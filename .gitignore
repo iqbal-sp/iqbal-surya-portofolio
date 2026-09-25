@@ -28,3 +28,5 @@ asset/Home/UI/ui-*.png
 *.jpg.json
 *.webp.json
 *.avif.json
+*.svg.json
+*.ico.json
