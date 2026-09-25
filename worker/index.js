@@ -1,5 +1,6 @@
 /* Boss Rush XP leaderboard: a Cloudflare Worker in front of the static portfolio (deploy steps: DEPLOY.md).
-   Every file of the site is served straight from the assets upload; only /api/* reaches this code.
+   Every file of the site is served straight from the assets upload; /api/* and the desktop's short address
+   (site() below) reach this code.
    One D1 table keeps each player's best winning run, where a player is a random id kept in their browser.
    The board is ordered by the game's own grade points: fight time plus ten seconds for every hit taken,
    lower first, and a tie goes to whoever got there first.
@@ -24,10 +25,26 @@ const POSTS = { limit: 20, window: 600 };
 const NAME_MAX = 12, BODY_MAX = 1024;
 const PID = /^[a-z0-9]{16,40}$/;
 
+// The desktop lives in option-a-desktop/ in the repo but is served at the bare address: / is its page, its own
+// files (app.js, style.css …) are found beside it, and old /option-a-desktop/ links move to the short address.
+// A redirect keeps the #/… part, so a shared window link still opens its window.
+const DESK = '/option-a-desktop';
+async function site(request, env, url) {
+  const p = url.pathname;
+  if (p === DESK || p.startsWith(DESK + '/')) return Response.redirect(url.origin + (p.slice(DESK.length).replace(/^\/index\.html$/, '/') || '/') + url.search, 301);
+  if (p === '/' || p === '/index.html') {
+    if (p === '/index.html') return Response.redirect(url.origin + '/' + url.search, 301);
+    return env.ASSETS.fetch(new Request(url.origin + DESK + '/' + url.search, request));
+  }
+  const res = await env.ASSETS.fetch(request);
+  if (res.status !== 404) return res;
+  return env.ASSETS.fetch(new Request(url.origin + DESK + p + url.search, request));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
+    if (!url.pathname.startsWith('/api/')) return site(request, env, url);
     if (url.pathname !== '/api/scores') return json({ error: 'not_found' }, 404);
     try {
       if (request.method === 'GET') return json(await board(env.DB, url.searchParams));

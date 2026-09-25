@@ -3,6 +3,7 @@
 Portofolio ini di-deploy sebagai satu Cloudflare Worker (paket gratis):
 
 - Semua file situs (`index.html`, `option-a-desktop/`, `shared/`, `asset/`) dilayani apa adanya sebagai *static assets*.
+- Desktop portofolio tampil langsung di alamat utama (`iqbalsurya.com/`), tanpa `option-a-desktop` di link. File-nya tetap di folder `option-a-desktop/`; `worker/index.js` yang menyajikannya di `/`, dan link lama `/option-a-desktop/…` dialihkan ke alamat pendek (bagian `#/…` ikut terbawa). `index.html` di root hanya dipakai saat membuka proyek di lokal.
 - `/api/scores` dijawab oleh `worker/index.js`, papan peringkat Boss Rush XP, dengan database D1 bernama `brxp-board`.
 - File yang tidak ikut terunggah (catatan, `.claude/`, `.impeccable/`, kode worker) tercantum di `.assetsignore`.
 
