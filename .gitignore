@@ -1,0 +1,30 @@
+# The repo holds the site itself. Kept out: system and editor files, local tooling and design notes,
+# and the owner's full-size source pictures (the site serves the smaller copies made from them).
+
+# system
+.DS_Store
+node_modules/
+.wrangler/
+.dev.vars*
+
+# local tooling and design notes (DEPLOY.md stays)
+.claude/
+.impeccable/
+anti-slop/
+CLAUDE.md
+DESIGN.md
+PRODUCT.md
+
+# the owner's source pictures, too big to serve; the site uses the copies beside them
+asset/about/*.png
+asset/Home/service/*.png
+asset/Home/design-shoot/UI-[0-9][0-9].png
+asset/Home/photo-hero.jpg
+asset/Home/newsprint.jpg
+asset/Home/cover - *.jpg
+asset/Home/UI/ui-*.png
+# where each picture came from (notes for the owner, not served)
+*.png.json
+*.jpg.json
+*.webp.json
+*.avif.json

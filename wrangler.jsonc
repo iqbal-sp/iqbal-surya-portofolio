@@ -1,0 +1,17 @@
+// Cloudflare deploy of the portfolio: the static site plus the Boss Rush XP leaderboard (steps: DEPLOY.md)
+{
+  "name": "iqbal-surya-portfolio",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  // this whole folder is the site; .assetsignore keeps the notes, the tooling and the worker's own code out of it
+  "assets": { "directory": ".", "binding": "ASSETS" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "brxp-board",
+      // replace with the id that `npx wrangler@latest d1 create brxp-board` prints
+      "database_id": "PASTE-DATABASE-ID-HERE",
+      "migrations_dir": "worker/migrations"
+    }
+  ]
+}

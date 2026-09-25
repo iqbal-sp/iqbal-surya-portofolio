@@ -1,0 +1,65 @@
+/*
+  One A4 page. Space Grotesk only (the portfolio's reading face), ink on white, one accent: Heading Cobalt,
+  the About document's heading ink, on the section labels. Every section sits on one grid: a label rail on
+  the left (it holds the portrait at the top) and the content column beside it.
+*/
+@page { size: A4; margin: 0; }
+
+:root {
+  --ink: #141414;
+  --muted: #5b5f6b;
+  --rule: #d8e1f3;
+  --accent: #0c3a9e;
+  --rail: 30mm;
+  --gap: 7mm;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+/* no ligatures: an "ff" or "fi" glyph would reach CV-screening software as one odd character */
+body { margin: 0; background: #eceef2; color: var(--ink); font: 400 8.75pt/1.45 "Space Grotesk", sans-serif; font-variant-ligatures: no-common-ligatures; }
+a { color: inherit; text-decoration: none; }
+p, h1, h2, h3, ul, dl, dd { margin: 0; }
+
+.page { display: flex; flex-direction: column; width: 210mm; height: 297mm; overflow: hidden; padding: 15mm 17mm 11mm; background: #fff; }
+@media screen {
+  body { padding: 24px 0; }
+  .page { margin: 0 auto; box-shadow: 0 1px 2px rgba(20, 20, 20, .08), 0 16px 40px -12px rgba(20, 20, 20, .2); }
+}
+@media print { body { background: #fff; } }
+
+/* head: portrait in the rail, name and ways to reach me in the content column */
+.head { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: var(--gap); align-items: start; padding-bottom: 6mm; }
+/* the portrait fills the rail, so its edges line up with every section label below it */
+.photo { display: block; width: 100%; aspect-ratio: 1; height: auto; object-fit: cover; border-radius: 1mm; }
+.name { font-size: 24pt; line-height: 1; font-weight: 700; letter-spacing: -0.025em; }
+.role { margin-top: 2mm; font-size: 11pt; line-height: 1.3; }
+.avail { margin-top: 1mm; color: var(--muted); }
+.contact { display: flex; flex-wrap: wrap; gap: 0.6mm 5mm; margin-top: 3mm; padding: 0; list-style: none; }
+
+/* sections: label in the rail, content beside it, a hairline between them */
+.sec { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: var(--gap); padding: 4.6mm 0; border-top: 0.25mm solid var(--rule); }
+.sec > h2 { font-size: 8.75pt; line-height: 1.45; font-weight: 700; color: var(--accent); }
+.sec-profile p, .sec-clients p { max-width: 132mm; }
+
+/* experience: role and dates on one line, the organisation under it */
+.job { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 4mm; break-inside: avoid; }
+.job + .job { margin-top: 2.8mm; }
+.job h3 { font-size: 9pt; line-height: 1.4; font-weight: 700; }
+.job .when { grid-column: 2; grid-row: 1; font-size: 8.25pt; line-height: 1.55; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.job .when b { font-weight: 500; color: var(--accent); }
+.job .org { grid-column: 1 / -1; color: var(--muted); }
+.job ul { grid-column: 1 / -1; margin-top: 0.6mm; padding-left: 3.4mm; }
+.job li + li { margin-top: 0.3mm; }
+/* a short early role with nothing more to say keeps to one line: role, then organisation, type and place */
+.job.brief + .job.brief { margin-top: 1.2mm; }
+.job.brief h3 span { font-weight: 400; color: var(--muted); }
+
+/* lists of equals (skill groups and languages): a name column and a line beside it */
+.rows { display: grid; grid-template-columns: 22mm minmax(0, 1fr); gap: 1.2mm 4mm; }
+.rows dd span { white-space: nowrap; }
+.rows dt { font-weight: 700; }
+.rows dd small { color: var(--muted); font-size: inherit; }
+.sec-education p + p { margin-top: 0.8mm; }
+
+.foot { display: flex; justify-content: space-between; gap: 8mm; margin-top: auto; padding-top: 3mm; border-top: 0.25mm solid var(--rule); font-size: 7.75pt; color: var(--muted); }

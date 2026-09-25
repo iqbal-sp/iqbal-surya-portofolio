@@ -1,0 +1,27 @@
+# Kept out of the public upload (wrangler.jsonc serves this whole folder):
+# notes, design tooling, the leaderboard's own code and config, and local state
+.assetsignore
+.claude
+.impeccable
+.wrangler
+.dev.vars*
+node_modules
+worker
+wrangler.jsonc
+# the CV source; the printed PDFs ship from asset/cv/
+resume
+# the owner's full-size About photos (up to 43 MB, over Cloudflare's 25 MiB per-file limit); the site uses their WebP copies
+asset/about/*.png
+package.json
+package-lock.json
+*.md
+**/.DS_Store
+# the owner's other full-size sources and the notes on where each web copy came from
+asset/Home/service/*.png
+asset/Home/design-shoot/UI-[0-9][0-9].png
+asset/Home/photo-hero.jpg
+asset/Home/newsprint.jpg
+asset/Home/cover - *.jpg
+asset/Home/UI/ui-*.png
+asset/**/*.json
+anti-slop
