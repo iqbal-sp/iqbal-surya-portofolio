@@ -5,6 +5,12 @@
   "compatibility_date": "2025-09-01",
   // this whole folder is the site; .assetsignore keeps the notes, the tooling and the worker's own code out of it
   "assets": { "directory": ".", "binding": "ASSETS" },
+  // the owner's domain (DNS on Cloudflare since 2026-09-25); the workers.dev address keeps working too
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "iqbalsurya.com", "custom_domain": true },
+    { "pattern": "www.iqbalsurya.com", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

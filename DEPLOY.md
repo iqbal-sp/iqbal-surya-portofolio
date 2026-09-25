@@ -36,9 +36,13 @@ Semua perintah di bawah dijalankan di Terminal, dari folder proyek ini. `npx` su
 npx wrangler@latest deploy
 ```
 
-## Pakai domain sendiri
+## Domain sendiri
 
-Dashboard Cloudflare → Workers & Pages → `iqbal-surya-portfolio` → Settings → Domains & Routes → Add → Custom domain. Domainnya harus dikelola lewat DNS Cloudflare.
+Situs tayang di **https://iqbalsurya.com** dan **https://www.iqbalsurya.com**. Keduanya tercantum di `routes` pada `wrangler.jsonc`, jadi ikut terpasang setiap kali `npx wrangler@latest deploy` dijalankan. Alamat `workers.dev` tetap aktif (`"workers_dev": true`).
+
+- Domain terdaftar di Hostinger. DNS-nya dikelola Cloudflare sejak 2026-09-25, lewat nameserver `luke.ns.cloudflare.com` dan `yolanda.ns.cloudflare.com`.
+- Email `@iqbalsurya.com` tetap di Hostinger. Data MX, SPF (TXT), DMARC (`_dmarc`), DKIM (`hostingermail-a/b/c._domainkey`), `autodiscover`, dan `autoconfig` ada di DNS Cloudflare. Semua CNAME email harus **DNS only** (awan abu-abu), karena kalau di-proxy, email tidak lolos verifikasi.
+- Jangan tambahkan data A atau CNAME untuk `@` dan `www` di DNS Cloudflare. Cloudflare membuatnya sendiri untuk Worker ini.
 
 ## Mencoba di komputer sendiri
 
