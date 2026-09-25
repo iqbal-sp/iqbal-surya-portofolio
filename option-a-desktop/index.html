@@ -28,15 +28,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=106">
-  <link rel="stylesheet" href="home.css?v=94">
+  <link rel="stylesheet" href="style.css?v=116">
+  <link rel="stylesheet" href="home.css?v=106">
   <script>
-    // before the first paint: the welcome screen shows once a session (never under ?preview), in the visitor's language
+    // before the first paint: the welcome screen shows once a session (never under ?preview), in the visitor's language.
+    // A link to one window (#/work/krool, #/about …) skips it: whoever follows a shared link came for that window
     (function (r) {
       var seen = null, saved = null;
       try { seen = sessionStorage.getItem('pf-a-boot'); saved = localStorage.getItem('pf-lang'); } catch (e) { /* storage unavailable */ }
       r.lang = saved === 'id' || saved === 'en' ? saved : /^id/i.test(navigator.language || '') ? 'id' : 'en';
-      if (seen !== '1' && !/[?&]preview(=|&|$)/.test(location.search)) r.classList.add('booting');
+      if (seen !== '1' && !/[?&]preview(=|&|$)/.test(location.search) && !/^#\/./.test(location.hash)) r.classList.add('booting');
       // a welcome screen whose script never ran must not cover the desktop
       addEventListener('DOMContentLoaded', function () { if (!(window.PF && window.PF.boot)) r.classList.remove('booting'); });
     })(document.documentElement);
@@ -46,10 +47,10 @@
 <!--
   DIRECTION CONTRACT — Option A "Desktop XP", Home: "Prime Time Guide"
   THESIS: Home is a 2004 Media Center TV-guide ad: the pitch reads as listings, the work plays as features. It refuses the stacked-section landing.
-  OWN-WORLD: Luna chrome around a white print page; a brushed-steel hero with the case pages' beige CRT; torn black-ruled newsprint; Media Center blue with green focus glow; a control-room multiviewer; a grass-green close that squeezes the end credits beside Up next. Tahoma bold, Space Grotesk body.
+  OWN-WORLD: Luna chrome around a white print page; a brushed-steel hero with the case pages' beige CRT; torn black-ruled newsprint; Media Center blue with green focus glow; a control-room multiviewer; a brushed-steel close with the owner's photo printed beside a New Message window. Tahoma bold, Space Grotesk body.
   STORY: A founder reads the offer, scans four slots, watches five features and the shots, flips episodes with the remote, presses Record, and writes the brief as the next programme.
   FIRST VIEWPORT: headline, intro and red Record printed on brushed steel, centred; under them a big CRT monitor playing the owner's photo; a torn four-slot listing below.
-  FORM: Prime Time Guide, rank 7 of 7, seed c2b40bb7. Signature: the remote switches episodes. Motion: the CRT powers on once; the multiviewer locks on once; the credits squeeze once.
+  FORM: Prime Time Guide, rank 7 of 7, seed c2b40bb7. Signature: the remote switches episodes. Motion: the CRT powers on once; the multiviewer locks on once.
   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -87,7 +88,8 @@
     <div class="boot-top"></div>
     <div class="boot-main">
       <svg class="boot-hello" viewBox="-7.5 12.5 484.7 199" role="img" aria-label="hello" focusable="false">
-        <path d="M3 196C8.9 193.3 14.8 191.9 20.9 188C28.4 183.2 36.5 175.4 43.7 168C51.2 160.2 58 151.3 64.9 142C72.3 132 79.7 120.9 86.6 110C93.6 98.9 100.7 87.1 106.8 76C112.4 65.8 119.9 55.1 122 46C123.5 39.2 124.4 30.8 121.5 27C119.1 23.8 112.5 21.9 108.5 23C103.5 24.4 98.6 31.5 94.9 38C90 46.6 88.2 59.1 84.7 72C80.2 88.7 75.7 109.8 70.8 130C65.5 152.2 59.6 176.7 54 200C57.1 190 59.2 179.2 63.2 170C67 161.3 71.4 152.7 77 146C82 139.9 88.4 133.9 94.6 131C99.9 128.5 106.6 126.8 111.3 128C115.3 129 119.6 132.1 121.4 136C123.6 140.8 121.5 148.9 120.6 156C119.4 164.2 114.6 174.5 114.3 182C114.1 187.7 113.9 194 116.7 197C119.4 199.8 125.5 200.2 130 200C134.9 199.8 140 197.5 145.2 195C151.3 192.1 157.8 187.6 164.1 183C170.8 178 178 172 184.2 166C190.1 160.3 196.7 154.2 200.5 148C203.6 142.8 207 136.6 206.3 132C205.7 128.1 202.3 123.5 198.7 122C194.6 120.3 187.4 121.7 182.2 124C176.4 126.6 170.3 132.2 165.9 138C161.2 144.1 157.5 152.5 155.6 160C153.8 167.2 152.6 175.7 154.3 182C155.9 187.5 159.5 193 164 196C168.6 199.1 175.8 200.3 182 200C188.9 199.7 196.7 196.7 203.7 193C211.4 189 218.8 182.9 225.8 176C233.6 168.2 240.7 158.2 247.5 148C254.9 137 261.7 124.1 268.1 112C274.4 100.1 280.8 87.6 285.8 76C290.2 65.7 295.8 54.8 297 46C297.8 39.4 298.2 31.8 295.3 28C292.8 24.7 286.5 22.2 282.5 23C277.8 24 273.1 30.2 269.4 36C264.3 43.9 261.5 56 257.7 68C252.8 83.2 247.6 103 243.2 120C239 136.3 233.5 155.2 231.7 168C230.5 176.4 228.6 183.6 230.6 189C232.3 193.4 236.1 197.4 240.2 199C245 200.9 252.4 199.6 258.5 198C265.3 196.2 272.6 192.5 278.9 188C285.6 183.3 291.4 176.7 297.2 170C303.5 162.8 309.3 154.9 315 146C321.4 135.9 327.1 123.5 333.1 112C339.3 100.2 346.6 87.6 351.8 76C356.3 65.7 361.8 54.8 363 46C363.8 39.4 364.2 31.8 361.3 28C358.8 24.7 352.5 22.2 348.5 23C343.8 24 339.1 30.2 335.4 36C330.3 43.9 327.5 56 323.7 68C318.8 83.2 313.6 103 309.2 120C305 136.3 299.5 155.2 297.7 168C296.5 176.4 294.6 183.6 296.6 189C298.3 193.4 302.2 197.3 306.2 199C310.6 200.9 316.9 200.3 322.2 199C328.3 197.6 335.1 194.1 340.4 190C345.8 185.8 350.5 179.9 354.2 174C358.1 168 359.6 160 363 154C366.2 148.5 369.3 143 373.6 139C377.9 135.1 383.4 132 388.8 130C394.1 128 400.2 126.7 405.5 127C410.4 127.2 416.1 128.2 419.6 131C423.1 133.8 425.4 139.1 426.4 144C427.6 149.6 426.5 156.8 424.9 163C423.2 169.5 420.2 176.5 416.3 182C412.5 187.4 407.5 192.8 402 196C396.6 199.1 389.7 200.7 383.8 201C378.2 201.2 371.8 200.5 367.5 198C363.4 195.7 359.9 191.4 358.1 187C356.2 182.2 356.4 175.5 357.2 170C358 164.5 360.4 159.1 363 154C365.8 148.7 369.3 143 373.6 139C377.9 135.1 383.4 132 388.8 130C394.1 128 400 127.5 405.5 127C410.9 126.5 416 127.4 421.5 127C427.5 126.5 433.6 125.8 440.2 124C448.4 121.8 457.8 117.3 466.6 114"/>
+        <path class="boot-line" d="M3 196C8.9 193.3 14.8 191.9 20.9 188C28.4 183.2 36.5 175.4 43.7 168C51.2 160.2 58 151.3 64.9 142C72.3 132 79.7 120.9 86.6 110C93.6 98.9 100.7 87.1 106.8 76C112.4 65.8 119.9 55.1 122 46C123.5 39.2 124.4 30.8 121.5 27C119.1 23.8 112.5 21.9 108.5 23C103.5 24.4 98.6 31.5 94.9 38C90 46.6 88.2 59.1 84.7 72C80.2 88.7 75.7 109.8 70.8 130C65.5 152.2 59.6 176.7 54 200C57.1 190 59.2 179.2 63.2 170C67 161.3 71.4 152.7 77 146C82 139.9 88.4 133.9 94.6 131C99.9 128.5 106.6 126.8 111.3 128C115.3 129 119.6 132.1 121.4 136C123.6 140.8 121.5 148.9 120.6 156C119.4 164.2 114.6 174.5 114.3 182C114.1 187.7 113.9 194 116.7 197C119.4 199.8 125.5 200.2 130 200C134.9 199.8 140 197.5 145.2 195C151.3 192.1 157.8 187.6 164.1 183C170.8 178 178 172 184.2 166C190.1 160.3 196.7 154.2 200.5 148C203.6 142.8 207 136.6 206.3 132C205.7 128.1 202.3 123.5 198.7 122C194.6 120.3 187.4 121.7 182.2 124C176.4 126.6 170.3 132.2 165.9 138C161.2 144.1 157.5 152.5 155.6 160C153.8 167.2 152.6 175.7 154.3 182C155.9 187.5 159.5 193 164 196C168.6 199.1 175.8 200.3 182 200C188.9 199.7 196.7 196.7 203.7 193C211.4 189 218.8 182.9 225.8 176C233.6 168.2 240.7 158.2 247.5 148C254.9 137 261.7 124.1 268.1 112C274.4 100.1 280.8 87.6 285.8 76C290.2 65.7 295.8 54.8 297 46C297.8 39.4 298.2 31.8 295.3 28C292.8 24.7 286.5 22.2 282.5 23C277.8 24 273.1 30.2 269.4 36C264.3 43.9 261.5 56 257.7 68C252.8 83.2 247.6 103 243.2 120C239 136.3 233.5 155.2 231.7 168C230.5 176.4 228.6 183.6 230.6 189C232.3 193.4 236.1 197.4 240.2 199C245 200.9 252.4 199.6 258.5 198C265.3 196.2 272.6 192.5 278.9 188C285.6 183.3 291.4 176.7 297.2 170C303.5 162.8 309.3 154.9 315 146C321.4 135.9 327.1 123.5 333.1 112C339.3 100.2 346.6 87.6 351.8 76C356.3 65.7 361.8 54.8 363 46C363.8 39.4 364.2 31.8 361.3 28C358.8 24.7 352.5 22.2 348.5 23C343.8 24 339.1 30.2 335.4 36C330.3 43.9 327.5 56 323.7 68C318.8 83.2 313.6 103 309.2 120C305 136.3 299.5 155.2 297.7 168C296.5 176.4 294.6 183.6 296.6 189C298.3 193.4 302.2 197.3 306.2 199C310.6 200.9 316.9 200.3 322.2 199C328.3 197.6 335.1 194.1 340.4 190C345.8 185.8 350.5 179.9 354.2 174C358.1 168 359.6 160 363 154C366.2 148.5 369.3 143 373.6 139C377.9 135.1 383.4 132 388.8 130C394.1 128 400.2 126.7 405.5 127C410.4 127.2 416.1 128.2 419.6 131C423.1 133.8 425.4 139.1 426.4 144C427.6 149.6 426.5 156.8 424.9 163C423.2 169.5 420.2 176.5 416.3 182C412.5 187.4 407.5 192.8 402 196C396.6 199.1 389.7 200.7 383.8 201C378.2 201.2 371.8 200.5 367.5 198C363.4 195.7 359.9 191.4 358.1 187C356.2 182.2 356.4 175.5 357.2 170C358 164.5 360.4 159.1 363 154C365.8 148.7 369.3 143 373.6 139C377.9 135.1 383.4 132 388.8 130C394.1 128 400 127.5 405.5 127C410.9 126.5 416 127.4 421.5 127C427.5 126.5 433.6 125.8 440.2 124C448.4 121.8 457.8 117.3 466.6 114"/>
+        <g class="boot-ink"></g>
       </svg>
       <div class="boot-user">
         <span class="boot-pic"><img src="../asset/iqba-surya-192.webp" alt="" width="192" height="192" fetchpriority="high"></span>
@@ -122,13 +124,12 @@
   <div class="zoom-rect" id="zoomRect" aria-hidden="true"></div>
 
   <!-- the welcome screen first, so it can count everything after it; GSAP writes its "hello" -->
-  <script src="boot.js?v=2"></script>
+  <script src="boot.js?v=5"></script>
   <script async src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" integrity="sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly" crossorigin="anonymous"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/DrawSVGPlugin.min.js" integrity="sha384-pfZbCpJUiv0Y8664JafRbiKcx2uJmjNjVCoPXGwaxvTSbO11M0htzeEeTC6KSaqa" crossorigin="anonymous"></script>
-  <script src="../shared/content.js?v=90"></script>
+  <script src="../shared/content.js?v=95"></script>
   <script src="../shared/cases.js?v=7"></script>
-  <script src="icons.js?v=55"></script>
-  <script src="app.js?v=133"></script>
+  <script src="icons.js?v=56"></script>
+  <script src="app.js?v=146"></script>
   <!-- live wallpaper (three.js); the static webp on .desktop stays as the fallback -->
   <script type="importmap">
   { "imports": {
@@ -136,6 +137,6 @@
       "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.core.js": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.core.min.js"
   } }
   </script>
-  <script type="module" src="wallpaper3d.js?v=14"></script>
+  <script type="module" src="wallpaper3d.js?v=16"></script>
 </body>
 </html>

@@ -8,7 +8,8 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const I = (name, size = 32) => PX.svg(name, size);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const mqMobile = window.matchMedia('(max-width: 720px)');
+  // phone mode (style.css, SMALL SCREENS): narrow, or a phone turned sideways
+  const mqMobile = window.matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
   const isMobile = () => mqMobile.matches;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let lang = PF.getLang();
@@ -23,7 +24,6 @@
       openPortfolio: 'View portfolio', downloadCV: 'Download CV', contactMe: 'Contact me',
       history: 'Career history',
       to: 'To', worklog: 'Work log', worklogLead: 'Where I’ve been, and who I’ve built things with.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Things I make when nobody’s asking: experiments, small tools, and ideas I wanted to test.', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Traveling, food, coffee, and books. Travel reminds me who I am designing for, and reading keeps my ideas fresh.', myPictures: 'My Pictures', build: 'Let’s build something together.', buildLead: 'Need a website or app that looks sharp and works properly? Tick what you need and send me a note.', need: 'What do you need?', sendMsg: 'Send a message', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
-      howNote: 'Research, design, test, ship.\nRepeat until it works.',
       footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsIcons: 'Icons: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0. Recoloured here as two-tone icons.',
       file: 'File', view: 'View', help: 'Help', play: 'Play', up: 'Up',
       address: 'Address', myDocs: 'My Documents', thumbnails: 'Thumbnails', details: 'Details', open: 'Open',
@@ -41,7 +41,7 @@
       switchCase: 'Choose a case study', copyLink: 'Copy link to this case', linkCopied: 'Link copied',
       coverAlt: (x) => `${x}: cover`,
       sendEmail: 'Send an email', copyEmail: 'Copy address', copyHint: 'Paste it into any mail app', copied: 'Copied!',
-      availability: 'Availability', openProfile: (n) => `Open ${n} profile`,
+      availability: 'Availability', openProfile: (n) => `Open ${n} profile`, newTab: 'opens in a new tab',
       cvDownload: 'Download CV (PDF)', cvHint: 'One page, updated 2026', cvByMail: 'Request my CV', cvByMailHint: 'Latest version, sent by email',
       fileDownload: 'File Download', dlText: 'You have chosen to download a file from this location.', from: 'from',
       dlQ: 'What would you like to do with this file?', dlOpen: 'Open this file from its current location', dlSave: 'Save this file to disk',
@@ -57,14 +57,15 @@
       youGet: 'What you get:', epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Previous episode', nextEp: 'Next episode',
       remote: 'Episode remote', channel: (n) => `CH ${String(n).padStart(2, '0')}`,
       helpTitle: 'Help Topics', helpTab: 'Contents', helpPick: 'Select a topic to read it.', openAbout: 'Open About Me',
-      newMessage: 'New Message', send: 'Send', toLabel: 'To:', subject: 'Subject:', message: 'Message', msgPlaceholder: 'Hi Iqbal, I’d like to talk about…', subjectOther: 'Something else', subjectPrefix: 'Project inquiry', sendMeMsg: 'Send me a message', sendHint: 'Opens your email app with this message, ready to send.',
+      newMessage: 'New Message', send: 'Send', toLabel: 'To:', subject: 'Subject:', message: 'Message', msgPlaceholder: 'Hi Iqbal, I’d like to talk about…', subjectOther: 'Something else', subjectPrefix: 'Project inquiry', sendMeMsg: 'Send me a message', sendHint: 'I reply to the address in From.',
+      fromLabel: 'From:', fromPlaceholder: 'you@company.com', sending: 'Sending…', sentTitle: 'Message sent', sentNote: (a) => `I’ll reply to ${a}.`,
+      mailAppTitle: 'Opening your email app', mailAppNote: 'Nothing opened? Copy my address and paste your message into any email.',
       showAtStart: 'Show Home each time the portfolio starts',
-      credits: 'Credits', crLocation: 'On location', crLinkedIn: 'Work history', crResume: 'Résumé', crType: 'Typeset in',
-      copyAddr: 'Copy', copiedAddr: 'Copied', copyAddrLabel: 'Copy the email address', copiedNote: 'Email address copied', watchAgain: 'Watch again from the top',
+      copyAddr: 'Copy', copiedAddr: 'Copied', copiedNote: 'Email address copied', watchAgain: 'Watch again from the top',
       gameMenu: 'Game', gameNew: 'New game', gamePause: 'Pause', gameSound: 'Sound', gameAch: 'Achievements', gameBoard: 'Leaderboard', gamePet: 'Stickman on the taskbar', gameExit: 'Exit', gameHow: 'How to play',
       gameLoading: 'Starting Boss Rush XP…', gameFailed: 'Boss Rush XP could not start. Close this window and try again.',
-      gameKeys: '← → move · ↑ jump · A punch · S kick · D dash · F special · P pause',
-      gateHead: 'Boss Rush XP needs a bigger screen.', gateText: 'It is made for a laptop or desktop computer with a keyboard, at least 1024 × 560 pixels. Open this page on a computer, or make your browser window bigger.',
+      gameKeys: '← → move · ↑ jump · A punch · S kick · W guard · D dash · F special · P pause',
+      gateHead: 'Boss Rush XP needs a bigger screen.', gateText: 'A phone screen is too small for it, and it is played with a keyboard. Open this page on a laptop or desktop computer.',
       gateBoard: 'Leaderboard', gateCols: ['#', 'Name', 'Time'], gateLoading: 'Loading…',
       gateBoardText: (n) => `${n} ${n === 1 ? 'player has' : 'players have'} beaten it. Open this page on a computer to take them on.`, gateBoardEmpty: 'Nobody has beaten it yet. Be the first, on a computer.',
       binExe: ['do-not-open.exe', 'C:\\Program Files\\Games', '01/04/2026'],
@@ -77,7 +78,6 @@
       openPortfolio: 'Lihat portofolio', downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
       history: 'Riwayat karier',
       to: 'Untuk', worklog: 'Catatan kerja', worklogLead: 'Tempat saya pernah bekerja, dan tim yang pernah membangun produk bersama saya.', present: 'Sekarang', ft: 'Full-time', fl: 'Freelance', projects: 'Project pribadi', projectsLead: 'Hal-hal yang saya buat tanpa diminta: eksperimen, tools kecil, dan ide yang ingin saya uji.', diskLabel: 'Project pribadi', offClock: 'Di luar jam kerja', offClockText: 'Jalan-jalan, kuliner, kopi, dan buku. Jalan-jalan mengingatkan saya untuk siapa saya mendesain, dan membaca menjaga ide saya tetap segar.', myPictures: 'My Pictures', build: 'Mari bangun sesuatu bersama.', buildLead: 'Butuh website atau aplikasi yang tampil rapi dan berfungsi dengan baik? Centang yang Anda butuhkan, lalu kirim pesan.', need: 'Apa yang Anda butuhkan?', sendMsg: 'Kirim pesan', reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: 'Tanya project', mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Sedikit tentang project-nya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
-      howNote: 'Riset, desain, uji, rilis.\nUlangi sampai berhasil.',
       footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsIcons: 'Ikon: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0. Di sini diwarnai ulang menjadi ikon dua warna.',
       file: 'Berkas', view: 'Tampilan', help: 'Bantuan', play: 'Putar', up: 'Naik',
       address: 'Alamat', myDocs: 'Dokumen Saya', thumbnails: 'Gambar mini', details: 'Rincian', open: 'Buka',
@@ -95,7 +95,7 @@
       switchCase: 'Pilih studi kasus', copyLink: 'Salin tautan kasus ini', linkCopied: 'Tautan tersalin',
       coverAlt: (x) => `${x}: sampul`,
       sendEmail: 'Kirim email', copyEmail: 'Salin alamat', copyHint: 'Tempel di aplikasi email mana pun', copied: 'Tersalin!',
-      availability: 'Ketersediaan', openProfile: (n) => `Buka profil ${n}`,
+      availability: 'Ketersediaan', openProfile: (n) => `Buka profil ${n}`, newTab: 'buka di tab baru',
       cvDownload: 'Unduh CV (PDF)', cvHint: 'Satu halaman, diperbarui 2026', cvByMail: 'Minta CV saya', cvByMailHint: 'Versi terbaru, dikirim lewat email',
       fileDownload: 'Unduh Berkas', dlText: 'Anda memilih untuk mengunduh berkas dari lokasi ini.', from: 'dari',
       dlQ: 'Apa yang ingin Anda lakukan dengan berkas ini?', dlOpen: 'Buka berkas dari lokasinya', dlSave: 'Simpan berkas ke disk',
@@ -111,14 +111,15 @@
       youGet: 'Yang Anda dapat:', epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Episode sebelumnya', nextEp: 'Episode berikutnya',
       remote: 'Remote episode', channel: (n) => `CH ${String(n).padStart(2, '0')}`,
       helpTitle: 'Topik Bantuan', helpTab: 'Isi', helpPick: 'Pilih topik untuk membacanya.', openAbout: 'Buka Tentang Saya',
-      newMessage: 'Pesan Baru', send: 'Kirim', toLabel: 'Kepada:', subject: 'Subjek:', message: 'Pesan', msgPlaceholder: 'Halo Iqbal, saya ingin membicarakan…', subjectOther: 'Hal lain', subjectPrefix: 'Tanya project', sendMeMsg: 'Kirim saya pesan', sendHint: 'Membuka aplikasi email Anda dengan pesan ini, siap dikirim.',
+      newMessage: 'Pesan Baru', send: 'Kirim', toLabel: 'Kepada:', subject: 'Subjek:', message: 'Pesan', msgPlaceholder: 'Halo Iqbal, saya ingin membicarakan…', subjectOther: 'Hal lain', subjectPrefix: 'Tanya project', sendMeMsg: 'Kirim saya pesan', sendHint: 'Saya membalas ke alamat di kolom Dari.',
+      fromLabel: 'Dari:', fromPlaceholder: 'anda@perusahaan.com', sending: 'Mengirim…', sentTitle: 'Pesan terkirim', sentNote: (a) => `Saya akan membalas ke ${a}.`,
+      mailAppTitle: 'Membuka aplikasi email', mailAppNote: 'Tidak ada yang terbuka? Salin alamat saya, lalu tempel pesan Anda di email mana pun.',
       showAtStart: 'Tampilkan Beranda setiap kali portofolio dibuka',
-      credits: 'Kredit', crLocation: 'Lokasi', crLinkedIn: 'Riwayat kerja', crResume: 'CV', crType: 'Huruf',
-      copyAddr: 'Salin', copiedAddr: 'Tersalin', copyAddrLabel: 'Salin alamat email', copiedNote: 'Alamat email tersalin', watchAgain: 'Tonton lagi dari awal',
+      copyAddr: 'Salin', copiedAddr: 'Tersalin', copiedNote: 'Alamat email tersalin', watchAgain: 'Tonton lagi dari awal',
       gameMenu: 'Permainan', gameNew: 'Permainan baru', gamePause: 'Jeda', gameSound: 'Suara', gameAch: 'Pencapaian', gameBoard: 'Papan peringkat', gamePet: 'Stickman di taskbar', gameExit: 'Keluar', gameHow: 'Cara bermain',
       gameLoading: 'Memulai Boss Rush XP…', gameFailed: 'Boss Rush XP gagal dimulai. Tutup jendela ini, lalu coba lagi.',
-      gameKeys: '← → gerak · ↑ lompat · A pukul · S tendang · D dash · F spesial · P jeda',
-      gateHead: 'Boss Rush XP butuh layar yang lebih besar.', gateText: 'Game ini dibuat untuk laptop atau komputer dengan keyboard, minimal 1024 × 560 piksel. Buka halaman ini di komputer, atau perbesar jendela browser Anda.',
+      gameKeys: '← → gerak · ↑ lompat · A pukul · S tendang · W tangkis · D dash · F spesial · P jeda',
+      gateHead: 'Boss Rush XP butuh layar yang lebih besar.', gateText: 'Layar ponsel terlalu kecil untuk game ini, yang dimainkan dengan keyboard. Buka halaman ini di laptop atau komputer.',
       gateBoard: 'Papan peringkat', gateCols: ['#', 'Nama', 'Waktu'], gateLoading: 'Memuat…',
       gateBoardText: (n) => `${n} pemain sudah menamatkannya. Buka halaman ini di komputer untuk menantang mereka.`, gateBoardEmpty: 'Belum ada yang menamatkannya. Jadilah yang pertama, di komputer.',
       binExe: ['jangan-dibuka.exe', 'C:\\Program Files\\Game', '01/04/2026'],
@@ -161,6 +162,11 @@
     el.style.left = clamp(r.left, 4, innerWidth - el.offsetWidth - 4) + 'px';
     el.style.top = Math.max(4, r.top - 28) + 'px';
     setTimeout(() => el.remove(), 1600);
+  }
+  // Counts what visitors do (a case opened, the CV, a message sent) through /api/event (worker/index.js):
+  // one number per day and event, with no cookie and nothing about the visitor. The page never waits on it
+  function track(e, d = '') {
+    try { navigator.sendBeacon('/api/event', new Blob([JSON.stringify({ e, d })], { type: 'application/json' })); } catch (err) { /* counting is optional */ }
   }
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); return true; } catch (e) {
@@ -212,7 +218,7 @@
       const w = clamp(W - left - 30, 480, 1280), h = clamp(H - 20, 360, 900);
       return { x: Math.max(left, Math.round((W - w) / 2) + 36), y: Math.max(8, Math.round((H - h) / 2)), w, h };
     }
-    if (id === 'contact') { const w = Math.min(580, W - 40), h = Math.min(460, H - 40); return { x: Math.round((W - w) / 2) + 70, y: Math.round((H - h) / 2) - 16, w, h }; }
+    if (id === 'contact') { const w = Math.min(580, W - 40), h = Math.min(492, H - 40); return { x: Math.round((W - w) / 2) + 70, y: Math.round((H - h) / 2) - 16, w, h }; }
     if (id === 'recycle') return { x: Math.round(W / 2 - 260), y: Math.round(H / 2 - 170), w: 520, h: 300 };
     // the Picture Viewer: a 4:3 picture plus its caption and toolbar, centred a little right of the icons
     if (id === 'viewer') { const w = clamp(W - 24, 320, 760), h = clamp(Math.round((w - 40) * 0.75) + 150, 300, H - 24); return { x: Math.max(left, Math.round((W - w) / 2) + 40), y: Math.max(8, Math.round((H - h) / 2)), w, h }; }
@@ -228,7 +234,7 @@
   const DEFS = {
     home: {
       icon: 'home', title: () => `${u('home')} - ${PF.owner.fullName}`, task: () => u('home'),
-      build: buildHome, route: () => '', onOpen: homeIntro, after: (w) => { homeArm(w); homeDither(w); homeLogos(w); },
+      build: buildHome, route: () => '', onOpen: homeIntro, after: (w) => { homeArm(w); homePeek(w); homeDither(w); homeLogos(w); },
       // the services menu opens on the first service whose picture is in
       initial: () => ({ ep: 0, svc: Math.max(0, PF.home.services.list.findIndex((s) => s.img.src)), faq: 0, subj: 0, msg: '' }),
     },
@@ -304,6 +310,7 @@
     // a dialog remembers the control that opened it, to hand the focus back when it closes
     if (def.dialog) w.opener = document.activeElement;
     wins.set(id, w);
+    if (['about', 'work', 'contact', 'resume', 'game'].includes(id)) track('window', id);
     const g = geometryFor(id);
     placeWin(w, g);
     el.style.zIndex = ++zTop;
@@ -648,6 +655,13 @@
       ${crtStand()}
     </figure>`;
   }
+  // the close's print: the owner's portrait in AVIF, WebP and a JPEG fallback. From 760px the print runs as tall as
+  // the message beside it, so the photo is cropped round the face (home.css sets where)
+  function closePhotoHTML() {
+    const P = PF.home.cta.photo, sizes = '(min-width: 1100px) 480px, (min-width: 760px) 40vw, 336px';
+    const srcset = (f) => P.widths.map((w) => `${esc(P.base)}${w}.${f} ${w}w`).join(', ');
+    return `<picture class="cl-pic">${['avif', 'webp'].map((f) => `<source type="image/${f}" srcset="${srcset(f)}" sizes="${sizes}">`).join('')}<img class="cl-photo" src="${esc(P.base)}${P.widths[0]}.jpg" srcset="${srcset('jpg')}" sizes="${sizes}" width="${P.width}" height="${P.height}" alt="${esc(t(P.alt))}" loading="lazy" decoding="async"></picture>`;
+  }
 
   // Tonight's features: the owner's five case studies as programme rows, each cover beside its programme
   // info (code and number, title, logline, tags). A row opens its case study in the player: the title is the
@@ -858,11 +872,12 @@
 
   function servicePaneHTML(i) {
     const s = PF.home.services.list[i];
-    // the pointed-at service shows its picture alone, at the owner's own shape (800 and 1600px PNG copies); a
-    // picture not supplied yet is a grey slot naming the owner's file. Its line stays in the data, not on the page
+    // the pointed-at service shows its picture alone, at the owner's own shape (800 and 1600px WebP copies); a
+    // picture not supplied yet is a grey slot naming the owner's file. Its line stays in the data, not on the page.
+    // Lazy: the menu sits far down Home, so its picture waits until the visitor gets near it
     const v = `?v=${PF.home.services.picVersion || 1}`;
     const pic = s.img.src
-      ? `<img class="mm-img" src="${esc(s.img.src)}-800.png${v}" srcset="${esc(s.img.src)}-800.png${v} 800w, ${esc(s.img.src)}-1600.png${v} 1600w" sizes="(min-width: 1100px) 44vw, (min-width: 760px) 42vw, 92vw" width="800" height="868" alt="" decoding="async">`
+      ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${esc(s.img.src)}-800.webp${v} 800w, ${esc(s.img.src)}-1600.webp${v} 1600w" sizes="(min-width: 1100px) 44vw, (min-width: 760px) 42vw, 92vw" width="800" height="868" alt="" loading="lazy" decoding="async">`
       : slotHTML(s.img, 'mm-img', 'png', t(s.name));
     return `<figure class="mm-fig">${pic}</figure>`;
   }
@@ -880,20 +895,8 @@
         <div class="faq-a" id="faq-a-${i}" role="region" aria-labelledby="faq-q-${i}"${open ? '' : ' hidden'}><h3>${esc(t(f.q))}</h3><p>${esc(t(f.a))}</p>${f.about ? `<button class="btn" data-act="home-about">${I('computer', 16)}<span>${esc(u('openAbout'))}</span></button>` : ''}</div>`;
     }).join('') + `<p class="faq-empty"${st.faq < 0 ? '' : ' hidden'}>${esc(u('helpPick'))}</p>`;
   }
-  // Iqbal's local time, like MONOLOG's studio clock (the taskbar clock is the visitor's)
-  function homeTime() {
-    const d = new Date(), timeZone = PF.home.timeZone;
-    try {
-      return {
-        time: d.toLocaleTimeString(lang === 'id' ? 'id-ID' : 'en-US', { hour: 'numeric', minute: '2-digit', timeZone }),
-        date: d.toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone }),
-      };
-    } catch (e) { return { time: '', date: '' }; }
-  }
-
   function buildHome(w) {
     const o = PF.owner, H = PF.home, st = w.state;
-    const now = homeTime();
     return `<div class="win-body sunk" data-keep="home"><article class="home">
 
       <header class="pt-hero" id="hm-top" aria-labelledby="hm-title">
@@ -979,41 +982,35 @@
         </section>
       </section>
 
-      <section class="hm-band hm-cta hm-close" id="hm-cta" aria-labelledby="hm-cta-h">
-        <div class="cl-squeeze">
-          <div class="cl-next">
-            <h2 class="pt-h2 cta-h" id="hm-cta-h">${esc(t(H.cta.head).join(' '))}</h2>
+      <section class="hm-cta hm-close" id="hm-cta" aria-labelledby="hm-cta-h">
+        <div class="cl-grid">
+          <h2 class="cta-h" id="hm-cta-h">${t(H.cta.head).map((l) => `<span>${esc(l)}</span>`).join(' ')}</h2>
+          <figure class="cl-print">
+            ${closePhotoHTML()}
+            <figcaption><b>${esc(o.fullName)}</b><span>${esc(t(o.role))} · ${esc(t(o.location))}, GMT+7</span></figcaption>
+          </figure>
+          <div class="cl-ask">
             <p class="cl-lead">${esc(t(H.cta.lead))}</p>
             <form class="mw hm-mail" data-form="home-mail" aria-labelledby="hm-mail-t">
               ${miniTitle('envelope', u('newMessage'), 'hm-mail-t')}
               <div class="mail-head">
-                <label for="hm-to">${esc(u('toLabel'))}</label>
-                <span class="mail-to"><input id="hm-to" class="field" type="email" value="${esc(o.email)}" readonly><button type="button" class="btn mail-copy" data-act="home-copy" aria-label="${esc(u('copyAddrLabel'))}">${I('copy', 16)}<span>${esc(u('copyAddr'))}</span></button></span>
+                <label for="hm-from">${esc(u('fromLabel'))}</label><input id="hm-from" class="field" type="email" name="from" autocomplete="email" required maxlength="200" placeholder="${esc(u('fromPlaceholder'))}" value="${esc(st.from || '')}">
                 <label for="hm-subj">${esc(u('subject'))}</label><select id="hm-subj" class="field" data-change="home-subj">${homeOffers().map((x, i) => `<option value="${i}"${i === st.subj ? ' selected' : ''}>${esc(u('subjectPrefix'))}: ${esc(x)}</option>`).join('')}</select>
               </div>
               <label class="sr-only" for="hm-msg">${esc(u('message'))}</label>
-              <textarea id="hm-msg" class="field mail-body" rows="7" placeholder="${esc(u('msgPlaceholder'))}">${esc(st.msg)}</textarea>
-              <div class="mail-send"><button type="submit" class="btn lg default">${I('envelope', 16)}<span>${esc(u('sendMeMsg'))}</span></button><small>${esc(u('sendHint'))}</small></div>
+              <textarea id="hm-msg" class="field mail-body" rows="7" required maxlength="5000" placeholder="${esc(u('msgPlaceholder'))}">${esc(st.msg)}</textarea>
+              <span class="mail-trap" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></span>
+              <div class="mail-send"><button type="submit" class="btn lg default">${I('envelope', 16)}<span>${esc(u('sendMeMsg'))}</span></button><small id="hm-send-note">${esc(u('sendHint'))}</small></div>
               <span class="sr-only" aria-live="polite" id="hm-copy-note"></span>
             </form>
           </div>
-          <aside class="cl-credits" aria-label="${esc(u('credits'))}">
-            <div class="cr-roll">
-              <p class="cr-star"><b>${esc(o.fullName)}</b><span>${esc(t(o.role))}</span></p>
-              <dl class="cr-list">
-                <div><dt>${esc(u('crLocation'))}</dt><dd>${esc(t(o.location))}<br><span class="nb"><time class="hm-clock">${esc(now.time)}</time> WIB · GMT+7</span></dd></div>
-                ${o.socials.map((x) => `<div><dt>${esc(x.label)}</dt><dd><a href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="${esc(u('openProfile', x.label))}">${esc(x.key === 'linkedin' ? u('crLinkedIn') : t(x.handle))}</a></dd></div>`).join('')}
-                <div><dt>${esc(u('crResume'))}</dt><dd><button type="button" data-act="resume">${esc(u(hasCV() ? 'cvDownload' : 'cvByMail'))}</button></dd></div>
-                <div><dt>${esc(u('crType'))}</dt><dd>Tahoma &amp; <span class="nb">Space Grotesk</span></dd></div>
-              </dl>
-              <p class="cr-motto">${esc(u('howNote')).replace('\n', '<br>')}</p>
-              <p class="cr-copy">© 2026 ${esc(o.fullName)}</p>
-            </div>
-          </aside>
+          <ul class="cl-links">
+            ${o.socials.map((x) => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="${esc(u('openProfile', x.label))}">${I(socialIcon[x.key] || 'globe', 24)}<span>${esc(x.label)}</span></a></li>`).join('')}
+          </ul>
         </div>
         <div class="cl-fine">
           <label class="chk ft-start"><input type="checkbox" data-change="home-startup"${homeAtStartup() ? ' checked' : ''}><span>${esc(u('showAtStart'))}</span></label>
-          <button type="button" class="cl-top" data-act="home-go" data-to="hm-top">${I('up', 16)}<span>${esc(u('watchAgain'))}</span></button>
+          <button type="button" class="cl-top" data-act="home-go" data-to="hm-top">${I('top', 24)}<span>${esc(u('watchAgain'))}</span></button>
         </div>
       </section>
 
@@ -1033,6 +1030,15 @@
   // the moments that play when their section first scrolls into view, once per visit. Home is re-rendered
   // (language, resize), so the watchers are re-armed after every render; what has played stays played
   const homeFx = { wall: false, squeeze: false };
+  // On a touch screen a programme row's UI card comes up while its cover crosses the middle fifth of the window,
+  // the touch stand-in for pointing at it (home.css, .peek); under reduced motion it just appears
+  function homePeek(w) {
+    if (!window.IntersectionObserver || !matchMedia('(hover: none)').matches) return;
+    const io = new IntersectionObserver((es) => es.forEach((x) => x.target.closest('.ft-show').classList.toggle('peek', x.isIntersecting)),
+      { root: $('.win-body', w.el), rootMargin: '-40% 0px -40% 0px' });
+    $$('.ft-show .ft-cover', w.el).forEach((c) => { if ($('.ft-ui', c)) io.observe(c); });
+    w.fxIO.push(io);
+  }
   function homeArm(w) {
     if (w.fxIO) w.fxIO.forEach((io) => io.disconnect());
     w.fxIO = [];
@@ -1049,15 +1055,6 @@
     };
     // the multiviewer locks onto its feeds
     once('wall', $('.mv-wall', w.el), 0.3, (wall) => wall.classList.add('lock'));
-    // the close runs a credit squeeze: a full-frame screen holds, then shrinks into the credits column while
-    // the credits roll to rest inside it and Up next slides in; a phone stacks the two, so it has nothing to squeeze
-    once('squeeze', $('.cl-squeeze', w.el), 0.6, (sq) => {
-      const cr = $('.cl-credits', sq);
-      if (!cr || getComputedStyle(sq).gridTemplateColumns.split(' ').length < 2) return;
-      sq.style.setProperty('--cw', `${cr.offsetWidth}px`);
-      sq.classList.add('squeeze');
-      setTimeout(() => sq.classList.remove('squeeze'), 1500);
-    });
   }
   function homeFaq(w, i) {
     w.state.faq = w.state.faq === i ? -1 : i;
@@ -1067,17 +1064,49 @@
   }
   function homeTick() {
     const w = wins.get('home'); if (!w) return;
-    const now = homeTime();
-    $$('.hm-clock', w.el).forEach((n) => { n.textContent = now.time; });
-    $$('.hm-date', w.el).forEach((n) => { n.textContent = now.date; });
     $$('.hm-day', w.el).forEach((n) => { n.style.width = `${dayShare().toFixed(1)}%`; });
   }
-  function homeSend(w) {
+  // What became of the message, as XP's notification balloon over the Send button: sent (it goes by itself), or
+  // handed to the visitor's email app, which a page can't see open, so that one stays with the Copy button until
+  // closed. Screen readers hear it as a status
+  function mailBalloon(f, sent, from) {
+    const old = $('.mail-bal', f); if (old) old.remove();
+    clearTimeout(f.balTimer);
+    const b = document.createElement('div');
+    b.className = 'mail-bal'; b.setAttribute('role', 'status');
+    b.innerHTML = `<b>${I(sent ? 'check' : 'envelope', 16)}<span>${esc(u(sent ? 'sentTitle' : 'mailAppTitle'))}</span></b><p>${esc(sent ? u('sentNote', from) : u('mailAppNote'))}</p>`
+      + (sent ? '' : `<button type="button" class="btn mail-copy" data-act="home-copy">${I('copy', 16)}<span>${esc(u('copyAddr'))}</span></button>`)
+      + `<button type="button" class="pet-x" data-act="mail-bal-x" aria-label="${esc(u('close'))}"></button>`;
+    $('.mail-send', f).appendChild(b);
+    if (sent) f.balTimer = setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 300); }, 8000);
+  }
+
+  // The message goes straight to the owner's inbox through /api/message (worker/index.js). Where that can't
+  // send (not set up, offline, a local preview) the visitor's email app opens with the same message
+  async function homeSend(w) {
+    const f = $('.hm-mail', w.el), note = $('#hm-send-note', w.el), btn = $('button[type="submit"]', f);
+    if (!f || (btn && btn.disabled)) return;
     const offers = homeOffers();
     const subject = `${u('subjectPrefix')}: ${offers[w.state.subj] || offers[0]}`;
-    const msg = $('#hm-msg', w.el);
-    const body = (msg && msg.value.trim()) || u('msgPlaceholder');
-    location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const from = $('#hm-from', f).value.trim(), message = $('#hm-msg', f).value.trim();
+    const say = (text) => { if (note) note.textContent = text; };
+    btn.disabled = true; say(u('sending'));
+    let res = null;
+    try {
+      res = await fetch('/api/message', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ from, subject, message, lang, website: f.elements.website.value }),
+      });
+    } catch (e) { res = null; }
+    btn.disabled = false;
+    say(u('sendHint'));
+    if (res && res.ok) {
+      $('#hm-msg', f).value = ''; w.state.msg = '';
+      mailBalloon(f, true, from); track('send', 'api');
+      return;
+    }
+    mailBalloon(f, false); track('send', 'mailto');
+    location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
   }
 
   /* ------------------------------------------------------------ ABOUT */
@@ -1465,6 +1494,7 @@
     const r = $('.tsize', w.el); if (r) { r.value = s; r.setAttribute('aria-valuetext', u('sizes')[s]); }
   }
   function switchCase(w, slug) {
+    track('case', slug);
     w.state.slug = slug;
     renderWin(w, false);
     renderTasks();
@@ -1477,6 +1507,7 @@
   function openCase(slug, from, push) {
     const w = wins.get('player');
     if (w) { if (w.state.slug !== slug) switchCase(w, slug); if (w.min) restoreWin(w, from); else focusWin(w); return; }
+    track('case', slug);
     openWin('player', { from, state: { slug }, pushHistory: push !== false });
   }
 
@@ -1492,31 +1523,39 @@
   function buildContact(w) {
     const o = PF.owner;
     const cat = CATS.find((c) => c.key === w.state.cat) || CATS[0];
+    // one action row: the icon in its socket, the label over its detail, and a key on the right that says what the row does
+    const row = (tag, attrs, icon, label, detail, go) => `<li><${tag} class="nero-act" ${attrs}><span class="nero-sock">${I(icon, 32)}</span><span class="nero-txt">${esc(label)}<small>${esc(detail)}</small></span><span class="nero-go" aria-hidden="true">${go}</span></${tag}></li>`;
+    // the key: an arrow runs the action here, a window opens a new tab, and the copy key swaps its arrow for a check once copied
+    const goArrow = GLYPH.arrow, goNew = GLYPH.max;
+    const newTab = `<span class="sr-only"> (${esc(u('newTab'))})</span>`;
     let acts = '';
     if (cat.key === 'email') {
-      acts = `<li><a href="mailto:${esc(o.email)}">${I('envelope', 32)}<span>${esc(u('sendEmail'))}<small>${esc(o.email)}</small></span></a></li>
-        <li><button data-act="copy-email">${I('copy', 32)}<span>${esc(u('copyEmail'))}<small>${esc(u('copyHint'))}</small></span></button></li>
-        <li><div class="nero-info">${I('clock', 32)}<span>${esc(u('availability'))}<small>${esc(t(o.statusLong))}</small></span></div></li>`;
+      acts = row('a', `href="mailto:${esc(o.email)}"`, 'envelope', u('sendEmail'), o.email, goArrow)
+        + row('button', 'data-act="copy-email"', 'copy', u('copyEmail'), u('copyHint'), goArrow + I('check', 16))
+        + `<li class="nero-note"><span class="nero-sock">${I('clock', 32)}</span><span class="nero-txt"><span class="nero-lamp">${esc(u('availability'))}</span><small>${esc(t(o.statusLong))}</small></span></li>`;
     } else if (cat.key === 'cv') {
-      acts = `<li><button data-act="resume">${I('resume', 32)}<span>${esc(u(hasCV() ? 'cvDownload' : 'cvByMail'))}<small>${esc(u(hasCV() ? 'cvHint' : 'cvByMailHint'))}</small></span></button></li>`;
+      acts = row('button', 'data-act="resume"', 'resume', u(hasCV() ? 'cvDownload' : 'cvByMail'), u(hasCV() ? 'cvHint' : 'cvByMailHint'), goArrow);
     } else {
       const s = o.socials.find((x) => x.key === cat.key);
-      acts = `<li><a href="${esc(s.url)}" target="_blank" rel="noopener">${I(cat.icon, 32)}<span>${esc(u('openProfile', s.label))}<small>${esc(s.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''))}</small></span></a></li>`;
+      acts = row('a', `href="${esc(s.url)}" target="_blank" rel="noopener"`, cat.icon, u('openProfile', s.label), s.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''), goNew).replace('</small></span>', `</small>${newTab}</span>`);
     }
     return `<div class="nero">
       <div class="nero-top" data-drag>
         <span class="nero-logo" aria-hidden="true">${esc(o.first.toLowerCase())}</span>
         <label class="nero-pick">${I(cat.icon, 16)}<span class="sr-only">${esc(u('contact'))}</span>
-          <select data-change="contact-cat" style="border:0;background:none;font:inherit;flex:1;outline:none">${CATS.map((c) => `<option value="${c.key}" ${c.key === cat.key ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select></label>
-        <span class="nero-ctrl"><button data-act="open-about" aria-label="${esc(u('about'))}" title="${esc(u('about'))}" style="font:700 13px var(--read)">?</button><button data-wact="min" aria-label="${esc(u('minimize'))}">${GLYPH.min}</button><button data-wact="close" aria-label="${esc(u('close'))}">${GLYPH.close}</button></span>
+          <select data-change="contact-cat">${CATS.map((c) => `<option value="${c.key}" ${c.key === cat.key ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select><span class="dd" aria-hidden="true">${GLYPH.arrow}</span></label>
+        <span class="nero-ctrl"><button class="q" data-act="open-about" aria-label="${esc(u('about'))}" title="${esc(u('about'))}">?</button><button data-wact="min" aria-label="${esc(u('minimize'))}" title="${esc(u('minimize'))}">${GLYPH.min}</button><button class="x" data-wact="close" aria-label="${esc(u('close'))}" title="${esc(u('close'))}">${GLYPH.close}</button></span>
       </div>
       <div class="nero-body">
-        <div class="nero-cats" role="tablist" aria-label="${esc(u('contact'))}">${CATS.map((c) => `<button class="nero-cat" role="tab" aria-selected="${c.key === cat.key}" data-cat="${c.key}">${I(c.icon, 40)}<span>${esc(c.label)}</span></button>`).join('')}</div>
-        <ul class="nero-actions" role="tabpanel">${acts}</ul>
+        <div class="nero-cats" role="tablist" aria-label="${esc(u('contact'))}">${CATS.map((c) => `<button class="nero-cat" role="tab" id="nero-tab-${c.key}" aria-selected="${c.key === cat.key}" aria-controls="nero-panel" tabindex="${c.key === cat.key ? 0 : -1}" data-cat="${c.key}">${I(c.icon, 40)}<span>${esc(c.label)}</span></button>`).join('')}</div>
+        <ul class="nero-actions" id="nero-panel" role="tabpanel" aria-labelledby="nero-tab-${cat.key}">${acts}</ul>
       </div>
-      <div class="nero-bottom"><span class="url">${esc(o.email)}</span>
-        <span class="nero-round"><button data-act="copy-email" aria-label="${esc(u('copyEmail'))}" title="${esc(u('copyEmail'))}">${I('copy', 24)}</button>
-        <a class="hot" href="mailto:${esc(o.email)}" aria-label="${esc(u('sendEmail'))}" title="${esc(u('sendEmail'))}">${I('envelope', 24)}</a></span>
+      <div class="nero-bottom">
+        <span class="nero-readout"><small aria-hidden="true">${esc(u('toLabel'))}</small><span class="url">${esc(o.email)}</span></span>
+        <span class="nero-round">
+          <span class="nero-key"><button data-act="copy-email" aria-label="${esc(u('copyEmail'))}" title="${esc(u('copyEmail'))}">${I('copy', 24)}</button><small aria-hidden="true">${esc(u('copyAddr'))}</small></span>
+          <span class="nero-key"><a class="hot" href="mailto:${esc(o.email)}" aria-label="${esc(u('sendEmail'))}" title="${esc(u('sendEmail'))}">${I('envelope', 24)}</a><small aria-hidden="true">${esc(u('send'))}</small></span>
+        </span>
       </div>
     </div>`;
   }
@@ -1566,17 +1605,17 @@
 
   /* ------------------------------------------------------------ Boss Rush XP (the hidden game) */
   // A stickman boss rush, opened from jangan-dibuka.exe in the Recycle Bin or with the Konami code.
-  // It needs a big screen, a keyboard and a mouse or trackpad; anywhere else a dialog asks for a
-  // bigger screen instead. game.js is only fetched the first time the game opens.
-  const GAME_MIN = { w: 1024, h: 560 };
-  const canPlayGame = () => innerWidth >= GAME_MIN.w && innerHeight >= GAME_MIN.h && window.matchMedia('(any-pointer: fine)').matches;
+  // Phones alone are turned away: a screen whose short side is under 600px (every iPhone, a folded Z Fold, a
+  // Surface Duo). A small window anywhere else is the game's to handle. game.js is only fetched on first open.
+  const PHONE_SIDE = 600;
+  const canPlayGame = () => Math.min(screen.width, screen.height) >= PHONE_SIDE;
   let gameScript = null;
   function loadGame() {
     if (window.BossRushXP) return Promise.resolve(window.BossRushXP);
     if (!gameScript) {
       gameScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'game.js?v=24';
+        s.src = 'game.js?v=30';
         s.onload = () => resolve(window.BossRushXP);
         s.onerror = () => { gameScript = null; s.remove(); reject(new Error('game.js did not load')); };
         document.head.appendChild(s);
@@ -1689,19 +1728,29 @@
     'open-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-start': (a, w) => {
+      track('start');
       const f = w && $('.hm-mail', w.el); if (!f) return;
       f.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
       const m = $('#hm-msg', f); if (m) m.focus({ preventScroll: true });
     },
+    'mail-bal-x': (a) => { const b = a.closest('.mail-bal'); if (b) b.remove(); },
     'home-copy': (a, w) => {
+      track('copy', 'email');
       const note = w && $('#hm-copy-note', w.el), label = $('span', a);
       const done = () => {
         if (label) label.textContent = u('copiedAddr');
         if (note) note.textContent = u('copiedNote');
         clearTimeout(a.copyTimer); a.copyTimer = setTimeout(() => { if (label) label.textContent = u('copyAddr'); if (note) note.textContent = ''; }, 1800);
       };
-      const field = w && $('#hm-to', w.el);
-      const fallback = () => { if (!field) return; field.select(); try { if (document.execCommand('copy')) done(); } catch (err) { /* the address stays selected to copy by hand */ } };
+      // without the clipboard API the address goes through a hidden field, the old way; if that fails too, the
+      // address is still printed under the form to copy by hand
+      const fallback = () => {
+        const field = document.createElement('input');
+        field.value = PF.owner.email; field.readOnly = true; field.style.cssText = 'position: fixed; opacity: 0; pointer-events: none;';
+        document.body.appendChild(field); field.select();
+        try { if (document.execCommand('copy')) done(); } catch (err) { /* nothing left to try */ }
+        field.remove();
+      };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(PF.owner.email).then(done, fallback); else fallback();
     },
     'home-go': (a, w) => { const s = w && $('#' + a.dataset.to, w.el); if (s) s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); },
@@ -1743,15 +1792,28 @@
     stop: (a, w) => { const r = rectOf(w.el); closeWin(w); openWin('work', { from: r, pushHistory: true }); },
     'prev-case': (a, w) => stepCase(w, -1),
     'next-case': (a, w) => stepCase(w, 1),
-    'copy-link': async (a, w) => { const url = location.href.split('#')[0] + '#/work/' + w.state.slug; const ok = await copyText(url); toast(ok ? u('linkCopied') : url, a); },
-    'copy-email': async (a) => { const ok = await copyText(PF.owner.email); toast(ok ? u('copied') : PF.owner.email, a); },
+    // the site's /work/<slug> address carries the case's own link preview (worker/index.js); a local preview has no
+    // worker, so there it copies the desktop's own address for the case
+    'copy-link': async (a, w) => {
+      const url = /\/option-a-desktop\//.test(location.pathname) ? location.href.split('#')[0] + '#/work/' + w.state.slug : `${location.origin}/work/${w.state.slug}`;
+      const ok = await copyText(url); toast(ok ? u('linkCopied') : url, a);
+    },
+    'copy-email': async (a) => {
+      track('copy', 'email'); const ok = await copyText(PF.owner.email); toast(ok ? u('copied') : PF.owner.email, a);
+      // the contact skin's copy keys turn green with a check for as long as the toast shows
+      const nero = ok && a.closest('.nero');
+      if (nero) { $$('[data-act="copy-email"]', nero).forEach((b) => b.classList.add('done')); setTimeout(() => $$('[data-act="copy-email"]', nero).forEach((b) => b.classList.remove('done')), 1600); }
+    },
     'dl-ok': (a, w) => {
       // "Open" shows the PDF in a new tab; "Save" downloads it under its own file name
-      if (($('input[name="dl"]:checked', w.el) || {}).value === 'open') window.open(cvHref(), '_blank', 'noopener');
+      const how = ($('input[name="dl"]:checked', w.el) || {}).value === 'open' ? 'open' : 'save';
+      track('cv', how);
+      if (how === 'open') window.open(cvHref(), '_blank', 'noopener');
       else { const l = document.createElement('a'); l.href = cvHref(); l.download = cvName(); document.body.appendChild(l); l.click(); l.remove(); }
       closeWin(w);
     },
     'cv-mail': (a, w) => {
+      track('cv', 'request');
       location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(u('cvSubject'))}&body=${encodeURIComponent(u('cvBody'))}`;
       closeWin(w);
     },
@@ -1779,6 +1841,11 @@
     const drag = e.target.closest('[data-drag]');
     if (drag && !e.target.closest('button, select, a, input, label')) startDrag(w, e);
   });
+
+  document.addEventListener('click', (e) => {
+    const ln = e.target.closest && e.target.closest('a[href^="http"]'); if (!ln) return;
+    const s = PF.owner.socials.find((x) => x.url === ln.href); if (s) track('social', s.key);
+  }, true);
 
   document.addEventListener('dblclick', (e) => {
     const title = e.target.closest('.title, .pl-cap');
@@ -1898,6 +1965,8 @@
     // Home: arrows on the remote switch episodes; in the Picture Viewer they step through the pictures
     if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && e.target.closest) {
       const d = e.key === 'ArrowRight' ? 1 : -1;
+      // the contact skin's tabs: arrows move to the next category, like any tab strip
+      if (e.target.closest('.nero-cats')) { const i = CATS.findIndex((c) => c.key === e.target.dataset.cat); if (i > -1) { e.preventDefault(); $(`[data-cat="${CATS[(i + d + CATS.length) % CATS.length].key}"]`, e.target.parentNode).click(); } return; }
       if (e.target.closest('.pt-remote')) { const w = winOf(e.target); if (w) { e.preventDefault(); homeEpisode(w, w.state.ep + d, true); } return; }
       const vw = winOf(e.target);
       if (vw && vw.id === 'viewer') { e.preventDefault(); viewerGo(vw, vw.state.i + d); return; }
@@ -1929,6 +1998,7 @@
       v.scrollTop = (w.knots ? tlProg(w.knots, x) : x) * (v.scrollHeight - v.clientHeight);
     } else if (e.target.classList.contains('tsize')) setTextSize(w, +e.target.value);
     else if (e.target.id === 'hm-msg') w.state.msg = e.target.value; // survives a language switch
+    else if (e.target.id === 'hm-from') w.state.from = e.target.value;
   });
   document.addEventListener('change', (e) => {
     const k = e.target.dataset && e.target.dataset.change; if (!k) return;
@@ -2007,13 +2077,31 @@
   }
   // the bare address is Home
   window.addEventListener('popstate', () => applyRoute(parseHash() || { id: 'home' }));
+  // A smaller desktop keeps every window reachable: none is larger than the desktop, and a title bar stays in reach
   window.addEventListener('resize', () => {
+    if (isMobile()) return;
     const W = desktopEl.clientWidth, H = desktopEl.clientHeight;
     wins.forEach((w) => {
-      if (isMobile()) return;
-      const x = parseFloat(w.el.style.left) || 0, y = parseFloat(w.el.style.top) || 0;
+      let x = parseFloat(w.el.style.left) || 0, y = parseFloat(w.el.style.top) || 0;
+      // a window that no longer fits shrinks to the desktop and moves fully onto it
+      if (w.el.offsetWidth > W - x) { w.el.style.width = Math.min(w.el.offsetWidth, W) + 'px'; x = clamp(x, 0, W - w.el.offsetWidth); }
+      if (w.el.style.height && w.el.offsetHeight > H - y) { w.el.style.height = Math.min(w.el.offsetHeight, H) + 'px'; y = clamp(y, 0, H - w.el.offsetHeight); }
       w.el.style.left = clamp(x, -w.el.offsetWidth + 90, W - 90) + 'px';
       w.el.style.top = clamp(y, 0, H - 24) + 'px';
+    });
+  });
+  // Phone mode fills the screen with the window and ignores its place; a window opened there was placed for a
+  // phone (Home 460px wide at x -36 on a 375px screen). Leaving phone mode (a window widened past 720px) gives
+  // every window the place it would have taken on this desktop
+  mqMobile.addEventListener('change', () => {
+    if (isMobile()) return;
+    const W = desktopEl.clientWidth, H = desktopEl.clientHeight;
+    wins.forEach((w) => {
+      placeWin(w, geometryFor(w.id));
+      if (w.def.dialog) {
+        w.el.style.left = Math.round((W - w.el.offsetWidth) / 2) + 'px';
+        w.el.style.top = Math.round((H - w.el.offsetHeight) / 2.4) + 'px';
+      }
     });
   });
 

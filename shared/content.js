@@ -243,16 +243,12 @@
       }))(['01', '02', '03', '04', '05', '06', '07', '08', '09']),
     },
     // the owner's clients in their own words (the owner's Figma, 2026-09-25), quoted as written on both languages'
-    // pages. A quote is a list of paragraphs
+    // pages. A quote is a list of paragraphs. TCA's reviewer is unnamed ("Name Surname"), so that column comes last
+    // and a named client opens the row (owner's request, 2026-09-25)
     words: {
       head: { en: 'What clients say', id: 'Kata klien' },
       lead: { en: 'Short notes from people I’ve designed with.', id: 'Catatan singkat dari orang-orang yang pernah bekerja dengan saya.' },
       list: [
-        {
-          name: 'Name Surname',
-          role: 'Lead Creative Team - TCA',
-          quote: ['Iqbal is an amazing person to work with. We loved his work because we were looking for something minimal yet functional and he delivered. From jump off, design, development to delivery, he was very concise on how the project should proceed. Aside from the design and development aspect of the project, his project management skills are top notch. He made sure that timelines and deadlines were met, making everything flow smoothly.'],
-        },
         {
           name: 'Nina Lombardo',
           role: 'Creative Director - LaunchPoint',
@@ -263,10 +259,15 @@
           role: 'Businessman - Garrus',
           quote: ['Iqbal demonstrated honesty and talent, bringing valuable skills to our project. He was willing to take the lead while remaining open to feedback and adjustments.', 'Working with Iqbal was a wonderful experience, and I genuinely look forward to collaborating with him again.'],
         },
+        {
+          name: 'Name Surname',
+          role: 'Lead Creative Team - TCA',
+          quote: ['Iqbal is an amazing person to work with. We loved his work because we were looking for something minimal yet functional and he delivered. From jump off, design, development to delivery, he was very concise on how the project should proceed. Aside from the design and development aspect of the project, his project management skills are top notch. He made sure that timelines and deadlines were met, making everything flow smoothly.'],
+        },
       ],
     },
     // the owner's five services (2026-09-25). Each shows the owner's picture when pointed at (asset/Home/service/,
-    // 4444 x 4823, shown at that shape from 800 and 1600px PNG copies in service/png/); a service without its
+    // 4444 x 4823, shown at that shape from 800 and 1600px WebP copies in service/webp/); a service without its
     // picture yet would show a grey slot naming the file. The lines for Brand, Website strategy and Digital product
     // are drafts for the owner to confirm
     services: {
@@ -274,11 +275,11 @@
       // bump when the owner replaces the pictures, so browsers fetch the new copies
       picVersion: 3,
       list: [
-        { name: { en: 'Brand strategy', id: 'Strategi brand' }, desc: { en: 'Positioning, voice and the visual direction your product needs before its first screen.', id: 'Positioning, gaya bahasa, dan arah visual yang dibutuhkan produk Anda sebelum layar pertamanya.' }, img: { file: 'brand strategy', src: '../asset/Home/service/png/brand-strategy' } },
-        { name: { en: 'Website strategy', id: 'Strategi website' }, desc: { en: 'The one thing that makes you worth choosing, and every page mapped to it before design starts.', id: 'Satu hal yang membuat Anda layak dipilih, dan setiap halaman dipetakan ke sana sebelum desain dimulai.' }, img: { file: 'Web strategy', src: '../asset/Home/service/png/website-strategy' } },
-        { name: { en: 'Website design', id: 'Desain website' }, desc: { en: 'Marketing sites and product pages that make the offer clear in seconds.', id: 'Website marketing dan halaman produk yang membuat penawaran Anda jelas dalam hitungan detik.' }, img: { file: 'Web Design', src: '../asset/Home/service/png/website-design' } },
-        { name: { en: 'Digital product', id: 'Produk digital' }, desc: { en: 'Dashboards and web apps, from the first flow to the working screens.', id: 'Dasbor dan aplikasi web, dari alur pertama sampai layar yang siap dipakai.' }, img: { file: 'Digital product', src: '../asset/Home/service/png/digital-product' } },
-        { name: { en: 'Mobile app design', id: 'Desain aplikasi mobile' }, desc: { en: 'iOS and Android apps, from the first flow to the final screens.', id: 'Aplikasi iOS dan Android, dari alur pertama sampai layar final.' }, img: { file: 'Mobile design', src: '../asset/Home/service/png/mobile-app' } },
+        { name: { en: 'Brand strategy', id: 'Strategi brand' }, desc: { en: 'Positioning, voice and the visual direction your product needs before its first screen.', id: 'Positioning, gaya bahasa, dan arah visual yang dibutuhkan produk Anda sebelum layar pertamanya.' }, img: { file: 'brand strategy', src: '../asset/Home/service/webp/brand-strategy' } },
+        { name: { en: 'Website strategy', id: 'Strategi website' }, desc: { en: 'The one thing that makes you worth choosing, and every page mapped to it before design starts.', id: 'Satu hal yang membuat Anda layak dipilih, dan setiap halaman dipetakan ke sana sebelum desain dimulai.' }, img: { file: 'Web strategy', src: '../asset/Home/service/webp/website-strategy' } },
+        { name: { en: 'Website design', id: 'Desain website' }, desc: { en: 'Marketing sites and product pages that make the offer clear in seconds.', id: 'Website marketing dan halaman produk yang membuat penawaran Anda jelas dalam hitungan detik.' }, img: { file: 'Web Design', src: '../asset/Home/service/webp/website-design' } },
+        { name: { en: 'Digital product', id: 'Produk digital' }, desc: { en: 'Dashboards and web apps, from the first flow to the working screens.', id: 'Dasbor dan aplikasi web, dari alur pertama sampai layar yang siap dipakai.' }, img: { file: 'Digital product', src: '../asset/Home/service/webp/digital-product' } },
+        { name: { en: 'Mobile app design', id: 'Desain aplikasi mobile' }, desc: { en: 'iOS and Android apps, from the first flow to the final screens.', id: 'Aplikasi iOS dan Android, dari alur pertama sampai layar final.' }, img: { file: 'Mobile design', src: '../asset/Home/service/webp/mobile-app' } },
       ],
     },
     // DRAFT for the owner to confirm: every step restates something the owner already says elsewhere
@@ -344,9 +345,22 @@
         { q: { en: 'Are you open to full-time roles?', id: 'Apakah Anda terbuka untuk posisi full-time?' }, a: { en: 'Yes. I’m open to full-time product design roles, remote or in Indonesia. My work history and CV are in About Me.', id: 'Ya. Saya terbuka untuk posisi product designer full-time, remote atau di Indonesia. Riwayat kerja dan CV saya ada di Tentang Saya.' }, about: true },
       ],
     },
+    // the close hands the hero's promise back as an invitation. The head is set in poster lines where the page is
+    // wide enough, and runs as one sentence on a phone
     cta: {
-      head: { en: ['Tell me what', 'you’re building.'], id: ['Ceritakan apa yang', 'sedang Anda bangun.'] },
+      head: { en: ['Got a product in mind?', 'Let’s make it', 'the one people notice.'], id: ['Punya ide produk?', 'Mari kita jadikan', 'yang paling dilirik.'] },
       lead: { en: 'A few lines is enough. I’ll reply by email with questions or a proposal.', id: 'Beberapa baris saja cukup. Saya akan membalas lewat email dengan pertanyaan atau proposal.' },
+      // the owner's photo, printed on the steel beside the message; the original is close-photo.jpg (2959 x 3699, 4:5),
+      // these are web-size copies (AVIF, WebP, and a JPEG fallback) at 600 and 1200px wide
+      photo: {
+        base: '../asset/Home/close-photo-',
+        widths: [600, 1200],
+        width: 2959, height: 3699,
+        alt: {
+          en: 'Iqbal leaning back on a green couch, hands behind the head and eyes closed, with a bowl of snacks and a stack of video tapes on the table.',
+          id: 'Iqbal bersandar di sofa hijau, kedua tangan di belakang kepala dan mata terpejam, dengan semangkuk camilan dan setumpuk kaset video di meja.',
+        },
+      },
     },
     timeZone: 'Asia/Jakarta',
   };

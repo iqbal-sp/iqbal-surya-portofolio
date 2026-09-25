@@ -5,14 +5,21 @@
   "compatibility_date": "2025-09-01",
   // this whole folder is the site; .assetsignore keeps the notes, the tooling and the worker's own code out of it
   "assets": { "directory": ".", "binding": "ASSETS",
-    // these reach worker/index.js before the files: / serves the desktop, old option-a-desktop links move to /
-    "run_worker_first": ["/", "/index.html", "/option-a-desktop", "/option-a-desktop/*"] },
+    // these reach worker/index.js before the files: / serves the desktop, old option-a-desktop links move to /,
+    // /work/<slug> is the desktop with one case study's link preview
+    "run_worker_first": ["/", "/index.html", "/option-a-desktop", "/option-a-desktop/*", "/work/*", "/sitemap.xml"] },
   // the owner's domain (DNS on Cloudflare since 2026-09-25); the workers.dev address keeps working too
   "workers_dev": true,
   "routes": [
     { "pattern": "iqbalsurya.com", "custom_domain": true },
     { "pattern": "www.iqbalsurya.com", "custom_domain": true }
   ],
+  // Home's New Message goes to MESSAGE_TO through Resend, from MESSAGE_FROM (a verified address on the owner's
+  // domain); it waits for the RESEND_API_KEY secret, and until then the page opens the visitor's email app (DEPLOY.md)
+  "vars": {
+    "MESSAGE_TO": "hello@iqbalsurya.com",
+    "MESSAGE_FROM": "Portfolio iqbalsurya.com <portfolio@iqbalsurya.com>"
+  },
   "d1_databases": [
     {
       "binding": "DB",

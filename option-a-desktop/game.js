@@ -1,20 +1,22 @@
-/* DIRECTION CONTRACT — Boss Rush XP's front door: "Duel di Desktop"
-   THESIS: The title is the XP desktop the game is about: three giant game icons stand as the opponents and the
-   whole menu lives in an XP Start menu; no catalog title (a logo over icon rows and a wall of controls).
-   OWN-WORLD: Luna desktop blue under one spotlight; giant icons with white shadowed labels, Selection Blue when
-   chosen; a Start menu (blue header, white programs, Places Blue column); cream XP balloons with stems; Tahoma.
-   Motion is XP's own: instant selection, a 0.15s menu rise, a stepped zoom rectangle.
-   STORY: The visitor sees whom they fight, picks Start the fight or presses Enter, and the chosen icon opens
-   into its arena like a program; the win returns as that Start menu under their name, ready to share.
-   FIRST VIEWPORT: logo top left; three icons across the right half, one selected; the stickman on the taskbar
-   facing them; the Start menu open bottom left; a tray balloon: press Enter.
-   FORM: Duel di Desktop, rank 7 of 7, seed 2283eb12.
+/* DIRECTION CONTRACT: Boss Rush XP's front door, "Papan di Bukit" (the board on the hill)
+   THESIS: The title is the scoreboard: the first thing a visitor reads is who beat the game and how fast, or, while
+   nobody has, an empty podium asking for their name; the opponents and the moves wait in a guide window beside it.
+   OWN-WORLD: an XP hillside of its own (not the Bliss photograph): a deep-to-pale sky with cumulus and two green
+   hills over the canvas taskbar; the Start menu open bottom left; Luna windows for the leaderboard (a podium in
+   Icon Yellow, Silver and Orange Rule, the other ranks in a white well) and for the guide (XP tabs: Bosses, Moves,
+   Items); Tahoma. Motion is XP's own: a 0.15s menu rise, a stepped zoom rectangle.
+   STORY: The visitor reads the board (or the empty podium), looks up the bosses and the combos, picks Start the
+   fight, gives a name, and plays to get it onto the board; the win returns them here with their row lit.
+   FIRST VIEWPORT: the title top left; the leaderboard and the guide side by side at the top right, no lower than
+   60% of the stage so the hills show; the stickman on the taskbar between them and the open Start menu.
+   FORM: shaped directly from the owner's brief (a precisely specified request, no roll).
    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict,
    DESIGN.md, and every shipping raster carrying its provenance */
 /* Boss Rush XP: the hidden game in Option A. It opens from the Recycle Bin (jangan-dibuka.exe) or with
    the Konami code. A stickman fights three built-in XP-era games in a row: Mines, Cards and Pinball, and then
    a final boss the title never mentions: the error they leave behind, which crashes to a blue screen halfway.
    Weapons drop in by parachute and last twenty seconds; a full meter unlocks the Ctrl+Alt+Del special.
+   W guards (Makki), and pressed just before a hit it parries, sending thrown things back.
    Health only comes back the hard way: clean hits refill it block by block, and coffee is a rare drop.
    Desktop only: app.js checks the screen before it loads this file. The arenas are drawn on one canvas
    in the games' own period colours; menus and messages are Luna mini windows in the DOM.
@@ -26,7 +28,9 @@
 
   /* ------------------------------------------------------------ constants + helpers */
   const W = 960, H = 540, FLOOR = 476, LEFT = 24, RIGHT = 936;
-  const MIN_W = 1024, MIN_H = 560;
+  // the smallest window it plays in: the portfolio's game window then holds a stage 60% of full size (576 by 324);
+  // phones never get here (app.js turns them away), so this only pauses a desktop window squeezed smaller
+  const MIN_W = 640, MIN_H = 460;
   const STEP = 1 / 120;
   const TAU = Math.PI * 2;
   const FONT = 'Tahoma, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
@@ -36,6 +40,8 @@
   const DEBUG = /[?&]debug\b/.test(location.search);
   // runs gained a fourth boss: best times from three-boss runs stay behind under the old key
   const BEST_KEY = 'brxp-best4', MUTE_KEY = 'brxp-mute';
+  // the furthest boss a run has reached in this browser: the guide keeps the final boss hidden until it is met
+  const MET_KEY = 'brxp-met';
 
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, k) => a + (b - a) * k;
@@ -76,15 +82,18 @@
     en: {
       tagline: 'One stickman against three built-in games.',
       howTo: 'How to play',
-      keys: [['← →', 'Move'], ['↑ or Space', 'Jump; press again in the air to double jump. Thrown by a big hit: press just before landing to flip up'],
-        ['A', 'Punch; tap up to four times for a combo, hold for a heavy punch. With a weapon: attack'], ['S', 'Kick; tap up to three times, hold for a flying kick. Mix A and S mid-combo for knees and elbows'],
-        ['← → + A / S', 'Toward your back: a spinning backfist or a spinning back kick'], ['↓ + A / S', 'Uppercut or sweep. In the air: hammer slam or dive kick'], ['D', 'Dash through attacks. Just before a hit lands: perfect dodge'],
+      keys: [['← →', 'Move. Tap twice toward where you face to dash, twice the other way for a backflip that keeps you facing the boss'], ['↑ or Space', 'Jump; press again in the air to double jump. Thrown by a big hit: press just before landing to flip up'],
+        ['A', 'Punch; tap up to four times for a combo. Hold for a heavy punch: walk or jump with it held, and let go in the air to fly at the boss. With a weapon, A uses it (the Items tab lists each one’s moves)'],
+        ['S', 'Kick; tap up to three times for Ap Chagi, Dollyo Chagi and Twio Dollyo Chagi. Hold for Twio Yeop Chagi, the flying side kick. In the air, S S is Narae Chagi. Mix A and S mid-combo for knees and elbows'],
+        ['← → + A / S', 'Toward your back: a spinning backfist, or Dwi Chagi (S again for Dwi Hurigi)'], ['↓ + A / S', 'Uppercut or sweep. In the air: hammer slam, or Naeryo Chagi, the axe kick'],
+        ['W', 'Makki, the guard: hold it and hits from the front cost no health, though three in a row break it. Press it just before a hit to parry: thrown things go back at the boss'],
+        ['D', 'Dash through attacks. Just before a hit lands: perfect dodge'],
         ['F', 'Full blue bar: 8 seconds of shadow mode, every hit +1. F again: End Task'], ['P or Esc', 'Pause']],
       itemTip: 'Weapons drop in by parachute. Grab one before it vanishes; each lasts 20 seconds.',
       healTip: 'Health refills slowly: land hits without taking one and the next block fills back up. Coffee (+2) is rare: it only drops when you are down to two blocks, once a fight.',
       start: 'Start', resume: 'Resume', menu: 'Main menu', retry: 'Try again', again: 'Play again',
-      startMenu: 'Boss Rush XP menu', startFight: 'Start the fight', startFightSub: 'Three games are waiting', practiceSub: '11 steps, about 2 minutes', exitGame: 'Exit the game',
-      readyTitle: 'Ready to fight?', readyText: 'Press Enter, or pick Start the fight.', achToast: (n) => `Achievement: ${n}`,
+      startMenu: 'Boss Rush XP menu', startFight: 'Start the fight', startFightSub: 'Three games are waiting', practiceSub: '12 steps, about 2 minutes', exitGame: 'Exit the game',
+      achToast: (n) => `Achievement: ${n}`,
       bossOf: (i, n) => `Boss ${i} of ${n}`,
       loading: 'Loading…',
       uninstall: (n) => `Uninstalling ${n}…`,
@@ -107,11 +116,34 @@
       share: (r, t, n, who, url, pos) => `I beat Boss Rush XP${who ? ` on ${who}’s portfolio` : ''}: grade ${r}, ${t}, ${n} ${n === 1 ? 'hit' : 'hits'} taken${pos ? `, #${pos.rank} of ${pos.total} ${pos.total === 1 ? 'player' : 'players'}` : ''}. Can you do better? ${url}`,
       board: 'Leaderboard', lbLoading: 'Checking the leaderboard…', lbAsk: (r, n) => `This run takes #${r} of ${n} on the leaderboard.`,
       lbName: 'Your name', lbSave: 'Save', lbSaving: 'Saving…',
+      nameTitle: 'New player', nameText: 'Type the name the leaderboard will show when you beat the game.', nameRule: 'Up to 12 letters, numbers, spaces, - or _.',
+      namePlay: 'Play', nameChange: 'Change name', nameChangeText: 'Your next saved record goes on the leaderboard under this name.', cancel: 'Cancel',
+      guide: 'Guide', tabBoard: 'Board', tabBoss: 'Bosses', tabMoves: 'Moves', tabItems: 'Items',
+      lbEmptyHead: 'The board is still empty', lbEmptyText: 'Beat every boss and your name goes up here first.', lbPractice: 'Practice first',
+      lbJoin: 'Your name isn’t on the board yet. Beat the game to get it here.', lockText: 'Locked. Beat the first three games to meet it.',
+      // the guide's Moves tab, in groups: keys (a word in brackets is an instruction, not a key) and what they make
+      moveList: [
+        ['Punches', [['A A A A', 'Jab, cross, overhand, uppercut, the hands in turn'], ['A (hold)', 'Heavy punch. Walk or jump with it held; let go in the air and it flies at the boss'],
+          ['↓ + A', 'Rising uppercut. In the air: hammer slam'], ['← → + A', 'Toward your back: spinning backfist']]],
+        ['Kicks', [['S S S', 'Ap Chagi, Dollyo Chagi, then Twio Dollyo Chagi: a jump, and the rear leg whips round'], ['S (hold)', 'Twio Yeop Chagi, the flying side kick. It carries like the heavy punch'],
+          ['↑ S S', 'Narae Chagi: two kicks in the air, one leg then the other'], ['↓ + S', 'Sweep. In the air: Naeryo Chagi, the axe kick, chopping down'],
+          ['← → + S', 'Toward your back: Dwi Chagi, the back kick. S again: Dwi Hurigi, the spinning hook kick']]],
+        ['Mixed', [['A S A S', 'Jab, knee, cross, low kick'], ['S A A', 'Ap Chagi, elbow, overhand'], ['A S A S A S S', 'The longest string: seven moves to Twio Dollyo Chagi']]],
+        ['Defense', [['W (hold)', 'Makki: blocks hits from the front. Three in a row break it and you reel'],
+          ['W (timed)', 'Parry, pressed just before a hit: mines, balls and red icons go back at the boss, cards and windows break, and the blue bar grows']]],
+        ['Movement', [['→ →', 'Tap twice the way you face: dash through attacks'], ['← ←', 'Tap twice the other way: backflip, still facing the boss'],
+          ['D', 'Dash. Just before a hit: perfect dodge'], ['F', 'Full blue bar: shadow mode. F again: End Task']]],
+      ],
+      // key names are held together by no-break spaces ( ), so "↓ + A" never splits across two lines
+      itemsInfo: [['keyboard', 'Two-handed. A A A: chop, backhand, full spin. Hold A: a floor smash that sends keys both ways. ↓ + A: upswing. In the air: smash down.'],
+        ['mouse', 'A whip. A A A: double-click lash, low lash, overhead crack. Hold A: spin it overhead to knock things away, let go for a long lash. ↓ + A: lash up. In the air: lash down.'],
+        ['cd', 'Thrown as you let go of A, it comes back and hits both ways; A again calls it home. Hold A: it goes out and back twice. ↓ + A: rolled along the floor. In the air: thrown down.'],
+        ['paint', 'Lobbed as you let go of A; wet paint makes every hit +1 for 5 seconds. Hold A: the whole bucket at once. ↓ + A: a puddle at your feet. In the air: poured down.'], ['coffee', 'Fills 2 blocks of health.']],
       lbSaved: (name, r, n) => `Saved as ${name}: #${r} of ${n}.`, lbKept: (r, n, t) => `Your best run (${t}) stays #${r} of ${n}.`,
       lbOff: 'The leaderboard can’t be reached right now.', lbView: 'View leaderboard',
       lbErr: { format: 'Use 1 to 12 letters, numbers, spaces, - or _.', name: 'That name can’t be used. Try another one.', slow: 'Too many saves from here. Try again in a few minutes.', net: 'Couldn’t save. Try again.' },
       lbCols: ['#', 'Name', 'Time', 'Hits', 'Grade'], lbCount: (n) => `${n} ${n === 1 ? 'player' : 'players'}`, lbHow: 'Ranked by time plus 10 seconds for every hit taken.',
-      lbEmpty: 'Nobody has finished yet. Be the first!', lbYou: 'you',
+      lbEmpty: 'Nobody has finished yet. Be the first!', lbYou: 'you', lbAll: 'See all',
       shareOpen: 'Share result…', shareTitle: 'Share your result', shareHint: 'Paste the picture into WhatsApp, LinkedIn or X, then add the text: it carries the link to the game.',
       cardMaking: 'Drawing your result card…', cardFail: 'The picture couldn’t be made. The text can still be copied.', cardNoRank: 'Save your name first to put your place on the card.',
       copyImg: 'Copy image', imgCopied: 'Image copied!', imgFail: 'This browser can’t copy pictures. Download it instead.', saveImg: 'Download image', imgSaved: (f) => `Downloading ${f}…`, copyText: 'Copy text', shareTo: 'Share to…',
@@ -122,28 +154,31 @@
       practice: 'Practice', lesStep: (i, n) => `Step ${i} of ${n}:`, lesSkip: 'Enter: skip',
       practiceEta: (n) => `Practice will complete in approximately: ${n > 6 ? '2 minutes' : n > 3 ? '1 minute' : 'less than a minute'}`,
       lesGood: 'Nice!', lesDodgeHit: 'Hit! Press D just as the paper is about to touch you.', lesDodgeLate: 'Through it! Now a little later, for a perfect dodge.',
+      lesGuardHit: 'Hit! Hold W as the paper comes.', lesGuardBlock: 'Blocked! Now press W just before it touches you.',
       les: {
         move: ['Move', 'Press [←] and [→] to walk.'],
         jump: ['Jump', 'Press [↑], then [↑] again in the air to double jump.'],
         punch: ['Punch', 'Walk up to the bin and press [A] four times for a combo.'],
         heavy: ['Heavy punch', 'Hold [A] until your fist glows, then let go.'],
-        kick: ['Kick', 'Press [S] twice for a roundhouse.'],
-        spin: ['Spinning attack', 'With your back to the bin, press the arrow toward it and [S] together.'],
+        kick: ['Kick', 'Press [S] twice for Dollyo Chagi, the roundhouse.'],
+        spin: ['Spinning attack', 'With your back to the bin, press the arrow toward it and [S] together for Dwi Chagi.'],
         rise: ['Uppercut', 'Hold [↓] and press [A].'],
-        dash: ['Dash', 'Press [D] to dash. While dashing, nothing can hit you.'],
+        dash: ['Dash', 'Press [D] to dash, or tap the arrow you face twice. While dashing, nothing can hit you.'],
         dodge: ['Perfect dodge', 'The bin throws paper. Press [D] just before it hits you.'],
+        guard: ['Guard', 'Hold [W] to block the paper, or press [W] just before it hits to send it back.'],
         weapon: ['Weapons', 'Grab the keyboard that drops in, then attack with [A].'],
         special: ['Shadow mode', 'Press [F] for shadow mode, then [F] again for End Task.'],
       },
       drillDone: 'Practice complete!', drillText: 'You have the basics down. The built-in games are waiting to be uninstalled.', drillFight: 'Start the fight', drillAgain: 'Practice again',
       status: (i, n, name) => `Boss ${i}/${n}: ${name}`,
       statusMenu: 'Main menu',
-      canvasLabel: 'Boss Rush XP. Arrow keys move, A punches, S kicks, D dashes, F starts shadow mode, P pauses.',
+      canvasLabel: 'Boss Rush XP. Arrow keys move, A punches, S kicks, W guards, D dashes, F starts shadow mode, P pauses.',
       fight: 'Fight!',
       stick: 'Stickman',
       items: { keyboard: 'Keyboard', mouse: 'Mouse', cd: 'CD', paint: 'Paint', coffee: 'Coffee' },
       gone: (n) => `${n} is gone`,
       ready: 'Shadow mode ready', shadowOn: 'Shadow mode', shadowHud: 'F: End Task', missed: 'Missed', techOk: 'Back flip!',
+      parryOk: 'Parry!', guardBroke: 'Guard broken',
       shadowSay: 'Shadow mode: every hit lands harder for 8 seconds. Press F again for End Task.', shadowOver: 'Shadow mode is over.',
       phase2: 'Phase 2',
       combo: (n) => `${n} hits`,
@@ -171,15 +206,18 @@
     id: {
       tagline: 'Satu stickman melawan tiga game bawaan.',
       howTo: 'Cara bermain',
-      keys: [['← →', 'Bergerak'], ['↑ atau Spasi', 'Lompat; tekan lagi di udara untuk lompat ganda. Terpental serangan besar: tekan tepat sebelum mendarat untuk salto'],
-        ['A', 'Pukul; tekan sampai empat kali untuk kombo, tahan untuk pukulan berat. Dengan senjata: menyerang'], ['S', 'Tendang; tekan sampai tiga kali, tahan untuk tendangan terbang. Selingi A dan S di tengah kombo untuk lutut dan siku'],
-        ['← → + A / S', 'Ke arah belakangmu: backfist berputar atau tendangan putar belakang'], ['↓ + A / S', 'Uppercut atau sapuan. Di udara: hantaman palu atau tendangan menukik'], ['D', 'Dash menembus serangan. Tepat sebelum kena: dodge sempurna'],
+      keys: [['← →', 'Bergerak. Ketuk dua kali ke arah hadap untuk dash, dua kali ke arah sebaliknya untuk salto belakang yang tetap menghadap bos'], ['↑ atau Spasi', 'Lompat; tekan lagi di udara untuk lompat ganda. Terpental serangan besar: tekan tepat sebelum mendarat untuk salto'],
+        ['A', 'Pukul; tekan sampai empat kali untuk kombo. Tahan untuk pukulan berat: bisa dibawa berjalan dan melompat, dan kalau dilepas di udara meluncur ke bos. Dengan senjata, A memakai senjata itu (jurus tiap senjata ada di tab Item)'],
+        ['S', 'Tendang; tekan sampai tiga kali untuk Ap Chagi, Dollyo Chagi dan Twio Dollyo Chagi. Tahan untuk Twio Yeop Chagi, tendangan samping terbang. Di udara, S S adalah Narae Chagi. Selingi A dan S di tengah kombo untuk lutut dan siku'],
+        ['← → + A / S', 'Ke arah belakangmu: backfist berputar, atau Dwi Chagi (S lagi untuk Dwi Hurigi)'], ['↓ + A / S', 'Uppercut atau sapuan. Di udara: hantaman palu, atau Naeryo Chagi, tendangan kapak'],
+        ['W', 'Makki, tangkisan: tahan, dan serangan dari depan tidak mengurangi nyawa, tapi tiga kali beruntun memecahkannya. Tekan tepat sebelum kena untuk tangkis tepat: benda yang dilempar berbalik ke bos'],
+        ['D', 'Dash menembus serangan. Tepat sebelum kena: dodge sempurna'],
         ['F', 'Bar biru penuh: mode bayangan 8 detik, tiap serangan +1. F lagi: Akhiri tugas'], ['P atau Esc', 'Jeda']],
       itemTip: 'Senjata turun dengan parasut. Ambil sebelum hilang; tiap senjata bertahan 20 detik.',
       healTip: 'Nyawa pulih perlahan: serang tanpa terkena serangan dan blok berikutnya terisi lagi. Kopi (+2) langka: hanya jatuh saat nyawa tinggal dua, sekali per pertarungan.',
       start: 'Mulai', resume: 'Lanjut', menu: 'Menu utama', retry: 'Coba lagi', again: 'Main lagi',
-      startMenu: 'Menu Boss Rush XP', startFight: 'Mulai pertarungan', startFightSub: 'Tiga game menunggu', practiceSub: '11 langkah, 2 menit', exitGame: 'Keluar dari game',
-      readyTitle: 'Siap bertarung?', readyText: 'Tekan Enter, atau pilih Mulai pertarungan.', achToast: (n) => `Pencapaian: ${n}`,
+      startMenu: 'Menu Boss Rush XP', startFight: 'Mulai pertarungan', startFightSub: 'Tiga game menunggu', practiceSub: '12 langkah, 2 menit', exitGame: 'Keluar dari game',
+      achToast: (n) => `Pencapaian: ${n}`,
       bossOf: (i, n) => `Bos ${i} dari ${n}`,
       loading: 'Memuat…',
       uninstall: (n) => `Menghapus ${n}…`,
@@ -202,11 +240,32 @@
       share: (r, t, n, who, url, pos) => `Aku menamatkan Boss Rush XP${who ? ` di portofolio ${who}` : ''}: nilai ${r}, waktu ${t}, terkena ${n} serangan${pos ? `, peringkat #${pos.rank} dari ${pos.total} pemain` : ''}. Bisa lebih baik? ${url}`,
       board: 'Papan peringkat', lbLoading: 'Mengecek papan peringkat…', lbAsk: (r, n) => `Waktu ini masuk peringkat #${r} dari ${n} pemain.`,
       lbName: 'Namamu', lbSave: 'Simpan', lbSaving: 'Menyimpan…',
+      nameTitle: 'Pemain baru', nameText: 'Ketik nama yang akan tampil di papan peringkat saat kamu menamatkan game.', nameRule: 'Maksimal 12 huruf, angka, spasi, - atau _.',
+      namePlay: 'Main', nameChange: 'Ganti nama', nameChangeText: 'Rekor berikutnya yang tersimpan akan tampil dengan nama ini.', cancel: 'Batal',
+      guide: 'Panduan', tabBoard: 'Papan', tabBoss: 'Bos', tabMoves: 'Jurus', tabItems: 'Item',
+      lbEmptyHead: 'Papan ini masih kosong', lbEmptyText: 'Kalahkan semua bos, dan namamu jadi yang pertama di sini.', lbPractice: 'Latihan dulu',
+      lbJoin: 'Namamu belum ada di papan. Tamatkan game untuk masuk ke sini.', lockText: 'Terkunci. Kalahkan tiga game pertama untuk bertemu dengannya.',
+      moveList: [
+        ['Pukulan', [['A A A A', 'Jab, cross, overhand, uppercut, tangan bergantian'], ['A (tahan)', 'Pukulan berat. Bisa dibawa berjalan dan melompat; lepas di udara untuk meluncur ke bos'],
+          ['↓ + A', 'Upper lompat. Di udara: hantaman palu'], ['← → + A', 'Ke arah belakangmu: backfist berputar']]],
+        ['Tendangan', [['S S S', 'Ap Chagi, Dollyo Chagi, lalu Twio Dollyo Chagi: melompat, kaki belakang menyapu memutar'], ['S (tahan)', 'Twio Yeop Chagi, tendangan samping terbang. Bisa dibawa seperti pukulan berat'],
+          ['↑ S S', 'Narae Chagi: dua tendangan di udara, kaki bergantian'], ['↓ + S', 'Sapuan. Di udara: Naeryo Chagi, tendangan kapak yang menebas ke bawah'],
+          ['← → + S', 'Ke arah belakangmu: Dwi Chagi, tendangan belakang. S lagi: Dwi Hurigi, tendangan kait berputar']]],
+        ['Campuran', [['A S A S', 'Jab, lutut, cross, tendangan rendah'], ['S A A', 'Ap Chagi, siku, overhand'], ['A S A S A S S', 'Rangkaian terpanjang: tujuh jurus sampai Twio Dollyo Chagi']]],
+        ['Bertahan', [['W (tahan)', 'Makki: menahan serangan dari depan. Tiga kali beruntun memecahkannya dan kamu terhuyung'],
+          ['W (tepat)', 'Tangkis tepat, ditekan sesaat sebelum kena: ranjau, bola dan ikon merah berbalik ke bos, kartu dan jendela hancur, bar biru bertambah']]],
+        ['Gerak', [['→ →', 'Ketuk dua kali ke arah hadap: dash menembus serangan'], ['← ←', 'Ketuk dua kali ke arah sebaliknya: salto belakang, tetap menghadap bos'],
+          ['D', 'Dash. Tepat sebelum kena: dodge sempurna'], ['F', 'Bar biru penuh: mode bayangan. F lagi: Akhiri tugas']]],
+      ],
+      itemsInfo: [['keyboard', 'Dua tangan. A A A: tebas, sabet balik, putaran penuh. Tahan A: hantam lantai, tuts terlempar ke dua sisi. ↓ + A: ayun ke atas. Di udara: hantam ke bawah.'],
+        ['mouse', 'Cambuk. A A A: cambuk dua klik, cambuk rendah, cambuk dari atas. Tahan A: putar di atas kepala untuk menghalau benda, lepas untuk cambukan jauh. ↓ + A: cambuk ke atas. Di udara: cambuk ke bawah.'],
+        ['cd', 'Dilempar saat A dilepas, lalu kembali dan kena saat pergi dan pulang; A lagi memanggilnya pulang. Tahan A: pergi-pulang dua kali. ↓ + A: digelindingkan di lantai. Di udara: dilempar ke bawah.'],
+        ['paint', 'Dilempar melengkung saat A dilepas; bos yang basah cat kena +1 tiap pukulan selama 5 detik. Tahan A: seluruh ember sekaligus. ↓ + A: genangan di depan kaki. Di udara: dituang ke bawah.'], ['coffee', 'Mengisi 2 blok nyawa.']],
       lbSaved: (name, r, n) => `Tersimpan sebagai ${name}: peringkat #${r} dari ${n}.`, lbKept: (r, n, t) => `Rekor terbaikmu (${t}) tetap peringkat #${r} dari ${n}.`,
       lbOff: 'Papan peringkat sedang tidak bisa dihubungi.', lbView: 'Lihat papan',
-      lbErr: { format: 'Pakai 1–12 huruf, angka, spasi, - atau _.', name: 'Nama itu tidak bisa dipakai. Coba nama lain.', slow: 'Terlalu sering menyimpan dari sini. Coba lagi beberapa menit lagi.', net: 'Gagal menyimpan. Coba lagi.' },
+      lbErr: { format: 'Pakai 1 sampai 12 huruf, angka, spasi, - atau _.', name: 'Nama itu tidak bisa dipakai. Coba nama lain.', slow: 'Terlalu sering menyimpan dari sini. Coba lagi beberapa menit lagi.', net: 'Gagal menyimpan. Coba lagi.' },
       lbCols: ['#', 'Nama', 'Waktu', 'Kena', 'Nilai'], lbCount: (n) => `${n} pemain`, lbHow: 'Diurutkan dari waktu + 10 detik untuk tiap serangan yang kena.',
-      lbEmpty: 'Belum ada yang menamatkan. Jadilah yang pertama!', lbYou: 'kamu',
+      lbEmpty: 'Belum ada yang menamatkan. Jadilah yang pertama!', lbYou: 'kamu', lbAll: 'Lihat semua',
       shareOpen: 'Bagikan hasil…', shareTitle: 'Bagikan hasil', shareHint: 'Tempel gambarnya di WhatsApp, LinkedIn, atau X, lalu tambahkan teksnya: di situ ada link ke game.',
       cardMaking: 'Menggambar kartu hasil…', cardFail: 'Gambarnya gagal dibuat. Teksnya tetap bisa disalin.', cardNoRank: 'Simpan namamu dulu agar peringkatmu ikut tampil di kartu.',
       copyImg: 'Salin gambar', imgCopied: 'Gambar tersalin!', imgFail: 'Browser ini tidak bisa menyalin gambar. Unduh saja gambarnya.', saveImg: 'Unduh gambar', imgSaved: (f) => `Mengunduh ${f}…`, copyText: 'Salin teks', shareTo: 'Bagikan ke…',
@@ -217,28 +276,31 @@
       practice: 'Latihan', lesStep: (i, n) => `Langkah ${i} dari ${n}:`, lesSkip: 'Enter: lewati',
       practiceEta: (n) => `Latihan selesai dalam sekitar: ${n > 6 ? '2 menit' : n > 3 ? '1 menit' : 'kurang dari 1 menit'}`,
       lesGood: 'Bagus!', lesDodgeHit: 'Kena! Tekan D tepat saat kertas hampir menyentuhmu.', lesDodgeLate: 'Tembus! Sekarang sedikit lebih lambat untuk dodge sempurna.',
+      lesGuardHit: 'Kena! Tahan W saat kertas datang.', lesGuardBlock: 'Tertangkis! Sekarang tekan W sesaat sebelum kertas menyentuhmu.',
       les: {
         move: ['Bergerak', 'Tekan [←] dan [→] untuk berjalan.'],
         jump: ['Lompat', 'Tekan [↑], lalu [↑] lagi di udara untuk lompat ganda.'],
         punch: ['Pukul', 'Dekati tempat sampah, lalu tekan [A] empat kali untuk kombo.'],
         heavy: ['Pukulan berat', 'Tahan [A] sampai kepalan menyala, lalu lepaskan.'],
-        kick: ['Tendang', 'Tekan [S] dua kali untuk tendangan putar.'],
-        spin: ['Serangan putar', 'Membelakangi tempat sampah, tekan panah ke arahnya bersamaan dengan [S].'],
+        kick: ['Tendang', 'Tekan [S] dua kali untuk Dollyo Chagi, tendangan memutar.'],
+        spin: ['Serangan putar', 'Membelakangi tempat sampah, tekan panah ke arahnya bersamaan dengan [S] untuk Dwi Chagi.'],
         rise: ['Uppercut', 'Tahan [↓], lalu tekan [A].'],
-        dash: ['Dash', 'Tekan [D] untuk dash. Selama dash, tak ada yang bisa mengenaimu.'],
+        dash: ['Dash', 'Tekan [D] untuk dash, atau ketuk dua kali panah ke arah hadapmu. Selama dash, tak ada yang bisa mengenaimu.'],
         dodge: ['Dodge sempurna', 'Tempat sampah melempar kertas. Tekan [D] tepat sebelum kertas mengenaimu.'],
+        guard: ['Tangkis', 'Tahan [W] untuk menangkis kertas, atau tekan [W] sesaat sebelum kena untuk memantulkannya.'],
         weapon: ['Senjata', 'Ambil keyboard yang jatuh, lalu serang dengan [A].'],
         special: ['Mode bayangan', 'Tekan [F] untuk mode bayangan, lalu [F] lagi untuk Akhiri tugas.'],
       },
       drillDone: 'Latihan selesai!', drillText: 'Dasarnya sudah kamu kuasai. Game-game bawaan menunggu untuk dihapus.', drillFight: 'Mulai pertarungan', drillAgain: 'Latihan lagi',
       status: (i, n, name) => `Bos ${i}/${n}: ${name}`,
       statusMenu: 'Menu utama',
-      canvasLabel: 'Boss Rush XP. Tombol panah untuk bergerak, A memukul, S menendang, D dash, F mode bayangan, P jeda.',
+      canvasLabel: 'Boss Rush XP. Tombol panah untuk bergerak, A memukul, S menendang, W menangkis, D dash, F mode bayangan, P jeda.',
       fight: 'Lawan!',
       stick: 'Stickman',
       items: { keyboard: 'Keyboard', mouse: 'Mouse', cd: 'CD', paint: 'Cat', coffee: 'Kopi' },
       gone: (n) => `${n} habis`,
       ready: 'Mode bayangan siap', shadowOn: 'Mode bayangan', shadowHud: 'F: Akhiri tugas', missed: 'Meleset', techOk: 'Salto!',
+      parryOk: 'Tangkis tepat!', guardBroke: 'Tangkisan pecah',
       shadowSay: 'Mode bayangan: setiap serangan lebih keras selama 8 detik. Tekan F lagi untuk Akhiri tugas.', shadowOver: 'Mode bayangan berakhir.',
       phase2: 'Fase 2',
       combo: (n) => `${n} pukulan`,
@@ -279,8 +341,17 @@
   const DODGE_WINDOW = 0.1, SLOW_TIME = 1.1, SLOW_SCALE = 0.35, DODGE_METER = 20, DODGE_SAFE = 0.5, DODGE_CD = 2.5;
   // the other way pressed with an attack, or within TURN_WINDOW of turning, makes it a turning attack
   const TURN_WINDOW = 0.1;
-  // a held punch or kick charges at least CHARGE_MIN and lets go by itself at CHARGE_MAX
-  const CHARGE_MIN = 0.2, CHARGE_MAX = 1.2;
+  // a held punch or kick charges at least CHARGE_MIN and lets go by itself at CHARGE_MAX; he can walk and jump with
+  // it, and let go in the air it flies for AIM_T seconds, at a boss ahead when it is within AIM_RANGE
+  const CHARGE_MIN = 0.2, CHARGE_MAX = 2.4, AIM_RANGE = 380, AIM_T = 0.28;
+  // two taps of an arrow within DTAP: a dash that way, or a backflip when it is the way behind him (untouchable
+  // for its first FLIP_SAFE seconds, like a dash)
+  const DTAP = 0.22, FLIP_SAFE = 0.3;
+  // W, Makki: the first PARRY_T of a press parries (not again within PARRY_CD); held, he guards at GUARD_WALK, and
+  // GUARD_BREAK blocks within GUARD_SPAN break it. A parry earns PARRY_METER
+  const PARRY_T = 0.14, PARRY_CD = 0.5, PARRY_METER = 15, GUARD_WALK = 100, GUARD_BREAK = 3, GUARD_SPAN = 2;
+  // the CD and the paint fly when A is let go, no sooner than THROW_MIN; held past THROW_FULL, the charged throw
+  const THROW_MIN = 0.07, THROW_FULL = 0.35;
   // on a platform ↓ drops through only once held DROP_DELAY, so ↓ + A and ↓ + S still work up there
   const DROP_DELAY = 0.08;
   // shadow mode: SHADOW_TIME seconds in which every hit lands SHADOW_DMG harder while the bar runs down. Its
@@ -288,7 +359,7 @@
   const SHADOW_TIME = 8, SHADOW_DMG = 1, SHADOW_C = '#7fd4ff', SHADOW_GLOW = 'rgba(70,180,255,.9)';
   // practice: one lesson per step, each finished by one game event (see Game.lesson)
   const LESSONS = [['move', 'moved'], ['jump', 'double'], ['punch', 'hit:upper'], ['heavy', 'hit:heavyP'], ['kick', 'hit:round'], ['spin', 'hit:spin'], ['rise', 'hit:rise'],
-    ['dash', 'dash'], ['dodge', 'perfect'], ['weapon', 'weapon'], ['special', 'special']];
+    ['dash', 'dash'], ['dodge', 'perfect'], ['guard', 'parry'], ['weapon', 'weapon'], ['special', 'special']];
   // achievements, roughly easiest first; names and how-tos are in STR.ach. They are kept in this browser:
   // { got: { id: when }, arms: [weapon kinds ever picked up] }, and each one shows once as an XP balloon
   const ACHS = ['crash', 'endtask', 'collector', 'combo', 'restore', 'perfect', 'sender', 'eagle', 'jackpot', 'clickok', 'lastcup', 'flawless', 'uninstall', 'rankS'];
@@ -623,6 +694,21 @@
       broke: () => { hiss(0.12, 0.3, 'bandpass', 1200, 300); tone('square', 300, 110, 0.18, 0.14); },
       cd: () => tone('triangle', 900, 1400, 0.14, 0.14),
       catch: () => tone('sine', 1200, 1500, 0.05, 0.14),
+      // the CD: a charged throw rings higher, a roll hums along the floor, and it turns for home when called
+      cdp: () => { tone('triangle', 900, 1800, 0.16, 0.14); tone('sine', 2400, 3000, 0.2, 0.06, 0.03); whoosh(0.18, 0.28, [1200, 3200], 1.6, 0.06); },
+      roll: () => { tone('triangle', 520, 380, 0.24, 0.08); hiss(0.2, 0.12, 'bandpass', 1200, 800); },
+      recall: () => { whoosh(0.18, 0.2, [600, 2400], 1.4, 0.1, 0.8); tone('triangle', 1100, 1650, 0.12, 0.08, 0.04); },
+      // the paint: the whole bucket heaved, a pour glugging out, a drop landing, and the empty bucket let fall
+      fling: () => { whoosh(0.26, 0.34, [600, 1500, 500], 0.9, 0.1, 0.5); hiss(0.3, 0.2, 'lowpass', 900, 200, 0.08); tone('sine', 140, 70, 0.2, 0.2, 0.1); },
+      pour: () => { [0, 0.07, 0.14].forEach((d) => tone('sine', 300 + rand(-40, 40), 170, 0.06, 0.16, d)); hiss(0.24, 0.12, 'lowpass', 900, 300, 0.02); },
+      drip: () => tone('sine', 900, 400, 0.05, 0.1),
+      clang: () => { tone('square', 620, 560, 0.1, 0.12); tone('sine', 1240, 1180, 0.3, 0.07); hiss(0.05, 0.25, 'bandpass', 2600, 1800); },
+      // the mouse whistling round overhead, once a turn
+      whirl: () => whoosh(0.2, 0.2, [700, 1700, 800], 2.2, 0.1, 0.5),
+      // Makki: a blow taken on the forearms, a parry's ring, and the guard breaking
+      block: () => { hiss(0.05, 0.5, 'lowpass', 1400, 300); tone('square', 240, 120, 0.05, 0.16); tone('sine', 160, 80, 0.08, 0.35); },
+      parry: () => { tone('sine', 2640, 2600, 0.22, 0.12); tone('triangle', 1320, 1310, 0.28, 0.1); hiss(0.04, 0.4, 'highpass', 4200, 3000); tone('sine', 880, 1760, 0.08, 0.06, 0.02); },
+      gbreak: () => { for (let i = 0; i < 3; i++) hiss(0.03, 0.45, 'highpass', 3200 - i * 600, 1800, i * 0.035); tone('square', 520, 110, 0.3, 0.14, 0.03); tone('sine', 180, 60, 0.3, 0.3, 0.05); },
       splat: () => { hiss(0.2, 0.5, 'lowpass', 1000, 150); tone('sine', 170, 60, 0.16, 0.3); },
       sip: () => { tone('sine', 320, 620, 0.1, 0.14); tone('sine', 360, 700, 0.1, 0.12, 0.13); },
       perfect: () => { tone('sine', 1568, 2093, 0.16, 0.13); tone('triangle', 784, 1568, 0.2, 0.09, 0.02); hiss(0.3, 0.2, 'bandpass', 5000, 900); tone('sine', 880, 220, 0.4, 0.1, 0.06); },
@@ -665,14 +751,21 @@
       kick: { s: (at) => whoosh(0.12, 0.4, [1600, 700], 1.1, at, 0.6), h: () => { hiss(0.08, 0.6, 'lowpass', 1800, 250); tone('sine', 140, 52, 0.14, 0.5); } },
       round: { s: (at) => whoosh(0.16, 0.3, [700, 2000, 800], 1.1, at, 0.6),
         h: () => { hiss(0.06, 0.6, 'bandpass', 1700, 900); hiss(0.02, 0.3, 'highpass', 3000, 2500); tone('sine', 160, 60, 0.12, 0.45); } },
-      // the leg rising, then the chop
-      axe: { s: (at) => { whoosh(0.12, 0.2, [500, 1500], 1.2, 0.06); whoosh(0.08, 0.45, [2400, 500], 1.2, at, 0.6); },
+      // the leg rising, the chop, and a whistle as he drops with it
+      axe: { s: (at) => { whoosh(0.12, 0.2, [500, 1500], 1.2, 0.06); whoosh(0.1, 0.45, [2400, 600], 1.2, at + 0.05, 0.6); tone('triangle', 1300, 500, 0.3, 0.04, at + 0.08); },
         h: () => { tone('sine', 120, 38, 0.24, 0.65); hiss(0.12, 0.65, 'lowpass', 2000, 150); hiss(0.03, 0.35, 'highpass', 2600, 1600); } },
+      // the take-off grunt of a low tone, then the rear leg's long whip round
+      // the hit is a whip's crack, then the weight behind it
+      tdol: { s: (at) => { tone('sine', 90, 140, 0.1, 0.18, 0.05); whoosh(0.28, 0.4, [500, 1800, 2600, 900], 1, at, 0.6); },
+        h: () => { hiss(0.025, 0.55, 'highpass', 4200, 3000); tone('square', 520, 180, 0.05, 0.12); hiss(0.14, 0.6, 'lowpass', 1400, 120); tone('sine', 120, 34, 0.3, 0.72); } },
       sweep: { s: (at) => { whoosh(0.22, 0.42, [300, 1000, 350], 1.2, at, 0.45); hiss(0.14, 0.12, 'lowpass', 1200, 300, 0.05); },
         h: () => { tone('sine', 200, 90, 0.08, 0.35); hiss(0.06, 0.45, 'bandpass', 1200, 700); } },
       spinFist: { s: (at) => whoosh(0.15, 0.26, [800, 2600, 1000], 1.3, at, 0.6), h: () => { hiss(0.05, 0.55, 'highpass', 2400, 1400); tone('sine', 230, 90, 0.09, 0.35); } },
-      spinKick: { s: (at) => whoosh(0.24, 0.34, [450, 2200, 600], 1, at, 0.62),
+      // Dwi Chagi is a straight thrust; Dwi Hurigi swirls through its turn and cracks at the heel
+      spinKick: { s: (at) => whoosh(0.14, 0.4, [1400, 450], 1.2, at, 0.72),
         h: () => { hiss(0.08, 0.7, 'bandpass', 1500, 700); hiss(0.03, 0.4, 'highpass', 3200, 2200); tone('sine', 130, 40, 0.24, 0.65); } },
+      hurigi: { s: (at) => { whoosh(0.16, 0.18, [600, 1300], 1.2, 0.12); whoosh(0.2, 0.42, [900, 3000, 1100], 1.1, at, 0.7); },
+        h: () => { hiss(0.03, 0.5, 'highpass', 3600, 2600); tone('square', 700, 250, 0.04, 0.1); hiss(0.08, 0.65, 'bandpass', 1400, 650); tone('sine', 150, 42, 0.22, 0.6); } },
       rise: { s: (at) => { whoosh(0.26, 0.3, [500, 1200, 3200], 1, at, 0.4); tone('square', 300, 900, 0.14, 0.05, at); },
         h: () => { tone('square', 330, 880, 0.1, 0.12); hiss(0.05, 0.5, 'bandpass', 2600, 1400); tone('sine', 150, 45, 0.16, 0.45); } },
       // fists up, then a falling whistle; the landing is the quake's
@@ -682,6 +775,9 @@
         h: () => { hiss(0.08, 0.5, 'lowpass', 1200, 150); tone('sine', 90, 40, 0.2, 0.5); hiss(0.2, 0.35, 'bandpass', 300, 120); } },
       heavyP: { s: (at) => { whoosh(0.2, 0.4, [2000, 700, 300], 0.9, at, 0.35); tone('sine', 90, 55, 0.18, 0.25); },
         h: () => { tone('sine', 110, 30, 0.34, 0.8); tone('square', 90, 35, 0.24, 0.2); hiss(0.14, 0.7, 'lowpass', 3000, 150); hiss(0.05, 0.45, 'highpass', 2000, 1200); } },
+      // flown fist first: a longer rush of air than the lunge on foot, and a hit that cracks before it booms
+      heavyA: { s: (at) => { whoosh(0.28, 0.4, [1800, 900, 400], 0.9, at, 0.3); tone('sine', 100, 60, 0.2, 0.22); },
+        h: () => { hiss(0.04, 0.6, 'highpass', 3400, 2000); tone('sine', 160, 40, 0.3, 0.72); tone('square', 120, 45, 0.18, 0.16); hiss(0.2, 0.55, 'bandpass', 900, 250); } },
       flyK: { s: (at) => { whoosh(0.3, 0.34, [700, 2600, 1300], 0.9, at, 0.3); tone('sine', 80, 60, 0.2, 0.2); },
         h: () => { hiss(0.1, 0.8, 'bandpass', 1500, 650); tone('sine', 150, 40, 0.26, 0.7); hiss(0.4, 0.5, 'lowpass', 900, 60); hiss(0.03, 0.3, 'highpass', 3200, 2400); } },
       slide: { s: () => { hiss(0.34, 0.2, 'bandpass', 1400, 400); whoosh(0.14, 0.2, [900, 1800], 1.2); },
@@ -693,18 +789,50 @@
       // the scissor: one leg, then the other
       akick2: { s: (at) => { whoosh(0.05, 0.26, [1800, 900], 1.3, 0.02); whoosh(0.07, 0.34, [2400, 1000], 1.3, at + 0.03); },
         h: () => { hiss(0.05, 0.7, 'bandpass', 1400, 800); tone('triangle', 200, 90, 0.08, 0.45); } },
-      // the dive kick whistles down and boings off
-      dive: { s: () => { tone('triangle', 1500, 600, 0.2, 0.05); whoosh(0.2, 0.26, [3000, 800], 1.4, 0.06, 0.3); },
-        h: () => { tone('sine', 170, 60, 0.12, 0.45); hiss(0.05, 0.55, 'bandpass', 1900, 1000); tone('square', 300, 600, 0.08, 0.08, 0.04); } },
+      // the backflip: air rushing past as he turns over, no hit
+      flip: { s: () => { whoosh(0.34, 0.24, [700, 1600, 800], 1.1, 0.17, 0.5); tone('sine', 180, 320, 0.08, 0.06); } },
       // the keyboard swings heavy and sheds keys; the mouse cable whistles and the mouse clicks (twice on ms1's double hit)
       kb1: { s: (at) => { whoosh(0.22, 0.36, [1100, 500, 250], 0.8, at, 0.6); keyTicks(2, 0.03); },
         h: () => { hiss(0.07, 0.55, 'highpass', 2400, 1200); tone('square', 150, 80, 0.08, 0.25); keyTicks(3, 0.04); } },
       kb2: { s: (at) => whoosh(0.18, 0.34, [400, 1300, 500], 0.8, at, 0.55), h: () => { hiss(0.06, 0.5, 'highpass', 2000, 1000); tone('square', 120, 60, 0.1, 0.28); keyTicks(2, 0.04); } },
-      kbAir: { s: (at) => whoosh(0.2, 0.36, [1600, 400], 0.8, at, 0.6),
+      // the keyboard raised a beat, then a falling whistle as he rides it down
+      kbAir: { s: (at) => { whoosh(0.1, 0.2, [900, 1600], 1.2, 0.04); tone('sine', 1200, 480, 0.26, 0.05, at); },
         h: () => { hiss(0.08, 0.6, 'highpass', 2200, 900); tone('sine', 120, 45, 0.16, 0.5); tone('square', 150, 70, 0.08, 0.2); keyTicks(3, 0.04); } },
+      // the spin swirls round twice as long, and lands with the most keys
+      kb3: { s: (at) => { whoosh(0.34, 0.38, [500, 1400, 700, 1600, 600], 0.9, at, 0.4); keyTicks(3, 0.1); },
+        h: () => { hiss(0.08, 0.6, 'highpass', 2200, 900); tone('sine', 110, 40, 0.24, 0.6); tone('square', 140, 60, 0.12, 0.22); keyTicks(4, 0.03); } },
+      // the upswing's hit rises; the smash is the heaviest thud of them all; landing the keys rattle over a low bump;
+      // the keys' wave only clatters
+      kbUp: { s: (at) => whoosh(0.2, 0.36, [400, 900, 2600], 0.9, at, 0.7),
+        h: () => { tone('triangle', 330, 880, 0.1, 0.22); hiss(0.05, 0.5, 'highpass', 3000, 1600); tone('sine', 180, 70, 0.12, 0.4); keyTicks(3, 0.02); } },
+      kbSmash: { s: (at) => { whoosh(0.3, 0.42, [300, 1800, 2400, 300], 0.7, at, 0.75); tone('sine', 70, 110, 0.2, 0.18, Math.max(0, at - 0.1)); },
+        h: () => { tone('sine', 100, 30, 0.34, 0.8); hiss(0.14, 0.7, 'lowpass', 2600, 120); tone('square', 110, 45, 0.2, 0.22); keyTicks(6, 0.03); } },
+      kbLand: { s: () => { tone('sine', 110, 32, 0.34, 0.65); hiss(0.26, 0.6, 'lowpass', 1500, 90); keyTicks(8, 0.02); },
+        h: () => { keyTicks(4, 0); hiss(0.08, 0.45, 'bandpass', 1800, 700); tone('sine', 120, 50, 0.14, 0.4); } },
+      keys: { h: () => { keyTicks(5, 0); tone('triangle', 900, 500, 0.04, 0.12); hiss(0.03, 0.3, 'highpass', 5000, 3500); } },
       ms1: { s: (at) => whoosh(0.1, 0.3, [1500, 4200], 2.5, at, 0.7), h: () => { tone('square', 2100, 1900, 0.018, 0.2); hiss(0.015, 0.25, 'highpass', 4000, 3000); tone('sine', 300, 180, 0.03, 0.35); } },
-      ms2: { s: (at) => whoosh(0.16, 0.3, [900, 3000, 1400], 2.2, at, 0.55),
+      // low along the floor it hisses and slaps; up it rises and clicks three times; overhead it cracks like a whip
+      ms2: { s: (at) => { hiss(0.18, 0.16, 'bandpass', 500, 900, Math.max(0, at - 0.1)); whoosh(0.1, 0.3, [2400, 5200, 3000], 4, at, 0.7); },
+        h: () => { tone('square', 1800, 1600, 0.02, 0.18); hiss(0.03, 0.35, 'bandpass', 1400, 900); tone('sine', 240, 110, 0.06, 0.32); } },
+      msUp: { s: (at) => whoosh(0.16, 0.3, [900, 3200, 2000], 3, at, 0.55),
         h: () => { [0, 0.055, 0.11].forEach((d) => tone('square', 2000, 1800, 0.018, 0.14, d)); tone('sine', 220, 90, 0.1, 0.3); } },
+      ms3: { s: (at) => { whoosh(0.18, 0.26, [600, 1400], 2, 0.06); whoosh(0.1, 0.36, [2600, 5200], 2.6, at, 0.8); },
+        h: () => { hiss(0.012, 0.8, 'highpass', 6000, 5000); tone('square', 3200, 2800, 0.012, 0.2); [0, 0.05].forEach((d) => tone('square', 2000, 1800, 0.018, 0.14, d)); tone('sine', 200, 80, 0.12, 0.4); } },
+      msSpin: { s: () => FX.whirl(), h: () => { tone('square', 1900, 1700, 0.018, 0.16); tone('sine', 280, 160, 0.04, 0.3); } },
+      // turned round into it: the same strikes with a swish of the turn before them
+      kbTurn: { s: (at) => { whoosh(0.1, 0.16, [700, 1200], 1.2, 0.02); whoosh(0.18, 0.34, [400, 1300, 500], 0.8, at, 0.55); },
+        h: () => { [0, 0.04].forEach((d) => { hiss(0.03, 0.45, 'bandpass', 2200, 1500, d); tone('square', 170, 90, 0.04, 0.18, d); }); keyTicks(3, 0.06); tone('sine', 130, 50, 0.14, 0.38, 0.02); } },
+      msTurn: { s: (at) => { whoosh(0.08, 0.16, [800, 1400], 1.3, 0.02); whoosh(0.1, 0.3, [1500, 4200], 2.5, at, 0.7); },
+        h: () => { tone('square', 2200, 2000, 0.018, 0.2); hiss(0.015, 0.25, 'highpass', 4200, 3200); tone('sine', 320, 170, 0.035, 0.35); } },
+      msLong: { s: (at) => whoosh(0.2, 0.34, [800, 3600, 1800], 2.2, at, 0.6),
+        h: () => { hiss(0.012, 0.7, 'highpass', 5600, 4600); [0, 0.05].forEach((d) => tone('square', 2100, 1900, 0.018, 0.16, d)); tone('sine', 230, 90, 0.1, 0.38); } },
+      toss: { s: (at) => whoosh(0.1, 0.22, [1400, 2800], 1.4, at) },
+      cdPierce: { s: (at) => { whoosh(0.14, 0.3, [1200, 3200], 1.4, at); tone('triangle', 1800, 2400, 0.12, 0.05, Math.max(0, at - 0.04)); } },
+      cdP: { h: () => { tone('sine', 2600, 2500, 0.1, 0.16); tone('sine', 3900, 3800, 0.08, 0.08); hiss(0.04, 0.5, 'bandpass', 3000, 1800); tone('sine', 200, 90, 0.1, 0.45); } },
+      // the bucket swung: a hollow tin clang
+      bucket: { s: (at) => { tone('triangle', 700, 520, 0.12, 0.04, Math.max(0, at - 0.08)); whoosh(0.16, 0.3, [500, 1100, 400], 0.7, at, 0.6); },
+        h: () => { tone('square', 480, 420, 0.08, 0.14); tone('sine', 960, 900, 0.22, 0.07); hiss(0.05, 0.45, 'lowpass', 1600, 300); tone('sine', 150, 70, 0.1, 0.35); } },
+      makki: { s: (at) => whoosh(0.08, 0.26, [1400, 2600], 1.8, at) },
       // swung from the air the cable lashes down, and the mouse right-clicks
       msAir: { s: (at) => whoosh(0.1, 0.3, [4400, 1600], 2.5, at, 0.4),
         h: () => { tone('square', 1500, 1350, 0.022, 0.2); hiss(0.015, 0.25, 'highpass', 3500, 2500); tone('sine', 260, 150, 0.04, 0.35); } },
@@ -759,16 +887,27 @@
   }
 
   /* ------------------------------------------------------------ input */
-  // arrows move and jump; the left hand rests on A S D F
+  // arrows move and jump; the left hand rests on A S D F, with W above S
   const KEYS = {
     ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'jump', Space: 'jump', ArrowDown: 'down',
-    KeyA: 'punch', KeyS: 'kick', KeyD: 'dash', ShiftLeft: 'dash', ShiftRight: 'dash', KeyF: 'special',
+    KeyA: 'punch', KeyS: 'kick', KeyW: 'guard', KeyD: 'dash', ShiftLeft: 'dash', ShiftRight: 'dash', KeyF: 'special',
     KeyP: 'pause', Escape: 'pause', Enter: 'confirm', NumpadEnter: 'confirm', F2: 'new', KeyM: 'mute',
   };
   class Input {
     constructor() { this.now = 0; this.clear(); }
-    clear() { this.held = Object.create(null); this.hits = Object.create(null); }
-    press(a) { if (!this.held[a]) this.hits[a] = this.now; this.held[a] = true; }
+    clear() { this.held = Object.create(null); this.hits = Object.create(null); this.tapAt = Object.create(null); }
+    press(a) {
+      if (!this.held[a]) {
+        this.hits[a] = this.now;
+        // a second tap of an arrow soon after the first counts as 'tap2', keeping its direction and when the first came
+        if (a === 'left' || a === 'right') {
+          const t1 = this.tapAt[a];
+          if (t1 !== undefined && this.now - t1 <= DTAP) { this.hits.tap2 = this.now; this.tap2 = a === 'left' ? -1 : 1; this.tap1 = t1; delete this.tapAt[a]; }
+          else this.tapAt[a] = this.now;
+        }
+      }
+      this.held[a] = true;
+    }
     release(a) { this.held[a] = false; }
     // a press counts if it happened within the buffer window; taking it uses it up
     take(a, win = 0.12) {
@@ -906,28 +1045,39 @@
     jabF: [4, -32, 10, -59, 12, -71, 24, -59, 36, -59, 4, -47, 11, -57, 14, -17, 16, 0, -5, -17, -8, 0],
     jabR: [1, -32, 4, -60, 5, -72, 9, -48, 15, -59, -3, -49, 6, -57, 10, -17, 14, -1, -5, -16, -11, 0],
     crossW: [-2, -32, -4, -60, -4, -72, 7, -54, 17, -62, -15, -52, -4, -58, 6, -17, 9, 0, -8, -16, -14, 0],
-    cross: [4, -31, 11, -58, 13, -70, 8, -45, 15, -56, 24, -60, 37, -60, 14, -17, 16, 0, -6, -17, -9, 0],
-    crossF: [5, -31, 13, -57, 16, -69, 10, -44, 16, -55, 27, -58, 39, -58, 16, -17, 18, 0, -6, -17, -8, 0],
+    // the rear hand's punches turn the back heel in, so the back knee drops forward under the hip
+    cross: [4, -31, 11, -58, 13, -70, 8, -44.5, 14, -55.5, 25, -60, 37.5, -60, 14.5, -17, 16.5, 0, 4.5, -13.5, -6, 0],
+    crossF: [5, -31, 13, -58, 16, -69.5, 10, -44, 15.5, -55, 27, -59, 39.5, -59, 16, -17, 18, -0.5, 4.5, -13.5, -6, 0],
     crossR: [1, -32, 4, -60, 5, -72, 10, -48, 17, -59, -3, -49, 6, -58, 10, -17, 14, -1, -5, -16, -11, 0],
-    upperW: [-2, -24, 9, -50, 16, -60, 8, -37, 16, -27, 5, -37, 12, -48, 14, -17, 11, 0, -11, -9, -25, -1],
-    upper: [2, -40, 0, -68, -2, -80, 2, -81, 3, -94, -12, -61, -24, -58, 5, -23, 4, -6, -2, -23, -10, -8],
-    upperF: [2, -42, -2, -70, -5, -81, -1, -83, -2, -96, -15, -65, -28, -64, 3, -25, -2, -8, -3, -25, -14, -12],
+    // the uppercut is the rear hand's, scooped up from a crouch: the string runs lead, rear, lead, rear
+    upperW: [-2, -25, 9.5, -50.5, 15.5, -61, 14, -37.5, 15, -50, 4, -37.5, 14.5, -30.5, 13.5, -17, 13, 0, 2, -8, -13, 0],
+    upper: [2, -40, -0.5, -68, -2.5, -79.5, 3, -54.5, 4.5, -66.5, 1.5, -82, 2.5, -94, 4.5, -22.5, 3, -5.5, -2, -23, -10.5, -8.5],
+    upperF: [2, -42, -2.5, -69.5, -5.5, -81, 0, -56, 0.5, -68.5, -1.5, -83.5, -2.5, -96, 2.5, -24.5, -2, -8, -3.5, -25.5, -15, -12.5],
     rushW: [-2, -27, 2, -54, 5, -66, -8, -46, -1, -35, 10, -46, 17, -56, 9, -13, 16, 0, -11, -12, -17, 0],
     rush: [6, -38, 26, -54, 37, -60, 40, -58, 54, -60, 18, -44, 8, -38, 12, -22, 4, -8, -8, -30, -24, -26],
-    kickW: [-2, -34, -7, -62, -8, -74, 0, -50, 6, -62, -17, -53, -23, -42, 15, -37, 11, -20, -5, -17, -7, 0],
-    kick: [-3, -34, -11, -61, -13, -73, -7, -48, -4, -60, -23, -55, -34, -49, 14, -34, 31, -34, -5, -17, -6, 0],
-    kickF: [-4, -34, -14, -61, -17, -72, -11, -47, -9, -60, -27, -56, -38, -52, 13, -36, 30, -39, -6, -17, -6, 0],
-    kickR: [-2, -34, -6, -62, -7, -74, 0, -50, 5, -62, -16, -53, -22, -42, 15, -40, 9, -24, -5, -17, -7, 0],
-    roundW: [0, -34, -6, -62, -7, -74, -1, -49, 1, -61, -15, -52, -24, -44, 15, -26, 1, -18, -2, -17, -3, 0],
-    round: [-2, -34, -13, -60, -16, -72, -11, -47, -11, -59, -26, -56, -39, -56, 11, -46, 24, -57, -4, -17, -4, 0],
-    roundF: [-3, -34, -16, -59, -20, -71, -15, -46, -17, -58, -29, -57, -42, -58, 5, -50, 11, -66, -5, -17, -4, 0],
-    roundR: [0, -34, -5, -62, -6, -74, 1, -49, 4, -62, -14, -52, -22, -43, 17, -29, 6, -15, -3, -17, -4, 0],
+    // Ap Chagi: the standing leg sinks as the knee comes up and straightens onto the ball of the foot for the snap
+    kickW: [-1, -30, -4.5, -58, -5, -70, 2, -45.5, 6, -57.5, -12, -46, -3.5, -55, 15.5, -35.5, 11.5, -19, 5.5, -13.5, -5, 0],
+    kick: [-3, -34.5, -11.5, -61, -13.5, -73, -8, -47.5, -5, -60, -24, -54, -34.5, -48, 14.5, -35, 31.5, -35, -4.5, -17, -7, 0],
+    kickF: [-4, -34.5, -14.5, -60.5, -17.5, -72, -12, -46.5, -11, -59, -27.5, -55, -39.5, -51.5, 13.5, -37, 30, -40.5, -5.5, -17, -8, 0],
+    kickR: [-2, -30, -6, -57.5, -6.5, -69.5, 0, -45, 5, -56.5, -15.5, -47.5, -19.5, -35.5, 15, -35, 8.5, -19, 5, -14, -5, 0],
+    // Dollyo Chagi: the knee turns over while the standing foot pivots, so that knee bends back for the kick
+    roundW: [0, -31, -5.5, -58.5, -6.5, -70.5, -0.5, -45.5, 1, -57.5, -14.5, -48, -22.5, -38.5, 15.5, -39, 0.5, -30.5, -9.5, -16, -4, 0],
+    round: [-2, -34, -14.5, -59, -17, -71, -13, -45, -13.5, -57.5, -28, -56.5, -40.5, -56, 11, -45.5, 24.5, -56, -6, -17, -6, 0],
+    roundF: [-3, -34, -17, -58, -20.5, -69.5, -16.5, -44.5, -18.5, -56.5, -31, -57, -43.5, -57.5, 5, -49.5, 11.5, -65, -7, -17, -7, 0],
+    roundR: [0, -31, -5, -58.5, -6, -70.5, 1, -46, 3.5, -58, -14, -48, -22, -38.5, 17, -26, 6.5, -13, 4.5, -14, -5, 0],
+    // Twio Dollyo Chagi: a crouch with the arms back, a skip off the lead leg, and the rear leg whipping round high
+    tdW: [0, -26, 9.5, -52.5, 13.5, -63.5, 1, -41.5, -10, -35, -1, -43, -12.5, -38.5, 14.5, -16.5, 11, 0, 2.5, -8.5, -12, 0],
+    tdA: [0, -38, -4, -65.5, -5, -77.5, 7, -56.5, 13, -67.5, -11, -78, -8.5, -90, 16, -45, 8, -30, 14.5, -28, 0, -19.5],
+    td: [-2, -40, -17, -63.5, -20, -75.5, -10.5, -51.5, -8, -63.5, -30.5, -62, -43, -61, 10.5, -28, -4.5, -20, 12, -50.5, 27, -59],
+    tdF: [-3, -40, -18.5, -63, -23, -74.5, -14, -50, -13.5, -62.5, -32.5, -62.5, -45, -63, 8, -26.5, -6.5, -18, 7.5, -54, 16.5, -68.5],
+    tdL: [0, -38, -3, -66, -3.5, -78, 4, -53.5, 9, -65, -13.5, -57, -20, -46, 7, -22, 4, -5.5, 6, -21.5, -2.5, -7],
     sweepW: [0, -20, 5, -46, 7, -58, 13, -37, 19, -45, -3, -35, 5, -40, 15, -12, 14, 0, -10, -8, -14, 0],
     sweep: [-4, -16, -10, -40, -12, -52, 2, -30, 8, -20, -18, -24, -22, -10, 12, -8, 32, -3, -12, -6, -16, 0],
     slide: [0, -12, -22, -26, -32, -32, -14, -14, -24, -4, -28, -16, -36, -4, 16, -9, 33, -5, 10, -17, 22, -4],
     apunch: [2, -40, 6, -68, 8, -80, 20, -66, 35, -66, -6, -60, 2, -66, 10, -30, 6, -17, -4, -27, -10, -14],
-    akick: [0, -40, -10, -64, -13, -76, 0, -60, 10, -66, -20, -58, -28, -64, 15, -36, 33, -32, -2, -26, -10, -16],
-    dive: [0, -46, -9, -72, -12, -84, 2, -66, 12, -72, -16, -66, -24, -74, 12, -30, 24, -14, -4, -32, -10, -18],
+    // Narae Chagi: the lead leg chambers and kicks, then the legs switch for the rear leg's kick (akick2)
+    akW: [0, -40, -7, -67, -8.5, -79, 2, -56.5, 6.5, -68, -19, -60, -29.5, -66.5, 16, -46.5, 3, -35.5, 1, -22.5, -13, -13.5],
+    akick: [0, -40, -12.5, -65, -15, -77, -6, -52.5, -5, -65, -25.5, -60.5, -37.5, -58, 17, -44, 33.5, -48, -0.5, -22.5, -15.5, -14],
     dash: [4, -30, 16, -54, 21, -65, 6, -46, -8, -40, 4, -46, -10, -44, 14, -15, 22, 0, -12, -18, -24, -8],
     airdash: [0, -38, 24, -44, 35, -47, 34, -40, 46, -41, 18, -36, 8, -34, -14, -42, -30, -40, -12, -32, -27, -28],
     skid: [-3, -29, -12, -55, -16, -66, 0, -46, 9, -52, -24, -46, -30, -54, 11, -15, 22, 0, -7, -15, -11, 0],
@@ -936,32 +1086,86 @@
     win: [0, -34, 0, -62, 1, -74, 9, -74, 15, -88, -9, -74, -15, -88, 7, -17, 10, 0, -7, -17, -10, 0],
     win2: [0, -34, 1, -62, 2, -74, 12, -70, 15, -86, -7, -50, -3, -39, 8, -17, 12, 0, -6, -17, -10, 0],
     wave: [0, -33, 0, -61, 1, -73, 10, -69, 14, -83, -3, -48, -3, -35, 4, -16, 6, 0, -4, -16, -7, 0],
-    throwW: [-2, -33, -5, -61, -6, -73, -16, -58, -26, -66, 6, -50, 14, -56, 8, -17, 13, 0, -7, -16, -13, 0],
-    throw: [3, -32, 9, -59, 12, -71, 22, -60, 36, -58, -2, -49, -10, -40, 13, -15, 18, 0, -6, -15, -14, 0],
-    lob: [2, -33, 7, -60, 10, -72, 18, -70, 28, -80, -4, -49, -10, -40, 12, -16, 17, 0, -6, -16, -13, 0],
-    kbW: [-2, -34, -5, -62, -4, -74, -7, -76, -15, -87, -12, -73, -18, -85, 8, -17, 13, 0, -8, -16, -13, 0],
-    kb1: [4, -28, 13, -54, 18, -65, 25, -47, 38, -42, 22, -45, 35, -39, 15, -13, 20, 0, -6, -13, -13, 0],
-    kb2: [1, -32, 5, -60, 7, -72, 18, -60, 32, -64, 14, -56, 28, -60, 10, -16, 15, 0, -7, -16, -12, 0],
-    msW: [-1, -33, -3, -61, -3, -73, -4, -74, -14, -82, -10, -50, -2, -42, 8, -16, 13, 0, -6, -16, -12, 0],
-    ms1: [2, -32, 7, -59, 10, -71, 19, -57, 32, -52, -3, -49, -8, -40, 12, -15, 17, 0, -6, -15, -13, 0],
-    ms2: [1, -35, 4, -63, 6, -75, 12, -73, 16, -88, -6, -52, -10, -42, 9, -18, 13, -1, -6, -17, -10, 0],
+    // the keyboard, in both hands (the rear one is put on it as he is drawn): the chop, the backhand as he winds round,
+    // the spin, the upswing, the smash raised and brought down, and the drop from the air with the crouch it lands in
+    kbW: [-2, -31, -7, -58.5, -7.5, -70.5, -11.5, -71.5, -22.5, -78, -14, -70.5, -23.5, -78.5, 8.5, -17, 10, 0, -1.5, -13.5, -12, 0],
+    kbA: [1, -33, 2, -61, 3, -73, 4.5, -75, 10.5, -85.5, 2, -75, 6.5, -86.5, 8, -17, 13.5, -1, -4, -16.5, -10, -0.5],
+    kb1: [5, -28, 15.5, -54, 21, -64.5, 28.5, -49, 39.5, -43, 27, -46, 38, -39.5, 18, -16.5, 22, 0, -2, -12, -14, 0],
+    kbF: [6, -26, 19, -50.5, 26, -60.5, 29, -41, 33.5, -29, 27, -39.5, 31.5, -27.5, 21, -17, 23, 0, 1.5, -9, -13, 0],
+    kb2W: [-1, -31, -2, -59, -1.5, -71, 12, -58, 24.5, -58, 11.5, -55.5, 24, -55.5, 9.5, -17, 11, 0, -3, -13.5, -13, 0],
+    kb2: [3, -30, 6, -58, 7.5, -69.5, 20, -58, 32.5, -59, 19.5, -55.5, 32, -56.5, 14.5, -17, 17, 0, 0.5, -12.5, -11, 0],
+    kb2F: [4, -30, 9, -57.5, 11, -69.5, 22.5, -54, 34, -49.5, 21.5, -51.5, 33.5, -47.5, 15.5, -17, 18, 0, 1.5, -12.5, -10, 0],
+    kb3W: [-1, -28, 4, -55.5, 6, -67.5, 17.5, -53, 30, -52, 17, -51, 29.5, -49.5, 12.5, -17, 14, 0, -1.5, -10.5, -15, 0],
+    kb3: [0, -31, 1, -59, 2, -71, 15, -59, 27.5, -59.5, 15, -56.5, 27, -57, 10.5, -17, 13, 0, -3, -14, -13, 0],
+    kbUW: [-2, -24, 13, -47.5, 20.5, -57, 8, -34.5, -3, -28.5, 6, -35.5, -5, -29.5, 14, -17, 12, 0, 1.5, -7, -14, 0],
+    kbU: [1, -38, -2, -66, -3.5, -77.5, 1.5, -79.5, 3, -92, -0.5, -80, 0.5, -92, 4, -21, 2.5, -4, -2, -21, -9, -5.5],
+    kbUF: [0, -40, -5, -67.5, -7.5, -79.5, -6, -81.5, -11.5, -93, -7.5, -81.5, -12.5, -92.5, 6, -23.5, 0, -7.5, -3, -23, -14, -9.5],
+    kbCh: [-2, -30, -8, -57.5, -9, -69.5, -10.5, -71, -21, -77.5, -12.5, -70.5, -23.5, -77, 9.5, -17, 12, 0, -2.5, -12.5, -14, 0],
+    kbS: [6, -22, 27, -40.5, 36.5, -48, 31.5, -27.5, 32.5, -15, 29, -27, 30.5, -14.5, 22.5, -16.5, 26, 0, 0, -5.5, -16, 0],
+    kbD: [0, -42, 5, -69.5, 8, -81, 14, -59, 18, -47, 12, -57.5, 16, -45.5, 16.5, -36, 8, -21.5, 6, -25.5, -8.5, -17],
+    kbL: [2, -20, 22, -40, 31.5, -47, 26.5, -26.5, 26.5, -14, 24, -26, 24, -13.5, 19, -16.5, 14, 0, 4.5, -2.5, -12, 0],
+    // the mouse, a whip in one hand: the lash, the low lash, the overhead crack, the spin, the long lash, up and down
+    msW: [-1, -33, -3, -61, -3, -73, -4, -75, -13.5, -83, -10.5, -49, -1.5, -40, 5, -16.5, 10, -0.5, -6.5, -16.5, -13, -0.5],
+    ms1: [2, -32, 7, -59.5, 10, -71, 20.5, -57.5, 32.5, -53, -3, -49.5, -9, -38.5, 9, -16, 15, 0, -4.5, -15.5, -11, 0],
+    msF: [3, -31, 9, -58.5, 11.5, -70, 19.5, -49.5, 24, -37.5, -1, -48.5, -3, -36, 13.5, -17, 15, 0, -1.5, -14, -11, 0],
+    ms2W: [0, -31, -1, -59, -1, -71, -13, -52, -25, -56.5, 6, -47, 15.5, -55, 10.5, -17, 10, 0, -3, -14, -13, 0],
+    ms2: [3, -27, 12.5, -53.5, 17.5, -64.5, 19.5, -41, 29, -33, 0.5, -46.5, -12, -44, 17, -16.5, 20, 0, 0, -10, -14, 0],
+    ms3W: [-1, -32, -4, -60, -5, -72, -6.5, -73.5, -10.5, -85.5, -11, -47.5, -4.5, -37, 8, -17, 10, 0, -5, -15, -13, 0],
+    ms3: [4, -29, 11.5, -56, 16, -67, 25, -52.5, 36.5, -47, 1, -47, -5.5, -36, 16.5, -17, 19, 0, 0, -12, -12, 0],
+    msSp: [0, -31, 0, -59, 0, -71, 5, -72, 3.5, -84.5, -5, -46, 6, -52, 10.5, -17, 11, 0, -2, -13.5, -12, 0],
+    msL: [5, -30, 12, -57, 15, -68.5, 25.5, -58.5, 38, -58.5, -0.5, -50, -12, -46, 16, -16, 21, 0, -3, -14.5, -12, 0],
+    msU: [0, -33, -2, -61, -3.5, -73, 7, -71.5, 9, -84, -9, -49, -4.5, -37, 5.5, -16.5, 10, 0, -5.5, -16.5, -12, -0.5],
+    msA: [0, -40, 3, -68, 5, -79.5, 15, -61, 24, -52, -9, -61, -21.5, -58.5, 13.5, -29, 5, -14, -3, -23, -16, -12],
+    // the CD: the frisbee wind-up and throw, the bowl along the floor, the throw from the air, the call home
+    cdW: [-1, -30, -2, -58, -2, -70, -14, -51, -26.5, -52, 5, -46, 11.5, -56.5, 10.5, -17, 12, 0, -1.5, -12.5, -13, 0],
+    throw: [3, -32, 9.5, -59.5, 12, -71, 23.5, -60.5, 35.5, -58.5, -1, -50, -9.5, -40.5, 10.5, -16, 17, -0.5, -3.5, -16, -10.5, -0.5],
+    throwF: [4, -31, 11, -58, 13.5, -70, 24, -53.5, 32, -44, 0, -49, -6, -38.5, 14.5, -17, 17, 0, -2.5, -15, -11, 0],
+    rollW: [-1, -24, 12, -48.5, 19, -58.5, 5, -36.5, -5.5, -30.5, 23, -39.5, 34.5, -44, 15, -17, 13, 0, 0.5, -6.5, -15, 0],
+    roll: [6, -18, 24, -39.5, 33, -47, 29, -26.5, 40.5, -22, 11, -34.5, -1.5, -32.5, 23.5, -17, 26, 0, -3.5, -3, -20, 0],
+    cdA: [0, -40, 5, -67.5, 8, -79, 16.5, -59.5, 25, -50.5, -7.5, -60.5, -19, -56.5, 11, -26.5, 2.5, -12, -3, -23, -16, -12],
+    callW: [2, -32, 5, -60, 6, -72, 19, -61, 31.5, -63, -2, -47.5, 9, -54, 9, -16, 15, 0, -4.5, -15.5, -11, 0],
+    call: [-2, -32, -4, -60, -4.5, -72, 1, -47, -5.5, -57.5, -11, -48, 0, -54, 5, -16, 11, 0, -4.5, -14.5, -13, 0],
+    // the paint: the bucket swung back and lobbed, both hands for the whole bucket, the pours, and the swing
+    lobW: [-1, -29, 2, -57, 3, -69, -4, -44, -11, -34, 9, -44.5, 18.5, -53, 12, -17, 12, 0, -0.5, -11.5, -13, 0],
+    lob: [2, -33, 7, -60.5, 10, -72, 17.5, -70, 26, -79, -3, -50.5, -10, -40.5, 9, -17, 15.5, -1.5, -4, -16.5, -10.5, -1],
+    splW: [-2, -26, 8.5, -52, 14, -62.5, 6, -38, 2, -26.5, 3.5, -39, -0.5, -27, 13, -17, 13, 0, 0.5, -8.5, -14, 0],
+    spl: [3, -36, 0, -64, -2, -75.5, 11, -73, 18, -83, 12, -71, 20, -80.5, 4.5, -18.5, 3, -1.5, -1.5, -19, -10, -4.5],
+    pour: [2, -28, 11.5, -54.5, 17, -65, 22.5, -45.5, 34, -41, 2.5, -43.5, 9, -33, 15.5, -17, 16, 0, 1.5, -10.5, -12, 0],
+    pourA: [0, -40, 1, -68, 2, -80, 14, -63, 26.5, -65.5, -11, -61, -23.5, -59, 13.5, -29, 5, -14, -3, -23, -16, -12],
+    bkW: [-1, -31, -1, -59, -0.5, -71, -11.5, -50, -23.5, -45.5, 6, -47, 17, -53, 9.5, -17, 11, 0, -3, -13.5, -13, 0],
+    bk: [4, -30, 11, -57, 14, -68.5, 24.5, -59.5, 35.5, -66, 0, -48, -6, -37.5, 15.5, -17, 18, 0, 0, -13, -11, 0],
+    // Makki: the guard, the chamber, the forearm swept out, a blow taken on it, and the guard broken
+    grd: [-1, -29, -2.5, -57, -2.5, -69, 9, -49, 8, -61.5, -7.5, -44, 5, -46, 12, -17, 12, 0, -1.5, -11.5, -14, 0],
+    mkW: [-1, -30, -3.5, -58, -4, -70, 9, -52, -3, -54, -14, -49, -8, -38, 10.5, -17, 11, 0, -2.5, -12.5, -14, 0],
+    mk: [0, -30, 0, -58, 0.5, -70, 10.5, -49, 13, -61.5, -10.5, -49, -4.5, -38, 11.5, -17, 13, 0, -2.5, -12.5, -14, 0],
+    grdHit: [-3, -30, -8.5, -57.5, -11.5, -69, -2, -45, -6.5, -56.5, -11.5, -44, -1, -50.5, 8.5, -17, 9, 0, -5.5, -12.5, -17, 0],
+    reel: [-4, -31, -14.5, -57, -22, -66.5, -4, -66, 8, -70, -23.5, -67.5, -35, -72, 12.5, -25, 6.5, -9, -4.5, -13.5, -15, 0],
     powerW: [0, -22, 2, -49, 3, -61, 10, -42, 2, -52, -6, -41, 6, -50, 12, -11, 18, 0, -12, -11, -18, 0],
     power: [0, -31, 0, -59, 0, -71, 13, -66, 26, -76, -13, -66, -26, -76, 10, -16, 19, 0, -10, -16, -19, 0],
     // turning attacks: the limb stays tucked while he swings round, then whips out on the new side
     bfW: [0, -34, -2, -62, -3, -74, 10, -56, -2, -55, -7, -49, 1, -59, 5, -17, 7, 0, -4, -17, -7, 0],
     bf: [3, -32, 6, -60, 8, -72, 19, -62, 31, -65, -1, -48, 10, -55, 12, -17, 15, 0, -5, -16, -10, 0],
-    skW: [-1, -34, -5, -62, -5, -74, -3, -49, -1, -61, -11, -50, -7, -38, 16, -29, 2, -19, -3, -17, -3, 0],
-    sk: [-4, -34, -20, -58, -24, -69, -22, -44, -25, -56, -33, -56, -45, -54, 13, -36, 30, -36, -6, -17, -5, 0],
-    skR: [-2, -34, -8, -62, -9, -74, -4, -49, -2, -61, -18, -53, -24, -42, 15, -32, 5, -18, -4, -17, -5, 0],
+    // Dwi Chagi is drawn turned away (the move holds him mirrored): knee up, then the heel driven straight back
+    skW: [1, -32, 6, -59.5, 9, -71, 10.5, -46.5, 17, -57, 1, -46.5, 10.5, -54.5, 15, -42.5, 11, -26, 8.5, -16, 3, 0],
+    sk: [4, -33, 22.5, -54, 32.5, -61, 21.5, -40, 32, -33.5, 25, -40, 37, -35.5, -13.5, -32.5, -30.5, -32.5, 11, -17, 9, 0],
+    skF: [4, -33, 24, -52.5, 34.5, -59, 21.5, -38.5, 32, -31.5, 25.5, -38.5, 37, -33.5, -13.5, -31, -30.5, -30, 11, -17, 9, 0],
+    skR: [0, -31, 1, -59, 2, -71, 8.5, -47, 14.5, -58, -6.5, -47, 2.5, -56, 10.5, -17, 9, 0, 1, -13.5, -9, 0],
+    // Dwi Hurigi: one full turn with the leg held out at head height, so the heel hooks round into the target
+    hurW: [0, -30, -3, -58, -5, -69.5, -7.5, -44.5, 2, -52.5, 2, -44.5, -0.5, -57, 17, -33, 8.5, -18.5, 7, -14, -3, 0],
+    hur: [-3, -34.5, -18.5, -57.5, -23, -69, -21, -44, -17, -55.5, -11.5, -45.5, -16, -57.5, 11.5, -44.5, 26, -53, -5, -17, -6, 0],
+    hurR: [0, -31, -5, -58.5, -6, -70.5, 1, -46, 4, -58, -13.5, -47.5, -19.5, -36.5, 17, -28, 7.5, -14, 4.5, -14, -5, 0],
     riseW: [-2, -23, 12, -48, 20, -57, 11, -34, 17, -23, 10, -34, 16, -45, 14, -17, 11, 0, -12, -9, -27, -1],
     rise: [0, -42, -2, -70, -3, -82, -1, -83, 0, -96, -12, -61, -24, -57, 2, -25, 2, -8, -3, -25, -12, -10],
     slamW: [0, -44, -5, -72, -8, -83, -10, -84, -17, -94, -7, -85, -12, -96, 15, -35, 6, -20, 9, -29, -3, -18],
     slam: [0, -48, 1, -76, 4, -88, 2, -63, 3, -50, 0, -63, 0, -50, 17, -43, 6, -29, 13, -36, -2, -27],
     quake: [0, -20, 21, -39, 31, -45, 23, -26, 23, -13, 19, -26, 17, -13, 17, -17, 14, 0, -13, -9, -30, -6],
-    chP: [-4, -30, -6, -58, -5, -70, -18, -51, -7, -45, 4, -49, 15, -56, 8, -17, 10, 0, -14, -16, -22, 0],
-    heavyP: [8, -28, 18, -55, 21, -66, 31, -55, 44, -56, 13, -42, 19, -53, 21, -17, 23, 0, -7, -18, -22, -12],
-    chK: [-2, -34, -10, -61, -11, -73, -3, -49, -2, -62, -20, -52, -26, -41, 13, -44, 12, -27, -5, -17, -7, 0],
-    flyK: [0, -40, -15, -64, -19, -75, -8, -52, -9, -64, -28, -64, -41, -62, 18, -40, 34, -39, 8, -25, -7, -17],
+    // the heavy straight is the rear hand's, cocked by the hip while it charges; in the air the body follows it
+    chP: [-4, -29, -7, -57, -6.5, -69, 2.5, -46.5, 8.5, -57.5, -19, -50, -7.5, -45, 8.5, -17, 10, 0, -3.5, -11.5, -16, 0],
+    heavyP: [8, -28, 17.5, -54.5, 21, -66, 11, -42, 20.5, -50.5, 31.5, -54.5, 44, -55, 21, -16.5, 25, 0, -6.5, -18, -22.5, -12],
+    heavyA: [0, -40, 21.5, -58, 31.5, -64.5, 9.5, -51, -3, -50, 35.5, -57.5, 48, -57.5, 6, -23.5, -7, -12.5, -15, -31, -31.5, -26.5],
+    // Twio Yeop Chagi: the side kick chambered on a bent standing leg, then thrown flying with the rear leg tucked
+    chK: [-2, -30, -9, -57, -9.5, -69, -2, -45, -2, -57.5, -19.5, -48, -26.5, -38, 13.5, -37.5, -3, -34, 5.5, -14, -4, 0],
+    flyK: [0, -42, -16.5, -64.5, -20.5, -76, -9.5, -52.5, -10, -65, -30.5, -64, -43, -63, 17.5, -43, 34.5, -44, 8, -26.5, -8, -22],
     hurtBig: [-4, -36, -20, -59, -30, -66, -10, -67, -6, -79, -15, -71, -18, -83, 10, -26, 18, -11, 5, -21, 5, -4],
     kip1: [-20, -14, -46, -3, -58, -2, -57, 4, -62, 16, -58, 2, -65, 13, -31, -28, -47, -23, -28, -29, -45, -27],
     kip2: [-2, -29, 8, -55, 13, -66, 20, -50, 33, -50, 19, -48, 31, -45, 13, -20, 10, -3, -9, -13, -20, 0],
@@ -970,20 +1174,22 @@
     kbIdle: [0, -33, 2, -61, 3, -73, 9, -72, 3, -83, -1, -47, 8, -56, 8, -17, 13, -1, -5, -16, -11, 0],
     msIdle: [0, -33, 2, -61, 3, -73, 6, -48, 18, -43, -4, -49, 4, -57, 8, -17, 13, -1, -5, -16, -11, 0],
     etRise: [0, -44, -1, -72, -2, -84, 0, -85, -1, -98, -2, -85, -4, -98, 1, -27, -1, -10, -2, -27, -10, -12],
-    // the longer strings: an overhand from above, an elbow, a knee, a low kick, an axe kick, and air follow-ups
+    // the longer strings: an overhand from above, an elbow, a knee, a low kick, and the air moves
     ohW: [-2, -32, -4, -60, -5, -72, -11, -72, -5, -83, -9, -48, -1, -57, 7, -18, 10, -1, -9, -16, -14, 0],
     oh: [4, -31, 13, -58, 17, -69, 25, -64, 37, -60, 7, -46, 14, -56, 15, -17, 17, -1, -6, -17, -9, 0],
     ohF: [5, -31, 16, -57, 22, -67, 30, -57, 39, -48, 10, -45, 17, -55, 16, -18, 17, -1, -5, -17, -8, 0],
     elW: [-1, -32, -2, -60, -2, -72, -14, -54, -4, -62, -7, -48, 1, -57, 8, -17, 11, -1, -7, -16, -13, 0],
     el: [4, -31, 11, -59, 13, -70, 24, -60, 12, -59, 6, -46, 13, -56, 14, -17, 16, 0, -5, -17, -9, 0],
-    knW: [0, -34, 3, -61, 5, -73, 16, -65, 28, -63, 16, -63, 28, -59, 6, -17, 6, 0, -5, -17, -7, 0],
+    knW: [0, -32, 3, -60, 5, -71.5, 16.5, -64, 28.5, -62, 17, -62, 28.5, -58, 9, -17, 6, 0, 3.5, -15, -5, 0],
     kn: [2, -34, -3, -62, -3, -74, 9, -55, 7, -43, 7, -52, 2, -41, 18, -40, 13, -24, 0, -17, 0, 0],
-    lkW: [-2, -34, -4, -62, -5, -74, 2, -50, 7, -62, -13, -52, -17, -40, 14, -28, 4, -15, -5, -17, -7, 0],
-    lk: [-3, -34, -10, -61, -11, -73, -5, -49, -3, -61, -21, -55, -31, -47, 11, -24, 27, -17, -5, -17, -6, 0],
-    axW: [-2, -34, -12, -60, -15, -72, 0, -56, 12, -60, -24, -54, -35, -47, 0, -52, 2, -69, -4, -17, -4, 0],
-    ax: [0, -34, 3, -62, 5, -74, 10, -50, 19, -58, -7, -53, -10, -41, 15, -25, 16, -8, -3, -17, -5, 0],
+    lkW: [-2, -32, -4, -60, -5, -72, 2.5, -47.5, 7.5, -59, -13.5, -49.5, -17, -37.5, 14.5, -25.5, 4, -12.5, 2, -15, -6, 0],
+    lk: [-3, -32, -10, -59, -11.5, -71, -5, -46, -3, -58.5, -22.5, -52.5, -32, -44.5, 11, -21.5, 26.5, -15, 1, -15, -7, 0],
+    // Naeryo Chagi from the air: the leg goes up past the head, then comes down straight, heel first, and he rides
+    // it down with his arms up
+    axW: [0, -42, -10.5, -68, -13.5, -79.5, 3.5, -66, 16, -68, -24.5, -67, -37, -68.5, -1, -59.5, -3.5, -76.5, -4, -25, -14, -11.5],
+    ax: [0, -44, -6, -71.5, -7, -83.5, 7.5, -76, 13.5, -87, -19, -76, -25, -87, 5, -27, 9, -10.5, -11, -30, -27.5, -33],
     apunch2: [0, -40, 3, -68, 4, -80, 1, -55, 7, -65, 16, -69, 29, -69, 13, -29, 8, -13, 6, -24, -3, -9],
-    akick2: [0, -40, -7, -67, -10, -79, 0, -55, 2, -68, -18, -60, -29, -54, 9, -25, -4, -14, 17, -42, 34, -43],
+    akick2: [0, -40, -10.5, -66, -13.5, -77.5, -24, -62.5, -36.5, -61.5, -5, -53, -4, -65.5, -4, -23, -20, -17, 17, -45, 33.5, -48],
   };
   const BONES = [[0, 1], [1, 2], [1, 3], [3, 4], [1, 5], [5, 6], [0, 7], [7, 8], [0, 9], [9, 10]];
   const wrapA = (d) => d - TAU * Math.round(d / TAU);
@@ -1021,10 +1227,35 @@
     const last = clip[clip.length - 1][1];
     return mixRig(RIG[last], RIG[last], 0, o);
   }
+  // how far past the forearm the keyboard turns in these poses, in degrees: over the shoulder at rest, cocked behind the
+  // head, kept off the floor on the follow-through, flat on it after a smash
+  const WRIST = { kbIdle: -40, kbW: -60, kbCh: -70, kbA: -25, kb1: 0, kbF: -48, kbUW: 10, kbU: -10, kbS: -67, kbL: -78 };
+  function sampleWrist(clip, t) {
+    const w = (k) => ((WRIST[k] || 0) * Math.PI) / 180;
+    if (t <= clip[0][0]) return w(clip[0][1]);
+    for (let i = 1; i < clip.length; i++) {
+      const [t1, p1, e] = clip[i];
+      if (t <= t1) { const [t0, p0] = clip[i - 1]; return lerp(w(p0), w(p1), EASE[e || 'out']((t - t0) / (t1 - t0 || 1))); }
+    }
+    return w(clip[clip.length - 1][1]);
+  }
+  // a track of keys [time, value...]: value i at time t, linear unless the key names an easing third
+  function sampleTrack(tr, t, i = 1) {
+    if (t <= tr[0][0]) return tr[0][i];
+    for (let j = 1; j < tr.length; j++) {
+      const k0 = tr[j - 1], k1 = tr[j];
+      if (t <= k1[0]) return lerp(k0[i], k1[i], (typeof k1[2] === 'string' ? EASE[k1[2]] : EASE.lin)((t - k0[0]) / (k1[0] - k0[0] || 1)));
+    }
+    return tr[tr.length - 1][i];
+  }
   // frame data in seconds. box = [forward offset, y from the feet, width, height]; tip is the joint
   // (or 'w', the weapon's end) whose path draws the swoosh; next: the strike each button leads to mid-string
-  // turn: he swings round to the side he faces now; charge: `on` still held after the hit winds up that act
+  // turn: he swings round to the side he faces now, from turnAt (till then he is drawn facing away, looking back
+  // over his shoulder if `look`); spinAt: one full turn between two times; hopAt: when a hop leaves the floor
+  // charge: `on` still held after the hit winds up that act; link: when a queued strike may cut this one short
   // vary: [rig angle, radians] nudged each time the move starts, so two jabs in a row never match
+  // weapons: yawT [time, yaw, easing] turns him through a swing; mt [time, angle°, reach] leads the mouse on its
+  // cable; tilt [time, degrees] holds the paint bucket; held: begun with that button down, it ends when let go
   const MOVES = {
     jab: { dur: 0.22, hit: [0.045, 0.11], dmg: 1, box: [12, -66, 40, 22], lunge: 70, next: { punch: 'cross', kick: 'knee' }, on: 'punch', charge: 'chP', tip: 4,
       vary: [[6, 0.12], [8, 0.12], [2, 0.04]], clip: [[0, 'jabW'], [0.045, 'jab', 'snap'], [0.1, 'jabF'], [0.15, 'jabR', 'out'], [0.22, 'idle', 'io']] },
@@ -1032,7 +1263,7 @@
       vary: [[10, 0.12], [12, 0.12], [2, 0.04]], clip: [[0, 'crossW'], [0.05, 'cross', 'snap'], [0.11, 'crossF'], [0.17, 'crossR', 'out'], [0.25, 'idle', 'io']] },
     overhand: { dur: 0.32, hit: [0.08, 0.16], dmg: 1, box: [10, -84, 44, 40], lunge: 110, next: { punch: 'upper', kick: 'round' }, tip: 4,
       vary: [[6, 0.1], [8, 0.1], [2, 0.05]], clip: [[0, 'ohW', 'out'], [0.06, 'ohW'], [0.09, 'oh', 'snap'], [0.15, 'ohF'], [0.22, 'jabR', 'out'], [0.32, 'idle', 'io']] },
-    upper: { dur: 0.42, hit: [0.08, 0.2], dmg: 2, box: [2, -112, 38, 64], lunge: 40, hop: -300, heavy: true, tip: 4,
+    upper: { dur: 0.42, hit: [0.08, 0.2], dmg: 2, box: [2, -112, 38, 64], lunge: 40, hop: -300, heavy: true, tip: 6,
       vary: [[2, 0.05], [10, 0.2]], clip: [[0, 'upperW', 'out'], [0.05, 'upperW'], [0.08, 'upper', 'snap'], [0.2, 'upperF'], [0.42, 'idle', 'io']] },
     // the other button mid-string: a knee, an elbow or a low kick, each leading back into a string
     elbow: { dur: 0.26, hit: [0.05, 0.12], dmg: 1, box: [8, -72, 30, 28], lunge: 110, next: { punch: 'overhand', kick: 'round' }, tip: 3,
@@ -1045,26 +1276,33 @@
       clip: [[0, 'rushW'], [0.07, 'rush', 'snap'], [0.24, 'rush'], [0.4, 'idle', 'io']] },
     kick: { dur: 0.36, hit: [0.09, 0.19], dmg: 2, box: [10, -56, 48, 56], lunge: 50, next: { kick: 'round', punch: 'elbow' }, on: 'kick', charge: 'chK', heavy: true, tip: 8,
       vary: [[14, 0.22], [16, 0.22], [2, 0.05]], clip: [[0, 'kickW', 'out'], [0.06, 'kickW'], [0.09, 'kick', 'snap'], [0.17, 'kickF'], [0.26, 'kickR', 'out'], [0.36, 'idle', 'io']] },
-    round: { dur: 0.44, hit: [0.1, 0.22], dmg: 2, box: [6, -88, 56, 44], lunge: 60, next: { kick: 'axe', punch: 'upper' }, heavy: true, tip: 8,
+    round: { dur: 0.44, hit: [0.1, 0.22], dmg: 2, box: [6, -88, 56, 44], lunge: 60, next: { kick: 'tdol', punch: 'upper' }, heavy: true, tip: 8,
       vary: [[14, 0.2], [16, 0.2], [2, 0.05]], clip: [[0, 'roundW', 'out'], [0.07, 'roundW'], [0.1, 'round', 'snap'], [0.18, 'roundF'], [0.3, 'roundR', 'out'], [0.44, 'idle', 'io']] },
-    // the kick string's finisher: the leg goes straight up, then chops down in front of him
-    axe: { dur: 0.5, hit: [0.16, 0.27], dmg: 2, box: [6, -96, 50, 96], lunge: 50, heavy: true, tip: 8,
-      vary: [[2, 0.05]], clip: [[0, 'kickW', 'out'], [0.1, 'axW', 'io'], [0.14, 'axW'], [0.18, 'ax', 'snap'], [0.28, 'ax'], [0.5, 'idle', 'io']] },
+    // the kick string's finisher, Twio Dollyo Chagi: a skip into the air and the rear leg whipping round head high
+    tdol: { dur: 0.56, hit: [0.16, 0.3], dmg: 3, box: [6, -84, 56, 48], lunge: 240, lungeT: 0.34, hop: -560, hopAt: 0.07, heavy: true, tip: 10,
+      vary: [[18, 0.1], [20, 0.1]], clip: [[0, 'tdW', 'out'], [0.07, 'tdA', 'io'], [0.12, 'tdA'], [0.16, 'td', 'snap'], [0.26, 'tdF'], [0.4, 'tdL', 'io'], [0.56, 'idle', 'io']] },
     // the sweep spins him a full turn on the floor, the leg arriving in front as the hit starts
     sweep: { dur: 0.4, hit: [0.08, 0.2], dmg: 2, box: [2, -26, 62, 26], heavy: true, spin: 0.09, tip: 8,
       clip: [[0, 'sweepW'], [0.08, 'sweep', 'snap'], [0.24, 'sweep'], [0.4, 'idle', 'io']] },
     spinFist: { dur: 0.34, hit: [0.09, 0.16], dmg: 2, box: [10, -70, 46, 26], lunge: 60, turn: 0.1, tip: 4,
       clip: [[0, 'bfW', 'out'], [0.08, 'bfW'], [0.1, 'bf', 'snap'], [0.18, 'bf'], [0.34, 'idle', 'io']] },
-    spinKick: { dur: 0.48, hit: [0.14, 0.25], dmg: 3, box: [8, -70, 58, 42], lunge: 80, turn: 0.13, heavy: true, tip: 8,
-      clip: [[0, 'skW', 'out'], [0.1, 'skW'], [0.14, 'sk', 'snap'], [0.26, 'sk'], [0.36, 'skR', 'out'], [0.48, 'idle', 'io']] },
+    // Dwi Chagi: still turned away and looking back, the heel goes straight back into the target, then he turns;
+    // S again follows with Dwi Hurigi
+    spinKick: { dur: 0.5, hit: [0.13, 0.27], dmg: 3, box: [8, -50, 56, 28], lunge: 60, turn: 0.14, turnAt: 0.3, look: true, next: { kick: 'hurigi' }, heavy: true, tip: 8,
+      clip: [[0, 'skW', 'out'], [0.1, 'skW'], [0.13, 'sk', 'snap'], [0.24, 'skF'], [0.36, 'skR', 'io'], [0.5, 'idle', 'io']] },
+    hurigi: { dur: 0.54, hit: [0.25, 0.36], dmg: 3, box: [6, -86, 58, 44], lunge: 70, lungeT: 0.2, spinAt: [0.05, 0.34], heavy: true, tip: 8,
+      clip: [[0, 'hurW', 'out'], [0.08, 'hur', 'io'], [0.36, 'hur'], [0.44, 'hurR', 'out'], [0.54, 'idle', 'io']] },
     rise: { dur: 0.52, hit: [0.1, 0.26], dmg: 2, box: [-6, -150, 44, 130], hop: -640, heavy: true, tip: 4,
       clip: [[0, 'riseW', 'out'], [0.08, 'riseW'], [0.11, 'rise', 'snap'], [0.3, 'rise'], [0.52, 'fall', 'io']] },
     // the hammer drop hangs a beat with the fists up, falls until the floor, then the landing sends out a wave
     slam: { dur: 3, hit: [0.08, 3], dmg: 2, box: [-18, -58, 36, 58], air: true, heavy: true, clip: [[0, 'slamW', 'out']] },
     quake: { dur: 0.34, hit: [0, 0.1], dmg: 2, box: [-84, -24, 168, 24], heavy: true, clip: [[0, 'quake'], [0.16, 'quake'], [0.34, 'idle', 'io']] },
     chP: { dur: 9, clip: [[0, 'chP', 'out']] },
-    heavyP: { dur: 0.5, hit: [0.06, 0.16], dmg: 3, box: [12, -72, 56, 32], lunge: 420, lungeT: 0.1, heavy: true, big: true, tip: 4,
+    heavyP: { dur: 0.5, hit: [0.06, 0.16], dmg: 3, box: [12, -72, 56, 32], lunge: 420, lungeT: 0.1, heavy: true, big: true, tip: 6,
       clip: [[0, 'chP'], [0.06, 'heavyP', 'snap'], [0.2, 'heavyP'], [0.5, 'idle', 'io']] },
+    // the charge let go in the air: he flies fist first, toward the boss when it is ahead (see unleash)
+    heavyA: { dur: 0.5, hit: [0.03, 0.3], dmg: 3, box: [16, -72, 48, 30], air: true, heavy: true, big: true, tip: 6,
+      clip: [[0, 'chP'], [0.04, 'heavyA', 'snap'], [0.3, 'heavyA'], [0.5, 'fall', 'io']] },
     chK: { dur: 9, clip: [[0, 'chK', 'out']] },
     flyK: { dur: 0.6, hit: [0.04, 0.4], dmg: 3, box: [6, -62, 54, 32], air: true, heavy: true, big: true, tip: 8,
       clip: [[0, 'chK'], [0.05, 'flyK', 'snap'], [0.4, 'flyK'], [0.6, 'fall', 'io']] },
@@ -1074,39 +1312,93 @@
       vary: [[6, 0.12], [8, 0.12]], clip: [[0, 'jabW'], [0.04, 'apunch', 'snap'], [0.16, 'apunch'], [0.26, 'fall', 'io']] },
     apunch2: { dur: 0.26, hit: [0.04, 0.14], dmg: 1, box: [10, -76, 42, 24], air: true, next: { kick: 'akick' }, tip: 6,
       vary: [[10, 0.12], [12, 0.12]], clip: [[0, 'apunch'], [0.04, 'apunch2', 'snap'], [0.16, 'apunch2'], [0.26, 'fall', 'io']] },
-    akick: { dur: 0.38, hit: [0.06, 0.24], dmg: 2, box: [8, -52, 46, 28], air: true, next: { kick: 'akick2' }, heavy: true, tip: 8,
-      vary: [[14, 0.15], [16, 0.15]], clip: [[0, 'jump'], [0.06, 'akick', 'snap'], [0.26, 'akick'], [0.38, 'fall', 'io']] },
-    // the other leg's kick: a scissor in the air
+    // Narae Chagi's first kick: with S pressed again the second one follows as soon as this one's hit is over (link)
+    akick: { dur: 0.38, hit: [0.06, 0.24], dmg: 2, box: [8, -52, 46, 28], air: true, next: { kick: 'akick2' }, link: 0.24, heavy: true, tip: 8,
+      vary: [[14, 0.15], [16, 0.15]], clip: [[0, 'jump'], [0.03, 'akW', 'out'], [0.07, 'akick', 'snap'], [0.26, 'akick'], [0.38, 'fall', 'io']] },
+    // Narae Chagi's second kick: the legs switch in the air and the rear leg kicks
     akick2: { dur: 0.34, hit: [0.05, 0.2], dmg: 1, box: [8, -52, 46, 28], air: true, tip: 10,
       vary: [[18, 0.12], [20, 0.12]], clip: [[0, 'akick'], [0.05, 'akick2', 'snap'], [0.22, 'akick2'], [0.34, 'fall', 'io']] },
-    dive: { dur: 0.8, hit: [0.04, 0.8], dmg: 2, box: [-2, -34, 40, 38], air: true, heavy: true, tip: 8,
-      clip: [[0, 'jump'], [0.06, 'dive', 'snap']] },
-    kb1: { dur: 0.48, hit: [0.14, 0.26], dmg: 3, box: [-4, -112, 84, 112], lunge: 60, next: { punch: 'kb2' }, heavy: true, weapon: true, tip: 'w',
-      clip: [[0, 'kbW', 'out'], [0.14, 'kb1', 'snap'], [0.3, 'kb1'], [0.48, 'idle', 'io']] },
-    kb2: { dur: 0.44, hit: [0.09, 0.2], dmg: 2, box: [-6, -92, 92, 64], lunge: 80, heavy: true, weapon: true, tip: 'w',
-      clip: [[0, 'kb1'], [0.09, 'kb2', 'snap'], [0.24, 'kb2'], [0.44, 'idle', 'io']] },
-    kbAir: { dur: 0.42, hit: [0.1, 0.26], dmg: 3, box: [-20, -110, 100, 110], air: true, heavy: true, weapon: true, tip: 'w',
-      clip: [[0, 'kbW', 'out'], [0.1, 'kb1', 'snap'], [0.3, 'kb1'], [0.42, 'fall', 'io']] },
-    ms1: { dur: 0.32, hit: [0.07, 0.17], dmg: 1, multi: true, box: [8, -80, 100, 34], next: { punch: 'ms2' }, weapon: true, tip: 'w',
-      clip: [[0, 'msW', 'out'], [0.07, 'ms1', 'snap'], [0.2, 'ms1'], [0.32, 'idle', 'io']] },
-    ms2: { dur: 0.36, hit: [0.07, 0.19], dmg: 1, box: [-6, -150, 96, 96], weapon: true, tip: 'w',
-      clip: [[0, 'ms1'], [0.07, 'ms2', 'snap'], [0.22, 'ms2'], [0.36, 'idle', 'io']] },
-    msAir: { dur: 0.32, hit: [0.07, 0.17], dmg: 1, multi: true, box: [8, -80, 100, 34], air: true, weapon: true, tip: 'w',
-      clip: [[0, 'msW', 'out'], [0.07, 'ms1', 'snap'], [0.2, 'ms1'], [0.32, 'fall', 'io']] },
-    toss: { dur: 0.3, release: 0.08, mobile: true, clip: [[0, 'throwW', 'out'], [0.08, 'throw', 'snap'], [0.18, 'throw'], [0.3, 'idle', 'io']] },
-    lob: { dur: 0.36, release: 0.12, mobile: true, clip: [[0, 'throwW', 'out'], [0.12, 'lob', 'snap'], [0.24, 'lob'], [0.36, 'idle', 'io']] },
+    // ↓ + S in the air, Naeryo Chagi: the leg raised past the head for a beat, then chopped down as he drops;
+    // it bounces him off whatever it hits
+    axe: { dur: 0.9, hit: [0.13, 0.9], dmg: 2, box: [2, -60, 46, 62], air: true, heavy: true, tip: 8,
+      clip: [[0, 'jump'], [0.1, 'axW', 'out'], [0.14, 'axW'], [0.2, 'ax', 'snap']] },
+    // the keyboard, in both hands. A A A: the chop over the shoulder, the backhand as he winds round, the full spin;
+    // held after the chop it goes up behind his head (kbCh), and let go it comes down into the floor (kbSmash)
+    kb1: { dur: 0.46, hit: [0.13, 0.25], dmg: 2, box: [-4, -112, 86, 112], lunge: 70, next: { punch: 'kb2', kick: 'knee' }, link: 0.3, on: 'punch', charge: 'kbCh', heavy: true, weapon: true, tip: 'w',
+      clip: [[0, 'kbW', 'out'], [0.08, 'kbA', 'io'], [0.13, 'kb1', 'snap'], [0.22, 'kbF'], [0.46, 'kbIdle', 'io']] },
+    kb2: { dur: 0.44, hit: [0.1, 0.2], dmg: 2, box: [-10, -96, 100, 66], lunge: 90, lungeT: 0.12, next: { punch: 'kb3', kick: 'lowKick' }, link: 0.28, heavy: true, weapon: true, tip: 'w',
+      yawT: [[0, 2.4], [0.04, 2.4], [0.14, 0, 'snap']], clip: [[0, 'kb2W', 'out'], [0.1, 'kb2', 'snap'], [0.22, 'kb2F'], [0.44, 'kbIdle', 'io']] },
+    kb3: { dur: 0.6, hit: [0.12, 0.36], dmg: 3, box: [-76, -98, 152, 64], lunge: 50, spinAt: [0.06, 0.36], heavy: true, big: true, weapon: true, tip: 'w',
+      clip: [[0, 'kb3W', 'out'], [0.06, 'kb3W'], [0.12, 'kb3', 'io'], [0.36, 'kb3'], [0.6, 'kbIdle', 'io']] },
+    kbTurn: { dur: 0.44, hit: [0.1, 0.2], dmg: 2, box: [-10, -96, 100, 66], lunge: 60, turn: 0.12, next: { punch: 'kb3' }, heavy: true, weapon: true, tip: 'w',
+      clip: [[0, 'kb2W', 'out'], [0.1, 'kb2', 'snap'], [0.22, 'kb2F'], [0.44, 'kbIdle', 'io']] },
+    kbUp: { dur: 0.56, hit: [0.1, 0.26], dmg: 2, box: [-8, -152, 76, 140], hop: -380, hopAt: 0.1, heavy: true, weapon: true, tip: 'w',
+      clip: [[0, 'kbUW', 'out'], [0.08, 'kbUW'], [0.13, 'kbU', 'snap'], [0.28, 'kbUF'], [0.56, 'kbIdle', 'io']] },
+    kbCh: { dur: 9, clip: [[0, 'kbCh', 'out']] },
+    kbSmash: { dur: 0.6, hit: [0.06, 0.14], dmg: 3, box: [0, -112, 96, 112], lunge: 90, lungeT: 0.08, release: 0.11, heavy: true, big: true, weapon: true, tip: 'w',
+      clip: [[0, 'kbCh'], [0.05, 'kbA', 'io'], [0.11, 'kbS', 'snap'], [0.36, 'kbS'], [0.6, 'kbIdle', 'io']] },
+    // in the air: raised a beat, then ridden down until the floor, where the keys fly both ways (kbLand)
+    kbAir: { dur: 3, hit: [0.1, 3], dmg: 2, box: [-8, -64, 76, 72], air: true, heavy: true, weapon: true, tip: 'w',
+      clip: [[0, 'kbW', 'out'], [0.1, 'kbA', 'io'], [0.16, 'kbD', 'snap']] },
+    kbLand: { dur: 0.4, hit: [0, 0.1], dmg: 2, box: [-84, -26, 168, 26], release: 0.001, heavy: true, weapon: true,
+      clip: [[0, 'kbL'], [0.18, 'kbL'], [0.4, 'kbIdle', 'io']] },
+    // the mouse, a whip. A A A: the double-click lash, the low lash, the overhead crack; held after the first it spins
+    // overhead, knocking away whatever comes near (msSpin), and let go it lashes long
+    ms1: { dur: 0.34, hit: [0.07, 0.17], dmg: 1, multi: true, box: [8, -82, 104, 38], lunge: 40, next: { punch: 'ms2', kick: 'knee' }, link: 0.22, on: 'punch', charge: 'msSpin', weapon: true, tip: 'w',
+      mt: [[0, -150, 40], [0.05, -120, 60], [0.09, 0, 104], [0.2, 10, 100]], clip: [[0, 'msW', 'out'], [0.07, 'ms1', 'snap'], [0.18, 'ms1'], [0.24, 'msF', 'io'], [0.34, 'msIdle', 'io']] },
+    ms2: { dur: 0.38, hit: [0.08, 0.2], dmg: 1, box: [10, -46, 112, 46], lunge: 60, next: { punch: 'ms3', kick: 'round' }, link: 0.26, weapon: true, tip: 'w',
+      mt: [[0, 170, 50], [0.06, 120, 60], [0.1, 18, 112], [0.22, 22, 108]], clip: [[0, 'ms2W', 'out'], [0.08, 'ms2', 'snap'], [0.22, 'ms2'], [0.38, 'msIdle', 'io']] },
+    ms3: { dur: 0.48, hit: [0.14, 0.26], dmg: 2, box: [14, -132, 112, 132], lunge: 50, heavy: true, weapon: true, tip: 'w',
+      mt: [[0, -100, 60], [0.1, -110, 72], [0.15, -30, 110], [0.19, 14, 118], [0.3, 20, 110]], clip: [[0, 'ms3W', 'out'], [0.1, 'ms3W'], [0.15, 'ms3', 'snap'], [0.3, 'ms3'], [0.48, 'msIdle', 'io']] },
+    msSpin: { dur: 9, hit: [0, 9], dmg: 1, box: [-84, -156, 168, 84], weapon: true, clip: [[0, 'msSp', 'out']] },
+    msLong: { dur: 0.46, hit: [0.07, 0.2], dmg: 2, box: [10, -86, 172, 46], lunge: 80, heavy: true, weapon: true, tip: 'w',
+      mt: [[0, -90, 66], [0.05, -40, 110], [0.09, 2, 166], [0.22, 6, 160]], clip: [[0, 'msSp'], [0.07, 'msL', 'snap'], [0.24, 'msL'], [0.46, 'msIdle', 'io']] },
+    msUp: { dur: 0.42, hit: [0.08, 0.2], dmg: 2, box: [-8, -160, 84, 120], heavy: true, weapon: true, tip: 'w',
+      mt: [[0, 100, 40], [0.05, 60, 60], [0.1, -82, 114], [0.22, -86, 110]], clip: [[0, 'msIdle', 'out'], [0.04, 'msF'], [0.09, 'msU', 'snap'], [0.24, 'msU'], [0.42, 'msIdle', 'io']] },
+    msAir: { dur: 0.36, hit: [0.07, 0.19], dmg: 1, box: [8, -44, 104, 84], air: true, weapon: true, tip: 'w',
+      mt: [[0, -120, 50], [0.05, -60, 70], [0.09, 42, 112], [0.22, 45, 108]], clip: [[0, 'msW', 'out'], [0.07, 'msA', 'snap'], [0.22, 'msA'], [0.36, 'fall', 'io']] },
+    msTurn: { dur: 0.34, hit: [0.08, 0.18], dmg: 1, multi: true, box: [8, -82, 104, 38], turn: 0.1, next: { punch: 'ms2' }, weapon: true, tip: 'w',
+      mt: [[0, -150, 40], [0.05, -120, 60], [0.1, 0, 104], [0.2, 10, 100]], clip: [[0, 'msW', 'out'], [0.08, 'ms1', 'snap'], [0.18, 'ms1'], [0.24, 'msF', 'io'], [0.34, 'msIdle', 'io']] },
+    // the CD goes when A is let go (cdW winds up, and past THROW_FULL it is charged); A while it is out calls it home
+    cdW: { dur: 9, held: 'punch', clip: [[0, 'cdW', 'out']] },
+    toss: { dur: 0.3, release: 0.04, mobile: true, clip: [[0, 'cdW'], [0.04, 'throw', 'snap'], [0.14, 'throw'], [0.2, 'throwF', 'io'], [0.3, 'idle', 'io']] },
+    cdPierce: { dur: 0.36, release: 0.04, lunge: 110, lungeT: 0.1, clip: [[0, 'cdW'], [0.04, 'throw', 'snap'], [0.16, 'throw'], [0.24, 'throwF', 'io'], [0.36, 'idle', 'io']] },
+    cdAir: { dur: 0.32, release: 0.05, air: true, clip: [[0, 'cdW'], [0.05, 'cdA', 'snap'], [0.2, 'cdA'], [0.32, 'fall', 'io']] },
+    cdRoll: { dur: 0.46, release: 0.14, clip: [[0, 'rollW', 'out'], [0.1, 'rollW'], [0.14, 'roll', 'snap'], [0.3, 'roll'], [0.46, 'idle', 'io']] },
+    recall: { dur: 0.3, release: 0.001, mobile: true, clip: [[0, 'callW', 'snap'], [0.1, 'callW'], [0.18, 'call', 'out'], [0.3, 'idle', 'io']] },
+    // the paint goes when A is let go too; held past THROW_FULL the whole bucket goes (splash), and that empties it.
+    // While a lob is on its way (lobCd) A swings the bucket instead
+    lobW: { dur: 9, held: 'punch', clip: [[0, 'lobW', 'out']] },
+    lob: { dur: 0.34, release: 0.06, mobile: true, clip: [[0, 'lobW'], [0.06, 'lob', 'snap'], [0.18, 'lob'], [0.34, 'idle', 'io']] },
+    splash: { dur: 0.56, release: 0.14, lunge: 70, lungeT: 0.12, hop: -240, hopAt: 0.08, tilt: [[0, 20], [0.08, -20], [0.14, -110], [0.34, -140], [0.56, 0]],
+      clip: [[0, 'splW', 'out'], [0.08, 'splW'], [0.14, 'spl', 'snap'], [0.36, 'spl'], [0.56, 'idle', 'io']] },
+    puddle: { dur: 0.52, release: [0.12, 0.18, 0.24, 0.3], tilt: [[0, 0], [0.1, -120], [0.36, -130], [0.52, 0]], clip: [[0, 'pour', 'out'], [0.4, 'pour'], [0.52, 'idle', 'io']] },
+    pourAir: { dur: 0.46, release: [0.08, 0.13, 0.18, 0.23, 0.28], air: true, tilt: [[0, 0], [0.07, 175], [0.36, 180], [0.46, 30]],
+      clip: [[0, 'pourA', 'out'], [0.36, 'pourA'], [0.46, 'fall', 'io']] },
+    bucket: { dur: 0.36, hit: [0.08, 0.18], dmg: 1, box: [8, -84, 54, 54], lunge: 60, weapon: true, tip: 'w', clip: [[0, 'bkW', 'out'], [0.08, 'bk', 'snap'], [0.2, 'bk'], [0.36, 'idle', 'io']] },
+    // W: Makki. The forearm swept out, a parry for its first PARRY_T seconds (see Stick.block and Game.parried); held, it
+    // becomes the guard, and a guard broken leaves him reeling
+    makki: { dur: 0.26, hit: [0, PARRY_T], dmg: 0, box: [-6, -104, 56, 100], parry: true,
+      clip: [[0, 'mkW', 'out'], [0.05, 'mkW'], [0.1, 'mk', 'snap'], [0.26, 'grd', 'io']] },
+    guard: { dur: 9, clip: [[0, 'grd', 'out']] },
+    reel: { dur: 0.7, clip: [[0, 'reel', 'snap'], [0.5, 'reel'], [0.7, 'idle', 'io']] },
     dash: { dur: 0.18 }, hurt: { dur: 0.34 }, land: { dur: 0.1 }, skid: { dur: 0.16 }, wave: { dur: 1.7 },
     // knocked down: he lies a moment and kips up; ↑ just before landing flips him onto his feet instead
     down: { dur: 0.34, then: 'getup', clip: [[0, 'dead']] },
     getup: { dur: 0.4, clip: [[0, 'dead'], [0.14, 'kip1', 'io'], [0.26, 'kip2', 'snap'], [0.4, 'idle', 'io']] },
     tech: { dur: 0.3, clip: [[0, 'tuck', 'snap'], [0.2, 'tuck'], [0.3, 'land', 'out']] },
+    // two taps of the arrow behind him: a backflip that way, still facing the same way
+    flip: { dur: 0.46, clip: [[0, 'tuck', 'snap'], [0.3, 'tuck'], [0.46, 'land', 'out']] },
     shadowUp: { dur: 0.42, clip: [[0, 'powerW', 'out'], [0.14, 'power', 'snap'], [0.3, 'power'], [0.42, 'idle', 'io']] },
     endtask: { dur: 3, air: true },
-    // hits from thrown weapons and End Task, for the bosses' damage tables
-    cd: { dmg: 1 }, paint: { dmg: 1, heavy: true }, blast: { dmg: 8, heavy: true },
+    // hits from thrown weapons (cdP: the charged CD; blob: the whole bucket; keys: the keyboard's wave; pool: a puddle
+    // of paint) and End Task, for the bosses' damage tables
+    cd: { dmg: 1 }, cdP: { dmg: 2, heavy: true }, paint: { dmg: 1, heavy: true }, blob: { dmg: 3, heavy: true }, keys: { dmg: 1 }, pool: { dmg: 1, heavy: true }, blast: { dmg: 8, heavy: true },
   };
   // no hit lands during these: shadow mode coming on, End Task, and a knockdown until he is up
   const SAFE_ACTS = ['shadowUp', 'endtask', 'down', 'getup', 'tech'];
+  // acts that last while a button is held: the charges, and the wind-ups of the thrown weapons (THROWS)
+  const HELD = ['chP', 'chK', 'kbCh', 'msSpin', 'cdW', 'lobW'], THROWS = ['cdW', 'lobW'];
   const TMP = new Array(22).fill(0), TMPR = new Array(22).fill(0), TMPR2 = new Array(22).fill(0);
 
   // two-bone IK: the middle joint for a limb from a to b; bend picks the side
@@ -1141,6 +1433,8 @@
       this.rig = RIG.idle.slice(); this.pts = POSE.idle.slice();
       this.band = [[0, 0], [0, 0], [0, 0]]; this.trail = []; this.ghosts = [];
       this.mouse = { x: 0, y: 0, vx: 0, vy: 0 };
+      // the keyboard's cable, a short rope hanging off its far end
+      this.cable = [0, 1, 2, 3].map(() => ({ x: 0, y: 0, px: 0, py: 0 }));
       this.reset(170);
     }
     reset(x) {
@@ -1151,6 +1445,11 @@
         restore: 0, restoreShow: 0, healT: 0, healFrom: 0, hitT: 0, hitN: 1, dodgeT: 0,
         // yaw: how far he is turned about the vertical (drawn as cos(yaw) across); lean: thrown back by a big hit
         yaw: 0, turnT: 9, downT: 0, spinT: 0.34, lean: 0, shadowK: 0,
+        // the weapon's own motion: the keyboard's angle at the wrist and how fast it turns, the paint bucket's swing on
+        // its handle, and where the hand was a step ago (the bucket feels it move)
+        wa: 0, wv: 0, ba: 0, bv: 0, handAt: null,
+        // Makki: when the last blows were taken on the guard, the moment after one, and the wait before another parry
+        guardHits: [], blockT: 0, parryCd: 0,
       });
       this.rig = RIG.idle.slice(); toPts(this.rig, this.pts);
       this.trail.length = 0; this.ghosts.length = 0;
@@ -1164,13 +1463,22 @@
     }
     hitbox() {
       const a = this.act, m = a && MOVES[a.k];
-      if (!m || !m.hit || a.t < m.hit[0] || a.t > m.hit[1]) return null;
-      const [ox, oy, w, h] = m.box;
+      // a Makki pressed again too soon is only a guard going up (dull): nothing to parry with
+      if (!m || !m.hit || a.dull || a.t < m.hit[0] || a.t > m.hit[1]) return null;
+      let [ox, oy, w, h] = m.box;
+      // an aimed flight tilts him, so the box turns with him about his middle
+      if (a.aim) {
+        const cx = ox + w / 2, cy = oy + h / 2 + 34, c = Math.cos(a.aim), s = Math.sin(a.aim);
+        ox = cx * c - cy * s - w / 2; oy = cx * s + cy * c - 34 - h / 2;
+      }
       return { x: this.face > 0 ? this.x + ox : this.x - ox - w, y: this.y + oy, w, h };
     }
     start(k, g) {
       const m = MOVES[k];
-      this.act = { k, t: 0, hits: new Set(), queued: null, hold: m.charge && g.input.held[m.on] ? m.on : null };
+      const inp = g.input;
+      this.act = { k, t: 0, hits: new Set(), queued: null, hold: m.charge && inp.held[m.on] ? m.on : m.held && inp.held[m.held] ? m.held : null };
+      // a parry sends back what the boss throws but never strikes the boss itself
+      if (m.parry && g.boss) this.act.hits.add(g.boss);
       // strikes alternate high and low by a random amount, so the same move twice never looks the same
       if (m.vary) { this.varSign = -(this.varSign || 1); this.act.v = this.varSign * rand(0.35, 1); }
       this.spin = 0; this.trail.length = 0;
@@ -1178,11 +1486,26 @@
       if (m.turn) this.yaw = Math.PI;
       g.snd.move(k, m.hit ? m.hit[0] : 0);
     }
-    // the charge lets go: a lunging straight, or a flying kick that leaves the ground
+    // the charge lets go: a lunging straight, or a flying kick that leaves the ground; let go in the air, the punch
+    // flies too. Either flight heads for the boss when it is ahead (or overhead) and within reach. A weapon lets go
+    // its own way: the CD and the paint are thrown (harder from a full wind-up), the keyboard comes down, the mouse lashes
     unleash(g) {
-      const kick = this.act.k === 'chK';
-      this.start(kick ? 'flyK' : 'heavyP', g);
-      if (kick) { this.vy = -380; this.ground = false; }
+      const k = this.act.k, air = !this.ground, full = this.act.t >= THROW_FULL;
+      if (k === 'cdW') { this.start(air ? 'cdAir' : full ? 'cdPierce' : 'toss', g); this.act.full = full; return; }
+      if (k === 'lobW') { this.start(full ? 'splash' : 'lob', g); return; }
+      if (k === 'kbCh') { this.start(air ? 'kbAir' : 'kbSmash', g); return; }
+      if (k === 'msSpin') { this.start('msLong', g); return; }
+      const kick = k === 'chK';
+      this.start(kick ? 'flyK' : air ? 'heavyA' : 'heavyP', g);
+      if (kick || air) {
+        const b = g.boss, t = b && !b.dying && !b.gone ? b.anchor() : null;
+        const dx = t ? t.x - this.x : 0, dy = t ? t.y - (this.y - 50) : 0;
+        // off the floor the flight always climbs a little, or it would land the moment it began
+        if (t && (sign(dx) === this.face || Math.abs(dx) < 60) && Math.hypot(dx, dy) < AIM_RANGE) this.act.aim = clamp(Math.atan2(dy, Math.abs(dx)), -1.05, air ? 0.7 : -0.15);
+        else if (!kick) this.act.aim = 0;
+        if (this.act.aim === undefined) this.vy = -380;
+        this.ground = false;
+      }
       g.fx.ring(this.x + this.face * 22, this.y - (kick ? 40 : 58), 6, 44, 0.2, '#ffd89a', 3);
     }
     // ↑ just before landing from a big hit: a backflip onto his feet instead of the floor
@@ -1190,6 +1513,13 @@
       this.start('tech', g);
       Object.assign(this, { vy: -300, spin: 0.001, spinDir: -1, spinT: 0.26 });
       g.fx.dust(this.x, this.y, 6); g.fx.chip(this.x, this.y - 104, g.s.techOk);
+    }
+    // two taps of the arrow behind him: a backflip that way, still facing the way he was
+    backflip(face, g) {
+      Object.assign(this, { face, yaw: 0, turnT: 9, dashCd: 0.42 });
+      this.start('flip', g);
+      Object.assign(this, { vy: -520, vx: -face * 330, ground: false, coyote: 0, spin: 0.001, spinDir: -1, spinT: 0.44 });
+      g.fx.dust(this.x, this.y, 4);
     }
     // the hammer lands: he crouches with his fists on the floor and a wave runs out both ways
     quake(g) {
@@ -1223,12 +1553,41 @@
         if (t && circleRect(t.x, t.y, t.r, { x: this.x - 26, y: this.y - 70, w: 52, h: 80 })) g.endTaskHit();
       }
     }
-    weaponMove(g) {
-      const k = this.weapon.kind;
-      if (k === 'keyboard') return this.ground ? 'kb1' : 'kbAir';
-      if (k === 'mouse') return this.ground ? 'ms1' : 'msAir';
-      if (k === 'cd') return this.cdOut ? (this.ground ? 'jab' : 'apunch') : 'toss';
-      return this.lobCd > 0 ? (this.ground ? 'jab' : 'apunch') : 'lob';
+    // A with a weapon in hand: its own move with ↓ held (low), toward his back (back) and in the air
+    weaponMove(low, back) {
+      const k = this.weapon.kind, air = !this.ground;
+      if (k === 'keyboard') return air ? 'kbAir' : low ? 'kbUp' : back ? 'kbTurn' : 'kb1';
+      if (k === 'mouse') return air ? 'msAir' : low ? 'msUp' : back ? 'msTurn' : 'ms1';
+      if (k === 'cd') return this.cdOut ? 'recall' : low && !air ? 'cdRoll' : 'cdW';
+      if (this.lobCd > 0) return air ? 'apunch' : 'bucket';
+      return air ? 'pourAir' : low ? 'puddle' : 'lobW';
+    }
+    // the spinning mouse can strike again every turn, and whistles once a turn
+    whirl(a, g) { if (a.t - (a.lap || 0) >= 0.26) { a.lap = a.t; a.hits.clear(); g.snd.play('whirl'); } }
+    guarding() { return !!this.act && (this.act.k === 'makki' || this.act.k === 'guard'); }
+    // a blow from in front met by Makki: inside a parry's first moments it costs nothing; otherwise it counts toward
+    // breaking the guard. Returns true, so whatever hit the guard is spent
+    block(g) {
+      if (this.blockT > 0) return true;
+      const a = this.act, x = this.x + this.face * 18, y = this.y - 58;
+      this.blockT = 0.2;
+      if (a.k === 'makki' && !a.dull && a.t <= PARRY_T) { this.vx = -this.face * 90; g.parried(x, y); return true; }
+      this.vx = -this.face * 230;
+      this.guardHits = this.guardHits.filter((t) => this.t - t < GUARD_SPAN);
+      this.guardHits.push(this.t);
+      if (this.guardHits.length >= GUARD_BREAK) { this.guardBreak(g); return true; }
+      g.fx.sparks(x, y, -this.face, 6, '#fff'); g.fx.ring(x, y, 3, 22, 0.14, '#fff', 2);
+      g.fx.shake(2.5, 0.1); g.hitstop(0.04); g.snd.play('block');
+      g.lesson('block');
+      return true;
+    }
+    guardBreak(g) {
+      this.guardHits = [];
+      this.start('reel', g); this.vx = -this.face * 260;
+      const x = this.x + this.face * 18, y = this.y - 58;
+      g.fx.debris(x, y, 8, ['#ffffff', '#ffe39a', '#ffb040'], 0.7); g.fx.ring(x, y, 6, 44, 0.24, '#ffb040', 3);
+      g.fx.chip(this.x, this.y - 104, g.s.guardBroke, true); g.fx.shake(5, 0.2); g.hitstop(0.06);
+      g.snd.play('gbreak'); g.say(g.s.guardBroke);
     }
     launch(vx, vy, g) {
       Object.assign(this, { vx, vy, ground: false, jumps: 1, airDash: true, act: null, jumpCut: false, spin: 0.001, spinDir: 1 });
@@ -1238,13 +1597,16 @@
     // big: a slam, a blast or a beam, which throws him off his feet
     hurt(dmg, fromX, g, lasting, big) {
       if (this.dead || this.won) return false;
-      // every dash goes through attacks; one that meets an arriving attack in its first moments is a perfect dodge
-      if (this.act && this.act.k === 'dash') {
+      // every dash goes through attacks, and so does the start of a backflip; meeting an arriving attack in the first
+      // moments is a perfect dodge
+      if (this.act && (this.act.k === 'dash' || (this.act.k === 'flip' && this.act.t < FLIP_SAFE))) {
         if (this.act.t <= DODGE_WINDOW && !lasting && !this.act.perfect && this.inv <= 0 && g.dodgeCd <= 0) { this.act.perfect = true; g.perfectDodge(); }
         else if (!this.act.perfect) g.lesson('through');
         return false;
       }
       if (this.inv > 0 || this.dodgeT > 0 || g.god || (this.act && SAFE_ACTS.includes(this.act.k))) return false;
+      // Makki takes what comes from in front (or from right above) unless it would throw him
+      if (this.guarding() && !big && (fromX - this.x) * this.face > -14) return this.block(g);
       if (!g.practice) this.hp = Math.max(0, this.hp - dmg);
       // the hit also wipes whatever health was on its way back
       Object.assign(this, { hitN: dmg + (this.restore > 0 ? 1 : 0), hitT: 0.45, restore: 0, restoreShow: 0 });
@@ -1261,11 +1623,11 @@
       if (this.hp <= 0) { this.dead = true; this.act = null; this.spin = 0; this.vy = -560; this.vx = dir * 240; g.playerDown(); }
       return true;
     }
-    // the attack landed: hang in the air a little, and a dive kick bounces off
+    // the attack landed: hang in the air a little, and the air axe kick bounces off
     connected() {
       const a = this.act;
       if (!a) return;
-      if (a.k === 'dive') { Object.assign(this, { act: null, vy: -660, jumps: 1, airDash: true, spin: 0.001, spinDir: 1 }); return; }
+      if (a.k === 'axe') { Object.assign(this, { act: null, vy: -660, jumps: 1, airDash: true, spin: 0.001, spinDir: 1 }); return; }
       if (!this.ground && this.vy > -160) this.vy = -160;
     }
     update(dt, g) {
@@ -1274,6 +1636,7 @@
       this.inv = Math.max(0, this.inv - dt); this.dashCd -= dt; this.coyote -= dt; this.dropT -= dt; this.carry -= dt; this.lobCd -= dt;
       this.sq = Math.max(0, this.sq - dt * 6); this.hurtFlash = Math.max(0, this.hurtFlash - dt);
       this.healT = Math.max(0, this.healT - dt); this.hitT = Math.max(0, this.hitT - dt); this.dodgeT = Math.max(0, this.dodgeT - dt);
+      this.blockT = Math.max(0, this.blockT - dt); this.parryCd -= dt;
       this.restoreShow = damp(this.restoreShow, this.restore, 14, dt);
       if (this.spin) { this.spin += dt / this.spinT; if (this.spin >= 1) { this.spin = 0; this.spinT = 0.34; } }
       this.fallT = this.ground ? 0 : this.fallT + dt;
@@ -1293,28 +1656,36 @@
       if (a) {
         const prev = a.t;
         a.t += dt;
-        if (m.hop && prev < m.hit[0] && a.t >= m.hit[0] && this.ground) { this.vy = m.hop; this.ground = false; }
-        if (m.release && prev < m.release && a.t >= m.release) g.release(a.k);
+        const hopAt = m.hopAt || (m.hit && m.hit[0]);
+        if (m.hop && prev < hopAt && a.t >= hopAt && this.ground) { this.vy = m.hop; this.ground = false; }
+        if (m.release !== undefined) [].concat(m.release).forEach((r, i) => { if (prev < r && a.t >= r) g.release(a.k, i); });
         // the mouse double-clicks: a second hit on the same target
         if (m.multi && !a.again && a.t >= m.hit[0] + 0.07) { a.again = true; a.hits.clear(); }
         // mid-string either button picks the next strike, so the punch and kick strings cross over; with ↓ held the
-        // press is left for the ↓ move once this one ends
+        // press is left for the ↓ move once this one ends. With a weapon in hand, A out of a kick goes back to the weapon
         if (m.next && !a.queued && a.t > m.hit[0] * 0.5 && !inp.held.down) {
-          for (const b of ['punch', 'kick']) if (m.next[b] && inp.take(b, 0.2)) { a.queued = m.next[b]; break; }
+          for (const b of ['punch', 'kick']) {
+            if (m.next[b] && inp.take(b, 0.2)) { a.queued = b === 'punch' && this.weapon && !m.weapon ? this.weaponMove(false, false) : m.next[b]; break; }
+          }
         }
         if (a.hold && !inp.held[a.hold]) a.hold = null;
         if (a.hold && m.charge && !a.queued && this.ground && a.t >= m.hit[1] + 0.03) {
           // the button is still down once the hit is over: wind up the heavy version
           const key = a.hold;
           this.start(m.charge, g); this.act.hold = key; a = this.act; m = MOVES[a.k];
-          g.snd.play('charge');
-        } else if (a.k === 'chP' || a.k === 'chK') {
-          // let go early and it still fires, once the minimum charge is in
+          g.snd.play(a.k === 'msSpin' ? 'whirl' : 'charge');
+        } else if (HELD.includes(a.k)) {
+          // let go early and it still fires, once the minimum charge is in (a throw goes almost at once)
           if (!a.hold) a.fire = true;
-          if ((a.fire && a.t >= CHARGE_MIN) || a.t >= CHARGE_MAX) { this.unleash(g); a = this.act; m = MOVES[a.k]; }
-        } else if (a.t >= m.dur && !(a.big && !this.ground)) {
-          // a queued strike only follows if it suits where he is now (a ground move needs the floor, an air move the air)
-          const next = (a.queued && !!MOVES[a.queued].air === !this.ground ? a.queued : null) || m.then || null;
+          if (a.k === 'msSpin') this.whirl(a, g);
+          else if (THROWS.includes(a.k) && !a.full && a.t >= THROW_FULL) { a.full = true; g.snd.play('charge'); }
+          if ((a.fire && a.t >= (THROWS.includes(a.k) ? THROW_MIN : CHARGE_MIN)) || a.t >= CHARGE_MAX) { this.unleash(g); a = this.act; m = MOVES[a.k]; }
+        } else if (a.k === 'guard') {
+          if (!inp.held.guard) { this.act = a = null; m = null; }
+        } else if ((a.t >= m.dur || (a.queued && m.link && a.t >= m.link)) && !(a.big && !this.ground)) {
+          // a queued strike only follows if it suits where he is now (a ground move needs the floor, an air move the air);
+          // a Makki still held becomes the guard
+          const next = (a.queued && !!MOVES[a.queued].air === !this.ground ? a.queued : null) || (a.k === 'makki' ? (inp.held.guard ? 'guard' : null) : m.then) || null;
           this.act = a = null; m = null;
           if (next) { this.start(next, g); a = this.act; m = MOVES[next]; }
         }
@@ -1322,13 +1693,14 @@
       const mv = (inp.held.right ? 1 : 0) - (inp.held.left ? 1 : 0);
       if (a && a.k === 'wave' && (mv || inp.pending())) { this.act = a = null; m = null; }
       const endT = m ? (m.hit ? m.hit[1] : m.release ? m.release + 0.06 : Infinity) : 0;
-      const recovering = !!(a && a.t > endT && a.k !== 'dive' && a.k !== 'slide');
-      // a charge can be dropped for a jump or a dash
-      const free = !a || recovering || a.k === 'skid' || a.k === 'chP' || a.k === 'chK';
+      const recovering = !!(a && a.t > endT && a.k !== 'axe' && a.k !== 'slide');
+      // a charge goes along on a jump and is dropped for a dash; a guard is dropped for either
+      const charging = !!(a && HELD.includes(a.k)), guarding = this.guarding(), free = !a || recovering || a.k === 'skid' || charging || guarding;
 
       if (free && (this.ground || this.coyote > 0 || this.jumps > 0) && inp.take('jump', 0.12)) {
         if (this.ground || this.coyote > 0) { this.vy = -770; g.fx.dust(this.x, this.y, 5); } else { this.jumps -= 1; this.vy = -680; this.spin = 0.001; this.spinDir = 1; g.lesson('double'); }
-        this.ground = false; this.coyote = 0; this.jumpCut = true; this.act = a = null; m = null;
+        this.ground = false; this.coyote = 0; this.jumpCut = true;
+        if (!charging) { this.act = a = null; m = null; }
         if (mv) this.face = mv;
         g.snd.play('jump');
       }
@@ -1338,6 +1710,25 @@
         this.dashCd = 0.42; this.start('dash', g); a = this.act; m = MOVES.dash; g.lesson('dash');
         g.snd.play('dash'); g.fx.dust(this.x, this.y, 4);
       }
+      // two taps of an arrow: a dash that way, or a backflip when it is the way behind him (the first tap may already
+      // have turned him round). Walking with a charge held never counts
+      if (free && !charging && this.dashCd <= 0 && inp.take('tap2', 0.12)) {
+        const d = inp.tap2, was = this.turnT <= inp.now - inp.tap1 + STEP ? -this.face : this.face;
+        if (this.ground && d !== was) this.backflip(was, g);
+        else if (this.ground || this.airDash) {
+          this.face = d;
+          if (!this.ground) this.airDash = false;
+          this.dashCd = 0.42; this.start('dash', g); g.lesson('dash');
+          g.snd.play('dash'); g.fx.dust(this.x, this.y, 4);
+        }
+        a = this.act; m = a && MOVES[a.k];
+      }
+      // W: Makki sweeps out as it is pressed (no parry in it when one was tried just before); held on, he guards
+      if (free && !guarding && inp.take('guard', 0.12)) {
+        if (mv) this.face = mv;
+        this.start('makki', g); a = this.act; m = MOVES.makki;
+        a.dull = this.parryCd > 0; this.parryCd = PARRY_CD;
+      }
       if (!a || a.k === 'skid') {
         // running into an attack changes it: a lunging punch, or a slide under whatever is coming
         const running = this.ground && Math.abs(this.vx) > 230 && mv === sign(this.vx);
@@ -1345,13 +1736,13 @@
         const back = this.ground && mv !== 0 && (mv !== this.face || this.turnT < TURN_WINDOW), low = inp.held.down;
         if (inp.take('punch', 0.14)) {
           if (mv) this.face = mv;
-          if (low) this.start(this.ground ? 'rise' : 'slam', g);
+          if (this.weapon) this.start(this.weaponMove(low, back), g);
+          else if (low) this.start(this.ground ? 'rise' : 'slam', g);
           else if (back) this.start('spinFist', g);
-          else if (this.weapon) this.start(this.weaponMove(g), g);
           else this.start(!this.ground ? 'apunch' : running ? 'rush' : 'jab', g);
         } else if (inp.take('kick', 0.14)) {
           if (mv) this.face = mv;
-          if (!this.ground) this.start(low ? 'dive' : 'akick', g);
+          if (!this.ground) this.start(low ? 'axe' : 'akick', g);
           else this.start(low ? 'sweep' : back ? 'spinKick' : running ? 'slide' : 'kick', g);
         }
         a = this.act; m = a && MOVES[a.k];
@@ -1363,11 +1754,27 @@
       if (a && a.k === 'endtask') this.finisher(a, dt, g);
       else if (a && a.k === 'dash') { this.vx = this.face * (a.t < 0.13 ? 760 : 380); this.vy = 0; }
       else if (a && a.k === 'slide') this.vx = this.face * lerp(600, 140, Math.min(1, a.t / m.dur));
-      else if (a && a.k === 'dive') { this.vx = this.face * 360; this.vy = 920; }
-      else if (a && a.k === 'slam') {
+      else if (a && a.k === 'axe') {
+        // the leg goes up while he hangs a beat, then he drops with it
+        if (a.t < 0.14) { this.vx = approach(this.vx, 0, 1400 * dt); this.vy = Math.min(this.vy, 0) * 0.85; } else { this.vx = this.face * 200; this.vy = 950; }
+      } else if (a && a.k === 'slam') {
         if (a.t < 0.08) { this.vx *= 0.8; this.vy = Math.min(this.vy, 0) * 0.5; } else { this.vx = approach(this.vx, 0, 2000 * dt); this.vy = 1300; }
-      } else if (a && a.k === 'flyK' && a.t < 0.4) this.vx = this.face * 620;
-      else if (a && ['hurt', 'skid', 'land', 'down', 'getup', 'tech'].includes(a.k)) { if (this.ground) this.vx = approach(this.vx, 0, (a.k === 'skid' ? 2400 : 1800) * dt); }
+      } else if (a && a.k === 'kbAir') {
+        // the keyboard goes up a beat, then he rides it down
+        if (a.t < 0.1) { this.vx *= 0.8; this.vy = Math.min(this.vy, 0) * 0.5; } else { this.vx = approach(this.vx, 0, 1600 * dt); this.vy = 1150; }
+      } else if (a && a.aim !== undefined && a.t < AIM_T) {
+        const sp = a.k === 'flyK' ? 640 : 700;
+        this.vx = Math.cos(a.aim) * sp * this.face; this.vy = Math.sin(a.aim) * sp;
+      } else if (a && a.k === 'flyK' && a.aim === undefined && a.t < 0.4) this.vx = this.face * 620;
+      else if (a && a.k === 'flip') { if (!this.ground) this.vx = -this.face * 330; else this.vx = approach(this.vx, 0, 2400 * dt); }
+      else if (a && ['hurt', 'skid', 'land', 'down', 'getup', 'tech', 'reel'].includes(a.k)) { if (this.ground) this.vx = approach(this.vx, 0, (a.k === 'skid' ? 2400 : 1800) * dt); }
+      // holding a charge he can still walk, slowly, and turn
+      else if (charging) {
+        this.vx = approach(this.vx, mv * (this.ground ? 150 : 295), (this.ground ? 1600 : 1300) * dt);
+        if (mv && mv !== this.face) { this.face = mv; this.yaw = Math.PI; }
+      }
+      // guarding he steps either way, slowly, still facing the same way
+      else if (guarding) this.vx = approach(this.vx, mv * (this.ground ? GUARD_WALK : 200), (this.ground ? 1400 : 900) * dt);
       else if (a && !m.air && !m.mobile && a.k !== 'wave') this.vx = a.t < (m.lungeT || 0.07) ? this.face * (m.lunge || 0) : approach(this.vx, 0, 2600 * dt);
       else if (!a && this.ground && mv && Math.abs(this.vx) > 230 && sign(this.vx) !== mv) {
         // turning around at a run: plant a foot and skid
@@ -1381,7 +1788,7 @@
       }
       this.vx += g.windX * dt;
 
-      if (!(a && ['dash', 'dive', 'slam', 'endtask'].includes(a.k))) {
+      if (!(a && (['dash', 'axe', 'slam', 'kbAir', 'endtask'].includes(a.k) || (a.aim !== undefined && a.t < AIM_T)))) {
         if (this.jumpCut && !inp.held.jump && this.vy < -300) { this.vy = -300; this.jumpCut = false; }
         if (this.vy >= 0) this.jumpCut = false;
         let gr = 2300 * (this.vy > 0 ? 1.12 : 1);
@@ -1404,11 +1811,15 @@
         if (!this.ground) {
           const hard = this.vy > 520;
           this.spin = 0;
-          if (a && a.k === 'dive') {
+          if (a && a.k === 'axe') {
             this.act = a = null;
             g.fx.dust(this.x - 12, this.y, 6); g.fx.dust(this.x + 12, this.y, 6); g.fx.shake(3, 0.12); g.snd.play('land');
             this.start('land', g);
           } else if (a && a.k === 'slam') { this.act = a = null; this.quake(g); }
+          else if (a && a.k === 'kbAir') {
+            this.act = a = null; this.start('kbLand', g);
+            g.fx.dust(this.x + this.face * 24, this.y, 8); g.fx.shake(6, 0.2);
+          }
           else if (a && a.k === 'endtask') { this.act = a = null; this.quake(g); g.endTaskMissed(); }
           else if (a && a.k === 'hurt' && a.big) {
             this.act = a = null;
@@ -1435,13 +1846,18 @@
       this.finish(dt);
     }
     finish(dt) {
-      // turning attacks swing him round, the sweep spins a full turn, any other turn settles back to square
+      // turning attacks swing him round, the sweep and Dwi Hurigi spin a full turn, any other turn settles back to square
       const a = this.act, m = a && MOVES[a.k];
-      if (m && m.turn) this.yaw = Math.PI * (1 - easeOut(Math.min(1, a.t / m.turn)));
+      if (m && m.turn) this.yaw = Math.PI * (1 - easeOut(clamp((a.t - (m.turnAt || 0)) / m.turn, 0, 1)));
+      else if (m && m.spinAt) this.yaw = a.t > m.spinAt[0] && a.t < m.spinAt[1] ? TAU * easeInOut((a.t - m.spinAt[0]) / (m.spinAt[1] - m.spinAt[0])) : 0;
       else if (m && m.spin) this.yaw = a.t < m.spin ? (TAU * a.t) / m.spin : 0;
+      else if (m && m.yawT) this.yaw = sampleTrack(m.yawT, a.t);
       else this.yaw = Math.max(0, this.yaw - (dt * Math.PI) / 0.09);
-      this.lean = a && a.k === 'hurt' && a.big ? -1.25 * Math.min(1, a.t / 0.36) : 0;
+      // thrown back by a big hit; tilted along an aimed flight, easing out once it is over
+      if (a && a.k === 'hurt' && a.big) this.lean = -1.25 * Math.min(1, a.t / 0.36);
+      else this.lean = a && a.aim ? a.aim * clamp(1 - (a.t - AIM_T) / 0.12, 0, 1) : 0;
       this.pickPose(dt);
+      this.updateGrip(dt);
       this.updateBand(dt);
       this.updateMouse(dt);
       this.updateTrail(dt);
@@ -1463,6 +1879,15 @@
             const [h0, h1] = m.hit, w = a.t < h0 ? a.t / h0 : a.t <= h1 ? 1 : Math.max(0, 1 - (a.t - h1) / (m.dur - h1));
             for (const [i, amp] of m.vary) target[i] += a.v * amp * w;
           }
+          // a charge or a guard carried along: the legs walk (backward too, guarding) or jump under the arms that hold
+          // it (a kick's chambered knee stays up in the air)
+          if ((HELD.includes(a.k) || a.k === 'guard') && (!this.ground || Math.abs(this.vx) > 30)) {
+            if (this.ground) this.runPh += dt * ((this.vx * this.face) / 295) * 13;
+            const legs = this.ground ? toRig(runPose(this.runPh, TMP, 0.2), TMPR2) : RIG[this.vy < -80 ? 'jump' : 'fall'];
+            for (let i = this.ground || a.k !== 'chK' ? 14 : 18; i < 22; i++) target[i] = legs[i];
+          }
+          // a blow taken on the guard knocks it back for a moment
+          if (this.blockT > 0 && this.guarding()) mixRig(target, RIG.grdHit, this.blockT / 0.2, target);
         }
         else if (a.k === 'dash') { target = RIG[this.ground ? 'dash' : 'airdash']; rate = 40; }
         else if (a.k === 'wave') {
@@ -1499,6 +1924,59 @@
       for (let i = 2; i < 22; i += 2) { r[i] += wrapA(target[i] - r[i]) * k; r[i + 1] += (target[i + 1] - r[i + 1]) * k; }
       toPts(r, this.pts);
     }
+    // a point on his body (as the poses give it) where it is drawn on the stage: turned by his yaw, tipped by a spin
+    toWorld(bx, by) {
+      let x = bx * Math.cos(this.yaw) * this.face, y = by;
+      const rot = this.spin ? this.spin * TAU * this.face * this.spinDir : this.lean * this.face;
+      if (rot) { const c = Math.cos(rot), s = Math.sin(rot); [x, y] = [x * c - (y + 34) * s, x * s + (y + 34) * c - 34]; }
+      return [this.x + x, this.y + y];
+    }
+    hand() { return this.toWorld(this.pts[8], this.pts[9]); }
+    // the weapon's own motion, once the pose is set: the keyboard turns at the wrist a little behind the arm and whips
+    // past it, the rear hand takes hold of it and its cable swings; the paint bucket swings on its handle
+    updateGrip(dt) {
+      const w = this.weapon;
+      if (!w) { this.gripOf = null; return; }
+      const P = this.pts, a = this.act, m = a && MOVES[a.k], fresh = this.gripOf !== w;
+      this.gripOf = w;
+      if (w.kind === 'keyboard') {
+        const want = this.rig[8] + (m && m.clip ? sampleWrist(m.clip, a.t) : (WRIST.kbIdle * Math.PI) / 180);
+        if (fresh) { this.wa = want; this.wv = 0; }
+        this.wv += (wrapA(want - this.wa) * 700 - this.wv * 32) * dt; this.wa += this.wv * dt;
+        // the rear hand a hand's width along from the front one, on whichever side the shoulder reaches better
+        const c = Math.cos(this.wa), s = Math.sin(this.wa), sx = P[2], sy = P[3];
+        let gx = P[8] + c * 10, gy = P[9] + s * 10;
+        if (Math.hypot(P[8] - c * 7 - sx, P[9] - s * 7 - sy) < Math.hypot(gx - sx, gy - sy)) { gx = P[8] - c * 7; gy = P[9] - s * 7; }
+        const e1 = ik(sx, sy, gx, gy, 14, 12.5, 1), e2 = ik(sx, sy, gx, gy, 14, 12.5, -1);
+        // the elbow that hangs lower, or with the hands up high the one further forward
+        const [ex, ey] = (gy < sy - 8 ? e1[0] > e2[0] : e1[1] > e2[1]) ? e1 : e2, d = Math.hypot(gx - ex, gy - ey) || 1;
+        P[10] = ex; P[11] = ey; P[12] = ex + ((gx - ex) / d) * 12.5; P[13] = ey + ((gy - ey) / d) * 12.5;
+        // the cable: a short rope from the far end, pulled along by it and falling behind every swing
+        const [ax, ay] = this.toWorld(P[8] + c * 47, P[9] + s * 47), cab = this.cable;
+        if (fresh) cab.forEach((n, i) => { n.x = n.px = ax; n.y = n.py = ay + i * 7; });
+        cab[0].x = ax; cab[0].y = ay;
+        for (let i = 1; i < cab.length; i++) {
+          const n = cab[i], vx = (n.x - n.px) * 0.95, vy = (n.y - n.py) * 0.95;
+          n.px = n.x; n.py = n.y; n.x += vx; n.y += vy + 1400 * dt * dt;
+        }
+        for (let it = 0; it < 3; it++) {
+          for (let i = 1; i < cab.length; i++) {
+            const p0 = cab[i - 1], n = cab[i], dx = n.x - p0.x, dy = n.y - p0.y, f = (Math.hypot(dx, dy) - 7) / (Math.hypot(dx, dy) || 1);
+            if (i === 1) { n.x -= dx * f; n.y -= dy * f; } else { n.x -= dx * f * 0.5; n.y -= dy * f * 0.5; p0.x += dx * f * 0.5; p0.y += dy * f * 0.5; }
+          }
+        }
+      } else if (w.kind === 'paint') {
+        // ba: 0 hangs straight down, positive swings toward his front. The hand's pull swings it; a move with a tilt
+        // holds it at that angle instead (a pour, a fling)
+        const [hx, hy] = this.hand(), at = this.handAt;
+        if (fresh || !at) { this.handAt = { x: hx, y: hy, vx: 0, vy: 0 }; this.ba = 0; this.bv = 0; return; }
+        const vx = (hx - at.x) / dt, vy = (hy - at.y) / dt, ax = clamp((vx - at.vx) / dt, -8000, 8000) * this.face, ay = clamp((vy - at.vy) / dt, -8000, 8000);
+        Object.assign(at, { x: hx, y: hy, vx, vy });
+        if (m && m.tilt) this.bv += (wrapA((sampleTrack(m.tilt, a.t) * Math.PI) / 180 - this.ba) * 900 - this.bv * 40) * dt;
+        else this.bv += ((-ax * Math.cos(this.ba) - (2300 - ay) * Math.sin(this.ba)) / 12 - this.bv * 4) * dt;
+        this.ba = wrapA(this.ba + this.bv * dt);
+      }
+    }
     // the red headband trails behind the head like a short rope
     updateBand(dt) {
       const P = this.pts, f = this.face * Math.cos(this.yaw);
@@ -1512,63 +1990,98 @@
         if (d > 10) { b[0] = px + (dx / d) * 10; b[1] = py + (dy / d) * 10; }
       }
     }
-    // the mouse swings on its cable like a flail: a spring that snaps out when he lashes
+    // the mouse swings on its cable like a flail: a spring toward a point that a lash leads along its track (mt) and
+    // the spin swings round overhead; otherwise it hangs from the hand and trails
     updateMouse(dt) {
       const w = this.weapon, m = this.mouse;
       if (!w || w.kind !== 'mouse') return;
-      const P = this.pts, a = this.act, ang = this.rig[8], mv = a && MOVES[a.k];
-      const lash = !!(mv && mv.weapon && a.t > mv.hit[0] - 0.04 && a.t < mv.hit[1] + 0.03);
-      const hx = this.x + P[8] * this.face * Math.cos(this.yaw), hy = this.y + P[9], reach = lash ? 100 : 22;
-      const tx = hx + Math.cos(ang) * reach * this.face, ty = hy + Math.sin(ang) * reach + (lash ? 0 : 16);
-      const k = lash ? 1600 : 520;
+      const a = this.act, mv = a && MOVES[a.k], cy = Math.cos(this.yaw), [hx, hy] = this.hand();
+      const tr = mv && mv.mt && a.t <= mv.mt[mv.mt.length - 1][0] ? mv.mt : null;
+      let tx, ty, k = 520, max = 112;
+      if (tr) {
+        const ang = (sampleTrack(tr, a.t) * Math.PI) / 180, reach = sampleTrack(tr, a.t, 2);
+        tx = hx + Math.cos(ang) * reach * this.face * cy; ty = hy + Math.sin(ang) * reach; k = 1600; max = Math.max(112, reach + 10);
+      } else if (a && a.k === 'msSpin') {
+        const ph = a.t * 24;
+        tx = hx + Math.cos(ph) * 66; ty = hy - 16 + Math.sin(ph) * 12; k = 2200;
+      } else {
+        const ang = this.rig[8];
+        tx = hx + Math.cos(ang) * 22 * this.face * cy; ty = hy + Math.sin(ang) * 22 + 16;
+      }
       m.vx += ((tx - m.x) * k - m.vx * 20) * dt; m.vy += ((ty - m.y) * k - m.vy * 20) * dt;
       m.x += m.vx * dt; m.y += m.vy * dt;
       const dx = m.x - hx, dy = m.y - hy, d = Math.hypot(dx, dy);
-      if (d > 112) { m.x = hx + (dx / d) * 112; m.y = hy + (dy / d) * 112; }
+      if (d > max) { m.x = hx + (dx / d) * max; m.y = hy + (dy / d) * max; }
     }
     tip(m) {
-      const P = this.pts, cy = Math.cos(this.yaw);
-      if (m.tip !== 'w') return [P[m.tip * 2] * cy, P[m.tip * 2 + 1]];
-      if (this.weapon && this.weapon.kind === 'mouse') return [(this.mouse.x - this.x) * this.face, this.mouse.y - this.y];
-      const ang = this.rig[8], len = this.weapon && this.weapon.kind === 'keyboard' ? 48 : 14;
-      return [(P[8] + Math.cos(ang) * len) * cy, P[9] + Math.sin(ang) * len];
+      const P = this.pts, cy = Math.cos(this.yaw), w = this.weapon && this.weapon.kind;
+      if (m.tip === 'w' && w === 'mouse') return [(this.mouse.x - this.x) * this.face, this.mouse.y - this.y];
+      let x, y;
+      if (m.tip !== 'w') { x = P[m.tip * 2] * cy; y = P[m.tip * 2 + 1]; }
+      else {
+        // the keyboard's far end, or the paint bucket hanging from its handle
+        const len = w === 'keyboard' ? 48 : 12, ang = w === 'keyboard' ? this.wa : w === 'paint' ? Math.PI / 2 - this.ba : this.rig[8];
+        x = (P[8] + Math.cos(ang) * len) * cy; y = P[9] + Math.sin(ang) * len;
+      }
+      if (!this.lean) return [x, y];
+      // tilted, as the body is drawn: about his middle, 34 up from the feet
+      const c = Math.cos(this.lean), s = Math.sin(this.lean);
+      return [x * c - (y + 34) * s, x * s + (y + 34) * c - 34];
     }
-    // the swoosh: the striking fist, foot or weapon leaves a short fading ribbon
+    // the swoosh: the striking fist, foot or weapon leaves a short fading ribbon; the keyboard sweeps a band from the
+    // hands to its far end
     updateTrail(dt) {
       for (const q of this.trail) q.age += dt;
-      while (this.trail.length && this.trail[0].age > 0.09) this.trail.shift();
+      while (this.trail.length && this.trail[0].age > this.trail[0].life) this.trail.shift();
       const a = this.act, m = a && MOVES[a.k];
       if (!m || !m.hit || m.tip === undefined || a.t < m.hit[0] - 0.03 || a.t > m.hit[1] + 0.03) return;
-      const [lx, ly] = this.tip(m);
       const c = m.weapon && this.weapon ? TRAIL[this.weapon.kind] : this.shadowK > 0.5 ? SHADOW_C : '#ffffff';
-      this.trail.push({ x: this.x + lx * this.face, y: this.y + ly, age: 0, w: m.weapon ? 8 : m.heavy ? 6 : 4.5, c });
+      if (m.weapon && this.weapon && this.weapon.kind === 'keyboard') {
+        const P = this.pts, [gx, gy] = this.hand(), [x, y] = this.toWorld(P[8] + Math.cos(this.wa) * 48, P[9] + Math.sin(this.wa) * 48);
+        this.trail.push({ x, y, gx, gy, age: 0, life: 0.12, w: 8, c });
+        return;
+      }
+      const [lx, ly] = this.tip(m);
+      this.trail.push({ x: this.x + lx * this.face, y: this.y + ly, age: 0, life: 0.09, w: m.weapon ? 8 : m.heavy ? 6 : 4.5, c });
     }
     // afterimages while he dashes, lunges or leaps; in shadow mode every move leaves them
     updateGhosts(dt) {
       for (const gh of this.ghosts) gh.t += dt;
       this.ghosts = this.ghosts.filter((gh) => gh.t < (gh.life || 0.22));
-      const a = this.act, fast = a && ['dash', 'rush', 'slide', 'shadowUp', 'endtask', 'heavyP', 'flyK'].includes(a.k);
+      const a = this.act, fast = a && ['dash', 'rush', 'slide', 'shadowUp', 'endtask', 'heavyP', 'heavyA', 'flyK', 'flip', 'tdol', 'kb3', 'kbSmash'].includes(a.k);
       if (!fast && !(this.shadowK > 0.5 && (a || !this.ground || Math.abs(this.vx) > 60))) return;
       this.ghostT -= dt;
       if (this.ghostT <= 0) {
         this.ghostT = 0.035;
-        this.ghosts.push({ pts: this.pts.slice(), x: this.x, y: this.y, face: this.face, cy: Math.cos(this.yaw), t: 0, c: this.shadowK > 0.5 ? SHADOW_C : undefined });
+        const rot = this.spin ? this.spin * TAU * this.face * this.spinDir : this.lean * this.face;
+        this.ghosts.push({ pts: this.pts.slice(), x: this.x, y: this.y, face: this.face, cy: Math.cos(this.yaw), rot, t: 0, c: this.shadowK > 0.5 ? SHADOW_C : undefined });
       }
     }
-    // the charge: light gathers at the fist (the foot for a kick), growing the longer he holds; a ring says it is full
+    // the charge: light gathers at the rear fist (the lead foot for a kick, the keyboard held high), growing the longer
+    // he holds; a ring says it is full. A thrown weapon only lights up once its wind-up is full
     drawCharge(ctx, a, cy) {
-      const P = this.pts, j = a.k === 'chP' ? 8 : 16, k = Math.min(1, a.t / 0.6);
-      const x = this.x + P[j] * this.face * cy, y = this.y + P[j + 1], r = 12 + 22 * k + Math.sin(this.t * 30) * 2;
+      const P = this.pts;
+      let x, y, k = Math.min(1, a.t / 0.6);
+      if (a.k === 'msSpin') return;
+      if (a.k === 'chP' || a.k === 'chK') { const j = a.k === 'chP' ? 12 : 16; x = this.x + P[j] * this.face * cy; y = this.y + P[j + 1]; }
+      else if (a.k === 'kbCh') [x, y] = this.toWorld(P[8] + Math.cos(this.wa) * 26, P[9] + Math.sin(this.wa) * 26);
+      else {
+        if (!a.full) return;
+        k = Math.min(1, 0.5 + (a.t - THROW_FULL) / 0.4);
+        [x, y] = this.toWorld(P[8], P[9] + (a.k === 'lobW' ? 12 : 0));
+      }
+      const r = 12 + 22 * k + Math.sin(this.t * 30) * 2;
       const gr = ctx.createRadialGradient(x, y, 1, x, y, r);
       gr.addColorStop(0, `rgba(255,248,214,${0.75 + 0.2 * k})`); gr.addColorStop(0.4, `rgba(255,176,48,${0.45 + 0.35 * k})`); gr.addColorStop(1, 'rgba(255,140,20,0)');
       ctx.fillStyle = gr; dot(ctx, x, y, r);
       if (k >= 1) { ctx.strokeStyle = 'rgba(255,150,30,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, r * 0.8, 0, TAU); ctx.stroke(); }
     }
     draw(ctx) {
-      for (const gh of this.ghosts) { ctx.globalAlpha = 0.45 * (1 - gh.t / (gh.life || 0.22)); this.body(ctx, gh.pts, gh.x, gh.y, gh.face, 1, 1, 0, gh.c || '#6aa8ff', false, gh.cy); }
+      for (const gh of this.ghosts) { ctx.globalAlpha = 0.45 * (1 - gh.t / (gh.life || 0.22)); this.body(ctx, gh.pts, gh.x, gh.y, gh.face, 1, 1, gh.rot || 0, gh.c || '#6aa8ff', false, gh.cy); }
       ctx.globalAlpha = 1;
       this.drawTrail(ctx);
-      const a = this.act, cy = Math.cos(this.yaw), power = a && a.k === 'shadowUp', charging = a && (a.k === 'chP' || a.k === 'chK');
+      const a = this.act, cy = Math.cos(this.yaw), power = a && a.k === 'shadowUp', charging = a && HELD.includes(a.k);
+      if (this.weapon && this.weapon.kind === 'keyboard' && !this.dead) this.drawCable(ctx);
       if (power) {
         // shadow mode coming on: a cold light swells around him
         const k = Math.min(1, a.t / 0.2), r = 62 + Math.sin(this.t * 20) * 4;
@@ -1588,11 +2101,58 @@
       ctx.globalAlpha = blink ? 0.35 : 1;
       const sx = 1 + this.sq * 0.14, sy = 1 - this.sq * 0.16, rot = this.spin ? this.spin * TAU * this.face * this.spinDir : this.lean * this.face;
       const tint = this.hurtFlash > 0 ? '#e0301e' : this.healT > 0.72 ? '#1fb85a' : null;
-      // a full charge makes him shake with it
-      const shake = charging && a.t > 0.5 ? Math.sin(this.t * 90) * 1.2 : 0;
+      // a full charge makes him shake with it (not a wind-up to throw, nor the mouse spinning overhead)
+      const shake = charging && a.t > 0.5 && ['chP', 'chK', 'kbCh'].includes(a.k) ? Math.sin(this.t * 90) * 1.2 : 0;
       this.body(ctx, this.pts, this.x + shake, this.y, this.face, sx, sy, rot, tint, true, cy);
       if (!this.spin && !this.lean && !this.dead) this.drawBand(ctx);
       ctx.globalAlpha = 1;
+      if (this.guarding() && !this.dead) this.drawGuard(ctx);
+      if (a && a.k === 'reel') this.drawDizzy(ctx);
+    }
+    // Makki's guard, a thin arc in front of his forearms: it flashes as a blow lands, glows through a parry's moment,
+    // and each blow it has taken lately cracks it (the third breaks it), going from white to orange
+    drawGuard(ctx) {
+      const a = this.act, n = this.guardHits.filter((t) => this.t - t < GUARD_SPAN).length, [cx, cy] = this.toWorld(0, -54);
+      const parry = a.k === 'makki' && !a.dull && a.t <= PARRY_T, up = a.k === 'makki' ? Math.min(1, a.t / 0.1) : 1;
+      const rgb = n >= 2 ? '255,160,50' : n === 1 ? '255,226,140' : '255,255,255', f = this.face * Math.max(0.25, Math.abs(Math.cos(this.yaw)));
+      const al = up * Math.min(1, (parry ? 0.8 : 0.34) + this.blockT * 3);
+      const at = (t) => [cx + Math.cos(t) * 36 * f, cy + Math.sin(t) * 40];
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = `rgba(${rgb},${al})`; ctx.lineWidth = parry ? 3.5 : 2.5;
+      ctx.beginPath();
+      for (let i = 0; i <= 14; i++) { const [x, y] = at(-1.05 + (2.1 * i) / 14); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+      ctx.stroke();
+      // the cracks: a short zigzag across the arc for each blow
+      ctx.lineWidth = 1.6; ctx.strokeStyle = `rgba(${n >= 2 ? '200,90,10' : '160,120,40'},${al})`;
+      for (let j = 0; j < Math.min(n, 2); j++) {
+        const t = j ? 0.42 : -0.3, [x, y] = at(t), nx = Math.cos(t) * f, ny = Math.sin(t);
+        ctx.beginPath(); ctx.moveTo(x - nx * 6, y - ny * 6); ctx.lineTo(x - ny * 3, y + nx * 3); ctx.lineTo(x + ny * 2, y - nx * 2 + 1); ctx.lineTo(x + nx * 6, y + ny * 6); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    // a guard broken: he reels, with three small stars going round his head
+    drawDizzy(ctx) {
+      const [hx, hy] = this.toWorld(this.pts[4], this.pts[5] - 15);
+      ctx.fillStyle = '#ffe417'; ctx.strokeStyle = 'rgba(120,80,0,.8)'; ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        const t = this.t * 7 + (i * TAU) / 3, x = hx + Math.cos(t) * 12, y = hy + Math.sin(t) * 4;
+        ctx.beginPath();
+        for (let k = 0; k < 8; k++) { const r = k % 2 ? 1.4 : 3.6, an = (k * Math.PI) / 4 + t; ctx.lineTo(x + Math.cos(an) * r, y + Math.sin(an) * r); }
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+      }
+    }
+    // the keyboard's cable, drawn behind him and the keyboard
+    drawCable(ctx) {
+      const c = this.cable, w = this.weapon, ga = ctx.globalAlpha;
+      if (w.t < 4 && Math.floor(w.t * 8) % 2) ctx.globalAlpha = ga * 0.4;
+      ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(c[0].x, c[0].y);
+      for (let i = 1; i < c.length - 1; i++) ctx.quadraticCurveTo(c[i].x, c[i].y, (c[i].x + c[i + 1].x) / 2, (c[i].y + c[i + 1].y) / 2);
+      ctx.lineTo(c[c.length - 1].x, c[c.length - 1].y); ctx.stroke();
+      // its plug
+      const e = c[c.length - 1], p = c[c.length - 2], an = Math.atan2(e.y - p.y, e.x - p.x);
+      ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(an); ctx.fillStyle = '#6b4f9e'; rr(ctx, -1, -2.2, 6, 4.4, 1.5); ctx.fill(); ctx.restore();
+      ctx.globalAlpha = ga;
     }
     body(ctx, P, x, y, face, sx, sy, rot, tint, full, cy = 1) {
       // turned partway round, the figure narrows across: the joints move in, the line widths stay
@@ -1621,24 +2181,35 @@
       ctx.strokeStyle = front; seg(torso); seg(frontLeg); seg(frontArm);
       ctx.fillStyle = front; dot(ctx, P[4], P[5], 8.5); dot(ctx, P[8], P[9], 3.5);
       if (full && !this.dead) {
-        // one eye shows which way he looks; it glows while shadow mode comes on and lasts
+        // one eye shows which way he looks (back over his shoulder while a `look` move holds him turned away); it
+        // glows while shadow mode comes on and lasts
+        const mv = this.act && MOVES[this.act.k], look = mv && mv.look && cy < 0 ? -1 : 1;
         ctx.fillStyle = dark || (this.act && this.act.k === 'shadowUp') ? '#bff4ff' : '#fff';
-        ctx.beginPath(); ctx.ellipse(P[4] + 3.8 * cy, P[5] - 1.2, 1.6 * Math.max(0.3, Math.abs(cy)), 2.3, 0, 0, TAU); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(P[4] + 3.8 * cy * look, P[5] - 1.2, 1.6 * Math.max(0.3, Math.abs(cy)), 2.3, 0, 0, TAU); ctx.fill();
       }
-      if (full && this.weapon) this.drawWeapon(ctx, P, x, y, face, sx, sy, cy);
+      if (full && this.weapon) this.drawWeapon(ctx, P, x, y, face, sx, sy, cy, rot);
       ctx.restore();
     }
-    drawWeapon(ctx, P, x, y, face, sx, sy, cy) {
-      const w = this.weapon, ang = this.rig[8], ga = ctx.globalAlpha;
+    // drawn inside the body's own coordinates: the keyboard at its wrist angle, the mouse where its spring has it, the
+    // CD in the hand, the bucket at its swing
+    drawWeapon(ctx, P, x, y, face, sx, sy, cy, rot) {
+      const w = this.weapon, a = this.act, ga = ctx.globalAlpha;
       if (w.t < 4 && Math.floor(w.t * 8) % 2) ctx.globalAlpha = ga * 0.4;
-      if (w.kind === 'keyboard') { ctx.save(); ctx.translate(P[8], P[9]); ctx.scale(cy, 1); ctx.rotate(ang); drawKeyboard(ctx, 1); ctx.restore(); }
+      if (w.kind === 'keyboard') { ctx.save(); ctx.translate(P[8], P[9]); ctx.scale(cy, 1); ctx.rotate(this.wa); drawKeyboard(ctx, 1); ctx.restore(); }
       else if (w.kind === 'mouse') {
-        const lx = (this.mouse.x - x) / (face * sx), ly = (this.mouse.y - y) / sy;
+        // the mouse lives on the stage: back into his coordinates, undoing a spin's tilt
+        let lx = this.mouse.x - x, ly = this.mouse.y - y;
+        if (rot) { const c = Math.cos(-rot), s = Math.sin(-rot), yy = ly + 34; [lx, ly] = [lx * c - yy * s, lx * s + yy * c - 34]; }
+        lx /= face * sx; ly /= sy;
+        // the further out it is, the straighter the cable runs
+        const sag = 12 * Math.max(0, 1 - Math.hypot(lx - P[8], ly - P[9]) / 120);
         ctx.strokeStyle = '#333'; ctx.lineWidth = 1.6;
-        ctx.beginPath(); ctx.moveTo(P[8], P[9]); ctx.quadraticCurveTo((P[8] + lx) / 2, Math.max(P[9], ly) + 10, lx, ly); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(P[8], P[9]); ctx.quadraticCurveTo((P[8] + lx) / 2, Math.max(P[9], ly) + sag, lx, ly); ctx.stroke();
         drawMouse(ctx, lx, ly, Math.atan2(ly - P[9], lx - P[8]));
-      } else if (w.kind === 'cd') { if (!this.cdOut) drawDisc(ctx, P[8] + 2, P[9] - 3, 8, this.t * 5); }
-      else drawBucket(ctx, P[8], P[9] + 9, 1, w.color);
+      } else if (w.kind === 'cd') {
+        // it turns slowly in the hand, and spins hard once a wind-up is full
+        if (!this.cdOut) drawDisc(ctx, P[8] + 2, P[9] - 3, 8, this.t * (a && a.k === 'cdW' && a.full ? 40 : 5));
+      } else { ctx.save(); ctx.translate(P[8], P[9]); ctx.scale(cy, 1); ctx.rotate(-this.ba); drawBucket(ctx, 0, 9, 1, w.empty ? null : w.color); ctx.restore(); }
       ctx.globalAlpha = ga;
     }
     drawBand(ctx) {
@@ -1653,9 +2224,16 @@
       const T = this.trail;
       if (T.length < 2) return;
       ctx.lineCap = 'round';
+      // the keyboard's band, from the hands to the far end, under its bright edge
+      for (let i = 1; i < T.length; i++) {
+        const a = T[i - 1], b = T[i];
+        if (a.gx === undefined || b.gx === undefined) continue;
+        ctx.globalAlpha = 0.3 * (i / (T.length - 1)) * Math.max(0, 1 - b.age / b.life); ctx.fillStyle = b.c;
+        ctx.beginPath(); ctx.moveTo(a.gx, a.gy); ctx.lineTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(b.gx, b.gy); ctx.closePath(); ctx.fill();
+      }
       for (let i = 1; i < T.length; i++) {
         const a = T[i - 1], b = T[i], k = i / (T.length - 1);
-        ctx.globalAlpha = 0.6 * k * Math.max(0, 1 - b.age / 0.09);
+        ctx.globalAlpha = 0.6 * k * Math.max(0, 1 - b.age / b.life);
         ctx.strokeStyle = b.c; ctx.lineWidth = b.w * (0.35 + k * 0.9);
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
@@ -1961,8 +2539,9 @@
     ctx.strokeStyle = '#555'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(0, -2, 7, Math.PI, 0); ctx.stroke();
     ctx.fillStyle = '#b8c0cf'; ctx.beginPath(); ctx.moveTo(-7, -2); ctx.lineTo(7, -2); ctx.lineTo(5.5, 11); ctx.lineTo(-5.5, 11); ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = color; ctx.beginPath(); ctx.ellipse(0, -2, 7, 2.2, 0, 0, TAU); ctx.fill();
-    ctx.fillRect(-4.6, -2, 2.4, 6.5); dot(ctx, -3.4, 4.6, 1.4);
+    // the paint at the rim and running down the side; an emptied bucket (no colour) shows its dark inside
+    ctx.fillStyle = color || '#6d7486'; ctx.beginPath(); ctx.ellipse(0, -2, 7, 2.2, 0, 0, TAU); ctx.fill();
+    if (color) { ctx.fillRect(-4.6, -2, 2.4, 6.5); dot(ctx, -3.4, 4.6, 1.4); }
     ctx.restore();
   }
   function drawMug(ctx, x, y, s, t) {
@@ -2065,23 +2644,20 @@
     ctx.fillStyle = dim ? '#000' : '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(text, cx, cy + px * 0.05);
   }
-  // a desktop icon's name: white with a soft black shadow, or once selected, white on Selection Blue in the
-  // dotted focus rectangle
-  function deskLabel(ctx, cx, cy, text, px, selected) {
-    ctx.font = `${px}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (selected) {
-      const w = Math.round(ctx.measureText(text).width + 10), h = Math.round(px * 1.5), x = Math.round(cx - w / 2), y = Math.round(cy - h / 2);
-      ctx.fillStyle = '#316ac5'; ctx.fillRect(x, y, w, h);
-      ctx.setLineDash([1, 1]); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); ctx.setLineDash([]);
-      ctx.fillStyle = '#fff'; ctx.fillText(text, cx, cy + 0.5);
-      return;
-    }
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.9)'; ctx.shadowBlur = 2; ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1;
-    ctx.fillStyle = '#fff'; ctx.fillText(text, cx, cy); ctx.restore();
+  // the guide card's pictures, drawn on small canvases: each art fills a 100 by 100 box
+  const BOSS_ART = [
+    (c) => smileyButton(c, 50, 50, 84, 'cool', false),
+    (c) => { c.save(); c.translate(50, 50); c.rotate(-0.06); c.drawImage(sprites().king, -31, -44, 62, 88); c.restore(); },
+    (c) => pinballFace(c, 50, 50, 26, 0, 50, 96, 0, 0),
+  ];
+  const itemArt = (kind) => (c) => { const k = kind === 'keyboard' ? 1.8 : 3; c.save(); c.translate(kind === 'keyboard' ? 52 : 50, 54); c.scale(k, k); drawItem(c, kind, 0, 0, 0, PAINTS[0]); c.restore(); };
+  function paintIcon(cv, art, size) {
+    const n = Math.round(size * Math.min(2, window.devicePixelRatio || 1));
+    if (cv.width !== n) { cv.width = n; cv.height = n; }
+    const x = cv.getContext('2d');
+    x.setTransform(n / 100, 0, 0, n / 100, 0, 0); x.clearRect(0, 0, 100, 100);
+    art(x);
   }
-  // the title's three opponents as giant desktop icons; pointing and double-clicking reach 62 either side of
-  // each, from 66 above its centre to 88 below
-  const FOES = [{ x: 574, y: 258 }, { x: 712, y: 258 }, { x: 850, y: 258 }];
   // the Start menu's account picture: the stickman's head and shoulders on a pale sky, framed as XP framed them
   function drawAvatar(c) {
     if (c && c.getContext) avatar(c.getContext('2d'), 0, 0, c.width);
@@ -2240,24 +2816,37 @@
   }
 
   /* ------------------------------------------------------------ arena backgrounds (drawn once per size) */
-  // the XP taskbar both desktops stand on: the title's (its start button down under the open Start menu, its
-  // label drawn per frame in the visitor's language) and the final boss's (always 'start', as XP shipped it)
+  // the XP taskbar both desktops stand on: the title's (down null: its start button is a real button there, drawn
+  // each frame in its state) and the final boss's (always 'start', as XP shipped it)
   function taskbar(ctx, down, label) {
     const tb = ctx.createLinearGradient(0, FLOOR, 0, H);
     tb.addColorStop(0, '#3168d5'); tb.addColorStop(0.08, '#4993e6'); tb.addColorStop(0.2, '#2157d7'); tb.addColorStop(0.9, '#2663e0'); tb.addColorStop(1, '#1941a5');
     ctx.fillStyle = tb; ctx.fillRect(0, FLOOR, W, H - FLOOR);
     ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(0, FLOOR, W, 2);
-    const sb = ctx.createLinearGradient(0, FLOOR + 6, 0, H - 6);
-    if (down) { sb.addColorStop(0, '#2f7a28'); sb.addColorStop(0.5, '#237a23'); sb.addColorStop(1, '#3c8f33'); }
-    else { sb.addColorStop(0, '#5eac56'); sb.addColorStop(0.5, '#3c8f33'); sb.addColorStop(1, '#2f7a28'); }
-    ctx.fillStyle = sb; ctx.beginPath(); ctx.moveTo(0, FLOOR + 6); ctx.lineTo(118, FLOOR + 6); ctx.quadraticCurveTo(146, (FLOOR + H) / 2, 118, H - 6); ctx.lineTo(0, H - 6); ctx.closePath(); ctx.fill();
-    // pressed, the pill sinks under a soft inner shadow
-    if (down) { ctx.save(); ctx.clip(); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3; ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 6; ctx.stroke(); ctx.restore(); }
+    if (down !== null) startPill(ctx, down ? 'down' : 'up');
     if (label) startLabel(ctx, label, down);
     const tray = ctx.createLinearGradient(0, FLOOR, 0, H);
     tray.addColorStop(0, '#0c59b9'); tray.addColorStop(0.1, '#18b5f2'); tray.addColorStop(0.2, '#0f9deb'); tray.addColorStop(1, '#095bc9');
     ctx.fillStyle = tray; ctx.fillRect(W - 150, FLOOR + 2, 150, H - FLOOR - 2);
     ctx.fillStyle = '#1042af'; ctx.fillRect(W - 151, FLOOR + 2, 1, H - FLOOR - 2);
+  }
+  // the start button's pill in the portfolio's own three states (DESIGN.md, Start button): up, lit under the
+  // pointer, and in while the Start menu is open
+  const PILL = {
+    up: [[0, '#5eb84f'], [0.45, '#3c9a3c'], [0.7, '#2d8a2d'], [1, '#237a23']],
+    hover: [[0, '#74cc63'], [0.45, '#4bab45'], [0.7, '#389a38'], [1, '#2b8a2b']],
+    down: [[0, '#3d8e36'], [0.5, '#2a7a2a'], [1, '#1d661d']],
+  };
+  function startPill(ctx, state) {
+    ctx.beginPath(); ctx.moveTo(0, FLOOR + 6); ctx.lineTo(118, FLOOR + 6); ctx.quadraticCurveTo(146, (FLOOR + H) / 2, 118, H - 6); ctx.lineTo(0, H - 6); ctx.closePath();
+    const g = ctx.createRadialGradient(44, FLOOR + 21, 2, 44, FLOOR + 21, 130);
+    PILL[state].forEach(([at, c]) => g.addColorStop(at, c));
+    ctx.fillStyle = g; ctx.fill();
+    // pressed, the pill sinks under a soft inner shadow; up, a light line runs along its top
+    ctx.save(); ctx.clip();
+    if (state === 'down') { ctx.shadowColor = 'rgba(0,30,0,.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 3; ctx.strokeStyle = 'rgba(0,30,0,.5)'; ctx.lineWidth = 6; ctx.stroke(); }
+    else { ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillRect(0, FLOOR + 6, 124, 1.5); }
+    ctx.restore();
   }
   function startLabel(ctx, label, down) {
     const y = (FLOOR + H) / 2 + (down ? 2 : 1);
@@ -2266,18 +2855,46 @@
     ctx.fillStyle = '#fff'; ctx.fillText(label, 34, y);
   }
   const ARENA = {
-    // the title: the desktop the three games live on, lit where they stand, darker toward its edges
+    // the title: an XP hillside of its own, not the Bliss photograph. Deep sky behind the white title, cumulus only
+    // in the middle band, and two hills, the near one's sunlit crest peaking where the stickman stands
     title(ctx) {
-      const g = ctx.createLinearGradient(0, 0, 0, FLOOR);
-      g.addColorStop(0, '#2a5fbf'); g.addColorStop(0.6, '#3b73d1'); g.addColorStop(1, '#5a8fe0');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, FLOOR);
-      const light = ctx.createRadialGradient(712, 250, 20, 712, 250, 380);
-      light.addColorStop(0, 'rgba(255,255,255,.28)'); light.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = light; ctx.fillRect(0, 0, W, FLOOR);
-      const edge = ctx.createRadialGradient(W / 2, FLOOR / 2, 250, W / 2, FLOOR / 2, 640);
-      edge.addColorStop(0, 'rgba(0,20,70,0)'); edge.addColorStop(1, 'rgba(0,20,70,.32)');
-      ctx.fillStyle = edge; ctx.fillRect(0, 0, W, FLOOR);
-      taskbar(ctx, true);
+      const sky = ctx.createLinearGradient(0, 0, 0, 380);
+      sky.addColorStop(0, '#0a47c4'); sky.addColorStop(0.35, '#1f6be0'); sky.addColorStop(0.75, '#6aaaf0'); sky.addColorStop(1, '#c2defa');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, FLOOR);
+      const rnd = seeded(29);
+      // a cloud is a row of soft puffs, fullest in the middle, with a faint blue-grey underside
+      const cloud = (cx, cy, w, h, a) => {
+        const n = Math.max(3, Math.round(w / 26));
+        for (let i = 0; i < n; i++) {
+          const u = (i + 0.5) / n, px = cx - w / 2 + w * u + (rnd() - 0.5) * 10, r = h * (0.5 + 0.6 * Math.sin(Math.PI * u)) * (0.85 + rnd() * 0.3);
+          const g = ctx.createRadialGradient(px, cy - r * 0.3, r * 0.15, px, cy, r);
+          g.addColorStop(0, `rgba(255,255,255,${a})`); g.addColorStop(0.7, `rgba(236,244,255,${a * 0.75})`); g.addColorStop(1, 'rgba(214,230,252,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, cy, r, 0, TAU); ctx.fill();
+        }
+      };
+      cloud(520, 150, 300, 40, 0.8); cloud(860, 118, 220, 32, 0.7); cloud(190, 232, 220, 30, 0.7); cloud(700, 236, 280, 30, 0.6); cloud(420, 286, 200, 22, 0.55);
+      const hill = (pts, top, stops) => {
+        ctx.beginPath(); ctx.moveTo(0, pts[0]);
+        ctx.bezierCurveTo(pts[1], pts[2], pts[3], pts[4], pts[5], pts[6]);
+        ctx.bezierCurveTo(pts[7], pts[8], pts[9], pts[10], W, pts[11]);
+        ctx.lineTo(W, FLOOR); ctx.lineTo(0, FLOOR); ctx.closePath();
+        const g = ctx.createLinearGradient(0, top, 0, FLOOR);
+        stops.forEach(([at, c]) => g.addColorStop(at, c));
+        ctx.fillStyle = g; ctx.fill();
+      };
+      hill([352, 220, 300, 470, 318, 640, 312, 790, 306, 880, 318, 326], 300, [[0, '#8fc36a'], [1, '#4f9a39']]);
+      hill([418, 120, 368, 250, 334, 400, 346, 560, 360, 780, 404, 386], 334, [[0, '#86d04a'], [0.45, '#52aa2c'], [1, '#2f7d1d']]);
+      // sunlight along the near crest, strongest left of centre
+      const sun = ctx.createRadialGradient(330, 330, 10, 330, 330, 300);
+      sun.addColorStop(0, 'rgba(255,250,210,.35)'); sun.addColorStop(1, 'rgba(255,250,210,0)');
+      ctx.fillStyle = sun; ctx.fillRect(0, 300, W, FLOOR - 300);
+      // blades of grass toward the foot of the hill, a little darker than the slope
+      ctx.strokeStyle = 'rgba(30,90,20,.35)'; ctx.lineWidth = 1;
+      for (let i = 0; i < 260; i++) {
+        const x = rnd() * W, y = 430 + rnd() * (FLOOR - 434), l = 3 + rnd() * 5;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (rnd() - 0.5) * 3, y - l); ctx.stroke();
+      }
+      taskbar(ctx, null);
     },
     mines(ctx) {
       ctx.fillStyle = '#b5b5b5'; ctx.fillRect(0, 0, W, H);
@@ -2905,9 +3522,11 @@
       for (const m of this.mines) {
         if (m.gone || m.st === 'kick' || act.hits.has(m) || !circleRect(m.x, m.y, m.r + 5, hb)) continue;
         act.hits.add(m);
-        const pw = { kick: [700, -430], akick: [700, -430], round: [640, -620], upper: [240, -780], dive: [420, -520], sweep: [640, -300], slide: [560, -260], rush: [720, -380], kb1: [760, -460], kb2: [760, -460], kbAir: [760, -460], ms1: [600, -380], ms2: [300, -760], msAir: [600, -380],
-          spinKick: [760, -520], spinFist: [620, -400], rise: [200, -980], slam: [300, -640], quake: [260, -820], heavyP: [820, -440], flyK: [800, -480],
-          overhand: [620, -480], elbow: [560, -360], knee: [420, -700], lowKick: [640, -260], axe: [360, -520], akick2: [700, -430] }[act.k] || [580, -340];
+        const pw = { kick: [700, -430], akick: [700, -430], round: [640, -620], upper: [240, -780], sweep: [640, -300], slide: [560, -260], rush: [720, -380], kb1: [760, -460], kb2: [760, -460], kbAir: [760, -460], ms1: [600, -380], ms2: [600, -300], msAir: [600, -380],
+          spinKick: [760, -520], spinFist: [620, -400], rise: [200, -980], slam: [300, -640], quake: [260, -820], heavyP: [820, -440], heavyA: [820, -520], flyK: [800, -480],
+          overhand: [620, -480], elbow: [560, -360], knee: [420, -700], lowKick: [640, -260], axe: [420, -520], akick2: [700, -430], tdol: [720, -560], hurigi: [760, -520],
+          kb3: [800, -520], kbTurn: [760, -460], kbUp: [220, -960], kbSmash: [780, -560], kbLand: [300, -800], keys: [460, -620], ms3: [640, -520], msLong: [760, -420],
+          msSpin: [520, -560], msUp: [240, -900], msTurn: [600, -380], bucket: [520, -420], makki: [700, -520], cdP: [620, -400] }[act.k] || [580, -340];
         m.st = 'kick'; m.vx = p.face * pw[0]; m.vy = pw[1];
         // aim assist: when the boss is in front, arc the mine into it
         const dx = this.x - m.x;
@@ -3216,7 +3835,8 @@
       const r = hitCard(this.proj, 30, 30) || hitCard(this.bouncers, 50, 70);
       if (r) return r;
       if (this.decoy) {
-        if (this.step !== 3) return null;
+        // a card is picked by striking it: a parry doesn't count
+        if (this.step !== 3 || MOVES[act.k].parry) return null;
         for (const c of this.decoy.cards) {
           if (act.hits.has(c) || !overlap(hb, { x: c.x - 48, y: c.y - 67, w: 96, h: 134 })) continue;
           act.hits.add(c);
@@ -3478,9 +4098,11 @@
       for (const b of this.balls) {
         if (b.fade || act.hits.has(b) || !circleRect(b.x, b.y, b.r + 6, hb)) continue;
         act.hits.add(b);
-        const pw = { upper: [140, -1000], kick: [620, -720], akick: [620, -640], dive: [300, -780], round: [560, -800], rush: [640, -700], sweep: [520, -620], slide: [420, -600], kb1: [700, -760], kb2: [700, -760], kbAir: [700, -760], ms2: [200, -950],
-          spinKick: [660, -760], spinFist: [520, -700], rise: [160, -1000], slam: [300, -700], quake: [240, -900], heavyP: [720, -700], flyK: [700, -720],
-          overhand: [560, -760], elbow: [480, -660], knee: [300, -950], lowKick: [560, -560], axe: [320, -700], akick2: [620, -640] }[act.k] || [480, -680];
+        const pw = { upper: [140, -1000], kick: [620, -720], akick: [620, -640], round: [560, -800], rush: [640, -700], sweep: [520, -620], slide: [420, -600], kb1: [700, -760], kb2: [700, -760], kbAir: [700, -760], ms2: [560, -600],
+          spinKick: [660, -760], spinFist: [520, -700], rise: [160, -1000], slam: [300, -700], quake: [240, -900], heavyP: [720, -700], heavyA: [720, -760], flyK: [700, -720],
+          overhand: [560, -760], elbow: [480, -660], knee: [300, -950], lowKick: [560, -560], axe: [300, -780], akick2: [620, -640], tdol: [640, -820], hurigi: [660, -780],
+          kb3: [720, -800], kbTurn: [700, -760], kbUp: [160, -1000], kbSmash: [720, -820], kbLand: [260, -900], keys: [420, -760], ms3: [600, -760], msLong: [700, -700],
+          msSpin: [480, -800], msUp: [180, -980], bucket: [480, -700], makki: [620, -760], cdP: [600, -700] }[act.k] || [480, -680];
         b.vx = p.face * pw[0]; b.vy = pw[1]; b.charge = 2.6; b.hurtCd = 0.3;
         // aim assist: a shot sent the boss's way flies to where the boss will be when it gets there
         const dx0 = this.x - b.x;
@@ -3946,6 +4568,13 @@
       const g = this.g;
       for (const q of this.papers) {
         q.vy += 700 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.spin += dt * 8;
+        // parried back, it only hits the bin
+        if (q.back) {
+          if (overlap({ x: q.x - q.r, y: q.y - q.r, w: q.r * 2, h: q.r * 2 }, this.body())) {
+            q.gone = true; this.angV += sign(q.vx) * 4; g.fx.debris(q.x, q.y, 6, ['#ffffff', '#d9d6cc'], 0.6); g.snd.play('card');
+          } else if (q.y > FLOOR - q.r) { q.gone = true; g.fx.dust(q.x, FLOOR, 3); }
+          continue;
+        }
         if (circleRect(q.x, q.y, q.r - 1, p.box) && g.hurt(1, q.x)) { q.gone = true; g.fx.debris(q.x, q.y, 6, ['#ffffff', '#d9d6cc'], 0.5); }
         else if (q.y > FLOOR - q.r) { q.gone = true; g.fx.dust(q.x, FLOOR, 3); }
       }
@@ -3953,8 +4582,11 @@
     }
     hitBy(hb, act, p) {
       for (const q of this.papers) {
-        if (act.hits.has(q) || !circleRect(q.x, q.y, q.r + 4, hb)) continue;
-        act.hits.add(q); q.gone = true; this.g.fx.debris(q.x, q.y, 6, ['#ffffff', '#d9d6cc'], 0.6);
+        if (q.back || act.hits.has(q) || !circleRect(q.x, q.y, q.r + 4, hb)) continue;
+        act.hits.add(q);
+        // parried, the paper flies back at the bin; struck, it tears
+        if (MOVES[act.k].parry) Object.assign(q, { back: true, vx: sign(this.x - q.x) * 520, vy: -240 });
+        else { q.gone = true; this.g.fx.debris(q.x, q.y, 6, ['#ffffff', '#d9d6cc'], 0.6); }
         return { x: q.x, y: q.y, heavy: false, color: '#fff' };
       }
       if (act.hits.has(this) || !overlap(hb, this.body())) return null;
@@ -4023,11 +4655,12 @@
       Object.assign(this, {
         state: 'title', st: 0, boss: null, bossIdx: 0, paused: false, stop: 0, windX: 0, tilt: 0, slip: false, acc: 0, last: 0, k: 1,
         bg: null, god: false, gone: false, detached: 0, small: false, clock: 0, special: null, banner: null, bolt: null, itemCd: 6, paintI: 0,
-        slow: 0, dodgeCd: 0, fightHits: 0, toast: null, practice: null, hoverFoe: -1, hudA: 1,
-        // the leaderboard: this win's place on it (see lbCheck), and what the board dialog shows (loadBoard)
-        lb: null, boardView: null,
+        slow: 0, dodgeCd: 0, fightHits: 0, toast: null, practice: null, hudA: 1,
+        // the leaderboard: this win's place on it (see lbCheck), what the board dialog shows (loadBoard), and the
+        // title's own copy of the board (fb) with the front cards that show it (showFront)
+        lb: null, boardView: null, fb: null, front: null, sbtn: null, sbHover: false, guideTab: null, titleMax: 480,
       });
-      this.items = []; this.shots = []; this.decals = [];
+      this.items = []; this.shots = []; this.decals = []; this.pools = [];
       this.combo = { n: 0, t: 0, pop: 0 };
       this.run = { time: 0, hits: 0, meterAt: 0, perfect: 0 };
       this.ach = loadAch(); this.toasts = [];
@@ -4051,9 +4684,6 @@
       this.canvas.addEventListener('keyup', (e) => this.key(e, false));
       this.canvas.addEventListener('blur', () => { this.input.clear(); this.pause(); });
       this.canvas.addEventListener('pointerdown', () => this.snd.ensure());
-      this.canvas.addEventListener('pointermove', (e) => this.point(e));
-      this.canvas.addEventListener('pointerleave', () => { this.hoverFoe = -1; });
-      this.canvas.addEventListener('dblclick', (e) => { if (this.point(e) >= 0) this.openFight(); });
       this.ro = new ResizeObserver(() => this.fit());
       this.ro.observe(root);
       this.onResize = () => this.checkSize();
@@ -4079,6 +4709,7 @@
       const bw = Math.max(1, Math.round(cw * dpr)), bh = Math.max(1, Math.round(ch * dpr));
       if (this.canvas.width !== bw || this.canvas.height !== bh) { this.canvas.width = bw; this.canvas.height = bh; }
       this.k = bw / W; this.bg = null;
+      if (this.front) this.layoutFront();
       this.render();
     }
     key(e, down) {
@@ -4114,21 +4745,26 @@
     status(text) { this.statusText = text; this.onStatus(text); }
     say(text) { this.live.textContent = text; }
     clearField() {
-      this.items = []; this.shots = []; this.decals = [];
+      this.items = []; this.shots = []; this.decals = []; this.pools = [];
       Object.assign(this, { special: null, shadow: null, banner: null, bolt: null, windX: 0, tilt: 0, slip: false, doneAt: 0, stop: 0, slow: 0, dodgeCd: 0 });
       this.combo = { n: 0, t: 0, pop: 0 };
       this.fx.p = [];
+      this.hideFront();
     }
     toTitle() {
       this.closeDialog();
       this.clearField();
       Object.assign(this, { state: 'title', st: 0, boss: null, paused: false, practice: null, lb: null });
       this.snd.music(null);
-      this.player.reset(430); this.player.face = 1; this.hoverFoe = -1;
+      this.player.reset(360); this.player.face = 1;
       this.status(this.s.statusMenu);
       this.showTitle();
     }
-    newGame() { this.run = { time: 0, hits: 0, meterAt: 0, perfect: 0 }; this.lb = null; this.startBoss(0); }
+    // every way into a run (the menu, Enter on the title, F2) asks a first-time player's name before it starts
+    newGame() {
+      if (!this.playerName()) { this.askName(() => this.newGame()); return; }
+      this.run = { time: 0, hits: 0, meterAt: 0, perfect: 0 }; this.lb = null; this.startBoss(0);
+    }
     // the special meter carries from one boss to the next; a retry starts with what the boss started with
     startBoss(i, carry) {
       this.closeDialog();
@@ -4136,6 +4772,7 @@
       this.clearField();
       Object.assign(this, { paused: false, bossIdx: i, state: 'intro', st: 0, itemCd: rand(5, 7), coffeeDone: false, fightHits: 0, practice: null });
       this.boss = new BOSSES[i](this);
+      if (i > (+store.get(MET_KEY) || 0)) store.set(MET_KEY, String(i));
       this.snd.music(this.boss.arena);
       this.input.clear();
       this.player.reset(170);
@@ -4145,8 +4782,9 @@
       this.showIntro();
       this.canvas.focus({ preventScroll: true });
     }
-    /* ---- practice: a recycle bin to spar with and eleven short lessons, Setup-style ---- */
+    /* ---- practice: a recycle bin to spar with and twelve short lessons, Setup-style ---- */
     startPractice() {
+      if (!this.playerName()) { this.askName(() => this.startPractice()); return; }
       this.closeDialog();
       this.clearField();
       Object.assign(this, { paused: false, bossIdx: 4, state: 'fight', st: 0, itemCd: 99, coffeeDone: true, fightHits: 0 });
@@ -4168,6 +4806,7 @@
         this.practiceMsg(this.s.lesGood, true); this.snd.play('ready');
         this.fx.ring(this.player.x, this.player.y - 40, 8, 70, 0.4, '#9dffa0', 4);
       } else if (les[0] === 'dodge' && (kind === 'hurt' || kind === 'through')) this.practiceMsg(kind === 'hurt' ? this.s.lesDodgeHit : this.s.lesDodgeLate);
+      else if (les[0] === 'guard' && (kind === 'hurt' || kind === 'block')) this.practiceMsg(kind === 'hurt' ? this.s.lesGuardHit : this.s.lesGuardBlock);
     }
     updatePractice(dt) {
       const pr = this.practice, p = this.player;
@@ -4187,7 +4826,7 @@
     }
     lessonStart() {
       const pr = this.practice, id = LESSONS[pr.step][0], b = this.boss, [name, how] = this.s.les[id];
-      if (id === 'dodge') { b.go('throw'); b.cool = 0.8; } else if (b.state === 'throw') { b.go('idle'); b.clear(); }
+      if (id === 'dodge' || id === 'guard') { b.go('throw'); b.cool = 0.8; } else if (b.state === 'throw') { b.go('idle'); b.clear(); }
       if (id === 'weapon') this.dropPracticeItem();
       this.say(`${this.s.lesStep(pr.step + 1, LESSONS.length)} ${name}. ${how.replace(/[[\]]/g, '')}`);
     }
@@ -4230,7 +4869,7 @@
       this.snd.music('fanfare');
       this.say(this.s.winTitle);
       const gift = this.onWin ? this.onWin() === 'new' : false;
-      this.lb = { st: 'load', name: store.get(NAME_KEY) || '' };
+      this.lb = { st: 'load', name: this.playerName() }; this.fb = null;
       this.showWin(isBest, isBest ? this.run.time : best, gift);
       this.lbCheck();
     }
@@ -4301,6 +4940,18 @@
       this.fx.chip(p.x, p.y - 130, s.perfect);
       this.snd.play('perfect'); this.snd.muffle(SLOW_TIME);
       this.say(s.perfect);
+    }
+    // Makki met something in its first moments (x, y: where): what the boss threw has gone back already (its hitBy),
+    // and the parry pays out once per press. The next parry needs no wait
+    parried(x, y) {
+      const p = this.player, a = p.act, s = this.s;
+      this.fx.sparks(x, y, p.face, 8, '#fff6c8'); this.fx.star(x, y, '#fff', 26);
+      if (!a || a.parried) { this.snd.play('block'); return; }
+      a.parried = true; p.parryCd = 0;
+      this.hitstop(0.07); this.gainMeter(PARRY_METER); this.lesson('parry');
+      this.fx.ring(x, y, 4, 44, 0.24, '#fff6c8', 4); this.fx.chip(p.x, p.y - 118, s.parryOk);
+      this.snd.play('parry');
+      this.say(s.parryOk);
     }
     // the slow runs out (heard as time coming back), or something bigger cuts it short
     endSlow(ranOut) {
@@ -4380,50 +5031,106 @@
       if (!w) return;
       p.weapon = null; p.cdOut = false;
       this.shots = this.shots.filter((s) => s.kind !== 'cd');
-      this.fx.debris(p.x + p.face * 20, p.y - 50, 8, ['#fff', '#c0c0c0', '#6aa8ff']); this.snd.play('broke');
+      // a bucket emptied in one go is dropped with a clang; anything else breaks
+      if (w.empty) { this.fx.debris(p.x + p.face * 16, p.y - 40, 4, ['#b8c0cf', '#8a92a6'], 0.6); this.snd.play('clang'); }
+      else { this.fx.debris(p.x + p.face * 20, p.y - 50, 8, ['#fff', '#c0c0c0', '#6aa8ff']); this.snd.play('broke'); }
       this.fx.chip(p.x, p.y - 104, this.s.gone(this.s.items[w.kind]), true);
       this.itemCd = Math.min(this.itemCd, rand(4, 7));
     }
-    // thrown weapons: the CD flies out and comes back, the paint lobs and splashes
-    release(k) {
-      const p = this.player, b = this.boss;
-      if (!p.weapon) return;
-      const hx = p.x + p.face * 26, hy = p.y - 58;
-      if (k === 'toss') {
-        this.shots.push({ kind: 'cd', x: hx, y: hy, vx: p.face * 780, dir: p.face, t: 0, back: false, hits: new Set(), spin: 0 });
-        p.cdOut = true; this.snd.play('cd');
+    // what a weapon lets go of, when its move says (release; i counts the drops of a pour): the keyboard's keys sent
+    // along the floor, the CD out on its boomerang flight, the paint lobbed, flung all at once, or poured
+    release(k, i = 0) {
+      const p = this.player, b = this.boss, w = p.weapon;
+      if (k === 'kbSmash' || k === 'kbLand') { this.keyWave(p.x + p.face * (k === 'kbSmash' ? 62 : 24), k === 'kbSmash' ? 0.5 : 0.3); return; }
+      if (!w) return;
+      if (k === 'recall') { this.recallCD(); return; }
+      const [hx, hy] = p.hand();
+      if (w.kind === 'cd') {
+        // thrown level, or down from the air (it skips off the floor), or rolled along it; a full wind-up goes faster,
+        // hits harder and makes two trips
+        const roll = k === 'cdRoll', full = !!(p.act && p.act.full), ang = k === 'cdAir' ? 0.62 : 0;
+        this.shots.push({ kind: 'cd', x: hx, y: roll ? FLOOR - 11 : hy, ux: Math.cos(ang) * p.face, uy: Math.sin(ang), sp: full ? 1000 : roll ? 620 : 780,
+          dir: p.face, t: 0, back: false, hits: new Set(), spin: 0, roll, power: full, trips: full ? 2 : 1 });
+        p.cdOut = true; this.snd.play(full ? 'cdp' : roll ? 'roll' : 'cd');
         return;
       }
-      const c = PAINTS[this.paintI++ % PAINTS.length];
-      let vx = p.face * 430, vy = -520;
-      if (b && !b.dying && b.state !== 'enter' && sign(b.x - hx) === p.face && Math.abs(b.x - hx) < 560) {
+      // the paint: an arc that finds the boss when it is ahead and near enough
+      const arc = (vx0, vy0) => {
+        if (!(b && !b.dying && b.state !== 'enter' && sign(b.x - hx) === p.face && Math.abs(b.x - hx) < 560)) return [p.face * vx0, vy0];
         const a = b.anchor(), T = clamp(Math.abs(a.x - hx) / 700, 0.35, 0.7);
-        vx = (a.x - hx) / T; vy = (a.y - hy - 0.5 * 1400 * T * T) / T;
+        return [(a.x - hx) / T, (a.y - hy - 0.5 * 1400 * T * T) / T];
+      };
+      if (k === 'lob') {
+        const c = PAINTS[this.paintI++ % PAINTS.length], [vx, vy] = arc(430, -520);
+        w.color = c; p.lobCd = 1.2;
+        this.shots.push({ kind: 'paint', x: hx, y: hy + 4, vx, vy, t: 0, c });
+        this.snd.play('lob');
+      } else if (k === 'splash') {
+        // the whole bucket at once: a fan of big blobs that strike the boss once between them, hard, and the bucket
+        // is empty
+        const [vx, vy] = arc(520, -480), group = new Set();
+        for (let j = -2; j <= 2; j++) this.shots.push({ kind: 'paint', big: true, group, x: hx, y: hy + 4, vx: vx * (1 + j * 0.2), vy: vy - j * 70 + rand(-25, 25), t: 0, c: w.color });
+        this.fx.drops(hx, hy, 10, w.color);
+        Object.assign(w, { empty: true, t: Math.min(w.t, 0.45) }); p.lobCd = 1.2;
+        this.snd.play('fling');
+      } else {
+        // poured: a few drops at a time, into a puddle in front of him (puddle) or straight down from the air, where
+        // they strike the boss once between them (pourAir)
+        const pour = k === 'puddle', last = [].concat(MOVES[k].release).length - 1;
+        if (i === 0) { p.pourHits = new Set(); this.snd.play('pour'); }
+        this.shots.push({ kind: 'paint', small: true, pool: pour, group: p.pourHits, x: hx + p.face * 8, y: hy + 10,
+          vx: pour ? p.face * (50 + i * 28) : p.vx * 0.4 + p.face * rand(-20, 40), vy: pour ? 60 : 240 + i * 30, t: 0, c: w.color });
+        if (i === last) p.lobCd = 1.2;
       }
-      p.weapon.color = c; p.lobCd = 1.2;
-      this.shots.push({ kind: 'paint', x: hx, y: hy - 8, vx, vy, t: 0, c });
-      this.snd.play('lob');
+    }
+    // A while the CD is out: it turns for home at once, at full speed, and can strike again on the way
+    recallCD() {
+      const s = this.shots.find((q) => q.kind === 'cd');
+      if (!s) { this.player.cdOut = false; return; }
+      Object.assign(s, { back: true, hits: new Set(), t: Math.max(s.t, 1.4), trips: 1 });
+      this.fx.ring(s.x, s.y, 3, 26, 0.18, '#e6d6ff', 2); this.snd.play('recall');
+    }
+    // the keyboard brought down on the floor: keys run out both ways along it, knocking into what they meet
+    keyWave(x, life) {
+      for (const dir of [-1, 1]) this.shots.push({ kind: 'keys', x, dir, t: 0, life, hits: new Set(), next: 0 });
+      this.fx.keys(x, FLOOR - 6, 8); this.fx.dust(x - 16, FLOOR, 6); this.fx.dust(x + 16, FLOOR, 6); this.fx.shake(6, 0.2);
     }
     updateShots(dt) {
       const p = this.player, b = this.boss;
       for (const s of this.shots) {
         s.t += dt;
         if (s.kind === 'cd') {
-          s.spin += dt * 28;
+          s.spin += dt * (s.power ? 44 : 28);
           if (!s.back) {
-            s.vx -= s.dir * 1500 * dt; s.x += s.vx * dt;
-            if (sign(s.vx) !== s.dir || s.x < LEFT + 10 || s.x > RIGHT - 10) { s.back = true; s.hits = new Set(); }
+            // out: slowing along its line (a roll keeps its speed to the wall), skipping off the floor when thrown down
+            if (!s.roll) s.sp -= (s.power ? 1300 : 1500) * dt;
+            s.x += s.ux * s.sp * dt; s.y += s.uy * s.sp * dt;
+            if (!s.roll && s.y > FLOOR - 11) { s.y = FLOOR - 11; s.uy = -Math.abs(s.uy) * 0.7; this.fx.dust(s.x, FLOOR, 3); }
+            if (s.sp <= 0 || s.x < LEFT + 10 || s.x > RIGHT - 10) { s.back = true; s.hits = new Set(); }
           } else {
-            const dx = p.x - s.x, dy = p.y - 52 - s.y, d = Math.hypot(dx, dy) || 1, sp = Math.min(950, 320 + s.t * 480);
-            s.x += (dx / d) * sp * dt; s.y += (dy / d) * sp * dt;
-            if (d < 26 || s.t > 4) { s.gone = true; p.cdOut = false; this.snd.play('catch'); }
+            // home to his hand (a roll along the floor); a charged one passes it and goes out once more
+            const dx = p.x - s.x, dy = s.roll ? 0 : p.y - 52 - s.y, d = Math.hypot(dx, dy) || 1, sp = s.roll ? 620 : Math.min(950, 320 + s.t * 480);
+            s.x += (dx / d) * Math.min(d, sp * dt); s.y += (dy / d) * Math.min(d, sp * dt);
+            if (d < 26 || s.t > 4) {
+              if (s.trips > 1 && s.t <= 4) Object.assign(s, { back: false, trips: s.trips - 1, sp: 1000, ux: p.face, uy: 0, dir: p.face, hits: new Set(), t: 0 });
+              else { s.gone = true; p.cdOut = false; this.snd.play('catch'); this.fx.ring(s.x, s.y, 2, 16, 0.14, '#e6d6ff', 2); }
+            }
           }
-          if (Math.random() < 0.5) this.fx.add({ k: 'dot', x: s.x, y: s.y, vx: 0, vy: 0, g: 0, life: 0.18, t: 0, r: 4, c: ['rgba(201,240,255,.7)', 'rgba(255,214,245,.7)', 'rgba(255,246,200,.7)'][Math.floor(Math.random() * 3)] });
-          this.shotHit(s, { x: s.x - 13, y: s.y - 13, w: 26, h: 26 }, 'cd', s.back ? -s.dir : s.dir);
+          if (Math.random() < (s.power ? 0.9 : 0.5)) this.fx.add({ k: 'dot', x: s.x, y: s.y, vx: 0, vy: 0, g: 0, life: s.power ? 0.26 : 0.18, t: 0, r: s.power ? 5 : 4, c: ['rgba(201,240,255,.7)', 'rgba(255,214,245,.7)', 'rgba(255,246,200,.7)'][Math.floor(Math.random() * 3)] });
+          this.shotHit(s, { x: s.x - 13, y: s.y - 13, w: 26, h: 26 }, s.power ? 'cdP' : 'cd', s.back ? sign(p.x - s.x) : s.dir);
+        } else if (s.kind === 'keys') {
+          // the keyboard's wave: keycaps kicked up as it runs along the floor
+          s.x += s.dir * 560 * dt;
+          if ((s.next -= dt) <= 0) {
+            s.next = 0.035;
+            this.fx.add({ k: 'key', x: s.x, y: FLOOR - 5, vx: s.dir * rand(30, 150), vy: rand(-430, -220), g: 1300, life: rand(0.35, 0.55), t: 0, rot: rand(-0.5, 0.5), vr: rand(-9, 9), s: 'ASDFQWERZXCV'[Math.floor(rand(0, 12))] });
+          }
+          if (s.t > s.life || s.x < LEFT || s.x > RIGHT) s.gone = true;
+          else this.shotHit(s, { x: s.x - 16, y: FLOOR - 36, w: 32, h: 36 }, 'keys', s.dir);
         } else {
           const oy = s.y;
           s.vy += 1400 * dt; s.x += s.vx * dt; s.y += s.vy * dt;
-          if (Math.random() < 0.4) this.fx.add({ k: 'dot', x: s.x, y: s.y, vx: 0, vy: 30, g: 400, life: 0.3, t: 0, r: 2.5, c: s.c });
+          if (Math.random() < (s.small ? 0 : s.big ? 0.7 : 0.4)) this.fx.add({ k: 'dot', x: s.x, y: s.y, vx: 0, vy: 30, g: 400, life: 0.3, t: 0, r: 2.5, c: s.c });
           const a = b && !b.dying ? b.anchor() : null;
           const onBoss = !!(a && Math.hypot(s.x - a.x, s.y - a.y) < a.r);
           let fy = FLOOR;
@@ -4432,6 +5139,7 @@
         }
       }
       this.shots = this.shots.filter((s) => !s.gone);
+      this.updatePools(dt);
     }
     shotHit(s, box, k, dir) {
       const b = this.boss;
@@ -4441,17 +5149,41 @@
       this.fx.sparks(res.x, res.y, dir, 8, res.color || '#e6d6ff'); this.fx.star(res.x, res.y, '#fff', 18);
       this.snd.strike(k); this.hitstop(0.03);
     }
+    // paint lands, on the boss (wet paint: +1 on every hit for a while) or the floor. The whole bucket's blobs splash
+    // wide; a pour's drops strike once between them (group), and those poured on the floor pool there
     splash(s, y, onFloor) {
       s.gone = true;
-      const b = this.boss;
+      const b = this.boss, R = s.big ? 100 : s.small ? 32 : 70;
       if (b && !b.dying) {
         const hp0 = b.hp;
-        b.hitBy({ x: s.x - 70, y: y - 60, w: 140, h: 100 }, { k: 'paint', t: 0, hits: new Set() }, { face: sign(s.vx), x: s.x });
-        if (b.hp < hp0 && !b.dying) { b.paintT = 5; b.paintC = s.c; }
+        b.hitBy({ x: s.x - R, y: y - R * 0.86, w: R * 2, h: R * 1.43 }, { k: s.big ? 'blob' : 'paint', t: 0, hits: s.group || new Set() }, { face: sign(s.vx), x: s.x });
+        if (b.hp < hp0 && !b.dying) { b.paintT = s.big ? 7 : 5; b.paintC = s.c; }
       }
-      this.fx.drops(s.x, y, 16, s.c); this.fx.ring(s.x, y, 6, 46, 0.25, s.c, 4);
-      if (onFloor) this.decals.push({ x: s.x, y: y + 4, c: s.c, t: 0, r: rand(22, 32), seed: rand(0, 10) });
-      this.snd.play('splat'); this.fx.shake(3, 0.12);
+      if (s.pool && onFloor) { this.pour(s.x, s.c); return; }
+      this.fx.drops(s.x, y, s.small ? 5 : s.big ? 22 : 16, s.c); this.fx.ring(s.x, y, 6, s.big ? 64 : s.small ? 18 : 46, 0.25, s.c, s.small ? 2 : 4);
+      if (onFloor) this.decals.push({ x: s.x, y: y + 4, c: s.c, t: 0, r: s.small ? rand(8, 12) : s.big ? rand(30, 40) : rand(22, 32), seed: rand(0, 10) });
+      this.snd.play(s.small ? 'drip' : 'splat');
+      if (!s.small) this.fx.shake(s.big ? 4 : 3, 0.12);
+    }
+    // a puddle where poured paint lands (drops close together make one wider pool). A boss that comes down into it is
+    // painted and takes a hit, and the puddle is spent
+    pour(x, c) {
+      const q = this.pools.find((o) => Math.abs(o.x - x) < 40);
+      if (q) { const l = Math.min(q.x - q.w / 2, x - 14), r = Math.max(q.x + q.w / 2, x + 14); Object.assign(q, { x: (l + r) / 2, w: r - l, t: 0 }); }
+      else this.pools.push({ x, w: 30, c, t: 0 });
+      this.fx.drops(x, FLOOR - 2, 4, c); this.snd.play('drip');
+    }
+    updatePools(dt) {
+      const b = this.boss, a = b && !b.dying && b.state !== 'enter' ? b.anchor() : null;
+      for (const q of this.pools) {
+        q.t += dt;
+        if (q.t > 7) q.gone = true;
+        else if (a && circleRect(a.x, a.y, a.r, { x: q.x - q.w / 2, y: FLOOR - 24, w: q.w, h: 24 }) && b.take(MOVES.pool.dmg)) {
+          q.gone = true; b.paintT = 5; b.paintC = q.c;
+          this.fx.drops(q.x, FLOOR - 4, 16, q.c); this.fx.ring(q.x, FLOOR - 4, 6, 50, 0.25, q.c, 4); this.snd.play('splat'); this.hitstop(0.03);
+        }
+      }
+      this.pools = this.pools.filter((q) => !q.gone);
     }
 
     // the special, played the Shadow Fight 3 way: F on a full bar (Ctrl+Alt+Del) turns him into a shadow for
@@ -4570,10 +5302,11 @@
       el.addEventListener('keydown', (e) => { const fn = o.keys && o.keys[e.code]; if (fn) { e.preventDefault(); e.stopPropagation(); fn(); } });
       this.layer.appendChild(el);
       this.dlg = el; this.dlgKind = o.kind; this.dlgRebuild = o.rebuild;
+      this.syncStart();
       if (!o.live) { const d = el.querySelector('.btn.default:not(:disabled)') || el.querySelector('.btn:not(:disabled)') || (o.menu && el.querySelector('button')); if (d) d.focus({ preventScroll: true }); }
       return el;
     }
-    closeDialog() { if (this.dlg) this.dlg.remove(); this.dlg = null; this.dlgKind = null; this.dlgRebuild = null; }
+    closeDialog() { if (this.dlg) this.dlg.remove(); this.dlg = null; this.dlgKind = null; this.dlgRebuild = null; this.syncStart(); }
     keysHTML() { return `<div class="gm-keys">${this.s.keys.map(([k, d]) => `<kbd>${esc(k)}</kbd><span>${esc(d)}</span>`).join('')}</div><p class="note">${esc(this.s.itemTip)}</p><p class="note">${esc(this.s.healTip)}</p>`; }
     // the whole game menu as an XP Start menu over the title's start button: the player's name for the account
     // (their leaderboard name once they have one), the two ways in as pinned programs, the rest on the right
@@ -4581,17 +5314,18 @@
       const s = this.s, best = +store.get(BEST_KEY) || 0, back = () => this.showTitle();
       const item = (act, ico, label, sub, pin, after = '') => `<li><button class="sm-item${pin ? ' pin' : ''}" type="button" data-act="${act}">${icon(ico, pin ? 32 : 24)}<span>${esc(label)}${sub ? `<small>${esc(sub)}</small>` : ''}</span>${after}</button></li>`;
       const el = this.dialog({
-        kind: 'title', menu: true, label: s.startMenu, rebuild: back,
-        body: `<div class="sm-head"><canvas width="76" height="76" aria-hidden="true"></canvas><span>${esc(store.get(NAME_KEY) || s.stick)}</span></div>
+        kind: 'title', menu: true, label: s.startMenu, rebuild: back, keys: { Escape: () => this.toggleStart() },
+        body: `<div class="sm-head"><canvas width="76" height="76" aria-hidden="true"></canvas><span>${esc(this.playerName() || s.stick)}</span></div>
           <div class="sm-cols"><ul class="sm-list">${item('play', 'play', s.startFight, s.startFightSub, true)}${item('practice', 'gradCap', s.practice, s.practiceSub, true)}<li class="sm-sep" role="separator"></li>${item('help', 'questionCircle', s.howTo)}</ul>
-          <ul class="sm-list places">${item('ach', 'trophy', s.achTitle, '', false, `<em>${this.achCount()}/${ACHS.length}</em>`)}${item('board', 'list', s.board)}${best ? `<li class="sm-stat">${icon('clock', 24)}<span>${esc(s.best)}<b>${fmt(best)}</b></span></li>` : ''}</ul></div>
+          <ul class="sm-list places">${item('ach', 'trophy', s.achTitle, '', false, `<em>${this.achCount()}/${ACHS.length}</em>`)}${item('board', 'list', s.board)}${this.playerName() ? item('name', 'user', s.nameChange) : ''}${best ? `<li class="sm-stat">${icon('clock', 24)}<span>${esc(s.best)}<b>${fmt(best)}</b></span></li>` : ''}</ul></div>
           ${this.onExit ? `<div class="sm-foot"><ul class="sm-list">${item('exit', 'computerOff', s.exitGame)}</ul></div>` : ''}`,
         actions: {
           play: () => this.openFight(), practice: () => this.startPractice(), help: () => this.showHelp(back),
-          ach: () => this.showAchievements(back), board: () => this.loadBoard(back), exit: () => this.onExit(),
+          ach: () => this.showAchievements(back), board: () => this.loadBoard(back), name: () => this.askName(back, true), exit: () => this.onExit(),
         },
       });
       drawAvatar(el.querySelector('.sm-head canvas'));
+      this.showFront();
       // XP's menus: up and down walk the items, left and right cross between the two columns
       el.addEventListener('keydown', (e) => {
         const items = [...el.querySelectorAll('.sm-item')], i = items.indexOf(document.activeElement);
@@ -4603,6 +5337,213 @@
         if (j < 0) return;
         e.preventDefault(); items[j].focus();
       });
+    }
+    /* ---- the title's front: the leaderboard and the guide, Luna windows standing on the title desktop ---- */
+    // two cards side by side when there is room right of the Start menu, one tabbed card when there isn't, and
+    // none on a stage too narrow for either (the menu's Leaderboard item still opens the board)
+    showFront() {
+      if (this.state !== 'title') return;
+      if (!this.front) {
+        const el = document.createElement('div');
+        el.className = 'gm-front';
+        el.addEventListener('click', (e) => this.frontClick(e));
+        el.addEventListener('keydown', (e) => this.frontKey(e));
+        this.layer.appendChild(el);
+        this.front = el;
+      }
+      // the start button painted on the taskbar gets a real, invisible button over it (see toggleStart)
+      if (!this.sbtn) {
+        const b = this.sbtn = document.createElement('button');
+        b.type = 'button'; b.className = 'gm-sbtn';
+        b.addEventListener('click', () => this.toggleStart());
+        b.addEventListener('pointerenter', () => { this.sbHover = true; });
+        b.addEventListener('pointerleave', () => { this.sbHover = false; });
+        this.layer.appendChild(b);
+      }
+      this.syncStart();
+      this.layoutFront(true);
+      if (!this.fb || Date.now() - this.fb.at > 20000) this.loadFront();
+    }
+    hideFront() {
+      if (this.front) { this.front.remove(); this.front = null; }
+      if (this.sbtn) { this.sbtn.remove(); this.sbtn = null; this.sbHover = false; }
+    }
+    // the taskbar's start button, as in XP: it opens the Start menu, and closes it again (so does Escape)
+    toggleStart() {
+      if (this.state !== 'title') return;
+      this.snd.ensure(); this.snd.play('ui');
+      if (this.dlgKind === 'title') { this.closeDialog(); if (this.sbtn) this.sbtn.focus({ preventScroll: true }); }
+      else this.showTitle();
+    }
+    syncStart() {
+      if (!this.sbtn) return;
+      this.sbtn.setAttribute('aria-label', this.s.start);
+      this.sbtn.setAttribute('aria-expanded', String(this.dlgKind === 'title'));
+    }
+    // the cards' box: right of the Start menu with room for the stickman between. They keep their own widths at the
+    // right and stop about 60% of the way down, so the hills stay in view; the title and the stickman take the rest
+    layoutFront(force) {
+      const f = this.front, L = this.layer.getBoundingClientRect();
+      if (!f || !L.width) return;
+      const k = L.width / W, menu = this.dlgKind === 'title' && this.dlg && this.dlg.getBoundingClientRect();
+      if (menu && menu.width) this.menuR = menu.right - L.left;
+      const menuR = this.menuR || clamp(330 * k, 300, 348), pad = Math.round(Math.max(10, 16 * k));
+      const left = Math.round(Math.max(menuR + 64, L.width * 0.4)), room = L.width - pad - left;
+      const mode = room >= 520 ? 'two' : room >= 250 ? 'one' : 'none';
+      Object.assign(f.style, { left: `${left}px`, top: `${pad}px`, right: `${pad}px` });
+      f.style.setProperty('--front-h', `${Math.round(clamp(L.height * 0.6 - pad, 200, 440))}px`);
+      if (force || f.dataset.mode !== mode) { f.dataset.mode = mode; this.renderFront(); } else this.renderBoardPart();
+      const c = mode === 'none' ? null : f.firstElementChild, cardsL = c ? c.getBoundingClientRect().left - L.left : L.width;
+      this.titleMax = mode === 'none' ? 480 : (cardsL - 24) / k - 40;
+      this.player.x = clamp((menuR + cardsL) / 2 / k, 40, W - 40);
+    }
+    renderFront() {
+      const f = this.front;
+      if (!f) return;
+      const mode = f.dataset.mode;
+      f.hidden = mode === 'none';
+      f.innerHTML = mode === 'two' ? this.boardCardHTML() + this.guideHTML(false) : mode === 'one' ? this.guideHTML(true) : '';
+      this.paintFront();
+      this.fitBoard();
+    }
+    // the board's box: its own card beside the guide, or the guide's page while the Board tab is open
+    boardBox() {
+      const f = this.front;
+      if (!f) return null;
+      return f.dataset.mode === 'two' ? f.querySelector('.gm-lbcard .gm-fcard-body') : this.tabNow(true) === 'board' ? f.querySelector('.gm-pane') : null;
+    }
+    // after the board arrives: only its part is redrawn, so a tab or button keeps the focus
+    renderBoardPart() {
+      const box = this.boardBox();
+      if (box) { box.innerHTML = this.boardBodyHTML(); this.paintFront(); this.fitBoard(); }
+    }
+    // the board keeps to its card: ranks leave from the bottom (never the player's own) until it fits, then the
+    // invitation, then the ⋯ over the player's row; See all opens the whole board
+    fitBoard() {
+      const box = this.boardBox();
+      if (!box) return;
+      const over = () => box.scrollHeight > box.clientHeight + 1;
+      const rows = [...box.querySelectorAll('.gm-ranks > li.top:not(.me)')];
+      while (over() && rows.length) rows.pop().remove();
+      const list = box.querySelector('.gm-ranks');
+      if (list && !list.querySelector('li:not(.gap)')) list.remove();
+      const join = box.querySelector('.gm-join');
+      if (join && over()) join.remove();
+      const gap = box.querySelector('.gm-ranks > li.gap');
+      if (gap && over() && !box.querySelector('.gm-ranks > li.top')) gap.remove();
+    }
+    loadFront() {
+      const had = this.fb && this.fb.data, fb = this.fb = { st: had ? 'ok' : 'load', data: had || null, at: Date.now() };
+      this.renderBoardPart();
+      boardCall(`?pid=${playerId()}`).then((j) => {
+        if (this.fb !== fb) return;
+        // a failed refresh keeps the board it already had
+        this.fb = j.error ? (had ? { st: 'ok', data: had, at: 0 } : { st: 'off', data: null, at: 0 }) : { st: 'ok', data: j, at: Date.now() };
+        this.renderBoardPart();
+      });
+    }
+    boardCardHTML() {
+      const s = this.s;
+      return `<section class="gm-fcard gm-lbcard" aria-labelledby="gm-lbc-t"><div class="mw-title"><span class="t-ico">${icon('trophy', 16)}</span><span class="t-text" id="gm-lbc-t">${esc(s.board)}</span></div>
+        <div class="gm-fcard-body" aria-live="polite">${this.boardBodyHTML()}</div></section>`;
+    }
+    // a podium for the top three (first drawn in the middle, read in order), the rest of the top ten in a well, the
+    // player's row under them when further down, a line inviting them while their name isn't on the board
+    boardBodyHTML() {
+      const s = this.s, fb = this.fb || { st: 'load' };
+      if (fb.st === 'load') return `<p class="gm-fb-note">${esc(s.lbLoading)}</p><div class="gm-bar" aria-hidden="true"><i></i></div>`;
+      if (fb.st === 'off') {
+        const best = +store.get(BEST_KEY) || 0;
+        return `<div class="gm-empty">${icon('warning', 32)}<p>${esc(s.lbOff)}</p>${best ? `<p class="gm-fb-note">${esc(s.best)}: <b>${fmt(best)}</b></p>` : ''}<button class="btn" type="button" data-act="fbRetry">${esc(s.retry)}</button></div>`;
+      }
+      const d = fb.data;
+      if (!d || !d.total) {
+        return `<div class="gm-empty"><ol class="gm-podium open" aria-hidden="true">${[1, 2, 3].map((n) => `<li class="gm-place p${n}"><span class="gm-q">?</span><span class="gm-step">${n}</span></li>`).join('')}</ol>
+          <h3>${esc(s.lbEmptyHead)}</h3><p>${esc(s.lbEmptyText)}</p>
+          <div class="gm-fb-cta"><button class="btn default" type="button" data-act="fight">${esc(s.startFight)}</button><button class="btn" type="button" data-act="drill">${esc(s.lbPractice)}</button></div></div>`;
+      }
+      const you = (r) => (r.me ? ` <small>${esc(s.lbYou)}</small>` : '');
+      const chip = (r) => { const g = gradeOf(r.time, r.hits); return `<span class="gm-gd g${g}" title="${esc(s.lbCols[4])}">${g}</span>`; };
+      const place = (r, n) => (r
+        ? `<li class="gm-place p${n}${r.me ? ' me' : ''}"><canvas class="gm-ava" aria-hidden="true"></canvas><b class="gm-pname">${esc(r.name)}${you(r)}</b><span class="gm-ptime">${fmt(r.time)} ${chip(r)}</span><span class="gm-step" aria-hidden="true">${n}</span></li>`
+        : `<li class="gm-place p${n} none" aria-hidden="true"><span class="gm-q">?</span><span class="gm-step">${n}</span></li>`);
+      const row = (r, top) => `<li value="${r.rank}" class="${[top ? 'top' : '', r.me ? 'me' : ''].join(' ').trim()}"><span class="n" aria-hidden="true">${r.rank}</span><span class="nm">${esc(r.name)}${you(r)}</span><span class="t">${fmt(r.time)}</span>${chip(r)}</li>`;
+      const rest = d.top.slice(3), mine = d.me && !d.top.some((r) => r.me);
+      return `<ol class="gm-podium">${[0, 1, 2].map((i) => place(d.top[i], i + 1)).join('')}</ol>
+        ${rest.length || mine ? `<ol class="gm-ranks" start="4">${rest.map((r) => row(r, true)).join('')}${mine ? `<li class="gap" aria-hidden="true">⋯</li>${row({ ...d.me, me: true })}` : ''}</ol>` : ''}
+        ${d.me ? '' : `<p class="gm-join">${esc(s.lbJoin)}</p>`}
+        <div class="gm-fb-foot"><span>${esc(s.lbCount(d.total))}</span><button class="gm-link" type="button" data-act="fbAll">${esc(s.lbAll)}</button></div>`;
+    }
+    tabNow(withBoard) {
+      const tabs = withBoard ? ['board', 'boss', 'moves', 'items'] : ['boss', 'moves', 'items'];
+      return tabs.includes(this.guideTab) ? this.guideTab : tabs[0];
+    }
+    // the guide: XP tabs over one page; on a narrow stage the board is its first tab
+    guideHTML(withBoard) {
+      const s = this.s, cur = this.tabNow(withBoard);
+      const tabs = [...(withBoard ? [['board', s.tabBoard]] : []), ['boss', s.tabBoss], ['moves', s.tabMoves], ['items', s.tabItems]];
+      const page = { board: () => this.boardBodyHTML(), boss: () => this.bossesHTML(), moves: () => this.movesHTML(), items: () => this.itemsHTML() }[cur]();
+      return `<section class="gm-fcard gm-guide" aria-labelledby="gm-guide-t"><div class="mw-title"><span class="t-ico">${icon(withBoard ? 'trophy' : 'bookOpen', 16)}</span><span class="t-text" id="gm-guide-t">${esc(withBoard ? 'Boss Rush XP' : s.guide)}</span></div>
+        <div class="gm-tabs" role="tablist" aria-labelledby="gm-guide-t">${tabs.map(([k, label]) => `<button type="button" class="gm-tab" role="tab" id="gm-tab-${k}" aria-selected="${k === cur}" aria-controls="gm-pane" tabindex="${k === cur ? 0 : -1}" data-tab="${k}">${esc(label)}</button>`).join('')}</div>
+        <div class="gm-pane" id="gm-pane" role="tabpanel" aria-labelledby="gm-tab-${cur}" tabindex="0"${cur === 'board' ? ' aria-live="polite"' : ''}>${page}</div></section>`;
+    }
+    // the three games in the order they come, and the final boss hidden until a run has reached it (or won)
+    bossesHTML() {
+      const s = this.s, met = Math.max(+store.get(MET_KEY) || 0, +store.get(BEST_KEY) ? 3 : 0);
+      // the in-fight tips without their "Tip:" (the tab already says what they are)
+      const tip = (t) => { const x = t.replace(/^Tip:\s*/, ''); return x.charAt(0).toUpperCase() + x.slice(1); };
+      const rows = [0, 1, 2].map((i) => `<li><canvas class="gm-art" data-boss="${i}" aria-hidden="true"></canvas><div><b>${esc(s.names[i])}</b><small>${esc(s.bossOf(i + 1, 3))}</small><p>${esc(tip(s.tips[i]))}</p></div></li>`).join('');
+      const last = met >= 3
+        ? `<li><span class="gm-art">${icon('error', 32)}</span><div><b>${esc(s.names[3])}</b><small>${esc(s.finalBoss)}</small><p>${esc(tip(s.tips[3]))}</p></div></li>`
+        : `<li class="locked"><span class="gm-art gm-lock" aria-hidden="true">?</span><div><b>???</b><small>${esc(s.finalBoss)}</small><p>${esc(s.lockText)}</p></div></li>`;
+      return `<ul class="gm-bosses">${rows}${last}</ul>`;
+    }
+    // the moves in their groups, each as keycaps over what it makes
+    movesHTML() {
+      const key = (t) => (t === '+' ? '<i>+</i>' : /^\(.+\)$/.test(t) ? `<i>${esc(t.slice(1, -1))}</i>` : `<kbd>${esc(t)}</kbd>`);
+      return this.s.moveList.map(([head, list]) => `<h4 class="gm-mhead">${esc(head)}</h4><ul class="gm-moves">${list.map(([keys, text]) => `<li><span class="gm-seq">${keys.split(' ').map(key).join('')}</span><span>${esc(text)}</span></li>`).join('')}</ul>`).join('');
+    }
+    itemsHTML() {
+      const s = this.s;
+      return `<ul class="gm-items">${s.itemsInfo.map(([k, text]) => `<li><canvas class="gm-art" data-item="${k}" aria-hidden="true"></canvas><div><b>${esc(s.items[k])}</b><p>${esc(text)}</p></div></li>`).join('')}</ul>
+        <p class="note">${esc(s.itemTip)}</p><p class="note">${esc(s.healTip)}</p>`;
+    }
+    paintFront() {
+      const f = this.front;
+      if (!f) return;
+      f.querySelectorAll('canvas.gm-ava').forEach((c) => paintIcon(c, (x) => avatar(x, 0, 0, 100), 28));
+      f.querySelectorAll('canvas[data-boss]').forEach((c) => paintIcon(c, BOSS_ART[+c.dataset.boss], 32));
+      f.querySelectorAll('canvas[data-item]').forEach((c) => paintIcon(c, itemArt(c.dataset.item), 32));
+    }
+    frontClick(e) {
+      const b = e.target.closest('button');
+      if (!b || !this.front || !this.front.contains(b)) return;
+      this.snd.ensure(); this.snd.play('ui');
+      if (b.dataset.tab) { this.pickTab(b.dataset.tab); return; }
+      if (b.dataset.act === 'fight') this.openFight(b);
+      else if (b.dataset.act === 'drill') this.startPractice();
+      else if (b.dataset.act === 'fbRetry') this.loadFront();
+      else if (b.dataset.act === 'fbAll') this.loadBoard(() => this.showTitle());
+    }
+    // XP tabs: left and right walk them, Home and End jump to the ends
+    frontKey(e) {
+      const t = e.target.closest && e.target.closest('[role="tab"]');
+      if (!t) return;
+      const tabs = [...this.front.querySelectorAll('[role="tab"]')], i = tabs.indexOf(t);
+      const j = { ArrowRight: (i + 1) % tabs.length, ArrowLeft: (i - 1 + tabs.length) % tabs.length, Home: 0, End: tabs.length - 1 }[e.key];
+      if (j === undefined) return;
+      e.preventDefault();
+      this.pickTab(tabs[j].dataset.tab);
+    }
+    pickTab(k) {
+      const f = this.front, g = f && f.querySelector('.gm-guide');
+      if (!g) return;
+      this.guideTab = k;
+      g.outerHTML = this.guideHTML(f.dataset.mode === 'one');
+      this.paintFront();
+      this.fitBoard();
+      const t = f.querySelector(`#gm-tab-${k}`);
+      if (t) t.focus({ preventScroll: true });
     }
     showAchievements(back) {
       const s = this.s, done = back || (() => this.resume()), got = this.ach.got;
@@ -4667,9 +5608,41 @@
       el.addEventListener('submit', (e) => { e.preventDefault(); this.lbSave(); });
       el.addEventListener('input', (e) => { if (e.target.id === 'gm-lb-name' && this.lb) this.lb.name = e.target.value; });
     }
+    /* ---- the player's name ---- */
+    // asked before the first play and kept in this browser; held in memory too, so a browser that keeps nothing asks
+    // once a visit instead of before every run
+    playerName() {
+      if (!this.pname) { const n = tidyName(store.get(NAME_KEY)); if (nameOk(n)) this.pname = n; }
+      return this.pname || '';
+    }
+    setName(n) { this.pname = n; store.set(NAME_KEY, n); }
+    // go runs once a valid name is in; change: opened from the menu to change the name, and back to the menu after
+    askName(go, change) {
+      const s = this.s, draft = this.nameDraft !== undefined ? this.nameDraft : this.playerName(), err = this.nameErr;
+      const leave = (then) => { this.nameDraft = undefined; this.nameErr = false; then(); };
+      const back = () => leave(() => this.showTitle());
+      const submit = () => {
+        const f = this.dlg && this.dlg.querySelector('#gm-name'), typed = f ? f.value : draft, n = tidyName(typed);
+        if (!nameOk(n)) { this.nameDraft = typed; this.nameErr = true; this.askName(go, change); return; }
+        this.setName(n);
+        leave(go);
+      };
+      const el = this.dialog({
+        kind: 'name', title: change ? s.nameChange : s.nameTitle, icon: 'user', rebuild: () => this.askName(go, change),
+        body: `<form class="gm-lb-form" novalidate><p>${esc(change ? s.nameChangeText : s.nameText)}</p>
+          <div class="gm-lb-row"><label for="gm-name">${esc(s.lbName)}</label><input id="gm-name" maxlength="${NAME_MAX}" autocomplete="nickname" spellcheck="false" value="${esc(draft)}" aria-describedby="gm-name-note"${err ? ' aria-invalid="true"' : ''}></div>
+          ${err ? `<p class="gm-lb-err" id="gm-name-note">${icon('warning', 16)}${esc(s.lbErr.format)}</p>` : `<p class="note" id="gm-name-note">${esc(s.nameRule)}</p>`}</form>`,
+        buttons: [{ label: change ? s.lbSave : s.namePlay, def: true, run: submit }, { label: s.cancel, run: back }],
+        keys: { Escape: back },
+      });
+      el.addEventListener('submit', (e) => { e.preventDefault(); submit(); });
+      el.addEventListener('input', (e) => { if (e.target.id === 'gm-name') this.nameDraft = e.target.value; });
+      const f = el.querySelector('#gm-name');
+      if (f) { f.focus({ preventScroll: true }); if (err) f.select(); }
+    }
     /* ---- the leaderboard ---- */
-    // where this win stands: a run that beats the player's saved best is offered for saving under a name ('ask'),
-    // one that doesn't shows where the saved best stands ('kept'); 'none' when the server won't rank it at all
+    // where this win stands: a run beating the player's saved best is saved at once under their name (the field shows
+    // only if the server refuses it or can't be reached); 'kept' shows the best that stands, 'none' an unranked run
     lbCheck() {
       const lb = this.lb, run = this.run;
       if (!lb) return;
@@ -4678,14 +5651,17 @@
       boardCall(`?pid=${playerId()}&time=${run.time.toFixed(2)}&hits=${run.hits}`).then((j) => {
         if (this.lb !== lb) return;
         if (j.error) lb.st = 'off';
-        else if (j.would) Object.assign(lb, { st: 'ask', rank: j.would.rank, total: j.would.total });
-        else if (j.me) Object.assign(lb, { st: 'kept', me: j.me, total: j.total });
+        else if (j.would) {
+          Object.assign(lb, { st: 'ask', rank: j.would.rank, total: j.would.total });
+          if (lb.name && !lb.auto) { lb.auto = true; this.lbSave(true); return; }
+        } else if (j.me) Object.assign(lb, { st: 'kept', me: j.me, total: j.total });
         else lb.st = 'none';
         this.renderLb(true);
       });
     }
-    lbSave() {
-      const lb = this.lb, field = this.dlg && this.dlg.querySelector('#gm-lb-name');
+    // auto: the save lbCheck makes by itself, with the name already known rather than whatever a field holds
+    lbSave(auto) {
+      const lb = this.lb, field = !auto && this.dlg && this.dlg.querySelector('#gm-lb-name');
       if (!lb || lb.st !== 'ask') return;
       lb.name = tidyName(field ? field.value : lb.name);
       if (!lb.name || !nameOk(lb.name)) { lb.err = 'format'; this.renderLb(true); return; }
@@ -4694,7 +5670,7 @@
       boardCall('', { pid: playerId(), name: lb.name, time: +this.run.time.toFixed(2), hits: this.run.hits }).then((j) => {
         if (this.lb !== lb) return;
         if (j.error) { Object.assign(lb, { st: 'ask', err: j.error === 'name' || j.error === 'slow' ? j.error : 'net' }); this.renderLb(true); return; }
-        store.set(NAME_KEY, lb.name);
+        this.setName(lb.name);
         Object.assign(lb, { st: j.saved ? 'saved' : 'kept', me: j.me, total: j.total });
         this.snd.play('ding');
         this.renderLb(true);
@@ -4893,6 +5869,7 @@
       this.s = STR[this.lang];
       this.canvas.setAttribute('aria-label', this.s.canvasLabel);
       if (this.dlgRebuild) this.dlgRebuild();
+      if (this.front) this.renderFront();
       this.status(this.state === 'title' ? this.s.statusMenu : this.practice ? this.s.practice : this.bossLabel(this.bossIdx));
     }
     toggleSound() { this.snd.setMuted(!this.snd.muted); }
@@ -5031,6 +6008,7 @@
       if (!hb) return;
       const res = b.hitBy(hb, p.act, p);
       if (!res) return;
+      if (MOVES[p.act.k].parry) { this.parried(res.x, res.y); return; }
       const mv = MOVES[p.act.k], w = mv.weapon && p.weapon ? p.weapon.kind : null;
       // a charged hit holds the freeze longest and shakes hardest
       this.hitstop(mv.big ? 0.11 : res.heavy ? 0.085 : 0.05);
@@ -5065,6 +6043,7 @@
       if (b && b.phase === 2 && !b.dying) this.drawRage(ctx, b);
       if (b) b.drawBack(ctx);
       this.drawDecals(ctx);
+      this.drawPools(ctx);
       this.drawItems(ctx);
       if (b && (this.state !== 'intro' || this.st > 0.9)) {
         b.draw(ctx);
@@ -5180,11 +6159,27 @@
         if (it.st === 'rest') tag(ctx, it.x, y - 46, cof ? `${this.s.items.coffee} +2` : this.s.items[it.kind]);
       }
     }
+    // the keys' wave is drawn by the keycaps it kicks up
     drawShots(ctx) {
       for (const s of this.shots) {
-        if (s.kind === 'cd') drawDisc(ctx, s.x, s.y, 11, s.spin);
-        else { ctx.fillStyle = s.c; dot(ctx, s.x, s.y, 7); ctx.fillStyle = 'rgba(255,255,255,.55)'; dot(ctx, s.x - 2, s.y - 2.5, 2.2); }
+        if (s.kind === 'cd') {
+          if (s.power) { ctx.fillStyle = 'rgba(230,214,255,.4)'; dot(ctx, s.x, s.y, 17); }
+          drawDisc(ctx, s.x, s.y, 11, s.spin);
+        } else if (s.kind === 'paint') {
+          const r = s.big ? 9.5 : s.small ? 3.8 : 7;
+          ctx.fillStyle = s.c; dot(ctx, s.x, s.y, r);
+          if (!s.small) { ctx.fillStyle = 'rgba(255,255,255,.55)'; dot(ctx, s.x - r * 0.3, s.y - r * 0.36, r * 0.32); }
+        }
       }
+    }
+    drawPools(ctx) {
+      for (const q of this.pools) {
+        ctx.globalAlpha = Math.min(1, (7 - q.t) / 1.2) * 0.92; ctx.fillStyle = q.c;
+        ctx.beginPath(); ctx.ellipse(q.x, FLOOR - 1, q.w / 2 + 4, 4.5, 0, 0, TAU); ctx.fill();
+        // still wet: a shine on it
+        ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.beginPath(); ctx.ellipse(q.x - q.w * 0.16, FLOOR - 2.4, Math.max(3, q.w * 0.16), 1.1, 0, 0, TAU); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
     drawShadow(ctx) {
       const p = this.player;
@@ -5228,83 +6223,49 @@
       });
       ctx.restore();
     }
-    // the title (the contract at the top): the desktop the three games live on. The name as the wallpaper's type,
-    // the three opponents as giant icons (the first one selected, as it is first up) with their tips as XP
-    // tooltips under the pointer, the stickman on the taskbar facing them, and a tray balloon. The Start menu
-    // over the start button is DOM (showTitle)
+    // the title (the contract at the top): the name sized to end before the front cards, the start button pressed
+    // under the open menu, and the tray; the Start menu and the cards beside it are DOM (showTitle, showFront)
     drawTitle(ctx) {
-      const s = this.s, t = this.clock, p = this.player;
+      const s = this.s;
       ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       ctx.font = `bold 66px ${FONT}`;
-      ctx.save(); ctx.shadowColor = 'rgba(0,20,70,.55)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 5;
-      ctx.fillStyle = '#fff'; ctx.fillText('BOSS RUSH XP', 42, 102);
+      const size = clamp((66 * this.titleMax) / ctx.measureText('BOSS RUSH XP').width, 28, 60), top = 22 + size * 0.76;
+      ctx.font = `bold ${size}px ${FONT}`;
+      ctx.save(); ctx.shadowColor = 'rgba(0,20,70,.55)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 4;
+      ctx.fillStyle = '#fff'; ctx.fillText('BOSS RUSH XP', 40, top);
       ctx.restore();
-      const rule = ctx.createLinearGradient(44, 0, 520, 0);
+      const w = ctx.measureText('BOSS RUSH XP').width, rule = ctx.createLinearGradient(42, 0, 42 + w, 0);
       rule.addColorStop(0, '#e8943a'); rule.addColorStop(1, 'rgba(232,148,58,0)');
-      ctx.fillStyle = rule; ctx.fillRect(44, 118, 476, 2);
-      ctx.font = `16px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillText(s.tagline, 45, 145);
-      const draw = [
-        (c, x, y) => smileyButton(c, x, y, 92, 'cool', false),
-        (c, x, y) => { c.save(); c.translate(x, y); c.rotate(-0.06); c.drawImage(sprites().king, -34, -48, 68, 96); c.restore(); },
-        (c, x, y) => pinballFace(c, x, y, 30, t, p.x, p.y - 60, 0, 0),
-      ];
-      FOES.forEach((f, i) => {
-        const y = f.y + Math.sin(t * 2 + i * 1.7) * 3;
-        if (i === 0) this.tinted(ctx, draw[i], f.x, y, 132); else draw[i](ctx, f.x, y);
-        deskLabel(ctx, f.x, f.y + 80, s.names[i], 14, i === 0);
-      });
-      if (this.hoverFoe >= 0 && this.state === 'title') { const f = FOES[this.hoverFoe]; tag(ctx, f.x, f.y + 96, s.tips[this.hoverFoe], 190); }
-      // the start button's label, and the tray: the stickman's icon and the clock
-      startLabel(ctx, s.start.toLowerCase(), true);
+      ctx.fillStyle = rule; ctx.fillRect(42, top + 12, w, 2);
+      ctx.save(); ctx.shadowColor = 'rgba(0,20,70,.5)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 1;
+      ctx.font = `${clamp(size * 0.34, 13, 16)}px ${FONT}`; ctx.fillStyle = '#fff'; ctx.fillText(s.tagline, 42, top + 36);
+      ctx.restore();
+      // the start button is a real one here: in while the Start menu is open, lit under the pointer
+      const open = this.dlgKind === 'title';
+      startPill(ctx, open ? 'down' : this.sbHover ? 'hover' : 'up');
+      startLabel(ctx, s.start.toLowerCase(), open);
       stickHead(ctx, 878, (FLOOR + H) / 2, 7);
       const d = new Date();
       ctx.fillStyle = '#fff'; ctx.font = `13px ${FONT}`; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       ctx.fillText(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`, W - 14, (FLOOR + H) / 2);
-      // the tray's balloon, a moment after the desktop settles; its stem finds the stickman's icon
-      const a = clamp((this.st - 0.8) / 0.25, 0, 1);
-      if (a > 0 && this.state === 'title') {
-        const w = 262, h = noticeH(ctx, w, s.readyText);
-        ctx.globalAlpha = a;
-        ctx.save(); ctx.translate(878, FLOOR + 10); ctx.scale(UI.f, UI.f);
-        notice(ctx, 40 - w, -22 - h, w, s.readyTitle, s.readyText, (c, x, y) => stickHead(c, x, y, 6));
-        ctx.restore();
-        ctx.globalAlpha = 1;
-      }
     }
-    // XP tints a selected desktop icon with Selection Blue: the icon is drawn off screen and tinted there
-    tinted(ctx, draw, cx, cy, size) {
-      const k = this.k, n = Math.max(1, Math.ceil(size * k)), c = this.tintC || (this.tintC = document.createElement('canvas'));
-      if (c.width !== n || c.height !== n) { c.width = n; c.height = n; }
-      const x = c.getContext('2d');
-      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, n, n);
-      x.setTransform(k, 0, 0, k, (size / 2 - cx) * k, (size / 2 - cy) * k);
-      draw(x, cx, cy);
-      x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'source-atop';
-      x.fillStyle = 'rgba(49,106,197,.4)'; x.fillRect(0, 0, n, n);
-      x.globalCompositeOperation = 'source-over';
-      ctx.drawImage(c, cx - size / 2, cy - size / 2, size, size);
-    }
-    // from the title the first opponent opens like a program: XP's zoom rectangle runs from its icon out to the
-    // whole arena in ten steps, then the fight's intro begins (straight in under reduced motion)
-    openFight() {
+    // the fight opens like a program: XP's zoom rectangle runs from the Start the fight that was chosen (the menu's
+    // or the board's) out to the whole arena in ten steps, then the intro begins (straight in under reduced motion)
+    openFight(from) {
       if (this.state !== 'title') return;
+      if (!this.playerName()) { this.askName(() => this.openFight()); return; }
       if (reduceMotion) { this.newGame(); return; }
-      this.closeDialog(); this.hoverFoe = -1;
+      const src = from || (this.dlg && this.dlg.querySelector('[data-act="play"]')), r = src && src.getBoundingClientRect(), L = this.layer.getBoundingClientRect();
+      this.zoomFrom = r && r.width && L.width ? { x: ((r.left - L.left) * W) / L.width, y: ((r.top - L.top) * H) / L.height, w: (r.width * W) / L.width, h: (r.height * H) / L.height } : null;
+      this.closeDialog(); this.hideFront();
       Object.assign(this, { state: 'opening', st: 0 });
       this.snd.play('ui');
     }
     drawZoom(ctx) {
-      const f = FOES[0], k = Math.min(10, Math.floor(this.st / 0.022)) / 10;
-      const x = lerp(f.x - 62, 0, k), y = lerp(f.y - 66, 0, k), w = lerp(124, W, k), h = lerp(154, H, k);
+      const f = this.zoomFrom || { x: 8, y: 300, w: 280, h: 44 }, k = Math.min(10, Math.floor(this.st / 0.022)) / 10;
+      const x = lerp(f.x, 0, k), y = lerp(f.y, 0, k), w = lerp(f.w, W, k), h = lerp(f.h, H, k);
       ctx.save(); ctx.globalCompositeOperation = 'difference'; ctx.strokeStyle = '#9a9a9a'; ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.restore();
-    }
-    // which of the title's giant icons is under the pointer (-1 for none)
-    point(e) {
-      if (this.state !== 'title') { this.hoverFoe = -1; return -1; }
-      const r = this.canvas.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * W, y = ((e.clientY - r.top) / r.height) * H;
-      this.hoverFoe = FOES.findIndex((f) => Math.abs(x - f.x) < 62 && y > f.y - 66 && y < f.y + 88);
-      return this.hoverFoe;
     }
     drawHUD(ctx) {
       const s = this.s, p = this.player, b = this.boss;

@@ -16,10 +16,12 @@
   A still of this scene (asset/wallpaper-media-center.webp) stays on .desktop underneath and remains the
   wallpaper whenever this can't run: no WebGL, CDN blocked, phones (windows cover the desktop there), or
   ?wall=static. With prefers-reduced-motion it renders one still frame and never animates or glitches.
+  three.js (about 190 KB) is fetched only where the wallpaper is drawn, so a phone never downloads it; a
+  screen that leaves phone mode (a window widened past 720px) fetches it then.
 
   Tuning lives in CFG. Console helpers: PF.wall3d.glitch(ms), .pause(), .play(), .step(dt), .state(), .targets().
 */
-import * as THREE from 'three';
+let THREE = null;
 
 const CFG = {
   pixel: 2,                     // CSS px per rendered pixel (the size of one dither dot)
@@ -72,12 +74,20 @@ const RIBBONS = [
 
 const PF = (window.PF = window.PF || {});
 const desktop = document.getElementById('desktop');
-const mqMobile = window.matchMedia('(max-width: 720px)');
+// phone mode, as style.css's SMALL SCREENS asks it
+const mqMobile = window.matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wantStatic = new URLSearchParams(location.search).get('wall') === 'static';
 
 if (desktop && !wantStatic) {
-  try { start(); } catch (err) { console.warn('[wall3d] staying on the static wallpaper:', err); }
+  // PF.wall3dLoad settles once the wallpaper has started or given up; the welcome screen waits on it
+  const load = () => {
+    PF.wall3dLoad = import('three')
+      .then((mod) => { THREE = mod; start(); })
+      .catch((err) => console.warn('[wall3d] staying on the static wallpaper:', err));
+  };
+  if (!mqMobile.matches) load();
+  else mqMobile.addEventListener('change', function widened() { if (mqMobile.matches) return; mqMobile.removeEventListener('change', widened); load(); });
 }
 
 function start() {

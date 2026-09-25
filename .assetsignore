@@ -23,8 +23,12 @@ package-lock.json
 asset/Home/service/*.png
 asset/Home/design-shoot/UI-[0-9][0-9].png
 asset/Home/photo-hero.jpg
+asset/Home/close-photo.jpg
 asset/Home/newsprint.jpg
 asset/Home/cover - *.jpg
 asset/Home/UI/ui-*.png
 asset/**/*.json
 anti-slop
+
+# the lossless PNG copies of the service pictures; the site shows their WebP copies in service/webp/
+asset/Home/service/png

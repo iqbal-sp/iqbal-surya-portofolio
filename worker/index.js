@@ -15,7 +15,18 @@
         (me is left out then, the run supersedes it)
    POST /api/scores  { pid, name, time, hits }  (application/json)
         -> { saved, total, top, me }  saved is false when the player's saved best is already better
-        errors: 400/413/415 bad, 403 origin, 422 time | name, 429 slow */
+        errors: 400/413/415 bad, 403 origin, 422 time | name, 429 slow
+
+   The same Worker carries two small things for the portfolio itself:
+   POST /api/message  { from, subject, message, lang, website }  (application/json)
+        Home's New Message, sent to the owner's inbox through Resend (message() below)
+        -> { sent: true }   errors: 503 offline (no RESEND_API_KEY yet), 502 mail, 400/413/415 bad,
+        403 origin, 422 from | message, 429 slow; the page opens the visitor's email app on any of them
+   POST /api/event  { e, d }  (application/json, sent with sendBeacon)
+        one more of what visitors do today (count() below) -> 204
+   GET  /work/<slug>  the desktop with that case study's link preview (casePage() below); /sitemap.xml lists them */
+
+import { CASES } from './cases.js';
 
 const TOP = 10;
 // nobody wins in under a minute: a bot that never gets hit and never stops attacking needs about 107 s
@@ -31,6 +42,9 @@ const PID = /^[a-z0-9]{16,40}$/;
 const DESK = '/option-a-desktop';
 async function site(request, env, url) {
   const p = url.pathname;
+  const one = p.match(/^\/work\/([a-z0-9-]+)\/?$/);
+  if (one) return casePage(request, env, url, one[1]);
+  if (p === '/sitemap.xml') return sitemap();
   if (p === DESK || p.startsWith(DESK + '/')) return Response.redirect(url.origin + (p.slice(DESK.length).replace(/^\/index\.html$/, '/') || '/') + url.search, 301);
   if (p === '/' || p === '/index.html') {
     if (p === '/index.html') return Response.redirect(url.origin + '/' + url.search, 301);
@@ -45,6 +59,13 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (!url.pathname.startsWith('/api/')) return site(request, env, url);
+    if (url.pathname === '/api/message' || url.pathname === '/api/event') {
+      if (request.method !== 'POST') return json({ error: 'method' }, 405, { allow: 'POST' });
+      try { return url.pathname === '/api/message' ? await message(env, request, url) : await count(env.DB, request, url); } catch (e) {
+        console.error(url.pathname, (e && e.stack) || e);
+        return json({ error: 'server' }, 500);
+      }
+    }
     if (url.pathname !== '/api/scores') return json({ error: 'not_found' }, 404);
     try {
       if (request.method === 'GET') return json(await board(env.DB, url.searchParams));
@@ -126,16 +147,17 @@ async function submit(db, request, url) {
   return json({ saved: res.meta.changes > 0, ...(await standing(db, pid, null)) });
 }
 
-// one counter per address and window; the address itself is never stored, only a hash of it
-async function allowed(db, request) {
-  const k = await hash(request.headers.get('cf-connecting-ip') || 'local'), now = Math.floor(Date.now() / 1000);
+// one counter per address and window; the address itself is never stored, only a hash of it. The game's saves,
+// the messages and the event counts each keep their own counter (tag)
+async function allowed(db, request, rule = POSTS, tag = '') {
+  const k = await hash(tag + (request.headers.get('cf-connecting-ip') || 'local')), now = Math.floor(Date.now() / 1000);
   const res = await db.batch([
     db.prepare('DELETE FROM throttle WHERE until <= ?').bind(now),
     db.prepare(`INSERT INTO throttle (k, n, until) VALUES (?1, 1, ?2)
-      ON CONFLICT (k) DO UPDATE SET n = n + 1`).bind(k, now + POSTS.window),
+      ON CONFLICT (k) DO UPDATE SET n = n + 1`).bind(k, now + rule.window),
     db.prepare('SELECT n FROM throttle WHERE k = ?').bind(k),
   ]);
-  return res[2].results[0].n <= POSTS.limit;
+  return res[2].results[0].n <= rule.limit;
 }
 async function hash(s) {
   const d = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('brxp:' + s)));
@@ -174,4 +196,96 @@ function rude(name) {
   const flat = words.join('');
   if (PARTS.some((p) => flat.includes(p) || squeeze(flat).includes(p))) return true;
   return [...words, flat].some((w) => WORDS.includes(w) || WORDS.includes(squeeze(w)));
+}
+
+/* ---- a link to one case study ---- */
+// iqbalsurya.com/work/krool is the desktop page with that case's own title, text and picture in its head, so a link
+// preview (LinkedIn, WhatsApp, Slack) and a search result show the case and not Home. In the browser the page moves
+// to the desktop's own address for the case (/#/work/krool), which opens its player and skips the welcome screen.
+const SITE = 'https://iqbalsurya.com';
+const attr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+async function casePage(request, env, url, slug) {
+  const c = CASES.find((x) => x.slug === slug);
+  if (!c) return Response.redirect(url.origin + '/#/work', 302);
+  const res = await env.ASSETS.fetch(new Request(url.origin + DESK + '/', request));
+  if (!res.ok) return res;
+  const page = `${SITE}/work/${slug}`, title = `${c.title} - Iqbal Surya Pratama, product designer`;
+  const meta = (html, key, value) => html.replace(new RegExp(`(<meta (?:name|property)="${key}" content=")[^"]*"`), `$1${attr(value)}"`);
+  let html = await res.text();
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${attr(title)}</title>`)
+    .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${page}"`);
+  for (const [k, v] of [['description', c.text], ['og:type', 'article'], ['og:url', page], ['og:title', title], ['og:description', c.text],
+    ['og:image', `${SITE}/asset/share/case-${slug}-1200x630.jpg?v=1`], ['og:image:alt', `${c.title}, a case study by Iqbal Surya Pratama`]]) html = meta(html, k, v);
+  // the page's files are named from the desktop's own folder, which is the bare address here
+  html = html.replace('<meta charset="utf-8">', `<meta charset="utf-8">\n  <base href="/">\n  <script>history.replaceState(null, '', '/' + location.search + '#/work/${slug}');</script>`);
+  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' } });
+}
+function sitemap() {
+  const urls = ['/', ...CASES.map((c) => `/work/${c.slug}`)].map((u) => `  <url><loc>${SITE}${u}</loc></url>`).join('\n');
+  return new Response(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`,
+    { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+}
+
+/* ---- Home's New Message ---- */
+// Resend delivers it (DEPLOY.md, "Pesan dari form"): RESEND_API_KEY is a secret, MESSAGE_TO and MESSAGE_FROM are
+// vars in wrangler.jsonc. Every message is kept in D1 as well, so one Resend refuses is not lost.
+const MSG = { limit: 5, window: 3600, from: 200, subject: 150, body: 5000 };
+const EMAIL = /^[^\s@<>,;"]+@[^\s@<>,;"]+\.[^\s@<>,;"]+$/;
+async function message(env, request, url) {
+  if (!env.RESEND_API_KEY || !env.MESSAGE_TO) return json({ error: 'offline' }, 503);
+  const body = await jsonBody(request, url, 8 * 1024);
+  if (body instanceof Response) return body;
+  // a bot filled in the field people never see: tell it all went well and keep nothing
+  if (body.website) return json({ sent: true });
+  const line = (v, max) => (typeof v === 'string' ? v.replace(/[\r\n\t]+/g, ' ').trim().slice(0, max) : '');
+  const from = line(body.from, MSG.from), subject = line(body.subject, MSG.subject) || 'New message';
+  const text = typeof body.message === 'string' ? body.message.trim() : '';
+  if (!EMAIL.test(from)) return json({ error: 'from' }, 422);
+  if (!text || text.length > MSG.body) return json({ error: 'message' }, 422);
+  if (!(await allowed(env.DB, request, MSG, 'msg:'))) return json({ error: 'slow' }, 429);
+  const lang = body.lang === 'id' ? 'id' : 'en';
+  const id = await env.DB.prepare('INSERT INTO messages (at, sender, subject, body, lang) VALUES (?1, ?2, ?3, ?4, ?5) RETURNING id')
+    .bind(Date.now(), from, subject, text, lang).first('id');
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      from: env.MESSAGE_FROM || 'Portfolio <portfolio@iqbalsurya.com>', to: [env.MESSAGE_TO], reply_to: from,
+      subject: `[iqbalsurya.com] ${subject}`,
+      text: `${text}\n\n---\nFrom: ${from}\nSent from the New Message window on iqbalsurya.com (${lang === 'id' ? 'Bahasa Indonesia' : 'English'}).`,
+    }),
+  });
+  if (!res.ok) { console.error('resend', res.status, await res.text()); return json({ error: 'mail' }, 502); }
+  await env.DB.prepare('UPDATE messages SET mailed = 1 WHERE id = ?').bind(id).run();
+  return json({ sent: true });
+}
+
+/* ---- what visitors do ---- */
+// A count per day, event and detail (DEPLOY.md, "Apa yang dilakukan pengunjung"). Nothing about the visitor is
+// kept; only the listed events and details are counted, so the table can't be filled with anything else.
+const EVENTS = {
+  case: /^[a-z0-9-]{1,40}$/, window: /^(about|work|contact|resume|game)$/, cv: /^(open|save|request)$/,
+  send: /^(api|mailto)$/, copy: /^email$/, start: /^$/, social: /^(linkedin|dribbble|behance|upwork)$/,
+};
+const EVENT_RATE = { limit: 120, window: 600 };
+async function count(db, request, url) {
+  const body = await jsonBody(request, url, 256);
+  if (body instanceof Response) return body;
+  const e = body.e, d = typeof body.d === 'string' ? body.d : '';
+  if (!Object.hasOwn(EVENTS, e) || !EVENTS[e].test(d)) return json({ error: 'bad' }, 400);
+  if (!(await allowed(db, request, EVENT_RATE, 'ev:'))) return json({ error: 'slow' }, 429);
+  await db.prepare(`INSERT INTO events (day, name, detail, n) VALUES (?1, ?2, ?3, 1)
+    ON CONFLICT (day, name, detail) DO UPDATE SET n = n + 1`).bind(new Date().toISOString().slice(0, 10), e, d).run();
+  return new Response(null, { status: 204 });
+}
+
+// a small JSON body from the portfolio's own pages, or the Response that turns it away
+async function jsonBody(request, url, max) {
+  if (!/^application\/json\b/i.test(request.headers.get('content-type') || '')) return json({ error: 'bad' }, 415);
+  const origin = request.headers.get('origin');
+  if (origin && origin !== url.origin) return json({ error: 'origin' }, 403);
+  const text = await request.text();
+  if (text.length > max) return json({ error: 'bad' }, 413);
+  try { const v = JSON.parse(text); if (v && typeof v === 'object' && !Array.isArray(v)) return v; } catch (e) { /* bad below */ }
+  return json({ error: 'bad' }, 400);
 }

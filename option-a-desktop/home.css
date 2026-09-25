@@ -25,7 +25,6 @@
   --gutter: 20px; --section: 96px; --band-pad: 80px; --lead: 40px; --block: 64px; --head: 16px;
   --ink: #141414;
   --ink-2: #3d3b34;
-  --on-band: color-mix(in srgb, var(--hi) 86%, transparent);
   /* newsprint: the listing band and the episode guide */
   --news: #e9e2cf;
   --news-ink: #1b1a17;
@@ -52,9 +51,15 @@
   --silver-face: linear-gradient(180deg, #f3f4f7 0%, #d4d7de 45%, #b3b8c2 100%);
   --silver-key: radial-gradient(circle at 35% 30%, #fff, #d5d8de 55%, #9aa0aa);
   --silver-edge: #6f747e;
-  /* the hero's brushed steel: a sweep a step deeper than the silver, and its grain (a generated 1600px tile) */
+  /* the brushed steel of the hero and the close: a sweep a step deeper than the silver, and its grain (a generated
+     1600px tile). The sheet lays the grain (drawn at 800px, so a hairline is one pixel of a 2x screen) over the sweep
+     in overlay, so it only lightens and darkens the metal, with two broad bands of sheen where the light catches the
+     grain and a shade between them; it wants background-blend-mode: overlay, normal, normal */
   --steel: linear-gradient(180deg, #e3e6ea 0%, #c3c8cf 40%, #a4aab4 100%);
   --steel-tex: url("../asset/Home/steel-brushed-1600.webp");
+  --steel-sheet: var(--steel-tex) 0 0 / 800px auto,
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 8%, rgba(255, 255, 255, .4) 30%, rgba(255, 255, 255, 0) 52%, rgba(40, 44, 60, .1) 74%, rgba(255, 255, 255, .28) 90%, rgba(255, 255, 255, 0)),
+    var(--steel);
   --screen-edge: 0 0 0 2px #2a2d35, 0 0 0 3px #7c818c;
   --bc-scrim: rgba(3, 18, 60, .92);
   container: home / inline-size;
@@ -75,17 +80,6 @@
 /* shared type: Tahoma bold heads in black ink, the way the 2004 ads set them */
 .pt-h2 { margin: 0; max-width: 22ch; font: 700 28px/1.05 var(--display); letter-spacing: -0.025em; color: var(--ink); text-wrap: balance; }
 .sec-copy { min-width: 0; }
-
-/* bands: the closing band keeps the Start green between XP's two light rules */
-.hm-band { --band: var(--band-blue); z-index: 1; background: var(--band); color: #fff; }
-.hm-band .pt-h2 { color: #fff; }
-.hm-band::before, .hm-band::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; pointer-events: none; }
-.hm-band::before { top: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .85) 30%, rgba(255, 255, 255, .85) 70%, transparent); }
-.hm-band::after { bottom: 0; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
-.hm-band :focus-visible { outline-color: #fff; }
-.hm-band .mw :focus-visible { outline-color: #000; }
-/* a checkbox draws its focus around its label, so on the band that label takes the white too */
-.hm-band .chk input:focus-visible + span { outline-color: #fff; }
 
 /* ============================================================
    MINI WINDOWS (XP programs drawn inside the page)
@@ -115,16 +109,10 @@
    1 · NOW SHOWING — the headline printed on brushed steel, over
    a big CRT monitor playing the owner's photo
    ============================================================ */
-/* the ground is a sheet of brushed steel: the grain tile (1600px drawn at 800, so a hairline is one pixel of a 2x
-   screen) laid over the steel sweep in overlay, so it only lightens and darkens the metal, with two broad bands of
-   sheen where the light catches the grain and a shade between them. The sheet's top edge is lit */
+/* the ground is a sheet of brushed steel (--steel-sheet), its top edge lit */
 .home > .pt-hero {
   display: grid; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: var(--lead); padding-top: 32px; padding-bottom: 64px;
-  background:
-    var(--steel-tex) 0 0 / 800px auto,
-    linear-gradient(90deg, rgba(255, 255, 255, 0) 8%, rgba(255, 255, 255, .4) 30%, rgba(255, 255, 255, 0) 52%, rgba(40, 44, 60, .1) 74%, rgba(255, 255, 255, .28) 90%, rgba(255, 255, 255, 0)),
-    var(--steel);
-  background-blend-mode: overlay, normal, normal;
+  background: var(--steel-sheet); background-blend-mode: overlay, normal, normal;
   box-shadow: inset 0 1px var(--hi);
 }
 /* the words are printed on the metal: dark ink with a white emboss under it, like the skins' printed labels */
@@ -137,9 +125,13 @@
 .home .btn.rec:not(:disabled):hover { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6), 0 0 14px rgba(214, 38, 28, .45); }
 .home .btn.rec:not(:disabled):active { background: linear-gradient(180deg, #a8170f, #d83127); }
 .home .btn.rec:focus-visible { outline-color: #fff; box-shadow: 0 0 0 2px var(--rec-edge); }
-.home .btn.rec .rec-dot { background: radial-gradient(circle at 35% 35%, #fff, #ffd9d4 60%, #f3a79f); box-shadow: none; }
+.home .btn.rec .rec-dot { background: radial-gradient(circle at 35% 35%, #fff, #ffd9d4 60%, #f3a79f); box-shadow: none; transition: box-shadow .15s; }
+/* the REC lamp lights under the pointer and burns bright while the key is held */
+.home .btn.rec:not(:disabled):hover .rec-dot { box-shadow: 0 0 6px 1px rgba(255, 255, 255, .7); }
+.home .btn.rec:not(:disabled):active .rec-dot { box-shadow: 0 0 8px 2px #fff; }
 .pt-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 4px; border: 0; background: none; color: var(--ink); font: 700 14px/1.2 var(--ui); text-decoration: underline; text-decoration-color: rgba(20, 20, 20, .35); text-underline-offset: 4px; }
 .pt-link:hover { text-decoration-color: currentColor; }
+.pt-link:active { color: #000; text-decoration-color: currentColor; text-decoration-thickness: 2px; }
 .pt-link .px { width: 16px; height: 16px; }
 .rec-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ff9a90, var(--rec) 60%, #8e110b); box-shadow: 0 0 0 1px rgba(0, 0, 0, .25); }
 
@@ -210,7 +202,8 @@
 .sl-genre { padding: 8px 16px 12px; border-top: 1px solid var(--news-ink); font: 12px/1.2 var(--read); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
 .pl-slots li:nth-last-child(-n+2) .sl-genre { padding-bottom: 52px; }
 .pt-slot:hover .sl-main b { text-decoration: underline; text-underline-offset: 3px; }
-.pt-slot[aria-current="true"] .sl-when { background: var(--news-ink); color: var(--news); }
+/* the slot's time tab prints in reverse for the episode on air, and already while a slot is pressed */
+.pt-slot[aria-current="true"] .sl-when, .pt-slot:active .sl-when { background: var(--news-ink); color: var(--news); }
 .pt-slot:focus-visible { outline: 2px dotted var(--news-ink); outline-offset: -6px; }
 @container home (min-width: 700px) {
   .pl-slots { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -267,6 +260,8 @@
 .ft-link::after { content: ""; position: absolute; inset: 32px 0; z-index: 3; }
 .ft-show:first-child .ft-link::after { top: 0; }
 .ft-show:hover .ft-link, .ft-link:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+/* pressed anywhere on the row, the title takes Glow Edge, as the credits' links do */
+.ft-link:active { color: var(--glow-edge); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 .ft-link:focus-visible { outline: none; }
 .ft-link:focus-visible::after { outline: 1px dotted #fff; outline-offset: 8px; }
 .ft-show + .ft-show { background: repeating-linear-gradient(90deg, rgba(214, 226, 248, .35) 0 4px, transparent 4px 8px) top / 100% 1px no-repeat; }
@@ -275,21 +270,23 @@
 .ft-dither { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* pointing at a row (or reaching its link from the keyboard) dims its cover and brings up the case study's UI
    card (460 × 345, or smaller on a cover too short to keep 24px above and below it): it rises from under the
-   cover's bottom edge and tips upright from 40° back on its X axis to flat as it comes. Only where there is a
-   pointer to point with */
-.ft-ui { display: none; }
+   cover's bottom edge and tips upright from 40° back on its X axis to flat as it comes. A touch screen has no
+   pointer to point with, so there the card comes up while its cover crosses the middle of the window (app.js,
+   homePeek: .peek) and goes down again as it leaves */
+.ft-cover { container: ft-cover / inline-size; perspective: 1200px; }
+.ft-cover::after { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(4, 22, 63, .6); opacity: 0; transition: opacity .3s; }
+.ft-ui { display: block; position: absolute; left: 50%; top: 50%; z-index: 2; width: min(460px, 87.5cqw - 64px); overflow: hidden; border-radius: 8px;
+  box-shadow: 0 28px 48px -18px rgba(0, 0, 0, .7); opacity: 0; transform-origin: 50% 100%; transform: translate(-50%, 25%) rotateX(40deg);
+  transition: transform .55s cubic-bezier(.2, .8, .2, 1), opacity .25s; }
+.ft-cover .ft-ui .ph, .ft-cover .ft-ui img { aspect-ratio: 4 / 3; }
+.ft-show.peek .ft-cover::after, .ft-show:has(.ft-link:focus-visible) .ft-cover::after { opacity: 1; }
+.ft-show.peek .ft-ui, .ft-show:has(.ft-link:focus-visible) .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
 @media (hover: hover) {
-  .ft-cover { container: ft-cover / inline-size; perspective: 1200px; }
-  .ft-cover::after { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(4, 22, 63, .6); opacity: 0; transition: opacity .3s; }
-  .ft-ui { display: block; position: absolute; left: 50%; top: 50%; z-index: 2; width: min(460px, 87.5cqw - 64px); overflow: hidden; border-radius: 8px;
-    box-shadow: 0 28px 48px -18px rgba(0, 0, 0, .7); opacity: 0; transform-origin: 50% 100%; transform: translate(-50%, 25%) rotateX(40deg);
-    transition: transform .55s cubic-bezier(.2, .8, .2, 1), opacity .25s; }
-  .ft-cover .ft-ui .ph, .ft-cover .ft-ui img { aspect-ratio: 4 / 3; }
-  .ft-show:hover .ft-cover::after, .ft-show:has(.ft-link:focus-visible) .ft-cover::after { opacity: 1; }
-  .ft-show:hover .ft-ui, .ft-show:has(.ft-link:focus-visible) .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
+  .ft-show:hover .ft-cover::after { opacity: 1; }
+  .ft-show:hover .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
 }
 /* without motion the card is simply there, upright and in place */
-@media (hover: hover) and (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   .ft-ui { transform: translate(-50%, -50%); }
 }
 .ft-prog { display: flex; flex-direction: column; align-items: flex-start; }
@@ -321,6 +318,7 @@
 .mv-tally { flex: none; width: 8px; height: 8px; border-radius: 2px; background: #3a3f4a; transition: background .15s, box-shadow .15s; }
 .mv-feed::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .15s; }
 .mv-feed:hover::after, .mv-feed:focus-visible::after { box-shadow: inset 0 0 0 2px var(--rec); }
+.mv-feed:active::after { box-shadow: inset 0 0 0 4px var(--rec); }
 .mv-feed:hover .mv-tally, .mv-feed:focus-visible .mv-tally { background: var(--rec); box-shadow: 0 0 6px rgba(214, 38, 28, .85); }
 .mv-feed:hover .mv-umd, .mv-feed:focus-visible .mv-umd { color: #fff; }
 .mv-feed:focus-visible { outline: none; }
@@ -458,10 +456,11 @@
 /* body copy under a heading: 16px in a softer ink than the heading, on every light section */
 .pe-text { margin: 16px 0 0; max-width: 70ch; font: 16px/1.6 var(--read); color: var(--ink-2); contain: inline-size; }
 .pe-get { margin: 28px 0 20px; font: 700 14px/1.2 var(--ui); }
-/* What you get: three things side by side, each icon over its label, spread across the copy's width. A label
-   never breaks; where the copy is narrower than the row, the last thing moves to a row of its own */
-.pe-items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; }
-.pe-items li { display: grid; align-content: start; justify-items: start; gap: 8px; font: 16px/1.4 var(--read); color: var(--ink-2); white-space: nowrap; }
+/* What you get: three things side by side, each icon over its label and only as wide as its label, 32px apart
+   from the left (the owner's spacing). A label never breaks; where the copy is narrower than the row, the last
+   thing moves to a row of its own */
+.pe-items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 32px; }
+.pe-items li { flex: none; display: grid; align-content: start; justify-items: start; gap: 8px; font: 16px/1.4 var(--read); color: var(--ink-2); white-space: nowrap; }
 .pe-items .px { width: 24px; height: 24px; }
 /* the remote: a silver 2004 media remote lying on its side, 220px on a mouse desktop (44px keys on touch, below).
    A brushed shell with a glossy top edge, two dark recessed wells for the keys (round arrow keys, then rubber
@@ -519,9 +518,14 @@
 .mm-no { flex: none; min-width: 2.2em; font: 700 12px/1 var(--ui); opacity: .3; font-variant-numeric: tabular-nums; }
 .mm-t { flex: 1; min-width: 0; }
 .mm-item .px { flex: none; width: 16px; height: 16px; opacity: 0; --ic-line: var(--glow-ink); }
-.mm-item:hover { background: rgba(255, 255, 255, .08); }
+/* Media Center's focus answers the pointer: a faint glow edge and the arrow drawn in outline under it. Pressed,
+   the glow's light fills the item, but not its face: only the picked item wears the face */
+.mm-item:hover { border-color: rgba(212, 247, 173, .35); background: rgba(255, 255, 255, .1); color: #fff; }
+.mm-item:not([aria-pressed="true"]):hover .px { opacity: .6; --ic-line: var(--glow-edge); }
 .mm-item[aria-pressed="true"] { border-color: var(--glow-edge); background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 0 20px var(--glow-halo); }
+.mm-item:not([aria-pressed="true"]):active { border-color: var(--glow-edge); background: rgba(134, 209, 63, .24); color: #fff; }
 .mm-item[aria-pressed="true"] .px { opacity: 1; }
+.mm-item:not([aria-pressed="true"]):active .px { opacity: 1; --ic-line: var(--glow-edge); }
 .mm-item:focus-visible { outline: 2px dotted #fff; outline-offset: 2px; }
 .mm-pane { align-self: start; }
 .mm-fig { margin: 0; }
@@ -553,7 +557,7 @@
 .faq-q .px { width: 16px; height: 16px; flex: none; }
 .faq-q span { padding: 0 4px; }
 .faq-q:hover span { text-decoration: underline; }
-.faq-q[aria-expanded="true"] span { background: var(--sel); color: #fff; text-decoration: none; }
+.faq-q[aria-expanded="true"] span, .faq-q:active span { background: var(--sel); color: #fff; text-decoration: none; }
 .faq-q:focus-visible { outline: none; }
 .faq-q:focus-visible span { outline: 1px dotted #000; outline-offset: 1px; }
 .faq-a { padding: 12px 16px 16px 28px; font: 14px/1.6 var(--read); }
@@ -571,66 +575,72 @@
 }
 
 /* ============================================================
-   10 · THE CLOSE — a 2000s credit squeeze on the Start button's green: the programme's end credits
-   shrink into a dark column while "Up next" takes the rest of the frame, and the next programme is
-   the visitor's project, written in a New Message window
+   10 · THE CLOSE — the hero's brushed steel again, so the page ends on the sheet it opened on: the hero's
+   promise handed back as an invitation in poster type, the owner's photo printed on the metal beside the
+   New Message window, and the owner's profiles under it
    ============================================================ */
-.home > .hm-cta { --band: radial-gradient(70% 55% at 88% 0%, rgba(255, 255, 255, .14), transparent 72%), var(--band-green); margin-top: var(--section); padding-top: var(--band-pad); padding-bottom: 0; }
-.hm-cta::after { display: none; }
-.cl-squeeze { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "next" "credits"; gap: 48px; }
-.cl-next { grid-area: next; position: relative; min-width: 0; }
-.cta-h { max-width: 16ch; font-size: 32px; line-height: 1.02; letter-spacing: -0.03em; }
-.cl-lead { margin: var(--head) 0 0; max-width: 40ch; font: 16px/1.6 var(--read); color: var(--on-band); text-wrap: pretty; }
-.cl-next .hm-mail { margin-top: 32px; }
-
-/* the credits: the programme's end frame, squeezed. Roles right, names left, around one centre line */
-.cl-credits { position: relative; z-index: 4; grid-area: credits; min-width: 0; padding: 32px 20px; border-radius: 10px; color: #fff;
-  background: linear-gradient(180deg, var(--bc-deep), #020b22); box-shadow: inset 0 0 0 1px rgba(214, 226, 248, .16), inset 0 24px 40px -24px rgba(29, 86, 184, .55), 0 26px 44px -22px rgba(0, 20, 0, .6); }
-.cr-roll { display: grid; justify-items: center; text-align: center; }
-.cr-star { display: grid; gap: 8px; margin: 0; }
-.cr-star b { font: 700 18px/1.15 var(--display); letter-spacing: -0.01em; }
-.cr-star span { font: 700 12px/1.3 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--bc-soft); }
-.cr-list { width: 100%; display: grid; gap: 12px; margin: 32px 0 0; padding: 24px 0 0; border-top: 1px solid rgba(214, 226, 248, .18); }
-.cr-list div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; align-items: baseline; }
-.cr-list dt { text-align: right; font: 700 12px/1.5 var(--ui); letter-spacing: .08em; text-transform: uppercase; color: var(--bc-soft); }
-.cr-list dd { margin: 0; text-align: left; font: 14px/1.45 var(--read); color: #fff; overflow-wrap: anywhere; }
-.cr-list time { font-variant-numeric: tabular-nums; }
-.cr-list .nb { white-space: nowrap; }
-.cr-list a, .cr-list button { padding: 0; border: 0; background: none; color: #fff; font: inherit; text-align: left; text-decoration: underline; text-decoration-color: rgba(214, 226, 248, .45); text-underline-offset: 3px; cursor: pointer; }
-.cr-list a:hover, .cr-list button:hover { color: var(--glow); text-decoration-color: currentColor; }
-.cl-credits :focus-visible { outline: 2px dotted #fff; outline-offset: 2px; }
-.cr-motto { margin: 32px 0 0; font: 700 16px/1.35 var(--display); color: #fff; }
-.cr-copy { margin: 12px 0 0; font: 12px/1.3 var(--ui); color: var(--bc-soft); }
-/* side by side from 960px: the ask first on the left, the credits squeezed into the right-hand column, so the
-   reading order, the tab order and the picture agree */
-@container home (min-width: 960px) {
-  .cl-squeeze { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "next credits"; column-gap: 48px; }
-  .cl-credits { display: grid; align-content: center; }
+.home > .hm-cta { margin-top: var(--section); padding-top: var(--band-pad); padding-bottom: 0; background: var(--steel-sheet); background-blend-mode: overlay, normal, normal;
+  /* the sheet's edge where it meets the white page: a dark seam, lit just under it */
+  box-shadow: inset 0 1px rgba(40, 44, 60, .35), inset 0 2px var(--hi); }
+.cl-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "print" "ask" "links"; gap: var(--lead) 48px; }
+/* the head in poster type, the largest on the page: its lines stand alone from 760px, and run as one balanced
+   sentence on a phone */
+.cta-h { grid-area: head; margin: 0; max-width: 22ch; font: 700 40px/1 var(--display); letter-spacing: -0.035em; color: var(--ink); text-wrap: balance; text-shadow: 0 1px rgba(255, 255, 255, .7); }
+.cl-ask { grid-area: ask; min-width: 0; }
+.cl-lead { margin: 0; max-width: 44ch; font: 18px/1.55 var(--read); color: var(--ink-2); text-wrap: pretty; text-shadow: 0 1px rgba(255, 255, 255, .6); }
+.cl-ask .hm-mail { margin-top: 24px; }
+/* the owner's photo as a print lying on the steel: a white border, the name written in its wider foot, and the
+   soft lift of a sheet of paper. On a phone the photo is 4:5; from 760px the print's foot sits level with the
+   window's and the photo fills what the foot leaves, cropped round the face */
+.cl-print { grid-area: print; justify-self: start; align-self: start; display: flex; flex-direction: column; width: min(100%, 360px); margin: 0; padding: 12px 12px 0; border-radius: 2px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(40, 44, 60, .12), 0 2px 3px rgba(20, 16, 8, .12), 0 32px 48px -24px rgba(4, 14, 32, .45); }
+.cl-pic { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; }
+.cl-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 12%; }
+.cl-print figcaption { display: grid; gap: 4px; padding: 16px 4px 20px; }
+.cl-print figcaption b { font: 700 18px/1.2 var(--display); letter-spacing: -0.01em; color: var(--ink); }
+.cl-print figcaption span { font: 12px/1.3 var(--ui); color: var(--ink-2); }
+/* the owner's four profiles, under the message: each a brand tile and its name */
+.cl-links { grid-area: links; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.cl-links a { display: inline-flex; align-items: center; gap: 8px; min-height: 32px;
+  color: var(--ink); font: 700 12px/1.3 var(--ui); text-decoration: none; text-shadow: 0 1px rgba(255, 255, 255, .6); }
+.cl-links .px { width: 24px; height: 24px; flex: none; }
+.cl-links a:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.cl-links a:active { color: #000; }
+.cl-links a:active span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.cl-links :focus-visible { outline-offset: 2px; }
+/* side by side from 760px: the head across the top, then the message on the left and the print on the right,
+   the print as tall as the lead and the window together (the photo keeps 240px at least); the profiles under both */
+@container home (min-width: 760px) {
+  .cl-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: "head head" "ask print" "links ."; row-gap: 32px; }
+  .cta-h { max-width: none; font-size: 52px; }
+  .cta-h span { display: block; }
+  .cl-print { align-self: stretch; width: 100%; }
+  .cl-pic { flex: 1 1 0; min-height: 240px; aspect-ratio: auto; }
 }
-/* the squeeze, once: a full-frame screen holds, then shrinks into the credits column while the credits roll
-   to rest inside it and Up next slides in; the frame ends exactly where the credits panel sits, so handing
-   back to the panel is seamless, and every part starts from the layout that is already visible */
-.cl-squeeze.squeeze::before { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: 10px; pointer-events: none; background: linear-gradient(180deg, var(--bc-deep), #020b22);
-  box-shadow: inset 0 0 0 1px rgba(214, 226, 248, .16); animation: cl-squeeze 1.3s cubic-bezier(.2, .8, .2, 1) both; }
-.cl-squeeze.squeeze .cl-credits { background: none; box-shadow: none; }
-.cl-squeeze.squeeze .cl-next { animation: cl-next .8s .55s cubic-bezier(.2, .8, .2, 1) both; }
-.cl-squeeze.squeeze .cr-roll { animation: cr-roll .9s .45s cubic-bezier(.2, .8, .2, 1) both; }
-@keyframes cl-squeeze { 0%, 28% { clip-path: inset(0 0 0 0 round 10px); } 72%, 100% { clip-path: inset(0 0 0 calc(100% - var(--cw)) round 10px); } }
-@keyframes cl-next { from { opacity: 0; transform: translateX(48px); } }
-@keyframes cr-roll { from { opacity: 0; transform: translateY(40px); } }
+/* from 1100px the print stands beside the head too, the way a poster sets its portrait, from the head's cap line
+   to the window's foot. The head's longest line fits the wider column at 52px, and at 64px from 1360px */
+@container home (min-width: 1100px) {
+  .cl-grid { grid-template-columns: minmax(0, 13fr) minmax(0, 8fr); grid-template-areas: "head print" "ask print" "links ."; }
+}
+/* the head at the owner's poster size, the largest type on the page: the page's last word is its biggest */
+@container home (min-width: 1360px) { .cta-h { font-size: 64px; } }
 
-/* the fine print under the frame: the startup setting, and a way back to the top */
-.cl-fine { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-top: 48px; padding: 16px 0 20px; border-top: 1px solid rgba(255, 255, 255, .28); }
-.home .ft-start { min-height: 24px; gap: 8px; font: 12px/1.3 var(--ui); color: #fff; }
-.cl-top { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; padding: 4px 8px; border: 0; border-radius: 3px; background: none; color: #fff; font: 12px/1.3 var(--ui); }
-.cl-top:hover { background: rgba(255, 255, 255, .16); }
-.cl-top .px { width: 16px; height: 16px; --ic-fill: var(--ic-green); }
+/* the fine print at the foot of the sheet, under an etched line: the startup setting, and a way back to the top */
+.cl-fine { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-top: var(--block); padding: 16px 0 20px;
+  border-top: 1px solid rgba(40, 44, 60, .22); box-shadow: inset 0 1px rgba(255, 255, 255, .7); }
+.home .ft-start { min-height: 24px; gap: 8px; font: 12px/1.3 var(--ui); color: var(--ink); }
+/* the button's wash reaches 8px past the text, so its icon and words line up with the fine print's edges */
+.cl-top { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; margin: 0 -8px; padding: 4px 8px; border: 0; border-radius: 3px; background: none; color: var(--ink); font: 12px/1.3 var(--ui); }
+.cl-top:hover { background: rgba(255, 255, 255, .45); }
+.cl-top:active { background: rgba(255, 255, 255, .7); }
+.cl-top:active > * { translate: 0 1px; }
+/* the library's arrow-circle-up at its own 24px grid, so every pixel of the ring and the arrow lands whole: a green
+   disc under the black outline, like the profile tiles beside it */
+.cl-top .px { width: 24px; height: 24px; --ic-fill: var(--ic-green); }
 
 /* New Message */
 .mail-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 8px; align-items: center; padding: 8px; }
 .mail-head label { text-align: right; }
-.mail-to { display: flex; gap: 4px; min-width: 0; }
-.mail-to .field { flex: 1; }
 .home .mail-copy { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; }
 .mail-copy .px { width: 16px; height: 16px; }
 .home .field { height: 22px; min-width: 0; padding: 0 4px; border: 0; border-radius: 0; font: 12px/20px var(--ui); color: #000; }
@@ -641,7 +651,23 @@
 .home .mail-body { display: block; width: calc(100% - 16px); height: auto; min-height: 160px; margin: 0 8px; padding: 8px 12px; border: 0; border-radius: 0; resize: vertical; background: #fff; box-shadow: var(--well); font: 14px/1.5 var(--read); color: #000; }
 .mail-body::placeholder { color: var(--ink-2); opacity: .75; }
 .mail-send { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 12px 8px 8px; }
-.mail-send small { font: 12px/1.3 var(--ui); color: var(--dark); }
+.mail-send small { flex: 1 1 200px; min-width: 0; font: 12px/1.3 var(--ui); color: var(--dark); }
+/* what became of the message: XP's notification balloon standing on the Send button (app.js, mailBalloon) */
+.mail-send { position: relative; }
+.mail-bal { position: absolute; left: 0; bottom: calc(100% - 4px); z-index: 3; width: min(320px, calc(100% - 8px)); padding: 8px 28px 8px 12px;
+  background: var(--tip); color: #000; border: 1px solid #000; border-radius: 7px; box-shadow: var(--menu-shadow); font: 12px/1.4 var(--ui);
+  animation: mail-bal .2s cubic-bezier(.2, .8, .2, 1); transition: opacity .3s; }
+.mail-bal::before, .mail-bal::after { content: ''; position: absolute; left: 44px; border-style: solid; border-color: transparent; }
+.mail-bal::before { top: 100%; border-width: 12px 12px 0 0; border-top-color: #000; }
+.mail-bal::after { top: calc(100% - 1px); left: 45px; border-width: 10px 10px 0 0; border-top-color: var(--tip); }
+.mail-bal b { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.mail-bal p { margin: 0; text-wrap: pretty; }
+.mail-bal .mail-copy { margin-top: 8px; }
+.mail-bal.out { opacity: 0; }
+@keyframes mail-bal { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .mail-bal { animation: none; transition: none; } }
+/* a field only a bot fills in (worker/index.js drops what arrives with it) */
+.mail-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
 /* ============================================================
    THE TWO STEPS: at 640px and 1100px of window width the rhythm
@@ -657,12 +683,10 @@
      528.3px here, so the quotes get 531px and break where the Figma breaks them. The longest line still ends
      32px short of the rule */
   .rv { padding-right: 28px; }
-  .cl-next .hm-mail { margin-top: 40px; }
-  .cl-credits { padding: 40px 24px; }
   .pt-h2, .pl-h { font-size: 32px; }
-  .pt-h1, .cta-h, .lt-head .pt-h2 { font-size: 40px; }
+  .pt-h1, .lt-head .pt-h2 { font-size: 40px; }
   .rv-head, .pe-title { font-size: 28px; }
-  .sl-main b, .cr-star b, .lt-stand { font-size: 20px; }
+  .sl-main b, .lt-stand { font-size: 20px; }
   .pt-services .mm-body { margin-top: 32px; }
   .mm-item { font-size: 32px; }
 }
@@ -677,13 +701,11 @@
   .home > .pt-divider + .pt-episodes { padding-top: 60px; }
   .mm-body { column-gap: 64px; }
   .home > .pt-faq { column-gap: 80px; }
-  .cl-squeeze { column-gap: 64px; }
-  .cl-credits { padding: 48px 32px; }
-  .cl-fine { margin-top: 64px; }
+  .cl-grid { column-gap: 64px; }
   .pt-h2, .pl-h { font-size: 40px; }
-  .pt-h1, .cta-h, .lt-head .pt-h2 { font-size: 44px; }
+  .pt-h1, .lt-head .pt-h2 { font-size: 44px; }
   .rv-head { font-size: 32px; }
-  .sl-main b, .cr-star b { font-size: 24px; }
+  .sl-main b { font-size: 24px; }
   /* the services menu at the owner's 52px, where its column holds the longest name on one line (32px from 640px,
      24px on a phone) */
   .mm-item { font-size: 52px; }
@@ -695,6 +717,10 @@
    at any width
    ============================================================ */
 @media (max-width: 720px), (pointer: coarse) {
+  .mail-bal { padding-right: 44px; }
+  .mail-bal .mail-copy { min-height: 44px; }
+  .mail-bal .pet-x { top: 0; right: 0; width: 44px; height: 44px; border: 0; }
+  .mail-bal .pet-x::before, .mail-bal .pet-x::after { left: 16px; right: 16px; top: 21px; }
   .home .btn { min-height: 44px; }
   .home .field { height: 44px; }
   .pt-link { min-height: 44px; }
@@ -714,9 +740,7 @@
     .pt-remote { left: 50%; right: auto; translate: -50% 0; }
   }
   .faq-q { min-height: 44px; }
-  .cr-list { gap: 0; }
-  .cr-list div { min-height: 44px; align-items: center; }
-  .cr-list a, .cr-list button { display: inline-flex; align-items: center; min-height: 44px; }
+  .cl-links a { min-height: 44px; }
   .cl-top { min-height: 44px; }
   .home .ft-start { min-height: 44px; }
 }
