@@ -1,6 +1,9 @@
 # Kept out of the public upload (wrangler.jsonc serves this whole folder):
 # notes, design tooling, the leaderboard's own code and config, and local state
 .assetsignore
+# the repo's own history and settings
+.git
+.gitignore
 .claude
 .impeccable
 .wrangler

@@ -9,8 +9,8 @@
     {
       "binding": "DB",
       "database_name": "brxp-board",
-      // replace with the id that `npx wrangler@latest d1 create brxp-board` prints
-      "database_id": "PASTE-DATABASE-ID-HERE",
+      // the leaderboard's database, made with `npx wrangler@latest d1 create brxp-board` (2026-09-25)
+      "database_id": "f62904ea-590d-40e9-9291-97ec1034cb08",
       "migrations_dir": "worker/migrations"
     }
   ]
