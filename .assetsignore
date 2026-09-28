@@ -29,6 +29,12 @@ asset/Home/cover - *.jpg
 asset/Home/UI/ui-*.png
 asset/**/*.json
 anti-slop
+# game prototypes: tested as private artifacts, never served from the site
+prototype
 
 # the lossless PNG copies of the service pictures; the site shows their WebP copies in service/webp/
 asset/Home/service/png
+
+# the owner's exports for the case study pages, checked on a local preview; the site shows their web copies
+asset/Work/*/*.png
+asset/Work/*/*.jpg

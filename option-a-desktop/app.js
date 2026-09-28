@@ -6,6 +6,9 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // title case for the labels that were once set in capitals: every word capitalised, bar the small joining words after the first
+  const SMALL = new Set('a an and as at but by for in nor of on or the to with atau bagi dalam dan dari dengan di ke pada untuk yang'.split(' '));
+  const titleCase = (s) => String(s).split(' ').map((w, i) => (i && SMALL.has(w.toLowerCase()) ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
   const I = (name, size = 32) => PX.svg(name, size);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   // phone mode (style.css, SMALL SCREENS): narrow, or a phone turned sideways
@@ -21,9 +24,9 @@
       network: 'Network', recycle: 'Recycle Bin', language: 'Language', shutdown: 'Shut Down…', openFolder: 'Open folder',
       minimize: 'Minimize', maximize: 'Maximize', close: 'Close',
       photoAlt: 'Portrait of Iqbal Surya',
-      openPortfolio: 'View portfolio', downloadCV: 'Download CV', contactMe: 'Contact me',
+      openPortfolio: 'View selected work', downloadCV: 'Download resume', contactMe: 'Contact me',
       history: 'Career history',
-      to: 'To', worklog: 'Work log', worklogLead: 'Where I’ve been, and who I’ve built things with.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Things I make when nobody’s asking: experiments, small tools, and ideas I wanted to test.', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Traveling, food, coffee, and books. Travel reminds me who I am designing for, and reading keeps my ideas fresh.', myPictures: 'My Pictures', build: 'Let’s build something together.', buildLead: 'Need a website or app that looks sharp and works properly? Tick what you need and send me a note.', need: 'What do you need?', sendMsg: 'Send a message', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
+      to: 'To', worklog: 'Experience', worklogLead: 'My experience across agencies, product teams, and freelance work.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Design experiments and personal projects.', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Outside work, I enjoy traveling, trying different food, and taking a break with coffee or a book.', myPictures: 'My Pictures', build: 'Have a project in mind?', buildLead: 'Have a website or app to design? Select what you need help with and send me a short brief.', need: 'What can I help with?', sendMsg: 'Write a project brief', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
       footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsIcons: 'Icons: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0. Recoloured here as two-tone icons.',
       file: 'File', view: 'View', help: 'Help', play: 'Play', up: 'Up',
       address: 'Address', myDocs: 'My Documents', thumbnails: 'Thumbnails', details: 'Details', open: 'Open',
@@ -32,40 +35,47 @@
       colNo: 'No.', colName: 'Name', colTags: 'Keywords', typeCase: 'Case study',
       openCase: 'Open case study', player: 'Case Study Player', chapters: 'Chapters', notYet: 'Not published',
       askAbout: (x) => `Ask me about ${x}`, askSubject: (x) => `${x} case study`, askBody: (x) => `Hi Iqbal,\n\nI saw ${x} in your portfolio and would like to hear more about it.\n\n`,
-      writeup: 'I haven’t published the full write-up for this project yet. Ask me about it and I’ll reply by email.',
-      lblCase: 'Case', lblLink: 'Link', sizes: ['Small', 'Medium', 'Large'],
-      fullCase: 'Full case study', picSoon: (x) => `${x} (picture to come)`,
+      writeup: 'The full project write-up is not available here yet. Email me if you’d like to discuss the work.',
+      lblCase: 'Project', lblLink: 'Link', sizes: ['Small', 'Medium', 'Large'],
+      fullCase: 'Project details', picSoon: (x) => `${x} (image not available yet)`, draftRatio: (s) => `Ratio differs from the slot (${s})`,
       overview: 'Overview', nowReading: 'Now reading',
-      prevCase: 'Previous case', nextCase: 'Next case', nextSection: 'Next section', stop: 'Back to portfolio',
+      prevCase: 'Previous case', nextCase: 'Next case', nextSection: 'Next section', stop: 'Back to selected work',
       textSize: 'Text size', readPos: 'Reading position',
       switchCase: 'Choose a case study', copyLink: 'Copy link to this case', linkCopied: 'Link copied',
       coverAlt: (x) => `${x}: cover`,
-      sendEmail: 'Send an email', copyEmail: 'Copy address', copyHint: 'Paste it into any mail app', copied: 'Copied!',
+      sendEmail: 'Send an email', copyEmail: 'Copy address', copyHint: 'Use this address in your email app', copied: 'Copied!',
       availability: 'Availability', openProfile: (n) => `Open ${n} profile`, newTab: 'opens in a new tab',
-      cvDownload: 'Download CV (PDF)', cvHint: 'One page, updated 2026', cvByMail: 'Request my CV', cvByMailHint: 'Latest version, sent by email',
-      fileDownload: 'File Download', dlText: 'You have chosen to download a file from this location.', from: 'from',
-      dlQ: 'What would you like to do with this file?', dlOpen: 'Open this file from its current location', dlSave: 'Save this file to disk',
-      ok: 'OK', cancel: 'Cancel', cvAsk: 'I send my CV by email, so you always get the latest version.', cvAskBtn: 'Request CV', cvSubject: 'CV request', cvBody: 'Hi Iqbal,\n\nCould you send me your latest CV?\n\n',
+      cvDownload: 'Download resume (PDF)', cvHint: 'One page · September 2026', cvByMail: 'Request my resume', cvByMailHint: 'Latest version, sent by email',
+      fileDownload: 'File Download', dlText: 'Iqbal’s resume is available as a PDF.', from: 'from',
+      dlQ: 'Open it in a new tab or download a copy.', dlOpen: 'Open PDF', dlSave: 'Download PDF',
+      ok: 'OK', cancel: 'Cancel', cvAsk: 'Email me to request my latest resume.', cvAskBtn: 'Request resume', cvSubject: 'Resume request', cvBody: 'Hi Iqbal,\n\nCould you send me your latest resume?\n\n',
       shutTitle: 'Shut Down', shutQ: 'What do you want the computer to do?', shutDown: 'Shut down', restart: 'Restart',
       safe: "It's now safe to turn off your computer.", clickRestart: 'Click anywhere to start again',
       binFrom: 'Original location', binDeleted: 'Date deleted', binNote: 'Ideas that did not make it',
       binItems: [['portfolio_v7_FINAL_final2.fig', 'C:\\Work', '12/03/2025'], ['logo-option-23.png', 'C:\\Work\\Logos', '02/11/2024'], ['idea-at-3am.txt', 'C:\\Notes', '21/06/2024'], ['lorem-ipsum-forever.doc', 'C:\\Drafts', '09/01/2023']],
-      home: 'Home', startProject: 'Start a project', watchWork: 'Watch the work',
+      home: 'Home', startProject: 'Start a project', watchWork: 'View the work',
       nowShowing: 'Now showing', detected: 'Detected',
       shotName: (n) => `UI shot ${n}`, openShot: (name) => `Open ${name}`, noSignal: 'No signal',
       viewer: 'Picture Viewer', prevPic: 'Previous picture', nextPic: 'Next picture', slideShow: 'Start slide show', stopShow: 'Stop slide show', openLink: 'Open link', picOf: (i, n) => `${i} of ${n}`,
       youGet: 'What you get:', epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Previous episode', nextEp: 'Next episode',
       remote: 'Episode remote', channel: (n) => `CH ${String(n).padStart(2, '0')}`,
       helpTitle: 'Help Topics', helpTab: 'Contents', helpPick: 'Select a topic to read it.', openAbout: 'Open About Me',
-      newMessage: 'New Message', send: 'Send', toLabel: 'To:', subject: 'Subject:', message: 'Message', msgPlaceholder: 'Hi Iqbal, I’d like to talk about…', subjectOther: 'Something else', subjectPrefix: 'Project inquiry', sendMeMsg: 'Send me a message', sendHint: 'I reply to the address in From.',
-      fromLabel: 'From:', fromPlaceholder: 'you@company.com', sending: 'Sending…', sentTitle: 'Message sent', sentNote: (a) => `I’ll reply to ${a}.`,
-      mailAppTitle: 'Opening your email app', mailAppNote: 'Nothing opened? Copy my address and paste your message into any email.',
+      newMessage: 'Project inquiry', send: 'Send', toLabel: 'To:', subject: 'Subject:', message: 'Message', msgPlaceholder: 'Tell me about your website or app, the help you need, and your deadline.', subjectOther: 'Something else', subjectPrefix: 'Project inquiry', sendMeMsg: 'Send project inquiry', sendHint: 'Use an email address where I can reply.',
+      fromLabel: 'From:', fromPlaceholder: 'you@company.com', sending: 'Sending…', sentTitle: 'Message sent', sentNote: (a) => `Thanks. I’ll reply to ${a}.`,
+      fromFixTitle: (a) => `Did you mean ${a}?`, fromFixNote: (a) => `${a} looks like a typo. If it’s right, send it again.`, fromFixUse: 'Use this address',
+      fromBadTitle: 'Check your email address', fromBadNote: (a) => `${a} can’t receive email, so my reply wouldn’t reach you. Check the spelling.`,
+      mailAppTitle: 'Send the draft from your email app', mailAppNote: 'The website couldn’t send this message. Send the draft from your email app, or copy my address and email me directly.',
       showAtStart: 'Show Home each time the portfolio starts',
-      copyAddr: 'Copy', copiedAddr: 'Copied', copiedNote: 'Email address copied', watchAgain: 'Watch again from the top',
+      copyAddr: 'Copy', copiedAddr: 'Copied', copiedNote: 'Email address copied', watchAgain: 'Back to the top',
       gameMenu: 'Game', gameNew: 'New game', gamePause: 'Pause', gameSound: 'Sound', gameAch: 'Achievements', gameBoard: 'Leaderboard', gamePet: 'Stickman on the taskbar', gameExit: 'Exit', gameHow: 'How to play',
-      gameLoading: 'Starting Boss Rush XP…', gameFailed: 'Boss Rush XP could not start. Close this window and try again.',
+      gameLoading: 'Loading Boss Rush XP…', gameFailed: 'Boss Rush XP couldn’t load. Close the game window and try again.',
       gameKeys: '← → move · ↑ jump · A punch · S kick · W guard · D dash · F special · P pause',
-      gateHead: 'Boss Rush XP needs a bigger screen.', gateText: 'A phone screen is too small for it, and it is played with a keyboard. Open this page on a laptop or desktop computer.',
+      saverLoading: 'Loading Screen Saver XP…', saverFailed: 'Screen Saver XP couldn’t load. Close its window and try again.',
+      saverKeys: 'Mouse, ← ↑ → ↓ or WASD move · Shift slow · Space Show Desktop · P pause', saverTouch: 'Drag anywhere to move · tap Show Desktop with a full meter', saverTrails: 'Pointer trails',
+      desktop: 'Desktop', properties: 'Properties', gateSaver: 'Play Screen Saver XP', gateSaverText: 'Screen Saver XP plays on a phone, with one finger.',
+      binHint: 'Recycle Bin isn’t empty', binHintText: 'Click here to see what’s in it.',
+      saverOffer: 'The screensaver fought back', saverOfferText: 'Click here to take it on in Screen Saver XP.',
+      gateHead: 'Play Boss Rush XP on a computer.', gateText: 'This game uses a keyboard and needs more screen space. Open the portfolio on a laptop or desktop to play.',
       gateBoard: 'Leaderboard', gateCols: ['#', 'Name', 'Time'], gateLoading: 'Loading…',
       gateBoardText: (n) => `${n} ${n === 1 ? 'player has' : 'players have'} beaten it. Open this page on a computer to take them on.`, gateBoardEmpty: 'Nobody has beaten it yet. Be the first, on a computer.',
       binExe: ['do-not-open.exe', 'C:\\Program Files\\Games', '01/04/2026'],
@@ -75,51 +85,58 @@
       network: 'Jaringan', recycle: 'Tempat Sampah', language: 'Bahasa', shutdown: 'Matikan…', openFolder: 'Buka folder',
       minimize: 'Kecilkan', maximize: 'Besarkan', close: 'Tutup',
       photoAlt: 'Potret Iqbal Surya',
-      openPortfolio: 'Lihat portofolio', downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
+      openPortfolio: "Lihat karya pilihan", downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
       history: 'Riwayat karier',
-      to: 'Untuk', worklog: 'Catatan kerja', worklogLead: 'Tempat saya pernah bekerja, dan tim yang pernah membangun produk bersama saya.', present: 'Sekarang', ft: 'Full-time', fl: 'Freelance', projects: 'Project pribadi', projectsLead: 'Hal-hal yang saya buat tanpa diminta: eksperimen, tools kecil, dan ide yang ingin saya uji.', diskLabel: 'Project pribadi', offClock: 'Di luar jam kerja', offClockText: 'Jalan-jalan, kuliner, kopi, dan buku. Jalan-jalan mengingatkan saya untuk siapa saya mendesain, dan membaca menjaga ide saya tetap segar.', myPictures: 'My Pictures', build: 'Mari bangun sesuatu bersama.', buildLead: 'Butuh website atau aplikasi yang tampil rapi dan berfungsi dengan baik? Centang yang Anda butuhkan, lalu kirim pesan.', need: 'Apa yang Anda butuhkan?', sendMsg: 'Kirim pesan', reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: 'Tanya project', mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Sedikit tentang project-nya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
+      to: 'Untuk', worklog: "Pengalaman", worklogLead: "Pengalaman saya di agensi, tim produk, dan proyek freelance.", present: "Saat ini", ft: 'Full-time', fl: 'Freelance', projects: "Proyek pribadi", projectsLead: "Eksperimen desain dan proyek pribadi.", diskLabel: "Proyek pribadi", offClock: 'Di luar jam kerja', offClockText: "Di luar pekerjaan, saya suka jalan-jalan, mencoba makanan baru, dan bersantai dengan kopi atau buku.", myPictures: "Foto Saya", build: "Punya rencana website atau aplikasi?", buildLead: "Butuh bantuan mendesain website atau aplikasi? Pilih kebutuhan Anda, lalu kirim brief singkat.", need: "Apa yang bisa saya bantu?", sendMsg: "Tulis brief proyek", reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: "Diskusi proyek", mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Tentang proyeknya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
       footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsIcons: 'Ikon: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0. Di sini diwarnai ulang menjadi ikon dua warna.',
       file: 'Berkas', view: 'Tampilan', help: 'Bantuan', play: 'Putar', up: 'Naik',
       address: 'Alamat', myDocs: 'Dokumen Saya', thumbnails: 'Gambar mini', details: 'Rincian', open: 'Buka',
       arrangeNo: 'Urutkan menurut Nomor', arrangeName: 'Urutkan menurut Nama', aboutPortfolio: 'Tentang portofolio ini',
-      objects: (n) => `${n} objek`, caseStudies: 'Studi kasus', caseTasks: 'Tugas studi kasus', otherPlaces: 'Tempat Lain', myComputer: 'Komputer Saya',
+      objects: (n) => `${n} objek`, caseStudies: 'Studi kasus', caseTasks: "Pilihan studi kasus", otherPlaces: 'Tempat Lain', myComputer: 'Komputer Saya',
       colNo: 'No.', colName: 'Nama', colTags: 'Kata kunci', typeCase: 'Studi kasus',
-      openCase: 'Buka studi kasus', player: 'Pemutar Studi Kasus', chapters: 'Bab', notYet: 'Belum terbit',
-      askAbout: (x) => `Tanya saya soal ${x}`, askSubject: (x) => `Studi kasus ${x}`, askBody: (x) => `Halo Iqbal,\n\nSaya melihat ${x} di portofolio Anda dan ingin tahu lebih banyak.\n\n`,
-      writeup: 'Saya belum menerbitkan tulisan lengkap untuk project ini. Tanyakan saja, saya akan membalas lewat email.',
-      lblCase: 'Kasus', lblLink: 'Tautan', sizes: ['Kecil', 'Sedang', 'Besar'],
-      fullCase: 'Studi kasus lengkap', picSoon: (x) => `${x} (gambar menyusul)`,
+      openCase: 'Buka studi kasus', player: 'Pemutar Studi Kasus', chapters: 'Bab', notYet: "Belum diterbitkan",
+      askAbout: (x) => `Tanya saya soal ${x}`, askSubject: (x) => `Studi kasus ${x}`, askBody: (x) => `Halo Iqbal,\n\nSaya melihat ${x} di portofolio Anda dan ingin tahu lebih banyak tentang proyeknya.\n\n`,
+      writeup: "Uraian lengkap proyek ini belum tersedia di sini. Kirim email jika Anda ingin membahas pekerjaannya.",
+      lblCase: "Proyek", lblLink: 'Tautan', sizes: ['Kecil', 'Sedang', 'Besar'],
+      fullCase: "Detail proyek", picSoon: (x) => `${x} (gambar menyusul)`, draftRatio: (s) => `Rasio beda dengan slot (${s})`,
       overview: 'Ringkasan', nowReading: 'Sedang dibaca',
-      prevCase: 'Kasus sebelumnya', nextCase: 'Kasus berikutnya', nextSection: 'Bagian berikutnya', stop: 'Kembali ke portofolio',
+      prevCase: "Proyek sebelumnya", nextCase: "Proyek berikutnya", nextSection: 'Bagian berikutnya', stop: "Kembali ke karya pilihan",
       textSize: 'Ukuran teks', readPos: 'Posisi baca',
-      switchCase: 'Pilih studi kasus', copyLink: 'Salin tautan kasus ini', linkCopied: 'Tautan tersalin',
+      switchCase: 'Pilih studi kasus', copyLink: "Salin tautan proyek ini", linkCopied: 'Tautan tersalin',
       coverAlt: (x) => `${x}: sampul`,
-      sendEmail: 'Kirim email', copyEmail: 'Salin alamat', copyHint: 'Tempel di aplikasi email mana pun', copied: 'Tersalin!',
-      availability: 'Ketersediaan', openProfile: (n) => `Buka profil ${n}`, newTab: 'buka di tab baru',
-      cvDownload: 'Unduh CV (PDF)', cvHint: 'Satu halaman, diperbarui 2026', cvByMail: 'Minta CV saya', cvByMailHint: 'Versi terbaru, dikirim lewat email',
-      fileDownload: 'Unduh Berkas', dlText: 'Anda memilih untuk mengunduh berkas dari lokasi ini.', from: 'dari',
-      dlQ: 'Apa yang ingin Anda lakukan dengan berkas ini?', dlOpen: 'Buka berkas dari lokasinya', dlSave: 'Simpan berkas ke disk',
-      ok: 'OK', cancel: 'Batal', cvAsk: 'CV saya kirim lewat email, supaya Anda selalu mendapat versi terbaru.', cvAskBtn: 'Minta CV', cvSubject: 'Permintaan CV', cvBody: 'Halo Iqbal,\n\nBoleh kirimkan CV terbaru Anda?\n\n',
-      shutTitle: 'Matikan', shutQ: 'Apa yang ingin dilakukan komputer?', shutDown: 'Matikan', restart: 'Mulai ulang',
+      sendEmail: 'Kirim email', copyEmail: 'Salin alamat', copyHint: "Gunakan alamat ini di aplikasi email Anda", copied: 'Tersalin!',
+      availability: 'Ketersediaan', openProfile: (n) => `Buka profil ${n}`, newTab: "dibuka di tab baru",
+      cvDownload: 'Unduh CV (PDF)', cvHint: "Satu halaman · September 2026", cvByMail: "Minta CV", cvByMailHint: 'Versi terbaru, dikirim lewat email',
+      fileDownload: 'Unduh Berkas', dlText: "CV Iqbal tersedia dalam format PDF.", from: 'dari',
+      dlQ: "Buka di tab baru atau unduh salinannya.", dlOpen: "Buka PDF", dlSave: "Unduh PDF",
+      ok: 'OK', cancel: 'Batal', cvAsk: "Kirim email untuk meminta CV terbaru saya.", cvAskBtn: 'Minta CV', cvSubject: 'Permintaan CV', cvBody: 'Halo Iqbal,\n\nBoleh kirimkan CV terbaru Anda?\n\n',
+      shutTitle: 'Matikan', shutQ: "Apa yang ingin Anda lakukan dengan komputer ini?", shutDown: 'Matikan', restart: 'Mulai ulang',
       safe: 'Sekarang aman untuk mematikan komputer Anda.', clickRestart: 'Klik di mana saja untuk memulai lagi',
       binFrom: 'Lokasi asal', binDeleted: 'Tanggal dihapus', binNote: 'Ide yang tidak lolos',
       binItems: [['portofolio_v7_FINAL_final2.fig', 'C:\\Kerja', '12/03/2025'], ['logo-opsi-23.png', 'C:\\Kerja\\Logo', '02/11/2024'], ['ide-jam-3-pagi.txt', 'C:\\Catatan', '21/06/2024'], ['lorem-ipsum-selamanya.doc', 'C:\\Draf', '09/01/2023']],
-      home: 'Beranda', startProject: 'Mulai project', watchWork: 'Tonton karyanya',
+      home: 'Beranda', startProject: "Mulai proyek", watchWork: "Lihat karyanya",
       nowShowing: 'Sedang tayang', detected: 'Terdeteksi',
       shotName: (n) => `Shot UI ${n}`, openShot: (name) => `Buka ${name}`, noSignal: 'Tidak ada sinyal',
       viewer: 'Penampil Gambar', prevPic: 'Gambar sebelumnya', nextPic: 'Gambar berikutnya', slideShow: 'Mulai tayangan slide', stopShow: 'Hentikan tayangan slide', openLink: 'Buka tautan', picOf: (i, n) => `${i} dari ${n}`,
-      youGet: 'Yang Anda dapat:', epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Episode sebelumnya', nextEp: 'Episode berikutnya',
-      remote: 'Remote episode', channel: (n) => `CH ${String(n).padStart(2, '0')}`,
-      helpTitle: 'Topik Bantuan', helpTab: 'Isi', helpPick: 'Pilih topik untuk membacanya.', openAbout: 'Buka Tentang Saya',
-      newMessage: 'Pesan Baru', send: 'Kirim', toLabel: 'Kepada:', subject: 'Subjek:', message: 'Pesan', msgPlaceholder: 'Halo Iqbal, saya ingin membicarakan…', subjectOther: 'Hal lain', subjectPrefix: 'Tanya project', sendMeMsg: 'Kirim saya pesan', sendHint: 'Saya membalas ke alamat di kolom Dari.',
+      youGet: "Hasil yang Anda dapat:", epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Episode sebelumnya', nextEp: 'Episode berikutnya',
+      remote: "Kontrol episode", channel: (n) => `CH ${String(n).padStart(2, '0')}`,
+      helpTitle: 'Topik Bantuan', helpTab: 'Isi', helpPick: "Pilih topik yang ingin Anda baca.", openAbout: 'Buka Tentang Saya',
+      newMessage: "Diskusi proyek", send: 'Kirim', toLabel: 'Kepada:', subject: 'Subjek:', message: 'Pesan', msgPlaceholder: "Ceritakan website atau aplikasi Anda, bantuan yang dibutuhkan, dan tenggatnya.", subjectOther: 'Hal lain', subjectPrefix: "Diskusi proyek", sendMeMsg: "Kirim brief proyek", sendHint: "Gunakan alamat email yang bisa saya hubungi.",
       fromLabel: 'Dari:', fromPlaceholder: 'anda@perusahaan.com', sending: 'Mengirim…', sentTitle: 'Pesan terkirim', sentNote: (a) => `Saya akan membalas ke ${a}.`,
-      mailAppTitle: 'Membuka aplikasi email', mailAppNote: 'Tidak ada yang terbuka? Salin alamat saya, lalu tempel pesan Anda di email mana pun.',
+      fromFixTitle: (a) => `Maksudnya ${a}?`, fromFixNote: (a) => `${a} sepertinya salah ketik. Kalau sudah benar, kirim sekali lagi.`, fromFixUse: 'Pakai alamat ini',
+      fromBadTitle: 'Periksa alamat email Anda', fromBadNote: (a) => `${a} tidak bisa menerima email, jadi balasan saya tidak akan sampai. Periksa lagi ejaannya.`,
+      mailAppTitle: "Kirim draf lewat aplikasi email Anda", mailAppNote: "Website ini belum berhasil mengirim pesan Anda. Kirim drafnya lewat aplikasi email, atau salin alamat saya dan kirim email langsung.",
       showAtStart: 'Tampilkan Beranda setiap kali portofolio dibuka',
-      copyAddr: 'Salin', copiedAddr: 'Tersalin', copiedNote: 'Alamat email tersalin', watchAgain: 'Tonton lagi dari awal',
+      copyAddr: 'Salin', copiedAddr: 'Tersalin', copiedNote: 'Alamat email tersalin', watchAgain: "Kembali ke atas",
       gameMenu: 'Permainan', gameNew: 'Permainan baru', gamePause: 'Jeda', gameSound: 'Suara', gameAch: 'Pencapaian', gameBoard: 'Papan peringkat', gamePet: 'Stickman di taskbar', gameExit: 'Keluar', gameHow: 'Cara bermain',
-      gameLoading: 'Memulai Boss Rush XP…', gameFailed: 'Boss Rush XP gagal dimulai. Tutup jendela ini, lalu coba lagi.',
+      gameLoading: "Memuat Boss Rush XP…", gameFailed: "Boss Rush XP gagal dimuat. Tutup jendela game, lalu coba lagi.",
       gameKeys: '← → gerak · ↑ lompat · A pukul · S tendang · W tangkis · D dash · F spesial · P jeda',
-      gateHead: 'Boss Rush XP butuh layar yang lebih besar.', gateText: 'Layar ponsel terlalu kecil untuk game ini, yang dimainkan dengan keyboard. Buka halaman ini di laptop atau komputer.',
+      saverLoading: 'Memuat Screen Saver XP…', saverFailed: 'Screen Saver XP gagal dimuat. Tutup jendelanya, lalu coba lagi.',
+      saverKeys: 'Mouse, ← ↑ → ↓ atau WASD gerak · Shift pelan · Spasi Show Desktop · P jeda', saverTouch: 'Geser di mana saja untuk bergerak · ketuk Show Desktop saat meter penuh', saverTrails: 'Jejak pointer',
+      desktop: 'Desktop', properties: 'Properti', gateSaver: 'Main Screen Saver XP', gateSaverText: 'Screen Saver XP bisa dimainkan di HP, cukup dengan satu jari.',
+      binHint: 'Tempat Sampah tidak kosong', binHintText: 'Klik di sini untuk melihat isinya.',
+      saverOffer: 'Screensaver-nya melawan', saverOfferText: 'Klik di sini untuk menantangnya di Screen Saver XP.',
+      gateHead: "Mainkan Boss Rush XP di komputer.", gateText: "Game ini menggunakan keyboard dan membutuhkan ruang layar lebih luas. Buka portofolio di laptop atau komputer untuk bermain.",
       gateBoard: 'Papan peringkat', gateCols: ['#', 'Nama', 'Waktu'], gateLoading: 'Memuat…',
       gateBoardText: (n) => `${n} pemain sudah menamatkannya. Buka halaman ini di komputer untuk menantang mereka.`, gateBoardEmpty: 'Belum ada yang menamatkannya. Jadilah yang pertama, di komputer.',
       binExe: ['jangan-dibuka.exe', 'C:\\Program Files\\Game', '01/04/2026'],
@@ -228,6 +245,12 @@
       const w = Math.round(960 * s + 6), h = Math.round(540 * s + 82);
       return { x: left + Math.max(0, Math.round((W - left - w) / 2)), y: Math.max(8, Math.round((H - h) / 2)), w, h };
     }
+    // Screen Saver XP keeps its 3:2 stage whole the same way: the arena and a task pane either side of it
+    if (id === 'screensaver') {
+      const s = clamp(Math.min((W - left - 42) / 720, (H - 24 - 85) / 480), 0.8, 1.35);
+      const w = Math.round(720 * s + 6), h = Math.round(480 * s + 85);
+      return { x: left + Math.max(0, Math.round((W - left - w) / 2)), y: Math.max(8, Math.round((H - h) / 2)), w, h };
+    }
     return { x: Math.round(W / 2 - 210), y: Math.round(H / 2 - 130), w: 420, h: 0 };
   }
 
@@ -259,6 +282,12 @@
       onClose: (w) => { if (w.game) w.game.destroy(); w.game = null; },
     },
     gamegate: { icon: 'warning', title: () => 'Boss Rush XP', build: buildGameGate, after: gateBoardLoad, dialog: true },
+    screensaver: {
+      icon: 'moon', title: () => 'Screen Saver XP', build: buildSaver, after: afterSaver, route: () => '#/screensaver',
+      onOpen: (w) => { if (w.game) w.game.focus(); },
+      onClose: (w) => { if (w.game) w.game.destroy(); w.game = null; trailsNoteNow(); },
+      onMin: trailsNoteNow,
+    },
     viewer: {
       icon: 'image', title: (w) => `${shotFile(PF.home.shorts.list[w.state.i])} - ${u('viewer')}`, task: () => u('viewer'),
       build: buildViewer, initial: () => ({ i: 0 }),
@@ -310,7 +339,7 @@
     // a dialog remembers the control that opened it, to hand the focus back when it closes
     if (def.dialog) w.opener = document.activeElement;
     wins.set(id, w);
-    if (['about', 'work', 'contact', 'resume', 'game'].includes(id)) track('window', id);
+    if (['about', 'work', 'contact', 'resume', 'game', 'recycle', 'gamegate', 'screensaver'].includes(id)) track('window', id);
     const g = geometryFor(id);
     placeWin(w, g);
     el.style.zIndex = ++zTop;
@@ -362,6 +391,7 @@
   }
 
   function minimizeWin(w) {
+    if (w.def.onMin) w.def.onMin(w);
     const from = rectOf(w.el);
     const btn = $(`[data-task="${w.id}"]`, tasksEl);
     w.min = true;
@@ -528,20 +558,20 @@
     const m = document.createElement('div');
     m.className = 'menu';
     m.setAttribute('role', 'menu');
-    m.innerHTML = items.map((it, i) => (it === '-' ? '<div class="hr" role="separator"></div>' : `<button role="menuitem" data-i="${i}"><span class="mk">${it.checked ? GLYPH.bullet : ''}</span><span>${esc(it.label)}</span></button>`)).join('');
+    m.innerHTML = items.map((it, i) => (it === '-' ? '<div class="hr" role="separator"></div>' : `<button role="menuitem" data-i="${i}"${it.off ? ' disabled' : ''}><span class="mk">${it.checked ? GLYPH.bullet : ''}</span><span>${esc(it.label)}</span></button>`)).join('');
     document.body.appendChild(m);
     const r = anchor.getBoundingClientRect();
     m.style.left = clamp(r.left, 2, innerWidth - m.offsetWidth - 2) + 'px';
     m.style.top = r.bottom + 'px';
     anchor.setAttribute('aria-expanded', 'true');
-    m.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (!b) return; const it = items[+b.dataset.i]; closeMenu(); it.run(); });
+    m.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (!b || b.disabled) return; const it = items[+b.dataset.i]; closeMenu(); it.run(); });
     m.addEventListener('keydown', (e) => {
-      const bs = $$('button', m); const i = bs.indexOf(document.activeElement);
+      const bs = $$('button:not(:disabled)', m); const i = bs.indexOf(document.activeElement);
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); }
       if (e.key === 'Escape') { closeMenu(); anchor.focus(); }
     });
     menuState = { m, anchor };
-    const f = $('button', m); if (f) f.focus({ preventScroll: true });
+    const f = $('button:not(:disabled)', m); if (f) f.focus({ preventScroll: true });
   }
   function closeMenu() {
     if (!menuState) return;
@@ -562,6 +592,20 @@
       ];
       if (key === 'help') return [{ label: u('gameHow'), run: () => gm && gm.help() }, '-', { label: u('aboutPortfolio'), run: () => openWin('credits') }];
     }
+    if (w.id === 'screensaver') {
+      const gm = w.game;
+      // an item that would do nothing where the game is now (or while it loads) is greyed, as XP greyed it
+      const off = (item) => !gm || (typeof gm.can === 'function' && !gm.can(item));
+      if (key === 'game') return [
+        { label: u('gameNew'), off: !gm, run: () => gm.newGame() },
+        { label: u('gamePause'), checked: !!(gm && gm.isPaused()), off: off('pause'), run: () => gm.togglePause() }, '-',
+        { label: u('gameSound'), checked: !!(gm && !gm.isMuted()), off: !gm, run: () => gm.toggleSound() }, '-',
+        { label: u('gameBoard'), off: off('board'), run: () => gm.board() }, '-',
+        ...(trailsState() ? [{ label: u('saverTrails'), checked: trailsWanted, run: toggleTrails }, '-'] : []),
+        { label: u('gameExit'), run: () => closeWin(w) },
+      ];
+      if (key === 'help') return [{ label: u('gameHow'), off: off('help'), run: () => gm.help() }, '-', { label: u('aboutPortfolio'), run: () => openWin('credits') }];
+    }
     if (key === 'help') return [{ label: u('about'), run: () => openWin('about', { pushHistory: true }) }, { label: u('aboutPortfolio'), run: () => openWin('credits') }, { label: u('contact'), run: () => openWin('contact') }];
     if (w.id === 'work') {
       const st = w.state;
@@ -580,7 +624,7 @@
   /* ------------------------------------------------------------ HOME */
   // A client-first landing page. Its structure follows bymonolog.com's homepage (positioning, proof, a
   // personal letter, teams, the promise, selected work, client words, services, process, FAQ, the ask);
-  // its telling stays in this desktop: Tahoma headlines on a white page carry the pitch, Luna bands mark the
+  // its telling stays in this desktop: Noto Sans headlines on a white page carry the pitch, Luna bands mark the
   // turns, and each proof section is an XP program. Image slots are grey placeholders until real ones exist.
   const HOME_KEY = 'pf-a-home';
   const homeAtStartup = () => { try { return localStorage.getItem(HOME_KEY) !== '0'; } catch (e) { return true; } };
@@ -593,8 +637,8 @@
   };
   const miniTitle = (icon, text, id, off, caps) => `<div class="mw-title${off ? ' off' : ''}"><span class="t-ico">${I(icon, 16)}</span><span class="t-text"${id ? ` id="${id}"` : ''}>${esc(text)}</span>${capBtns(caps)}</div>`;
 
-  // Prime Time: Home told as a 2004 Media Center TV-guide ad. The owner's photo plays on a TV, a torn
-  // newsprint listing lays out the project's week, the work runs as tonight's features in Media Center,
+  // Prime Time: Home told as a 2004 Media Center TV-guide ad. The owner's photo plays on a TV, the work
+  // runs as tonight's features in Media Center,
   // and a remote flips through the episodes of a project.
 
   // an image slot: the real picture once the owner adds it, a grey placeholder naming the file until then
@@ -644,7 +688,7 @@
             <picture>${['avif', 'webp'].map((f) => `<source type="image/${f}" srcset="${srcset(f)}" sizes="${sizes}">`).join('')}<img class="pt-photo" src="${esc(P.base)}${P.widths[0]}.jpg" srcset="${srcset('jpg')}" sizes="${sizes}" width="${P.width}" height="${P.height}" alt="${esc(t(P.alt))}" fetchpriority="high" decoding="async" style="object-position:${TV_FOCUS[0] * 100}% ${TV_FOCUS[1] * 100}%"></picture>
             <span class="pt-sel" aria-hidden="true" hidden></span>
             <div class="tv-lower">
-              <b class="tv-now">${esc(u('nowShowing'))}</b>
+              <b class="tv-now">${esc(titleCase(u('nowShowing')))}</b>
               <span class="tv-title">${esc(PF.owner.fullName)}</span>
               <i class="tv-bar" aria-hidden="true"><i class="hm-day" style="width:${dayShare().toFixed(1)}%"></i></i>
             </div>
@@ -760,7 +804,7 @@
     const gaps = cols.map((c) => Math.ceil(n / c) * c - n);
     for (let k = 0; k < Math.max(...gaps); k++) {
       const on = cols.filter((c, j) => k < gaps[j]).map((c) => `ns-${c}`).join(' ');
-      cells.push(`<li class="mv-off ${on}" style="--k:${n + k}" aria-hidden="true"><span class="mv-pic"><span>${esc(u('noSignal'))}</span></span><span class="mv-umd"><i class="mv-tally"></i></span></li>`);
+      cells.push(`<li class="mv-off ${on}" style="--k:${n + k}" aria-hidden="true"><span class="mv-pic"><span>${esc(titleCase(u('noSignal')))}</span></span><span class="mv-umd"><i class="mv-tally"></i></span></li>`);
     }
     return `<div class="mv-mon"><ol class="mv-wall">${cells.join('')}</ol></div>`;
   }
@@ -823,10 +867,15 @@
     viewerGo(w, w.state.i);
   }
 
-  // the episode guide: each episode's still plays on a silver flat-panel TV; the remote steps through them
+  // the episode guide: each episode's still plays on a silver flat-panel TV; the remote steps through them. The
+  // stills are frames of the 3D desk (desk3d/), at its dither dot: 340 dots wide for the full TV, 170 for a
+  // phone's. Where the desk can run, desk3d/episode.js draws it over the still
   function episodeScreenHTML(i) {
-    const s = PF.home.process.steps[i];
-    return `${slotHTML(s.img, 'pe-img')}<span class="pe-lower"><b class="tv-now">${esc(u('epLabel', i + 1))}</b><span>${esc(t(s.when))} · ${esc(t(s.genre))}</span></span>`;
+    const s = PF.home.process.steps[i], im = s.img;
+    const pic = im.src
+      ? `<picture><source media="(max-width: 520px)" srcset="${esc(im.src)}-170.png"><img class="pe-img pe-still" src="${esc(im.src)}-340.png" width="340" height="200" alt="${esc(t(im.alt))}" loading="lazy" decoding="async"></picture>`
+      : slotHTML(im, 'pe-img');
+    return `${pic}<span class="pe-lower"><b class="tv-now">${esc(u('epLabel', i + 1))}</b><span>${esc(t(s.when))} · ${esc(t(s.genre))}</span></span>`;
   }
   function episodeCopyHTML(i) {
     const s = PF.home.process.steps[i];
@@ -862,10 +911,13 @@
     const n = PF.home.process.steps.length;
     w.state.ep = ((i % n) + n) % n;
     const screen = $('.pe-screen', w.el), copy = $('.pe-now', w.el); if (!screen || !copy) return;
+    // the desk's canvas stays through the change, so its camera can travel to the new episode
+    const desk = $(':scope > .desk3d', screen);
     screen.innerHTML = episodeScreenHTML(w.state.ep);
+    if (desk) screen.prepend(desk);
+    if (PF.desk3d) PF.desk3d.go(w.state.ep);
     copy.innerHTML = episodeCopyHTML(w.state.ep);
     $$('.rm-num', w.el).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === w.state.ep)));
-    $$('.pt-slot', w.el).forEach((b) => b.setAttribute('aria-current', String(+b.dataset.i === w.state.ep)));
     if (!reduceMotion) { screen.classList.remove('flick'); void screen.offsetWidth; screen.classList.add('flick'); }
     if (focusKey) { const k = $(`.rm-num[data-i="${w.state.ep}"]`, w.el); if (k) k.focus({ preventScroll: true }); }
   }
@@ -904,20 +956,12 @@
           <h1 class="pt-h1" id="hm-title">${esc(t(H.hero.title))}</h1>
           <p class="pt-intro">${esc(t(H.hero.sub))}</p>
           <div class="pt-acts">
-            <button class="btn lg rec" data-act="home-start"><i class="rec-dot" aria-hidden="true"></i><span>${esc(u('startProject'))}</span></button>
-            <button class="pt-link" data-act="home-go" data-to="hm-work">${I('play', 16)}<span>${esc(u('watchWork'))}</span></button>
+            <button type="button" class="page-key rec" data-act="home-start"><i class="rec-dot" aria-hidden="true"></i><span>${esc(u('startProject'))}</span></button>
+            <button type="button" class="page-key silver" data-act="home-go" data-to="hm-work">${I('play', 16)}<span>${esc(u('watchWork'))}</span></button>
           </div>
         </div>
         ${heroCrtHTML()}
       </header>
-
-      <section class="pt-listing" aria-labelledby="pt-list-h">
-        <div class="pl-paper">
-          <h2 class="pl-h" id="pt-list-h">${esc(t(H.hero.listing))}</h2>
-          <ol class="pl-slots">${H.process.steps.map((s, i) => `<li><button class="pt-slot" data-act="home-ep" data-i="${i}" data-go="1" aria-current="${i === st.ep}"><span class="sl-when">${esc(t(s.when))}</span><span class="sl-main"><b>${esc(t(s.slot))}</b><span>${esc(t(s.line))}</span></span><span class="sl-genre" aria-hidden="true">${esc(t(s.genre))}</span></button></li>`).join('')}</ol>
-        </div>
-        <span class="pl-fringe" aria-hidden="true"></span>
-      </section>
 
       <section class="pt-letter" aria-labelledby="pt-letter-h">
         <div class="lt-head">
@@ -949,7 +993,7 @@
       </section>
 
       <section class="pt-reviews" aria-labelledby="hm-words-h">
-        <h2 class="rv-head" id="hm-words-h">${esc(t(H.words.head))}</h2>
+        <h2 class="rv-head" id="hm-words-h">${esc(titleCase(t(H.words.head)))}</h2>
         <ul class="rv-row" role="list" tabindex="0" aria-labelledby="hm-words-h">${H.words.list.map((r) => `<li class="rv"><figure lang="en"><blockquote>${r.quote.map((p) => `<p>${esc(p)}</p>`).join('')}</blockquote><figcaption>${r.name ? `<b>${esc(r.name)}</b>` : ''}<span>${esc(r.role)}</span></figcaption></figure></li>`).join('')}</ul>
       </section>
       <hr class="pt-divider">
@@ -1066,63 +1110,129 @@
     const w = wins.get('home'); if (!w) return;
     $$('.hm-day', w.el).forEach((n) => { n.style.width = `${dayShare().toFixed(1)}%`; });
   }
-  // What became of the message, as XP's notification balloon over the Send button: sent (it goes by itself), or
-  // handed to the visitor's email app, which a page can't see open, so that one stays with the Copy button until
-  // closed. Screen readers hear it as a status
-  function mailBalloon(f, sent, from) {
+  // What became of the message, as XP's notification balloon over the Send button: sent (it goes by itself); handed
+  // to the visitor's email app, which a page can't see open, so that one stays with the Copy button until closed; or
+  // sent back because no reply could reach the address: a slip the balloon offers to fix (fix) or a domain that takes
+  // no mail (bad), which stay until the address changes. Screen readers hear it as a status
+  function mailBalloon(f, kind, from, fix) {
     const old = $('.mail-bal', f); if (old) old.remove();
     clearTimeout(f.balTimer);
     const b = document.createElement('div');
-    b.className = 'mail-bal'; b.setAttribute('role', 'status');
-    b.innerHTML = `<b>${I(sent ? 'check' : 'envelope', 16)}<span>${esc(u(sent ? 'sentTitle' : 'mailAppTitle'))}</span></b><p>${esc(sent ? u('sentNote', from) : u('mailAppNote'))}</p>`
-      + (sent ? '' : `<button type="button" class="btn mail-copy" data-act="home-copy">${I('copy', 16)}<span>${esc(u('copyAddr'))}</span></button>`)
+    b.className = 'mail-bal'; b.dataset.kind = kind; b.setAttribute('role', 'status');
+    const key = (act, icon, label, more = '') => `<button type="button" class="btn mail-copy" data-act="${act}"${more}>${I(icon, 16)}<span>${esc(label)}</span></button>`;
+    const [icon, title, note, button] = {
+      sent: ['check', u('sentTitle'), u('sentNote', from), ''],
+      mail: ['envelope', u('mailAppTitle'), u('mailAppNote'), key('home-copy', 'copy', u('copyAddr'))],
+      fix: ['warning', u('fromFixTitle', fix), u('fromFixNote', from), key('home-fix', 'check', u('fromFixUse'), ` data-to="${esc(fix)}"`)],
+      bad: ['warning', u('fromBadTitle'), u('fromBadNote', from), ''],
+    }[kind];
+    b.innerHTML = `<b>${I(icon, 16)}<span>${esc(title)}</span></b><p>${esc(note)}</p>${button}`
       + `<button type="button" class="pet-x" data-act="mail-bal-x" aria-label="${esc(u('close'))}"></button>`;
     $('.mail-send', f).appendChild(b);
-    if (sent) f.balTimer = setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 300); }, 8000);
+    if (kind === 'sent') f.balTimer = setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 300); }, 8000);
   }
 
   // The message goes straight to the owner's inbox through /api/message (worker/index.js). Where that can't
-  // send (not set up, offline, a local preview) the visitor's email app opens with the same message
+  // send (not set up, offline, a local preview) the visitor's email app opens with the same message; an address no
+  // reply can reach comes back to the form instead
   async function homeSend(w) {
     const f = $('.hm-mail', w.el), note = $('#hm-send-note', w.el), btn = $('button[type="submit"]', f);
     if (!f || (btn && btn.disabled)) return;
     const offers = homeOffers();
     const subject = `${u('subjectPrefix')}: ${offers[w.state.subj] || offers[0]}`;
-    const from = $('#hm-from', f).value.trim(), message = $('#hm-msg', f).value.trim();
+    const field = $('#hm-from', f), from = field.value.trim(), message = $('#hm-msg', f).value.trim();
     const say = (text) => { if (note) note.textContent = text; };
-    btn.disabled = true; say(u('sending'));
+    btn.disabled = true; say(u('sending')); field.removeAttribute('aria-invalid');
     let res = null;
     try {
       res = await fetch('/api/message', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ from, subject, message, lang, website: f.elements.website.value }),
+        // sure: the balloon offered a fix for this very address, and the visitor sent it as typed all the same
+        body: JSON.stringify({ from, subject, message, lang, website: f.elements.website.value, sure: w.state.fromAsked === from }),
       });
     } catch (e) { res = null; }
     btn.disabled = false;
     say(u('sendHint'));
     if (res && res.ok) {
       $('#hm-msg', f).value = ''; w.state.msg = '';
-      mailBalloon(f, true, from); track('send', 'api');
+      mailBalloon(f, 'sent', from); track('send', 'api');
       return;
     }
-    mailBalloon(f, false); track('send', 'mailto');
+    // no reply could reach the address (worker/index.js, message()): the message waits in the form, and the balloon
+    // offers the fix for a slip (suggest) or asks for another look at the address
+    const why = res && res.status === 422 ? await res.json().catch(() => null) : null;
+    if (why && why.error === 'from') {
+      field.setAttribute('aria-invalid', 'true');
+      if (why.suggest) { w.state.fromAsked = from; mailBalloon(f, 'fix', from, why.suggest); } else { mailBalloon(f, 'bad', from); field.focus(); }
+      return;
+    }
+    mailBalloon(f, 'mail'); track('send', 'mailto');
     location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
   }
 
   /* ------------------------------------------------------------ ABOUT */
   // A document in five parts: the letter, the work log, side projects, off the clock, and an order form.
+  // The side projects disk: a 3.5" HD floppy in the site's own materials. Navy plastic lit from the top left, the Silver
+  // shutter brushed and sheened like the hero's steel, the label's text on its ruled lines, the write-protect slider
+  // bottom left and the HD hole bottom right, cut through so the page shows.
+  const FLOPPY_GRAIN = [[3.9, 30, 58, 1], [5.1, 44, 44, 0], [6.6, 28, 40, 1], [7.4, 61, 29, 0], [9.2, 33, 51, 1], [10.7, 28, 23, 0],
+    [11.9, 50, 40, 1], [13.6, 36, 30, 0], [15.1, 28, 62, 1], [16.8, 57, 33, 0], [18.3, 31, 38, 1], [19.9, 44, 46, 0], [21.4, 28, 27, 1],
+    [22.8, 62, 28, 0], [24.5, 35, 47, 1], [26.1, 28, 34, 0], [27.4, 51, 39, 1], [29.2, 30, 60, 0], [30.9, 46, 25, 1], [32.3, 28, 44, 0],
+    [33.8, 58, 32, 1], [35.6, 32, 41, 0], [37.2, 28, 62, 1], [38.9, 48, 42, 0]]
+    .map(([y, x, w, lit]) => `<rect x="${x}" y="${y}" width="${Math.min(w, 90 - x)}" height=".3" fill="${lit ? '#fff' : '#2e3442'}" opacity="${lit ? .38 : .14}"/>`).join('');
   function floppySVG(label, vol) {
+    const body = 'M5 2h101l12 12v104a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z';
+    const shutter = 'M28 2h62v38.6a1.4 1.4 0 0 1-1.4 1.4H29.4a1.4 1.4 0 0 1-1.4-1.4z';
     return `<svg class="floppy-art" viewBox="0 0 120 124" aria-hidden="true" focusable="false">
-      <path d="M5 2h101l12 12v104a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z" fill="#1b2744"/>
-      <path d="M5 2h101l12 12v104a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4z" fill="none" stroke="#0b1226" stroke-width="2"/>
-      <rect x="28" y="2" width="62" height="40" fill="#c7cad1"/><rect x="28" y="2" width="62" height="3" fill="#e9ebef"/>
-      <rect x="70" y="9" width="12" height="27" fill="#1b2744"/>
-      <rect x="13" y="54" width="94" height="62" rx="2" fill="#f7f4ea"/>
-      <rect x="13" y="54" width="94" height="9" fill="#d8471f"/>
-      <g fill="#b9b6ab"><rect x="19" y="84" width="82" height="1"/><rect x="19" y="97" width="82" height="1"/><rect x="19" y="110" width="82" height="1"/></g>
-      <text class="fl-t1" x="19" y="82.6">${esc(label)}</text>
-      <text class="fl-t2" x="19" y="95.6">${esc(vol)}</text>
-      <rect x="6" y="112" width="6" height="6" fill="#0b1226"/>
+      <defs>
+        <linearGradient id="fl-body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#28375f"/><stop offset=".45" stop-color="#1b2744"/><stop offset="1" stop-color="#131b32"/></linearGradient>
+        <linearGradient id="fl-gloss" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".07"/><stop offset=".35" stop-color="#fff" stop-opacity=".02"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <linearGradient id="fl-foot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#040a18" stop-opacity="0"/><stop offset="1" stop-color="#040a18" stop-opacity=".4"/></linearGradient>
+        <linearGradient id="fl-wall" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#050a16" stop-opacity=".45"/><stop offset="1" stop-color="#050a16" stop-opacity="0"/></linearGradient>
+        <linearGradient id="fl-lip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050a16" stop-opacity=".55"/><stop offset="1" stop-color="#050a16" stop-opacity="0"/></linearGradient>
+        <linearGradient id="fl-metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f4f7"/><stop offset=".4" stop-color="#d4d7de"/><stop offset="1" stop-color="#b3b8c2"/></linearGradient>
+        <linearGradient id="fl-sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".4"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset=".68" stop-color="#282c3c" stop-opacity=".1"/><stop offset=".9" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <linearGradient id="fl-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf9f2"/><stop offset="1" stop-color="#f2eee2"/></linearGradient>
+        <clipPath id="fl-cut"><path clip-rule="evenodd" d="${body}M109 112v5.5h5.5V112z"/></clipPath>
+      </defs>
+      <g clip-path="url(#fl-cut)">
+        <path d="${body}" fill="url(#fl-body)"/>
+        <path d="${body}" fill="url(#fl-gloss)"/>
+        <rect x="1" y="100" width="118" height="22" fill="url(#fl-foot)"/>
+        <path d="M5 2.6h100.8l11.6 11.6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".9"/>
+        <path d="M1.6 6v112" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width=".9"/>
+        <rect x="12" y="2" width="16" height="39" fill="#050a16" opacity=".16"/>
+        <rect x="12" y="2" width="3" height="39" fill="url(#fl-wall)"/>
+        <rect x="12" y="40.5" width="16" height=".5" fill="#fff" opacity=".1"/>
+        <path d="M7 7.5l3.2 5.2H3.8z" fill="#3a4b7b"/>
+        <rect x="28" y="42" width="62" height="2.2" fill="url(#fl-lip)"/>
+        <path d="${shutter}" fill="url(#fl-metal)"/>
+        ${FLOPPY_GRAIN}
+        <path d="${shutter}" fill="url(#fl-sheen)"/>
+        <rect x="28" y="2" width="62" height="1" fill="#fff" opacity=".9"/>
+        <rect x="28" y="3" width="62" height="1.6" fill="#fff" opacity=".35"/>
+        <path d="M28.3 2v38.6" stroke="#fff" stroke-opacity=".5" stroke-width=".6"/>
+        <path d="M89.7 2v38.6M29.4 41.7h59.2" fill="none" stroke="#6f747e" stroke-opacity=".7" stroke-width=".6"/>
+        <rect x="70" y="9" width="12" height="27" rx="1.4" fill="#0f172d"/>
+        <rect x="70" y="9" width="12" height="4" rx="1.4" fill="url(#fl-lip)"/>
+        <rect x="70" y="9" width="1.1" height="27" fill="#050a16" opacity=".4"/>
+        <path d="M71.2 35.7h9.6" stroke="#fff" stroke-opacity=".75" stroke-width=".6"/>
+        <rect x="14" y="116" width="94" height="1" fill="#050a16" opacity=".4"/>
+        <rect x="107" y="55" width=".9" height="61.6" fill="#050a16" opacity=".35"/>
+        <rect x="13" y="54" width="94" height="62" rx="2" fill="url(#fl-paper)" stroke="#141008" stroke-opacity=".14" stroke-width=".5"/>
+        <path d="M13 56a2 2 0 0 1 2-2h90a2 2 0 0 1 2 2v7H13z" fill="#d4441d"/>
+        <rect x="13" y="62.5" width="94" height=".5" fill="#9c2f10" opacity=".55"/>
+        <text class="fl-hd" x="19" y="60.8">HD</text>
+        <text class="fl-hd" x="101" y="60.8" text-anchor="end">1.44 MB</text>
+        <g fill="#b9b6ab"><rect x="19" y="84" width="82" height="1"/><rect x="19" y="97" width="82" height="1"/><rect x="19" y="110" width="82" height="1"/></g>
+        <text class="fl-t1" x="19" y="82.6">${esc(label)}</text>
+        <text class="fl-t2" x="19" y="95.6">${esc(vol)}</text>
+        <rect x="5.5" y="112" width="5.5" height="5.5" fill="#18213b"/>
+        <rect x="5.5" y="112" width="5.5" height="1.6" fill="#050a16" opacity=".7"/>
+        <rect x="5.5" y="112" width="1.1" height="5.5" fill="#050a16" opacity=".5"/>
+      </g>
+      <path d="${body}" fill="none" stroke="#0b1226" stroke-width="1.2"/>
+      <path d="M109 112h5.5v5.5H109zM5.5 112H11v5.5H5.5z" fill="none" stroke="#0b1226" stroke-width=".6"/>
     </svg>`;
   }
   function buildAbout() {
@@ -1154,9 +1264,8 @@
         <dl class="sp-facts">${facts}</dl>
         <p class="ad-lede">${esc(t(o.intro))}</p>
         <div class="ad-actions">
-          <button class="btn lg default" data-act="resume">${I('resume', 16)}<span>${esc(u(hasCV() ? 'downloadCV' : 'cvAskBtn'))}</span></button>
-          <button class="btn lg" data-act="open-work">${I('folder', 16)}<span>${esc(u('openPortfolio'))}</span></button>
-          <button class="btn lg" data-act="to-build">${I('envelope', 16)}<span>${esc(u('sendMsg'))}</span></button>
+          <button type="button" class="page-key rec" data-act="resume">${I('resume', 16)}<span>${esc(u(hasCV() ? 'downloadCV' : 'cvAskBtn'))}</span></button>
+          <button type="button" class="page-key silver" data-act="open-work">${I('folder', 16)}<span>${esc(u('openPortfolio'))}</span></button>
         </div>
       </header>
 
@@ -1166,10 +1275,6 @@
       </div></section>
 
       <div class="sp-row">
-        <section class="panel"><h2>${esc(u('projects'))}</h2><div class="pb pj-pb">
-          <div class="floppy" aria-hidden="true">${floppySVG(u('diskLabel'), `Vol. ${o.sideProjects.length}`)}</div>
-          <div class="pj-list"><p class="lead">${esc(u('projectsLead'))}</p><ol class="pj">${projects}</ol></div>
-        </div></section>
         <section class="panel"><h2>${esc(u('offClock'))}</h2><div class="pb oc">
           <p class="lead">${esc(u('offClockText'))}</p>
           <div class="cpl">
@@ -1184,7 +1289,7 @@
           <h2 id="bd-h">${esc(u('build'))}</h2>
           <p class="bd-lead">${esc(u('buildLead'))}</p>
           <fieldset class="bd-need"><legend>${esc(u('need'))}</legend><div class="bd-grid">${offers}</div></fieldset>
-          <div class="bd-send"><button class="btn lg default" type="button" data-act="send-brief">${I('envelope', 16)}<span>${esc(u('sendMsg'))}</span></button></div>
+          <div class="bd-send"><button class="page-key rec" type="button" data-act="send-brief">${I('envelope', 16)}<span>${esc(u('sendMsg'))}</span></button></div>
         </div>
         <aside class="bd-side" aria-labelledby="bd-side-h">
           <h3 id="bd-side-h">${esc(u('reachDirect'))}</h3>
@@ -1282,14 +1387,65 @@
   // A case plays its page from shared/cases.js after its overview (the hero), one chapter per section of the owner's
   // Figma page. A case without a page plays the overview and keeps the write-up's place as a chapter not published yet.
   const casePage = (p) => (PF.cases && PF.cases[p.slug]) || null;
+  // On a local preview an empty slot shows the owner's export as soon as it is saved in the case's folder under the
+  // slot's file name (Figma's PNG or JPG, with or without its @2x suffix), so each screen is judged in place and
+  // replaced by exporting it again. The site itself shows a slot's src only: the web copies, made once approved.
+  const DRAFTS = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const DRAFT_EXT = ['@2x.png', '.png', '@2x.jpg', '.jpg'];
+  // the export waits hidden in front of the grey slot, with the name tag that names its file on hover
+  const draftHTML = (c, x) => (DRAFTS
+    ? `<img class="cs-img" data-draft="../${esc(c.dir)}/${esc(x.file)}" width="${x.w}" height="${x.h}" alt="${esc(t(x.alt))}" decoding="async" hidden><span class="cs-draft-tag" aria-hidden="true" hidden></span>`
+    : '');
+  // each name the export may carry is tried in turn, the sharper @2x first when both were exported; the first that
+  // loads takes the slot's place, and when none does the grey slot stands again. A newer check drops an older one.
+  function draftLoad(img, stamp) {
+    const tag = img.nextElementSibling, slot = tag.nextElementSibling;
+    const w = +img.getAttribute('width'), h = +img.getAttribute('height');
+    const tries = DRAFT_EXT;
+    img.dataset.scan = stamp;
+    const next = (i) => {
+      if (img.dataset.scan !== String(stamp)) return;
+      if (i === tries.length) { img.hidden = tag.hidden = true; slot.hidden = false; return; }
+      const probe = new Image();
+      probe.onload = () => {
+        if (img.dataset.scan !== String(stamp)) return;
+        const nw = probe.naturalWidth, nh = probe.naturalHeight, off = Math.abs(nw / nh / (w / h) - 1) > 0.01;
+        // the loaded probe takes the picture's place: the local server says no-cache, so a new src would fetch again
+        for (const a of img.attributes) if (a.name !== 'src' && a.name !== 'hidden') probe.setAttribute(a.name, a.value);
+        img.replaceWith(probe);
+        // the tag gives the file to export again, its size and its scale; it stays up on a picture of another shape
+        tag.classList.toggle('off', off);
+        tag.innerHTML = `<b>${esc(probe.dataset.draft.split('/').slice(-2).join('/') + tries[i])}</b><small>${nw} × ${nh} · ${+(nw / w).toFixed(1)}x</small>${off ? `<small class="dt-off">${I('warning', 16)}<span>${esc(u('draftRatio', `${w} × ${h}`))}</span></small>` : ''}`;
+        tag.hidden = false;
+        slot.hidden = true;
+      };
+      probe.onerror = () => next(i + 1);
+      probe.src = `${img.dataset.draft}${tries[i]}?r=${stamp}`;
+    };
+    next(0);
+  }
+  function draftScan(root) {
+    const stamp = Date.now();
+    $$('img[data-draft]', root).forEach((img) => draftLoad(img, stamp));
+  }
+  // coming back to the page from the export (Figma, Finder) checks the open case again: a new or replaced file shows
+  // without a reload, and the page keeps its place. A page out of sight waits, so a background tab asks for nothing.
+  let draftAt = 0;
+  function draftAgain() {
+    const w = wins.get('player');
+    if (!w || document.hidden || Date.now() - draftAt < 500) return;
+    draftAt = Date.now();
+    draftScan(w.el);
+  }
+  if (DRAFTS) { window.addEventListener('focus', draftAgain); document.addEventListener('visibilitychange', draftAgain); }
   // a screen on the page: the owner's screenshot once it has a src, until then a grey slot naming its file and size
   function picBody(c, x) {
     if (x.src) return `<img class="cs-img" src="${esc(x.src)}" width="${x.w}" height="${x.h}" alt="${esc(t(x.alt))}" loading="lazy" decoding="async">`;
-    return `<span class="cs-ph cs-img" style="aspect-ratio: ${x.w} / ${x.h}" role="img" aria-label="${esc(u('picSoon', t(x.alt)))}"><span class="cs-ph-tag"><b>${esc(c.dir.split('/').pop())}/${esc(x.file)}</b><small>${x.w} × ${x.h}</small></span></span>`;
+    return `${draftHTML(c, x)}<span class="cs-ph cs-img" style="aspect-ratio: ${x.w} / ${x.h}" role="img" aria-label="${esc(u('picSoon', t(x.alt)))}"><span class="cs-ph-tag"><b>${esc(c.dir.split('/').pop())}/${esc(x.file)}</b><small>${x.w} × ${x.h}</small></span></span>`;
   }
   // a CRT with no screen yet shows its own On-Screen Display, the way a monitor says it has no input, naming the file
   const crtBody = (c, x) => (x.src ? picBody(c, x)
-    : `<span class="crt-osd" role="img" aria-label="${esc(u('picSoon', t(x.alt)))}"><span class="osd-box"><b>${esc(u('noSignal'))}</b><span>${esc(c.dir.split('/').pop())}/${esc(x.file)}</span><small>${x.w} × ${x.h}</small></span></span>`);
+    : `${draftHTML(c, x)}<span class="crt-osd" role="img" aria-label="${esc(u('picSoon', t(x.alt)))}"><span class="osd-box"><b>${esc(u('noSignal'))}</b><span>${esc(c.dir.split('/').pop())}/${esc(x.file)}</span><small>${x.w} × ${x.h}</small></span></span>`);
   const CRT_CHIN = '<span class="crt-chin" aria-hidden="true"><span class="crt-grille"></span><span class="crt-badge"></span><span class="crt-keys"><i></i><i></i><i></i><i></i></span><span class="crt-lamp"></span><span class="crt-power"></span></span>';
   // the stand is one drawing in the case's plastic and light, so it reads as one moulding: the neck widens down from
   // under the case, shaded where the case overhangs it, and stands in a swivel ring on the base, whose front edge shows
@@ -1313,8 +1469,9 @@
     return `<figure class="${cls}">${casePic(c, b.pic)}${b.pop ? `<span class="cs-pop">${casePic(c, b.pop)}</span>` : ''}</figure>`;
   }
   // every screen sits in something from the XP years: a big one on a CRT monitor, the rest in an XP window of the app
-  // (Home's mini window: a tool window or a dialog carries only its close button)
+  // (Home's mini window: a tool window or a dialog carries only its close button); the design focus's shot goes bare
   function casePic(c, x) {
+    if (x.frame === 'bare') return picBody(c, x);
     if (x.frame === 'crt') return `<span class="cs-crt"><span class="crt-case"><span class="crt-bezel"><span class="crt-glass">${crtBody(c, x)}</span></span>${CRT_CHIN}</span>${crtStand()}</span>`;
     // a window is never wider than its screen at 1x (its frame is 6px), so a small card is not blown up; a phone
     // screen stays at 280px so a whole one fits on the screen
@@ -1328,11 +1485,16 @@
     if (c && c.hero) return `<div class="cs-hero has-crt">${text}<figure class="cs-hero-crt">${casePic(c, c.hero)}</figure></div>`;
     return `<div class="cs-hero on-cover"><span class="cs-hero-pic">${coverImg(p, '(max-width: 720px) 100vw, 1100px', u('coverAlt', p.title))}</span>${text}</div>`;
   }
-  const tagHTML = (ch) => `<p class="cs-tag">${esc(t(ch.label))}</p>`;
+  const tagHTML = (ch) => `<p class="cs-tag">${esc(titleCase(t(ch.label)))}</p>`;
   const paras = (list) => [].concat(list).map((x) => `<p>${esc(t(x))}</p>`).join('');
   // the page's blocks; style.css sets each on the page's grid where the owner's Figma puts it
   const BLOCKS = {
-    intro: (b, ch) => `<div class="cs-intro${b.under ? ' under' : ''}">${tagHTML(ch)}<h3 class="cs-title">${esc(t(b.title))}</h3>${b.text ? `<div class="cs-lede">${paras(b.text)}</div>` : ''}</div>`,
+    intro: (b, ch) => {
+      const title = `<h3 class="cs-title">${esc(t(b.title))}</h3>`, lede = b.text ? `<div class="cs-lede">${paras(b.text)}</div>` : '';
+      // the solution's tag sits under its heading and its text beside the tag, so the two share a row of their own
+      return b.under ? `<div class="cs-intro under">${title}<div class="cs-under">${tagHTML(ch)}${lede}</div></div>`
+        : `<div class="cs-intro">${tagHTML(ch)}${title}${lede}</div>`;
+    },
     quote: (b, ch) => `<div class="cs-quote">${tagHTML(ch)}<blockquote><p>${esc(t(b.text))}</p></blockquote></div>`,
     pic: (b, ch, c) => figHTML(c, b),
     row: (b, ch, c) => figHTML(c, b),
@@ -1441,6 +1603,7 @@
       + '<span class="tl-fill"></span>' + segs.slice(1).map((g) => `<span class="tl-mark${g.el ? '' : ' off'}" style="left:${pct(g.start)}"></span>`).join('');
   }
   function afterPlayer(w) {
+    if (DRAFTS && !document.hidden) draftScan(w.el);
     plMeasure(w);
     updatePlayer(w);
     if (w.plRO) w.plRO.disconnect();
@@ -1470,8 +1633,15 @@
     const at = w.knots ? tlTrack(w.knots, prog) : prog;
     const fill = $('.tl-fill', w.el); if (fill) fill.style.width = pct(at);
     const seek = $('.seek', w.el); if (seek && document.activeElement !== seek) seek.value = Math.round(at * 1000);
-    if (w.curSec !== id) { const b = $(`.skin-nav button[data-sec="${id}"]`, w.el); if (b && b.parentNode.scrollWidth > b.parentNode.clientWidth) b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    if (w.curSec !== id) { const b = $(`.skin-nav button[data-sec="${id}"]`, w.el); if (b) navShow(b); }
     w.curSec = id;
+  }
+  // the chapter being read comes into view when a short window cuts the tray's list off. Only the list scrolls, never
+  // the desktop behind a window that hangs off the screen (a phone lists no chapters)
+  function navShow(b) {
+    const n = b.parentNode, nr = n.getBoundingClientRect(), r = b.getBoundingClientRect();
+    const dy = r.top < nr.top ? r.top - nr.top : r.bottom > nr.bottom ? r.bottom - nr.bottom : 0;
+    if (dy) n.scrollBy(0, dy);
   }
   function scrollToSec(w, id) {
     const v = $('.screen-view', w.el);
@@ -1518,7 +1688,7 @@
     { key: 'dribbble', icon: 'dribbble', label: 'Dribbble' },
     { key: 'behance', icon: 'behance', label: 'Behance' },
     { key: 'upwork', icon: 'upwork', label: 'Upwork' },
-    { key: 'cv', icon: 'resume', label: 'CV' },
+    { key: 'cv', icon: 'resume', label: { en: 'Resume', id: 'CV' } },
   ];
   function buildContact(w) {
     const o = PF.owner;
@@ -1543,11 +1713,11 @@
       <div class="nero-top" data-drag>
         <span class="nero-logo" aria-hidden="true">${esc(o.first.toLowerCase())}</span>
         <label class="nero-pick">${I(cat.icon, 16)}<span class="sr-only">${esc(u('contact'))}</span>
-          <select data-change="contact-cat">${CATS.map((c) => `<option value="${c.key}" ${c.key === cat.key ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}</select><span class="dd" aria-hidden="true">${GLYPH.arrow}</span></label>
+          <select data-change="contact-cat">${CATS.map((c) => `<option value="${c.key}" ${c.key === cat.key ? 'selected' : ''}>${esc(t(c.label))}</option>`).join('')}</select><span class="dd" aria-hidden="true">${GLYPH.arrow}</span></label>
         <span class="nero-ctrl"><button class="q" data-act="open-about" aria-label="${esc(u('about'))}" title="${esc(u('about'))}">?</button><button data-wact="min" aria-label="${esc(u('minimize'))}" title="${esc(u('minimize'))}">${GLYPH.min}</button><button class="x" data-wact="close" aria-label="${esc(u('close'))}" title="${esc(u('close'))}">${GLYPH.close}</button></span>
       </div>
       <div class="nero-body">
-        <div class="nero-cats" role="tablist" aria-label="${esc(u('contact'))}">${CATS.map((c) => `<button class="nero-cat" role="tab" id="nero-tab-${c.key}" aria-selected="${c.key === cat.key}" aria-controls="nero-panel" tabindex="${c.key === cat.key ? 0 : -1}" data-cat="${c.key}">${I(c.icon, 40)}<span>${esc(c.label)}</span></button>`).join('')}</div>
+        <div class="nero-cats" role="tablist" aria-label="${esc(u('contact'))}">${CATS.map((c) => `<button class="nero-cat" role="tab" id="nero-tab-${c.key}" aria-selected="${c.key === cat.key}" aria-controls="nero-panel" tabindex="${c.key === cat.key ? 0 : -1}" data-cat="${c.key}">${I(c.icon, 40)}<span>${esc(t(c.label))}</span></button>`).join('')}</div>
         <ul class="nero-actions" id="nero-panel" role="tabpanel" aria-labelledby="nero-tab-${cat.key}">${acts}</ul>
       </div>
       <div class="nero-bottom">
@@ -1564,7 +1734,7 @@
   // the CV is one PDF per language (owner.cv.en / owner.cv.id), so the file follows the language switch
   const cvHref = () => t(PF.owner.cv);
   const hasCV = () => !!cvHref() && !cvHref().startsWith('#');
-  const cvName = () => (hasCV() ? decodeURIComponent(cvHref().split('/').pop()) : `Resume_${PF.owner.first}_${PF.owner.last}.pdf`);
+  const cvName = () => (hasCV() ? decodeURIComponent(cvHref().split(/[?#]/)[0].split('/').pop()) : `Resume_${PF.owner.first}_${PF.owner.last}.pdf`);
   function buildResume() {
     if (!hasCV()) {
       return `<div class="win-body"><div class="dlg">
@@ -1615,7 +1785,7 @@
     if (!gameScript) {
       gameScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'game.js?v=30';
+        s.src = 'game.js?v=34';
         s.onload = () => resolve(window.BossRushXP);
         s.onerror = () => { gameScript = null; s.remove(); reject(new Error('game.js did not load')); };
         document.head.appendChild(s);
@@ -1660,7 +1830,7 @@
     if (!petScript) {
       petScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'pet.js?v=3';
+        s.src = 'pet.js?v=6';
         s.onload = () => resolve(window.DesktopPet);
         s.onerror = () => { petScript = null; s.remove(); reject(new Error('pet.js did not load')); };
         document.head.appendChild(s);
@@ -1673,7 +1843,7 @@
     if (pet) return;
     loadPet().then((P) => {
       if (pet || !petWanted) return;
-      pet = P.create({ lang, fresh, onPlay: (from) => openGame(from), onHide: hidePet });
+      pet = P.create({ lang, fresh, onPlay: (from) => { track('door', 'br:pet'); openGame(from); }, onHide: hidePet });
     }).catch(() => { /* no stickman this visit */ });
   }
   function hidePet() {
@@ -1692,7 +1862,8 @@
     return `<div class="win-body"><div class="dlg">
       <div class="dlg-row">${I('warning', 32)}<div><p><b>${esc(u('gateHead'))}</b></p><p>${esc(u('gateText'))}</p></div></div>
       ${gateBoardHTML(w.state.board)}
-      <div class="btns"><button class="btn default" data-wact="close">${esc(u('ok'))}</button></div>
+      <p>${esc(u('gateSaverText'))}</p>
+      <div class="btns"><button class="btn default" data-act="gate-saver">${esc(u('gateSaver'))}</button><button class="btn" data-wact="close">${esc(u('ok'))}</button></div>
     </div></div>`;
   }
   // The gate also shows the top five of the game's leaderboard (worker/index.js), so a visitor who can't play
@@ -1721,10 +1892,257 @@
     });
   }
 
+  /* ------------------------------------------------------------ Screen Saver XP (the second game) */
+  // A bullet hell against XP's own screensavers that plays on a phone as well as at a desk (GAME2_BRIEF.md). Its window
+  // opens from the desktop's right-click menu (Properties), from the screensaver's offer once it wakes, from Boss Rush
+  // XP's phone gate, and at #/screensaver. screensaver.js is only fetched on first open, or when the idle screensaver
+  // first runs.
+  let saverScript = null;
+  function loadSaver() {
+    if (window.ScreenSaverXP) return Promise.resolve(window.ScreenSaverXP);
+    if (!saverScript) {
+      saverScript = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'screensaver.js?v=2';
+        s.onload = () => resolve(window.ScreenSaverXP);
+        s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
+        document.head.appendChild(s);
+      });
+    }
+    return saverScript;
+  }
+  function openSaver(from, push = true) { openWin('screensaver', { from, push, pushHistory: push }); }
+  // a touch screen's status bar names the touches, not the keys
+  const coarsePtr = window.matchMedia('(pointer: coarse)');
+  function buildSaver() {
+    return `<div class="menubar" role="menubar">${menuBtn('game', u('gameMenu'))}${menuBtn('help', u('help'))}</div>
+      <div class="win-body saver-body" data-saver></div>
+      <div class="statusbar"><span class="gm-where">Screen Saver XP</span><span>${esc(u(coarsePtr.matches ? 'saverTouch' : 'saverKeys'))}</span></div>`;
+  }
+  // the game outlives re-renders (a language switch rebuilds the window body): its stage moves into the new body
+  function afterSaver(w) {
+    const host = $('[data-saver]', w.el);
+    if (w.game) { w.game.attach(host); w.game.setLang(lang); return; }
+    // a tall screen that isn't a phone's (a tablet held upright) plays the portrait stage in a maximised window
+    if (!w.max && !isMobile() && desktopEl.clientHeight > desktopEl.clientWidth) toggleMax(w);
+    host.innerHTML = `<p class="gm-note">${esc(u('saverLoading'))}</p>`;
+    loadSaver().then((S) => {
+      if (wins.get('screensaver') !== w || w.game) return;
+      const h = $('[data-saver]', w.el);
+      h.innerHTML = '';
+      w.game = S.create({
+        lang, owner: PF.owner.fullName, onContact: () => openWin('contact'), onWin: trailsWon,
+        // Blank.scr beaten: the PC starts again, and the result waits until the Welcome screen has gone
+        onReboot: (done) => { bootScreen.replay(); bootScreen.home(null); afterBoot(done); },
+        onStatus: (text) => { const st = $('.gm-where', w.el); if (st) st.textContent = text; },
+        onRun: (d) => track('run', `ss:${d}`),
+        // the pointer trails' switch in the game's Settings, where a phone has it: null until they are won
+        trails: { on: () => (trailsState() ? trailsWanted : null), set: (on) => { if (on !== trailsWanted) toggleTrails(); } },
+      });
+      w.game.attach(h);
+      if (activeId === w.id) w.game.focus();
+    }).catch(() => { const h = $('[data-saver]', w.el); if (h) h.innerHTML = `<p class="gm-note">${esc(u('saverFailed'))}</p>`; });
+  }
+
+  /* ---- the desktop's own right-click menu: Properties opens Display Properties, the game's front door ---- */
+  // Only the bare desktop opens it (not a window, an icon or the taskbar): a right-click, a long press on a touch
+  // screen, or Shift+F10 or the Menu key while nothing else has the focus
+  let deskMenu = null, pressT = 0, pressAt = null;
+  const onDesk = (t) => !!(t && t.closest && t.closest('#desktop') && !t.closest('.win, .dicon'));
+  function openDeskMenu(x, y) {
+    closeMenu(); closeStart(); closeDeskMenu();
+    const m = deskMenu = document.createElement('div');
+    m.className = 'menu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', u('desktop'));
+    m.innerHTML = `<button role="menuitem"><span class="mk"></span><span>${esc(u('properties'))}</span></button>`;
+    document.body.appendChild(m);
+    m.style.left = clamp(x, 2, innerWidth - m.offsetWidth - 2) + 'px';
+    m.style.top = clamp(y, 2, innerHeight - m.offsetHeight - 2) + 'px';
+    m.addEventListener('click', (e) => { if (!e.target.closest('button')) return; const r = rectOf(m); closeDeskMenu(); track('door', 'ss:display'); openSaver(r); });
+    m.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeDeskMenu(); } });
+    $('button', m).focus({ preventScroll: true });
+    document.addEventListener('pointerdown', deskMenuOutside, true);
+  }
+  function deskMenuOutside(e) { if (deskMenu && !deskMenu.contains(e.target)) closeDeskMenu(); }
+  function closeDeskMenu() {
+    if (!deskMenu) return;
+    deskMenu.remove(); deskMenu = null;
+    document.removeEventListener('pointerdown', deskMenuOutside, true);
+  }
+  desktopEl.addEventListener('contextmenu', (e) => {
+    clearTimeout(pressT); pressAt = null;
+    if (!onDesk(e.target)) return;
+    e.preventDefault(); openDeskMenu(e.clientX, e.clientY);
+  });
+  desktopEl.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' || !onDesk(e.target)) return;
+    pressAt = { x: e.clientX, y: e.clientY, id: e.pointerId };
+    clearTimeout(pressT);
+    pressT = setTimeout(() => { if (pressAt) openDeskMenu(pressAt.x, pressAt.y); pressAt = null; }, 550);
+  });
+  desktopEl.addEventListener('pointermove', (e) => {
+    if (pressAt && e.pointerId === pressAt.id && Math.hypot(e.clientX - pressAt.x, e.clientY - pressAt.y) > 10) { clearTimeout(pressT); pressAt = null; }
+  });
+  ['pointerup', 'pointercancel'].forEach((k) => desktopEl.addEventListener(k, () => { clearTimeout(pressT); pressAt = null; }));
+  // from the keyboard it opens in the middle of the desktop, and the browser's own menu, which the same key can bring
+  // next, stays shut over it
+  document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented || !(e.key === 'ContextMenu' || (e.key === 'F10' && e.shiftKey))) return;
+    const f = document.activeElement;
+    if (f && f !== document.body && !onDesk(f)) return;
+    e.preventDefault();
+    const r = desktopEl.getBoundingClientRect();
+    openDeskMenu(r.left + r.width / 2, r.top + r.height / 2);
+  });
+  document.addEventListener('contextmenu', (e) => { if (deskMenu && deskMenu.contains(e.target)) e.preventDefault(); });
+
+  /* ---- the screensaver: XP's Starfield after the desktop has sat still, twice a visit at most ---- */
+  // Only on a desktop-sized screen with a mouse or trackpad (the stickman's test in pet.js), never under reduced motion:
+  // after 30 s without input on an empty desktop, or 2 min with a window open (a reader still scrolls or moves the
+  // mouse in that time).
+  const roomy = matchMedia('(min-width: 721px) and (any-pointer: fine)');
+  const IDLE_EMPTY = 30000, IDLE_OPEN = 120000, IDLE_MAX = 2;
+  // the wait is read every few seconds against the desktop as it is then, so closing the last window starts the short one
+  let idleTick = 0, idleRuns = 0, idleLast = performance.now(), saverUp = null;
+  function idleArm() {
+    clearInterval(idleTick); idleTick = 0;
+    if (reduceMotion || idleRuns >= IDLE_MAX || saverUp || !roomy.matches) return;
+    idleTick = setInterval(idleCheck, 5000);
+  }
+  function idleCheck() {
+    const open = Array.from(wins.values()).some((x) => !x.min);
+    if (performance.now() - idleLast < (open ? IDLE_OPEN : IDLE_EMPTY) || idleBlocked()) return;
+    clearInterval(idleTick); idleTick = 0;
+    idleRuns += 1;
+    loadSaver().then((S) => {
+      if (saverUp || idleBlocked()) { idleRuns -= 1; idleArm(); return; }
+      if (PF.wall3d) PF.wall3d.pause();
+      saverUp = S.idle({ onWake: idleWake });
+      track('hint', 'idle');
+    }).catch(() => { idleArm(); });
+  }
+  function idleBlocked() {
+    const a = document.activeElement;
+    return document.hidden || !document.hasFocus() || document.documentElement.classList.contains('booting') || !!$('.shutdown-screen')
+      || !!(a && a.closest && a.closest('input, textarea, select, [contenteditable]'))
+      || !startMenu.hidden || !!menuState || !!deskMenu || !!noteNow || !!$('.pet-note')
+      || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')) || (x.id === 'viewer' && x.showTimer));
+  }
+  function idleWake() {
+    saverUp = null; idleLast = performance.now();
+    if (PF.wall3d) PF.wall3d.play();
+    if (!saverPlayed()) showNote('offer');
+    idleArm();
+  }
+  // a visitor who has named a player or run the game has played it: no offer for them
+  const saverPlayed = () => { try { return !!(localStorage.getItem('ssxp-name') || localStorage.getItem('ssxp-pid')); } catch (e) { return true; } };
+  // any input starts the wait again
+  const idleInput = () => { if (!saverUp) idleLast = performance.now(); };
+  ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach((k) => window.addEventListener(k, idleInput, { capture: true, passive: true }));
+  document.addEventListener('visibilitychange', idleArm);
+  roomy.addEventListener('change', idleArm);
+
+  /* ---- the tray's balloons: the Recycle Bin hint and the screensaver's offer, never both at once ---- */
+  // an XP balloon over the tray: its body is one button, beside its close box; it goes by itself after 12 s
+  let noteNow = null;
+  function showNote(kind) {
+    // one balloon at a time, the stickman's and the trails' install notes included
+    if (noteNow || $('.pet-note')) return false;
+    const [title, text, icon] = kind === 'bin' ? [u('binHint'), u('binHintText'), 'recycle'] : [u('saverOffer'), u('saverOfferText'), 'moon'];
+    const n = noteNow = document.createElement('div');
+    n.className = 'pet-note tray-note'; n.setAttribute('role', 'status');
+    n.innerHTML = `<button type="button" class="pet-x" aria-label="${esc(u('close'))}"></button><button type="button" class="note-go"><b>${I(icon, 16)}${esc(title)}</b><span>${esc(text)}</span></button>`;
+    document.body.appendChild(n);
+    const drop = () => { clearTimeout(n.timer); n.remove(); if (noteNow === n) noteNow = null; };
+    n.querySelector('.pet-x').addEventListener('click', drop);
+    n.querySelector('.note-go').addEventListener('click', () => {
+      const r = rectOf(n); drop();
+      if (kind === 'bin') openBinHint(r); else { track('door', 'ss:idle'); openSaver(r); }
+    });
+    n.timer = setTimeout(drop, 12000);
+    track('hint', kind === 'bin' ? 'bin' : 'offer');
+    return true;
+  }
+  // Boss Rush XP's way in stays the Recycle Bin, but nobody was clicking it: this balloon points there, once per browser,
+  // for a visitor who hasn't opened the game, after two windows or 90 seconds on the site (GAME2_BRIEF.md). Clicked, the
+  // Recycle Bin opens with jangan-dibuka.exe selected
+  const HINT_KEY = 'brxp-hint';
+  let hintT = 0, hintWins = 0;
+  const brxpSeen = () => { try { return Object.keys(localStorage).some((k) => k.startsWith('brxp-')); } catch (e) { return true; } };
+  function hintTry() {
+    clearTimeout(hintT);
+    if (brxpSeen() || wins.has('game') || wins.has('gamegate')) return;
+    if (wins.has('recycle')) { try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* it may show next visit */ } return; }
+    // it waits while anything else is up, and while a game is being played
+    if (noteNow || saverUp || $('.pet-note') || !startMenu.hidden || menuState || deskMenu || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')))) { hintT = setTimeout(hintTry, 5000); return; }
+    if (showNote('bin')) { try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* it may show again next visit */ } }
+  }
+  function openBinHint(from) {
+    const w = openWin('recycle', { from });
+    // the exe run from here is the balloon's door, not the Recycle Bin's own
+    w.fromHint = true;
+    // once the zoom has put the window on screen, the exe takes the focus, which is how the list shows it selected
+    const pick = (n) => {
+      if (w.el.style.visibility === 'hidden' && n < 50) { setTimeout(() => pick(n + 1), 40); return; }
+      const b = $('.bin-run', w.el); if (b) b.focus({ preventScroll: true });
+    };
+    setTimeout(() => pick(0), 40);
+  }
+
+  /* ---- pointer trails: the reward for beating Screen Saver XP ---- */
+  // 'on' from the first full win, 'off' once the visitor switches them off (the game's menu, or its Settings on a phone);
+  // trails.js is only fetched once they have been earned, and they never run under reduced motion
+  const TRAILS_KEY = 'ssxp-trails';
+  const trailsState = () => { try { return localStorage.getItem(TRAILS_KEY); } catch (e) { return null; } };
+  const setTrailsState = (v) => { try { localStorage.setItem(TRAILS_KEY, v); } catch (e) { /* storage off: they stay for this visit */ } };
+  let trails = null, trailsScript = null, trailsWanted = false;
+  function loadTrails() {
+    if (window.PointerTrails) return Promise.resolve(window.PointerTrails);
+    if (!trailsScript) {
+      trailsScript = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'trails.js?v=2';
+        s.onload = () => resolve(window.PointerTrails);
+        s.onerror = () => { trailsScript = null; s.remove(); reject(new Error('trails.js did not load')); };
+        document.head.appendChild(s);
+      });
+    }
+    return trailsScript;
+  }
+  function showTrails(fresh) {
+    trailsWanted = true;
+    if (trails || reduceMotion) return;
+    loadTrails().then((T) => {
+      if (trails || !trailsWanted) return;
+      trails = T.create({ lang, fresh });
+    }).catch(() => { /* no trails this visit */ });
+  }
+  function hideTrails() {
+    trailsWanted = false; setTrailsState('off');
+    if (trails) { trails.destroy(); trails = null; }
+  }
+  function toggleTrails() { if (trailsWanted) hideTrails(); else { setTrailsState('on'); showTrails(false); } }
+  // the game calls this when a full run is won: the first win installs them ('new'); after that it says how they stand.
+  // On a small screen the tray's note would cover the win screen, so it waits until the game's window closes or goes
+  // down to the taskbar (trailsNoteNow)
+  let trailsNote = false;
+  function trailsWon() {
+    const st = trailsState();
+    if (st === 'on' || st === 'off') return st;
+    trailsNote = isMobile();
+    setTrailsState('on'); showTrails(!trailsNote);
+    return reduceMotion ? 'on' : 'new';
+  }
+  function trailsNoteNow() {
+    if (!trailsNote) return;
+    trailsNote = false;
+    if (trails && trails.notify) trails.notify();
+  }
+
   /* ------------------------------------------------------------ actions */
   const winOf = (el) => { const n = el.closest('.win'); return n ? wins.get(n.dataset.id) : null; };
   const ACTIONS = {
     'open-work': (a) => openWin('work', { from: rectOf(a), pushHistory: true }),
+    'gate-saver': (a, w) => { const r = rectOf(a); if (w) closeWin(w); track('door', 'ss:gate'); openSaver(r); },
     'open-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-start': (a, w) => {
@@ -1734,6 +2152,14 @@
       const m = $('#hm-msg', f); if (m) m.focus({ preventScroll: true });
     },
     'mail-bal-x': (a) => { const b = a.closest('.mail-bal'); if (b) b.remove(); },
+    // the balloon's fix for a slip in the address: it takes the field's place, and Send is next
+    'home-fix': (a, w) => {
+      const f = w && $('.hm-mail', w.el), field = f && $('#hm-from', f); if (!field) return;
+      field.value = w.state.from = a.dataset.to;
+      field.removeAttribute('aria-invalid');
+      a.closest('.mail-bal').remove();
+      $('button[type="submit"]', f).focus();
+    },
     'home-copy': (a, w) => {
       track('copy', 'email');
       const note = w && $('#hm-copy-note', w.el), label = $('span', a);
@@ -1756,16 +2182,14 @@
     'home-go': (a, w) => { const s = w && $('#' + a.dataset.to, w.el); if (s) s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); },
     // a programme row opens its case study; the player zooms out of the row's cover
     'home-case': (a) => { const row = a.closest('.ft-show'); openCase(a.dataset.slug, rectOf(row && $('.ft-cover', row)) || rectOf(a), true); },
-    // a listing slot opens its episode; the remote's keys switch episodes where they are
+    // the remote's keys switch episodes where they are
     'home-ep': (a, w) => {
       if (!w) return;
-      homeEpisode(w, +a.dataset.i, !a.dataset.go);
-      if (a.dataset.go) { const s = $('#hm-eps', w.el); if (s) s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); }
+      homeEpisode(w, +a.dataset.i, true);
     },
     'home-ep-step': (a, w) => { if (w) { homeEpisode(w, w.state.ep + (+a.dataset.d)); a.focus({ preventScroll: true }); } },
     'home-svc': (a, w) => homeService(w, +a.dataset.i),
     'home-faq': (a, w) => homeFaq(w, +a.dataset.i),
-    'to-build': (a, w) => { const f = w && $('#about-build', w.el); if (!f) return; f.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); const c = $('input[name="need"]', f); if (c) c.focus({ preventScroll: true }); },
     'send-brief': (a, w) => {
       const list = w ? $$('input[name="need"]:checked', w.el).map((c) => c.value).join(', ') : '';
       location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(u('mailSubject'))}&body=${encodeURIComponent(u('mailBody', list))}`;
@@ -1779,7 +2203,7 @@
     },
     resume: (a) => openWin('resume', { from: rectOf(a) }),
     contact: (a) => openWin('contact', { from: rectOf(a) }),
-    'open-game': (a) => openGame(rectOf(a)),
+    'open-game': (a, w) => { track('door', w && w.fromHint ? 'br:balloon' : 'br:bin'); openGame(rectOf(a)); },
     'open-case': (a) => openCase(a.dataset.slug, rectOf(a), true),
     'ask-case': (a) => {
       const p = PF.bySlug(a.dataset.slug); if (!p) return;
@@ -1942,10 +2366,10 @@
   const KONAMI = 'arrowup,arrowup,arrowdown,arrowdown,arrowleft,arrowright,arrowleft,arrowright,b,a';
   const konamiKeys = [];
   document.addEventListener('keydown', (e) => {
-    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable], .gm-stage')) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable], .gm-stage, .ss-host')) return;
     konamiKeys.push((e.key || '').toLowerCase());
     if (konamiKeys.length > 10) konamiKeys.shift();
-    if (konamiKeys.join(',') === KONAMI) { konamiKeys.length = 0; openGame(null); }
+    if (konamiKeys.join(',') === KONAMI) { konamiKeys.length = 0; track('door', 'br:konami'); openGame(null); }
   });
 
   document.addEventListener('keydown', (e) => {
@@ -1998,7 +2422,12 @@
       v.scrollTop = (w.knots ? tlProg(w.knots, x) : x) * (v.scrollHeight - v.clientHeight);
     } else if (e.target.classList.contains('tsize')) setTextSize(w, +e.target.value);
     else if (e.target.id === 'hm-msg') w.state.msg = e.target.value; // survives a language switch
-    else if (e.target.id === 'hm-from') w.state.from = e.target.value;
+    else if (e.target.id === 'hm-from') {
+      w.state.from = e.target.value;
+      // a new address answers the balloon about the old one
+      e.target.removeAttribute('aria-invalid');
+      const bal = $('.mail-bal[data-kind="fix"], .mail-bal[data-kind="bad"]', w.el); if (bal) bal.remove();
+    }
   });
   document.addEventListener('change', (e) => {
     const k = e.target.dataset && e.target.dataset.change; if (!k) return;
@@ -2028,6 +2457,9 @@
     wins.forEach((w) => renderWin(w, true));
     renderTasks();
     if (pet) pet.setLang(l);
+    if (trails) trails.setLang(l);
+    if (noteNow) { clearTimeout(noteNow.timer); noteNow.remove(); noteNow = null; }
+    closeDeskMenu();
   }
   setInterval(() => { $('#clock').textContent = clockText(); homeTick(); }, 15000);
 
@@ -2058,12 +2490,14 @@
     if (a === 'contact') return { id: 'contact' };
     if (a === 'home') return { id: 'home' };
     if (a === 'game') return { id: 'game' };
+    if (a === 'screensaver') return { id: 'screensaver' };
     return null;
   }
   function applyRoute(r) {
     if (!r) return;
     if (r.id === 'player') openCase(r.slug, null, false);
     else if (r.id === 'game') openGame(null, false);
+    else if (r.id === 'screensaver') openSaver(null, false);
     else openWin(r.id, { push: false });
   }
   // Only Home opens at startup (unless the visitor unticked "Show this screen…"); a shared link opens its window on top of it.
@@ -2110,6 +2544,17 @@
   renderDesk();
   renderStartBtn();
   updateTray();
+  { const r = parseHash(); if (r && (r.id === 'game' || r.id === 'screensaver')) track('door', r.id === 'game' ? 'br:link' : 'ss:link'); }
   openDefault();
   if (petState() === 'on') showPet(false);
+  if (trailsState() === 'on') showTrails(false);
+  // once the Welcome screen has gone: the screensaver's wait starts, and the Recycle Bin's hint comes after 90 seconds, or
+  // sooner once two windows have been opened
+  afterBoot(() => {
+    idleArm();
+    hintT = setTimeout(hintTry, 90000);
+    new MutationObserver((ms) => {
+      for (const m of ms) for (const n of m.addedNodes) if (n.classList && n.classList.contains('win') && !n.classList.contains('dialog') && ++hintWins === 2) setTimeout(hintTry, 1500);
+    }).observe(layer, { childList: true });
+  });
 })();

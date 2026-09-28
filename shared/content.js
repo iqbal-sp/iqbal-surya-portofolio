@@ -16,21 +16,21 @@
     since: 2020,
     role: { en: 'Product Designer', id: 'Product Designer' },
     location: { en: 'Indonesia', id: 'Indonesia' },
-    status: { en: 'Open for work', id: 'Terbuka untuk kerja' },
+    status: { en: 'Open for work', id: "Terbuka untuk peluang kerja" },
     statusLong: {
       en: 'Available for full-time roles and freelance projects',
-      id: 'Tersedia untuk posisi full-time dan project freelance',
+      id: "Tersedia untuk posisi full-time dan proyek freelance",
     },
     tagline: {
-      en: 'I design websites and apps that look sharp and work properly.',
-      id: 'Saya merancang website dan aplikasi yang tampil rapi dan berfungsi dengan baik.',
+      en: "I design websites and apps with clear structure and a distinct visual style.",
+      id: "Saya merancang website dan aplikasi dengan struktur yang jelas dan gaya visual yang khas.",
     },
     to: { en: 'friends, teams, and future clients', id: 'teman, tim, dan calon klien' },
     // the About card's intro, kept to three sentences: the card's facts already say where and since when,
     // and the hobbies have their own panel further down
     intro: {
-      en: 'I design websites and apps with teams around the world, and I build many of the sites myself in Webflow and Framer. Building them taught me to put clarity first: the blueprint before the house. My workflow balances speed and quality, so what I make works as well as it looks.',
-      id: 'Saya merancang website dan aplikasi bersama tim dari berbagai negara, dan membangun banyak website-nya sendiri di Webflow dan Framer. Dari situ saya belajar mengutamakan kejelasan: rancang cetak birunya dulu, baru bangun rumahnya. Alur kerja saya menyeimbangkan kecepatan dan kualitas, supaya yang saya buat berfungsi sebaik tampilannya.',
+      en: "I’m a product designer based in Indonesia, working across websites, dashboards, and mobile apps. My work brings together clear user flows and detailed interface design, from early wireframes to Figma prototypes. I also build websites in Webflow and Framer, and have worked with agencies, product teams, and freelance clients internationally.",
+      id: "Saya product designer di Indonesia yang merancang website, dashboard, dan aplikasi mobile. Pekerjaan saya mencakup alur pengguna dan detail antarmuka, dari wireframe awal hingga prototipe Figma. Saya juga membangun website di Webflow dan Framer, serta memiliki pengalaman bersama agensi, tim produk, dan klien freelance dari berbagai negara.",
     },
     // the About card's facts: `since` above is the year the owner started designing UI (the print job before it
     // does not count); the region is the one on the owner's LinkedIn profile, the time zone the one the FAQ gives;
@@ -44,7 +44,7 @@
     photo: '../asset/iqba-surya.png',
     // The CV PDF per language, printed from resume/cv.html by `node resume/build.mjs`.
     // Empty = the Resume dialog offers to send it by email instead.
-    cv: { en: '../asset/cv/Iqbal-Surya-Pratama-Resume.pdf', id: '../asset/cv/Iqbal-Surya-Pratama-CV.pdf' },
+    cv: { en: '../asset/cv/Iqbal-Surya-Pratama-Resume.pdf?v=2', id: "../asset/cv/Iqbal-Surya-Pratama-CV.pdf?v=2" },
     socials: [
       { key: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/in/iqbal-surya-pratama-29b2811a3/', handle: 'Iqbal Surya Pratama' },
       { key: 'dribbble', label: 'Dribbble', url: 'https://dribbble.com/iqbalsp', handle: '@iqbalsp' },
@@ -67,19 +67,18 @@
       { from: '2019/06', to: '2021/03', role: 'Designer', org: 'CV. Kresna Digital Printing', type: 'ft', place: 'Medan, North Sumatra, Indonesia' },
     ],
     sideProjects: [
-      { name: 'Bestrfra.me', year: 2021, kind: { en: 'Website', id: 'Website' }, desc: { en: 'A frame-picking tool for photos, built to learn responsive layout.', id: 'Tool memilih bingkai foto, dibuat untuk belajar layout responsif.' }, url: '#' },
+      { name: 'Bestrfra.me', year: 2021, kind: { en: 'Website', id: "Website" }, desc: { en: 'A frame-picking tool for photos, built to learn responsive layout.', id: 'Tool memilih bingkai foto, dibuat untuk belajar layout responsif.' }, url: '#' },
       { name: 'Pixel Kit 98', year: 2024, kind: { en: 'Figma UI kit', id: 'UI kit Figma' }, desc: { en: 'Windows 98 components rebuilt as a modern auto-layout kit.', id: 'Komponen Windows 98 yang dibangun ulang sebagai kit auto-layout modern.' }, url: '#' },
       { name: 'Kopi Log', year: 2025, kind: { en: 'Mobile app concept', id: 'Konsep aplikasi mobile' }, desc: { en: 'A brew journal for home baristas: beans, grind, and taste notes.', id: 'Jurnal seduh untuk barista rumahan: biji, gilingan, dan catatan rasa.' }, url: '#' },
       { name: 'Transit Jogja', year: 2023, kind: { en: 'Redesign exploration', id: 'Eksplorasi redesign' }, desc: { en: 'What if city bus info fit on one clear screen?', id: 'Bagaimana jika info bus kota muat di satu layar yang jelas?' }, url: '#' },
     ],
     // Off the clock: the owner's 9:16 photos (asset/about/*.png, 2026-09-25), served as <photo>-360/-480/-720.webp.
     // The label is the photo's name tag; pointing at or tapping the photo opens the note in an infotip.
-    // Traveling's and book's notes are kept from the earlier panel; culinary's and coffee's are drafts for the owner to confirm.
     hobbies: [
-      { photo: '../asset/about/traveling', label: { en: 'Traveling', id: 'Jalan-jalan' }, note: { en: 'New places, new problems to notice', id: 'Tempat baru, masalah baru untuk diamati' } },
-      { photo: '../asset/about/culinary', label: { en: 'Culinary', id: 'Kuliner' }, note: { en: 'Food I haven’t tried yet', id: 'Makanan yang belum pernah saya coba' } },
-      { photo: '../asset/about/coffee', label: { en: 'Coffee', id: 'Kopi' }, note: { en: 'Trying new beans and new cafés', id: 'Mencoba biji kopi dan kafe baru' } },
-      { photo: '../asset/about/book', label: { en: 'Book', id: 'Buku' }, note: { en: 'Design, history, and the odd novel', id: 'Desain, sejarah, dan sesekali novel' } },
+      { photo: '../asset/about/traveling', label: { en: 'Traveling', id: 'Jalan-jalan' }, note: { en: "Getting out and exploring somewhere new.", id: "Jalan-jalan dan menjelajahi tempat baru." } },
+      { photo: '../asset/about/culinary', label: { en: "Food", id: 'Kuliner' }, note: { en: "Trying something I haven’t tasted before.", id: "Mencoba makanan yang belum pernah saya cicipi." } },
+      { photo: '../asset/about/coffee', label: { en: 'Coffee', id: 'Kopi' }, note: { en: "A coffee break, away from my desk.", id: "Rehat sejenak dengan kopi, jauh dari meja kerja." } },
+      { photo: '../asset/about/book', label: { en: "Books", id: 'Buku' }, note: { en: "Taking a break from screens with a few pages.", id: "Rehat dari layar dengan beberapa halaman buku." } },
     ],
     // What visitors can tick in the "let's build" form
     offers: [
@@ -102,10 +101,10 @@
   PF.home = {
     hero: {
       // kept short: the welcome dialog beside the photo does the explaining
-      title: { en: 'Make your product the one people notice.', id: 'Jadikan produk Anda yang paling dilirik orang.' },
+      title: { en: "Websites and apps with character.", id: "Website dan aplikasi yang punya karakter." },
       sub: {
-        en: 'I’m Iqbal, a product designer in Indonesia. I design websites and apps for founders and small teams, and build many of them myself in Webflow and Framer, so nothing gets lost between design and launch.',
-        id: 'Saya Iqbal, product designer dari Indonesia. Saya merancang website dan aplikasi untuk founder dan tim kecil, dan membangun banyak di antaranya sendiri di Webflow dan Framer, supaya tidak ada yang hilang di antara desain dan peluncuran.',
+        en: "I’m Iqbal, a product designer in Indonesia. I bring clear user flows and detailed UI design to websites, dashboards, and mobile apps. I also build websites in Webflow and Framer.",
+        id: "Saya Iqbal, product designer di Indonesia. Saya merancang website, dashboard, dan aplikasi mobile dengan alur yang jelas dan detail UI yang matang. Saya juga membangun website di Webflow dan Framer.",
       },
       // the owner's photo, opened in Paint; the original is photo-hero.jpg (2880 x 2000),
       // these are web-size copies (AVIF, WebP, and a JPEG fallback) at 1200 and 2000px wide
@@ -126,22 +125,21 @@
         },
       },
       // the TV-guide listing band under the hero: the project's four moments as tonight's time slots
-      listing: { en: 'Your project’s prime time', id: 'Prime time project Anda' },
     },
     // real numbers, from the work log; not shown on Home at the moment, kept for reuse
     stats: [
       { group: { en: 'Experience:', id: 'Pengalaman:' }, value: { en: '5+ years', id: '5+ tahun' }, note: { en: 'designing websites and apps, since 2020', id: 'merancang website dan aplikasi, sejak 2020' } },
       { group: { en: 'Reach:', id: 'Jangkauan:' }, value: { en: '4 countries', id: '4 negara' }, note: { en: 'Canada, the Netherlands, the US, and Indonesia', id: 'Kanada, Belanda, Amerika Serikat, dan Indonesia' } },
-      { group: { en: 'Teams:', id: 'Tim:' }, value: { en: '5 teams', id: '5 tim' }, note: { en: 'agencies, studios, and product teams, plus Upwork clients since 2021', id: 'agensi, studio, dan tim produk, ditambah klien Upwork sejak 2021' } },
+      { group: { en: 'Teams:', id: 'Tim:' }, value: { en: "Agency + freelance", id: "Agensi + freelance" }, note: { en: "agency, studio, and product work, alongside freelance projects", id: "pekerjaan di agensi, studio, dan tim produk, serta proyek freelance" } },
     ],
     letter: [
       {
-        en: 'I started designing in 2020 and began building my own sites soon after. Doing both taught me the rule I still work by: a screen isn’t finished when it looks right. It’s finished when the person using it knows what to do next.',
-        id: 'Saya mulai merancang pada 2020 dan tak lama kemudian membangun website sendiri. Mengerjakan keduanya mengajarkan aturan yang masih saya pegang: sebuah layar belum selesai saat terlihat bagus. Layar itu selesai saat orang yang memakainya tahu apa yang harus dilakukan berikutnya.',
+        en: "I’ve been designing interfaces since 2020, across websites, dashboards, and mobile apps. I pay attention to how a screen looks and how someone moves through it: the information they need, the choices they have, and what happens next.",
+        id: "Saya merancang antarmuka sejak 2020, mulai dari website dan dashboard hingga aplikasi mobile. Saya memperhatikan tampilan layar sekaligus cara orang menggunakannya: informasi yang mereka butuhkan, pilihan yang tersedia, dan langkah berikutnya.",
       },
       {
-        en: 'Since then I’ve designed for agencies in Yogyakarta, a research team in Seattle, and studios in Toronto and the Netherlands. The products change; the problem rarely does. Something genuinely useful, hidden behind a page that doesn’t explain it. Fixing that is the job.',
-        id: 'Sejak itu saya merancang untuk agensi di Yogyakarta, tim riset di Seattle, serta studio di Toronto dan Belanda. Produknya berganti; masalahnya jarang berubah. Sesuatu yang benar-benar berguna, tersembunyi di balik halaman yang tidak menjelaskannya. Memperbaiki itulah pekerjaan saya.',
+        en: "My experience spans agency work, product teams, and freelance projects for international clients. Some of that work is private. The selection here brings together client work and design explorations that reflect the kind of design I want to do more of.",
+        id: "Pengalaman saya mencakup pekerjaan di agensi, tim produk, dan proyek freelance untuk klien dari berbagai negara. Sebagian pekerjaan itu bersifat privat. Karya di sini mencakup proyek klien dan eksplorasi desain yang mewakili jenis pekerjaan yang ingin saya tekuni lebih jauh.",
       },
     ],
     // the owner's logos (asset/Home/Logo), grey on the dark band until the pointer is on them; a file drawn in
@@ -163,10 +161,10 @@
       ],
     },
     promise: {
-      head: { en: ['Most products', 'are better than', 'their screens.'], id: ['Kebanyakan produk', 'lebih baik dari', 'tampilannya.'] },
+      head: { en: ["A distinct look.","A clear way","through."], id: ["Tampilan khas.", "Alur yang", "jelas."] },
       text: {
-        en: 'Your website and app are where people decide if you’re worth their time. I find the one thing that makes your product worth choosing, build every screen around it, and cut whatever gets in the way.',
-        id: 'Website dan aplikasi Anda adalah tempat orang memutuskan apakah Anda layak mendapat waktu mereka. Saya menemukan satu hal yang membuat produk Anda layak dipilih, membangun setiap layar di sekitarnya, dan membuang apa pun yang menghalangi.',
+        en: "I work on the structure as well as the visual details. That means planning the pages or user flows, building a consistent interface, and making the main actions easy to find. The design should feel like your product and give people a clear place to start.",
+        id: "Saya mengerjakan struktur dan detail visualnya. Mulai dari menyusun halaman atau alur pengguna, merancang antarmuka yang konsisten, hingga memastikan tindakan utama mudah ditemukan. Desainnya perlu terasa sesuai dengan produk Anda dan memberi pengguna titik awal yang jelas.",
       },
     },
     // the owner's five case studies as the owner set them in Figma (Work area, node 542:1646): a programme
@@ -184,8 +182,8 @@
           img: { file: 'cover-krool', src: '../asset/Home/cover-krool-1280.webp', small: '../asset/Home/cover-krool-640.webp' },
           ui: { file: 'ui-krool', src: '../asset/Home/UI/ui-krool-920.webp', big: '../asset/Home/UI/ui-krool-1380.webp' },
           sub: {
-            en: 'An AI-powered multi-channel communication and CRM platform that centralizes conversations, automates workflows, and enhances team collaboration.',
-            id: 'Platform komunikasi multikanal dan CRM berbasis AI yang menyatukan percakapan, mengotomatiskan alur kerja, dan mempererat kolaborasi tim.',
+            en: "A CRM design study bringing conversations, leads, and team tasks into a shared workspace.",
+            id: "Studi desain CRM yang menyatukan percakapan, informasi prospek, dan tugas tim dalam satu ruang kerja.",
           },
           tags: ['UI/UX', 'Dashboard', 'CRM', { en: 'Automation', id: 'Otomasi' }],
         },
@@ -194,38 +192,38 @@
           img: { file: 'cover-serenity-spa', src: '../asset/Home/cover-serenity-spa-1280.webp', small: '../asset/Home/cover-serenity-spa-640.webp' },
           ui: { file: 'ui-serenity-spa', src: '../asset/Home/UI/ui-serenity-spa-920.webp', big: '../asset/Home/UI/ui-serenity-spa-1380.webp' },
           sub: {
-            en: 'Experience holistic treatments, soothing therapies, and rejuvenating escapes designed to restore balance to your mind, body, and spirit.',
-            id: 'Nikmati perawatan holistik, terapi yang menenangkan, dan waktu rehat yang menyegarkan, dirancang untuk memulihkan keseimbangan pikiran, tubuh, dan jiwa Anda.',
+            en: "A spa website template designed for Webflow, with seven pages, mobile layouts, and a shared style guide.",
+            id: "Template website spa untuk Webflow, dengan tujuh halaman, tampilan mobile, dan panduan gaya yang konsisten.",
           },
-          tags: ['UI/UX', 'Website', 'SPA', { en: 'Therapeutic', id: 'Terapi' }],
+          tags: ['UI/UX', 'Website', 'SPA', { en: 'Template', id: "Template" }],
         },
         {
           title: 'FINDMENTOR',
           img: { file: 'cover-findmentor', src: '../asset/Home/cover-findmentor-1280.webp', small: '../asset/Home/cover-findmentor-640.webp' },
           ui: { file: 'ui-findmentor', src: '../asset/Home/UI/ui-findmentor-920.webp', big: '../asset/Home/UI/ui-findmentor-1380.webp' },
           sub: {
-            en: 'The platform offers a smooth, goal-focused experience with tools for mentee learning, skill growth, and progress tracking.',
-            id: 'Platform ini menawarkan pengalaman yang mulus dan berfokus pada tujuan, dengan alat untuk pembelajaran mentee, pengembangan keterampilan, dan pemantauan progres.',
+            en: "A mentorship interface connecting mentor discovery with sessions, assignments, and learning progress.",
+            id: "Desain antarmuka mentoring yang menghubungkan pencarian mentor, sesi, tugas, dan progres belajar.",
           },
-          tags: ['UI/UX', 'Dashboard', 'CRM', { en: 'Automation', id: 'Otomasi' }],
+          tags: ['UI/UX', 'Dashboard', { en: 'Mentorship', id: "Mentoring" }, { en: 'Education', id: "Pendidikan" }],
         },
         {
           title: 'Boxify',
           img: { file: 'cover-boxify', src: '../asset/Home/cover-boxify-1280.webp', small: '../asset/Home/cover-boxify-640.webp' },
           ui: { file: 'ui-boxify', src: '../asset/Home/UI/ui-boxify-920.webp', big: '../asset/Home/UI/ui-boxify-1380.webp' },
           sub: {
-            en: 'Boxify offers mobile and web platforms for a seamless self-storage experience. With advanced features and a focus on user experience, it transforms storage into a secure, tech-driven process.',
-            id: 'Boxify menghadirkan platform mobile dan web untuk pengalaman self-storage yang mulus. Dengan fitur canggih dan fokus pada pengalaman pengguna, Boxify mengubah penyimpanan barang menjadi proses yang aman dan berbasis teknologi.',
+            en: "Website and mobile app design for finding, booking, and managing self-storage units.",
+            id: "Desain website dan aplikasi mobile untuk mencari, memesan, dan mengelola unit penyimpanan barang.",
           },
-          tags: ['UI/UX', 'Website', { en: 'Mobile App', id: 'Aplikasi Mobile' }, 'Self-storage'],
+          tags: ['UI/UX', 'Website', { en: 'Mobile App', id: "Aplikasi mobile" }, 'Self-storage'],
         },
         {
           title: 'SENSORSTACK',
           img: { file: 'cover-sensorstack', src: '../asset/Home/cover-sensorstack-1280.webp', small: '../asset/Home/cover-sensorstack-640.webp' },
           ui: { file: 'ui-sensorstack', src: '../asset/Home/UI/ui-sensorstack-920.webp', big: '../asset/Home/UI/ui-sensorstack-1380.webp' },
           sub: {
-            en: 'How We Designed an IoT Monitoring Platform That Turns Complex Sensor Data Into Clear, Confident Decisions',
-            id: 'Bagaimana kami merancang platform pemantauan IoT yang mengubah data sensor yang rumit menjadi keputusan yang jelas dan meyakinkan',
+            en: "A client website redesign for an IoT monitoring platform, using sensor data and dashboard previews to explain the product.",
+            id: "Desain ulang website klien untuk platform pemantauan IoT, dengan data sensor dan pratinjau dashboard untuk menjelaskan produknya.",
           },
           tags: ['UI/UX', 'Website', 'IoT', 'SaaS'],
         },
@@ -275,81 +273,81 @@
       // bump when the owner replaces the pictures, so browsers fetch the new copies
       picVersion: 3,
       list: [
-        { name: { en: 'Brand strategy', id: 'Strategi brand' }, desc: { en: 'Positioning, voice and the visual direction your product needs before its first screen.', id: 'Positioning, gaya bahasa, dan arah visual yang dibutuhkan produk Anda sebelum layar pertamanya.' }, img: { file: 'brand strategy', src: '../asset/Home/service/webp/brand-strategy' } },
-        { name: { en: 'Website strategy', id: 'Strategi website' }, desc: { en: 'The one thing that makes you worth choosing, and every page mapped to it before design starts.', id: 'Satu hal yang membuat Anda layak dipilih, dan setiap halaman dipetakan ke sana sebelum desain dimulai.' }, img: { file: 'Web strategy', src: '../asset/Home/service/webp/website-strategy' } },
-        { name: { en: 'Website design', id: 'Desain website' }, desc: { en: 'Marketing sites and product pages that make the offer clear in seconds.', id: 'Website marketing dan halaman produk yang membuat penawaran Anda jelas dalam hitungan detik.' }, img: { file: 'Web Design', src: '../asset/Home/service/webp/website-design' } },
-        { name: { en: 'Digital product', id: 'Produk digital' }, desc: { en: 'Dashboards and web apps, from the first flow to the working screens.', id: 'Dasbor dan aplikasi web, dari alur pertama sampai layar yang siap dipakai.' }, img: { file: 'Digital product', src: '../asset/Home/service/webp/digital-product' } },
-        { name: { en: 'Mobile app design', id: 'Desain aplikasi mobile' }, desc: { en: 'iOS and Android apps, from the first flow to the final screens.', id: 'Aplikasi iOS dan Android, dari alur pertama sampai layar final.' }, img: { file: 'Mobile design', src: '../asset/Home/service/webp/mobile-app' } },
+        { name: { en: "Visual direction", id: "Arah visual" }, desc: { en: "Colours, typography, and interface styling that carry your brand into the website or app.", id: "Warna, tipografi, dan gaya antarmuka yang membawa identitas brand Anda ke website atau aplikasi." }, img: { file: 'brand strategy', src: '../asset/Home/service/webp/brand-strategy' } },
+        { name: { en: "Website structure", id: "Struktur website" }, desc: { en: "Page layouts and wireframes that organise your content around what visitors need to know and do.", id: "Tata letak halaman dan wireframe yang menyusun konten sesuai informasi dan tindakan yang dibutuhkan pengunjung." }, img: { file: 'Web strategy', src: '../asset/Home/service/webp/website-strategy' } },
+        { name: { en: 'Website design', id: 'Desain website' }, desc: { en: "Responsive marketing sites and product pages, with Webflow or Framer builds available as part of the scope.", id: "Website pemasaran dan halaman produk yang responsif. Pembangunan di Webflow atau Framer dapat masuk dalam cakupan proyek." }, img: { file: 'Web Design', src: '../asset/Home/service/webp/website-design' } },
+        { name: { en: "Product UI/UX", id: "UI/UX produk" }, desc: { en: "User flows, dashboards, and web app interfaces, with reusable components and clickable Figma prototypes.", id: "Alur pengguna, dashboard, dan antarmuka aplikasi web, dengan komponen yang bisa digunakan ulang dan prototipe Figma yang bisa diklik." }, img: { file: 'Digital product', src: '../asset/Home/service/webp/digital-product' } },
+        { name: { en: 'Mobile app design', id: 'Desain aplikasi mobile' }, desc: { en: "iOS and Android interface design, from the main user flows to detailed screens and prototypes.", id: "Desain antarmuka iOS dan Android, dari alur pengguna utama hingga detail layar dan prototipe." }, img: { file: 'Mobile design', src: '../asset/Home/service/webp/mobile-app' } },
       ],
     },
-    // DRAFT for the owner to confirm: every step restates something the owner already says elsewhere
-    // (FAQ: fixed quote, weekly call, video walkthroughs, shared Figma; services: prototypes; launch framed as a developer handoff, design-only).
-    // Each slide carries an image slot; the files are generated later from the prompts in the hand-off notes.
+    // Process deliverables depend on the agreed scope.
+    // Each slide's picture is a still of the 3D desk on the TV (option-a-desktop/desk3d/, rendered to asset/Home/process/
+    // by prototype/process-desk/tools/stills.mjs); where the desk can run, it plays over the still.
     process: {
-      head: { en: 'How a project runs', id: 'Bagaimana project berjalan' },
-      lead: { en: 'Four moments you can plan around, from the first email to the week after launch.', id: 'Empat momen yang bisa Anda rencanakan, dari email pertama sampai seminggu setelah rilis.' },
+      head: { en: 'How a project runs', id: "Alur pengerjaan proyek" },
+      lead: { en: "From the first brief to final files or a website build. We agree on the scope and deliverables before starting.", id: "Dari brief awal hingga file desain final atau website. Kita menyepakati cakupan dan hasil pekerjaan sebelum mulai." },
       steps: [
         {
           when: { en: 'Before we start', id: 'Sebelum mulai' },
-          title: { en: 'A fixed price before any work', id: 'Harga pasti sebelum kerja dimulai' },
-          text: { en: 'Send a few lines about what you’re building. After a short call you get the scope, a fixed price, and a timeline with milestones, all in writing. Nothing starts until you’ve agreed to all three.', id: 'Kirim beberapa baris tentang apa yang Anda bangun. Setelah panggilan singkat, Anda menerima cakupan, harga tetap, dan timeline dengan milestone, semuanya tertulis. Tidak ada yang dimulai sebelum Anda setuju ketiganya.' },
-          items: [{ icon: 'document', en: 'Written scope', id: 'Cakupan tertulis' }, { icon: 'cart', en: 'Fixed price', id: 'Harga tetap' }, { icon: 'flag', en: 'Timeline with milestones', id: 'Timeline dengan milestone' }],
-          slot: { en: 'Fixed price', id: 'Harga pasti' },
-          line: { en: 'Scope, price, and milestones in writing', id: 'Cakupan, harga, dan milestone tertulis' },
+          title: { en: "Agree on the work", id: "Sepakati pekerjaan yang dibutuhkan" },
+          text: { en: "Tell me what you’re building, who it’s for, and what you need help with. We’ll define the deliverables, discuss the budget, and agree on a timeline that fits the scope.", id: "Ceritakan apa yang Anda buat, siapa penggunanya, dan bantuan yang Anda butuhkan. Kita akan menentukan hasil pekerjaan, membahas anggaran, dan menyepakati jadwal sesuai cakupan proyek." },
+          items: [{ icon: 'document', en: 'Written scope', id: 'Cakupan tertulis' }, { icon: 'cart', en: "Budget and pricing", id: "Anggaran dan biaya" }, { icon: 'flag', en: "Project timeline", id: "Jadwal proyek" }],
+          slot: { en: "The brief", id: "Brief awal" },
+          line: { en: "Scope, budget, and timeline", id: "Cakupan, anggaran, dan jadwal" },
           genre: { en: 'News', id: 'Berita' },
-          img: { file: 'process-1', src: null, alt: { en: 'A signed one-page scope on a desk next to a laptop', id: 'Satu halaman cakupan yang sudah ditandatangani di meja, di samping laptop' } },
+          img: { file: 'process-1', src: '../asset/Home/process/ep1', alt: { en: 'A scope document on a dark clipboard, just signed, with a slim pen above it and a green tab on its edge', id: 'Dokumen cakupan di papan klip gelap yang baru ditandatangani, dengan pena ramping di atasnya dan tab hijau di tepinya' } },
         },
         {
-          when: { en: 'Week one', id: 'Minggu pertama' },
-          title: { en: 'One sentence the whole product hangs on', id: 'Satu kalimat yang menopang seluruh produk' },
-          text: { en: 'Before any screen, I write down the one thing that makes your product worth choosing and map every page to it. You check that sentence first, because every design decision after it leans on it.', id: 'Sebelum ada layar, saya menuliskan satu hal yang membuat produk Anda layak dipilih, lalu memetakan setiap halaman ke sana. Anda memeriksa kalimat itu lebih dulu, karena setiap keputusan desain sesudahnya bersandar padanya.' },
-          items: [{ icon: 'quote', en: 'The one-sentence offer', id: 'Penawaran dalam satu kalimat' }, { icon: 'grid', en: 'Content map', id: 'Peta konten' }, { icon: 'users', en: 'Key user flows', id: 'Alur pengguna utama' }],
-          slot: { en: 'The one sentence', id: 'Satu kalimat' },
-          line: { en: 'Every page mapped to why you’re worth choosing', id: 'Setiap halaman dipetakan ke alasan Anda layak dipilih' },
+          when: { en: "Structure", id: "Struktur" },
+          title: { en: "Map out the pages and flows", id: "Susun halaman dan alur pengguna" },
+          text: { en: "I organise the content and main user flows, then use wireframes to work through the layout. We review the structure before moving into detailed interface design.", id: "Saya menyusun konten dan alur pengguna utama, lalu membuat wireframe untuk merencanakan tata letaknya. Kita meninjau struktur ini sebelum masuk ke detail desain antarmuka." },
+          items: [{ icon: 'quote', en: "Page structure", id: "Struktur halaman" }, { icon: 'grid', en: 'Content map', id: 'Peta konten' }, { icon: 'users', en: 'Key user flows', id: 'Alur pengguna utama' }],
+          slot: { en: "The structure", id: "Struktur" },
+          line: { en: "Content, wireframes, and key user flows", id: "Konten, wireframe, dan alur pengguna utama" },
           genre: { en: 'Documentary', id: 'Dokumenter' },
-          img: { file: 'process-2', src: null, alt: { en: 'A wall of sticky notes sorted around one sentence', id: 'Dinding sticky note yang disusun di sekitar satu kalimat' } },
+          img: { file: 'process-2', src: '../asset/Home/process/ep2', alt: { en: 'A page model in layers: white layout panels settling onto a metal plate along guide lines, one panel in green', id: 'Model halaman berlapis: panel tata letak putih turun ke pelat logam mengikuti garis pemandu, satu panel berwarna hijau' } },
         },
         {
-          when: { en: 'Every week', id: 'Setiap minggu' },
-          title: { en: 'Progress you can open in Figma', id: 'Progres yang bisa Anda buka di Figma' },
-          text: { en: 'I design in a Figma file you can open and comment on anytime. Each week you get a short video walkthrough of what changed and one call, and key flows become clickable Figma prototypes that real people try before anyone argues about them.', id: 'Saya merancang di file Figma yang bisa Anda buka dan komentari kapan saja. Setiap minggu Anda mendapat video walkthrough singkat tentang apa yang berubah dan satu panggilan, dan alur utama menjadi prototipe Figma yang bisa diklik dan dicoba orang sungguhan sebelum ada yang memperdebatkannya.' },
-          items: [{ icon: 'penNib', en: 'Shared Figma file', id: 'File Figma bersama' }, { icon: 'play', en: 'Weekly video walkthrough and call', id: 'Video walkthrough dan panggilan mingguan' }, { icon: 'laptop', en: 'Clickable Figma prototype', id: 'Prototipe Figma yang bisa diklik' }],
-          slot: { en: 'Walkthrough', id: 'Walkthrough' },
-          line: { en: 'An open Figma file, a short video, one call', id: 'File Figma terbuka, video singkat, satu panggilan' },
+          when: { en: "Design and review", id: "Desain dan review" },
+          title: { en: "Review the design in Figma", id: "Tinjau desain di Figma" },
+          text: { en: "The interface takes shape in Figma, where we can review screens and work through feedback. For app flows, clickable prototypes show how the screens connect. We agree on a review schedule that suits the project.", id: "Saya merancang antarmuka di Figma agar kita bisa meninjau layar dan membahas masukan. Untuk alur aplikasi, prototipe yang bisa diklik memperlihatkan hubungan antar layar. Jadwal review kita sepakati sesuai kebutuhan proyek." },
+          items: [{ icon: 'penNib', en: 'Shared Figma file', id: 'File Figma bersama' }, { icon: 'play', en: "Design reviews", id: "Review desain" }, { icon: 'laptop', en: 'Clickable Figma prototype', id: 'Prototipe Figma yang bisa diklik' }],
+          slot: { en: "The design", id: "Desain" },
+          line: { en: "Screens, prototypes, and feedback in Figma", id: "Layar, prototipe, dan masukan di Figma" },
           genre: { en: 'Series', id: 'Serial' },
-          img: { file: 'process-3', src: null, alt: { en: 'A phone showing a clickable prototype in someone’s hand', id: 'Ponsel yang menampilkan prototipe di tangan seseorang' } },
+          img: { file: 'process-3', src: '../asset/Home/process/ep3', alt: { en: 'A phone on a stand showing a prototype, a pointer on its green button, a comment beside it and the next screens behind', id: 'Ponsel di stand menampilkan prototipe, kursor di tombol hijaunya, komentar di sampingnya, dan layar berikutnya di belakang' } },
         },
         {
-          when: { en: 'Launch', id: 'Peluncuran' },
-          title: { en: 'A handoff developers can build from', id: 'Serah terima yang siap dibangun developer' },
-          text: { en: 'Your developers get final Figma files with specs, components, and every state a screen can be in, organised so nothing is left to guess. I stay on while they build and review each screen against the design. After launch we look at real use and refine the design where it falls short.', id: 'Developer Anda menerima file Figma final berisi spesifikasi, komponen, dan setiap kondisi sebuah layar, tersusun rapi sehingga tidak ada yang perlu ditebak. Saya tetap mendampingi selama mereka membangun dan meninjau setiap layar terhadap desainnya. Setelah rilis, kita melihat pemakaian nyata dan menyempurnakan desain di bagian yang masih kurang.' },
-          items: [{ icon: 'code', en: 'Developer-ready Figma files', id: 'File Figma siap developer' }, { icon: 'search', en: 'Design review during the build', id: 'Review desain selama build' }, { icon: 'paintBrush', en: 'Post-launch design fixes', id: 'Perbaikan desain setelah rilis' }],
-          slot: { en: 'Clean handoff', id: 'Serah terima rapi' },
-          line: { en: 'Specs and components, then design review during the build', id: 'Spesifikasi dan komponen, lalu review desain selama build' },
+          when: { en: "Handoff or build", id: "Serah terima atau pembangunan" },
+          title: { en: "Prepare the design for its next step", id: "Siapkan desain untuk tahap berikutnya" },
+          text: { en: "For a design project, I organise the final Figma files and components for your team. If a Webflow or Framer build is part of the scope, I build the website too. Build reviews and further support can be included in our agreement.", id: "Untuk proyek desain, saya merapikan file Figma final dan komponen agar siap diserahkan ke tim Anda. Jika pembangunan website di Webflow atau Framer termasuk dalam cakupan, saya juga membangunnya. Review saat pembangunan dan dukungan lanjutan bisa kita sertakan dalam kesepakatan." },
+          items: [{ icon: 'code', en: "Organised design files", id: "File desain yang tertata" }, { icon: 'search', en: "Components and design notes", id: "Komponen dan catatan desain" }, { icon: 'paintBrush', en: "Website build, if included", id: "Pembangunan website, jika disepakati" }],
+          slot: { en: "The handoff", id: "Serah terima" },
+          line: { en: "Final design files or a Webflow / Framer website", id: "File desain final atau website Webflow / Framer" },
           genre: { en: 'Premiere', id: 'Premier' },
-          img: { file: 'process-4', src: null, alt: { en: 'A Figma file with annotated specs next to the live product on launch day', id: 'File Figma berisi anotasi spesifikasi di samping produk yang sudah live di hari peluncuran' } },
+          img: { file: 'process-4', src: '../asset/Home/process/ep4', alt: { en: 'A key with a green tag on a leather notebook, under a spotlight', id: 'Kunci berlabel hijau di atas buku kulit, di bawah sorot lampu' } },
         },
       ],
     },
-    // process answers here (timeline, communication, pricing) are drafts for the owner to confirm
+    // Timeline, communication, and pricing depend on the agreed scope.
     faq: {
       head: { en: 'Before we work together', id: 'Sebelum kita bekerja sama' },
-      lead: { en: 'The questions I hear most often, answered up front.', id: 'Pertanyaan yang paling sering saya dengar, dijawab di awal.' },
+      lead: { en: "A few practical details about working together.", id: "Beberapa hal praktis tentang bekerja bersama saya." },
       list: [
-        { q: { en: 'Who will I be working with?', id: 'Dengan siapa saya akan bekerja?' }, a: { en: 'Me, directly. I lead the work from the first call to launch, so the person who understands your product is the one designing it.', id: 'Langsung dengan saya. Saya memegang pekerjaan dari panggilan pertama sampai peluncuran, jadi orang yang memahami produk Anda adalah orang yang merancangnya.' } },
-        { q: { en: 'Can you build it too?', id: 'Apakah Anda juga bisa membangunnya?' }, a: { en: 'Yes. I design and build websites in Webflow and Framer. For apps, I prepare specs and components developers can build from, and stay involved while they do.', id: 'Bisa. Saya merancang dan membangun website di Webflow dan Framer. Untuk aplikasi, saya menyiapkan spesifikasi dan komponen yang bisa dibangun developer, dan tetap terlibat selama prosesnya.' } },
-        { q: { en: 'How long does a project take?', id: 'Berapa lama sebuah project?' }, a: { en: 'It depends on scope. You’ll get a timeline with milestones before we start, and you’ll see progress every week, not just at the end.', id: 'Tergantung cakupannya. Anda akan mendapat timeline dengan milestone sebelum mulai, dan melihat progres setiap minggu, bukan hanya di akhir.' } },
-        { q: { en: 'How do we work together day to day?', id: 'Bagaimana kita bekerja sehari-hari?' }, a: { en: 'Async first, with a weekly call. You’ll get short video walkthroughs and a shared Figma file. I work from Indonesia (GMT+7), which overlaps with mornings in Europe and evenings in the Americas.', id: 'Utamakan async, dengan satu panggilan mingguan. Anda mendapat video walkthrough singkat dan file Figma bersama. Saya bekerja dari Indonesia (GMT+7), yang bertepatan dengan pagi di Eropa dan malam di Amerika.' } },
-        { q: { en: 'What does it cost?', id: 'Berapa biayanya?' }, a: { en: 'Every project is quoted after a short call. You’ll get a fixed price and scope in writing before anything starts.', id: 'Setiap project diberi penawaran setelah panggilan singkat. Anda akan menerima harga dan cakupan tetap secara tertulis sebelum pekerjaan dimulai.' } },
-        { q: { en: 'How do we get started?', id: 'Bagaimana memulainya?' }, a: { en: 'Send a short brief below: what you’re building, who it’s for, and when you need it. I’ll reply by email with questions or a proposal.', id: 'Kirim brief singkat di bawah: apa yang Anda bangun, untuk siapa, dan kapan dibutuhkan. Saya akan membalas lewat email dengan pertanyaan atau proposal.' } },
-        { q: { en: 'Are you open to full-time roles?', id: 'Apakah Anda terbuka untuk posisi full-time?' }, a: { en: 'Yes. I’m open to full-time product design roles, remote or in Indonesia. My work history and CV are in About Me.', id: 'Ya. Saya terbuka untuk posisi product designer full-time, remote atau di Indonesia. Riwayat kerja dan CV saya ada di Tentang Saya.' }, about: true },
+        { q: { en: 'Who will I be working with?', id: 'Dengan siapa saya akan bekerja?' }, a: { en: "You’ll discuss the design with me directly. I work with your team and, when a project needs other collaborators, we’ll clarify who is involved and what each person is responsible for.", id: "Anda akan membahas desain langsung dengan saya. Saya bekerja bersama tim Anda. Jika proyek membutuhkan kolaborator lain, kita akan memperjelas siapa yang terlibat dan tanggung jawab masing-masing." } },
+        { q: { en: 'Can you build it too?', id: "Bisa sekaligus membangun website-nya?" }, a: { en: "Yes, for websites in Webflow and Framer. For web and mobile apps, my focus is UI/UX design, prototypes, and files for your developers. We’ll agree on the build or handoff scope at the start.", id: "Bisa, untuk website di Webflow dan Framer. Untuk aplikasi web dan mobile, fokus saya pada desain UI/UX, prototipe, dan file untuk developer Anda. Cakupan pembangunan atau serah terima kita sepakati di awal." } },
+        { q: { en: 'How long does a project take?', id: "Berapa lama pengerjaan proyeknya?" }, a: { en: "That depends on the number of pages or flows, the content available, and whether a website build is included. Share what you need and your deadline so we can discuss a realistic timeline.", id: "Tergantung jumlah halaman atau alur, kesiapan konten, dan apakah pembangunan website termasuk dalam pekerjaan. Ceritakan kebutuhan dan tenggat Anda agar kita bisa membahas jadwal yang realistis." } },
+        { q: { en: 'How do we work together day to day?', id: "Bagaimana komunikasi selama proyek?" }, a: { en: "We review the design in Figma and use messages or calls to work through feedback. I’m based in Indonesia (GMT+7). We’ll agree on meeting times and a review schedule that work for both of us.", id: "Kita meninjau desain di Figma dan membahas masukan lewat pesan atau panggilan. Saya berada di Indonesia (GMT+7). Waktu pertemuan dan jadwal review akan kita sesuaikan agar cocok untuk kedua pihak." } },
+        { q: { en: 'What does it cost?', id: 'Berapa biayanya?' }, a: { en: "Pricing depends on the scope, deliverables, and whether you need design, a website build, or both. Send a short brief and we can discuss a budget and pricing arrangement before starting.", id: "Biaya bergantung pada cakupan, hasil pekerjaan, serta kebutuhan desain, pembangunan website, atau keduanya. Kirim brief singkat agar kita bisa membahas anggaran dan skema biaya sebelum mulai." } },
+        { q: { en: 'How do we get started?', id: 'Bagaimana memulainya?' }, a: { en: "Send a short brief below: what you’re building, who it’s for, and when you need it. Links or references are helpful too. I’ll reply by email to discuss the next step.", id: "Kirim brief singkat lewat formulir di bawah: apa yang Anda buat, siapa penggunanya, dan kapan dibutuhkan. Tautan atau referensi juga membantu. Saya akan membalas lewat email untuk membahas langkah berikutnya." } },
+        { q: { en: 'Are you open to full-time roles?', id: 'Apakah Anda terbuka untuk posisi full-time?' }, a: { en: 'Yes. I’m open to full-time product design roles, remote or in Indonesia. My work history and CV are in About Me.', id: "Ya. Saya terbuka untuk posisi product designer full-time, baik remote maupun di Indonesia. Riwayat kerja dan CV saya ada di Tentang Saya." }, about: true },
       ],
     },
     // the close hands the hero's promise back as an invitation. The head is set in poster lines where the page is
     // wide enough, and runs as one sentence on a phone
     cta: {
-      head: { en: ['Got a product in mind?', 'Let’s make it', 'the one people notice.'], id: ['Punya ide produk?', 'Mari kita jadikan', 'yang paling dilirik.'] },
-      lead: { en: 'A few lines is enough. I’ll reply by email with questions or a proposal.', id: 'Beberapa baris saja cukup. Saya akan membalas lewat email dengan pertanyaan atau proposal.' },
+      head: { en: ["Have a website","or app in mind?","Let’s talk."], id: ["Punya ide website", "atau aplikasi?", "Mari diskusi."] },
+      lead: { en: "Tell me what you need and when you need it. A short brief is enough to start the conversation.", id: "Ceritakan apa yang Anda butuhkan dan kapan dibutuhkan. Brief singkat sudah cukup untuk memulai diskusi." },
       // the owner's photo, printed on the steel beside the message; the original is close-photo.jpg (2959 x 3699, 4:5),
       // these are web-size copies (AVIF, WebP, and a JPEG fallback) at 600 and 1200px wide
       photo: {

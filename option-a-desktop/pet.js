@@ -13,14 +13,14 @@
     en: {
       label: 'Stickman. Double-click to play Boss Rush XP again.',
       name: 'Stickman', play: 'Play again', hide: 'Hide the stickman', close: 'Close',
-      installed: 'Stickman.exe installed', installedText: 'He lives on your taskbar now. Double-click him to play again.',
-      quips: ['Hi!', 'I beat four bosses, you know.', 'This taskbar is safe with me.', 'Double-click me for a rematch.', 'Nice wallpaper.', 'Still here!', 'Ctrl+Alt+Del? Not on my watch.'],
+      installed: 'Stickman.exe installed', installedText: 'Your reward is on the taskbar. Double-click the stickman for another round.',
+      quips: ['Hi!', 'Four bosses. One tiny taskbar.', 'This taskbar is safe with me.', 'Double-click me for a rematch.', 'Nice wallpaper.', 'Just taking a screen break.', 'Ctrl+Alt+Del? Not on my watch.'],
     },
     id: {
       label: 'Stickman. Klik dua kali untuk main Boss Rush XP lagi.',
       name: 'Stickman', play: 'Main lagi', hide: 'Sembunyikan stickman', close: 'Tutup',
-      installed: 'Stickman.exe terpasang', installedText: 'Ia sekarang tinggal di taskbar Anda. Klik dua kali untuk bermain lagi.',
-      quips: ['Halo!', 'Aku sudah mengalahkan empat bos, lho.', 'Taskbar ini aman bersamaku.', 'Klik dua kali kalau mau tanding ulang.', 'Wallpaper-nya keren.', 'Masih di sini!', 'Ctrl+Alt+Del? Tidak selama aku berjaga.'],
+      installed: 'Stickman.exe terpasang', installedText: "Hadiahmu sudah ada di taskbar. Klik dua kali pada stickman untuk main lagi.",
+      quips: ['Halo!', 'Empat bos. Satu taskbar kecil.', 'Taskbar ini aman bersamaku.', 'Klik dua kali kalau mau tanding ulang.', 'Wallpaper-nya keren.', 'Lagi istirahat dari layar.', 'Ctrl+Alt+Del? Tidak selama aku berjaga.'],
     },
   };
   // his canvas in CSS px; the taskbar's top edge runs GROUND px down it, and his legs hang below it when he sits
@@ -149,7 +149,7 @@
       if (asleep) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(head[0] + 1.4 * f, head[1] + 0.5); ctx.lineTo(head[0] + 3.8 * f, head[1] + 0.5); ctx.stroke(); }
       else { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(head[0] + 2.6 * f, head[1] - 0.4, 1.1, 1.6, 0, 0, TAU); ctx.fill(); }
       if (asleep) {
-        ctx.font = 'bold 10px Tahoma, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.font = 'bold 10px "Noto Sans", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
         for (let i = 0; i < 3; i++) {
           const k = (t * 0.45 + i / 3) % 1;
           ctx.globalAlpha = 1 - k; ctx.fillStyle = '#1f55c9'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;

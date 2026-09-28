@@ -2,9 +2,7 @@
    OPTION A — DESKTOP XP
    Windows XP "Luna" (blue) system chrome · the About document ·
    media-player case studies · Y2K red skin for contact
-   Type: Tahoma for chrome and headings, Space Grotesk for body
-   text. Tahoma ships with Windows and macOS; phones fall back
-   to their own system face.
+   Type: Noto Sans throughout, from Google Fonts.
    ============================================================ */
 
 :root {
@@ -57,15 +55,24 @@
   --ic-pink: #ff8fb8;
   --ic-red: #ff3b30;
   /* type */
-  --ui: Tahoma, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --read: "Space Grotesk", sans-serif;
-  --display: Tahoma, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ui: "Noto Sans", sans-serif;
+  --read: "Noto Sans", sans-serif;
+  --display: "Noto Sans", sans-serif;
   /* edges: Luna draws with 1px lines and soft gradients */
   --well: inset 0 0 0 1px var(--line);        /* fields and white content wells */
   --hairline: inset 0 0 0 1px #d4d0c8;        /* colour swatches, small panes */
   --btn-face: linear-gradient(180deg, #ffffff 0%, #ecebe6 86%, #d6d0c5 100%);
   --btn-hot: inset -1px 1px #fff0cf, inset 1px 2px #fdd889, inset -2px 2px #fbc761, inset 2px -2px #e5a01a;
   --btn-focus: inset -1px 1px #cee7ff, inset 1px 2px #98b8ea, inset -2px 2px #bcd4f6, inset 1px -1px #89ade4, inset 2px -2px #89ade4;
+  /* the pages' ink, and the page keys' materials (Home and About), each drawn once: REC red and the remote's silver */
+  --ink: #141414;
+  --ink-2: #3d3b34;
+  --rec: #d6261c;
+  /* the gloss stays above the label: from a quarter down, the face holds white text at 4.5:1 */
+  --rec-face: linear-gradient(180deg, #f4695e 0%, #d83127 24%, #c4241b 60%, #a8170f 100%);
+  --rec-edge: #7e1410;
+  --silver-face: linear-gradient(180deg, #f3f4f7 0%, #d4d7de 45%, #b3b8c2 100%);
+  --silver-edge: #6f747e;
   /* Luna surfaces, each drawn once and reused */
   --caption-btn: radial-gradient(circle at 90% 90%, #0054e9 0%, #2263d5 55%, #4479e4 70%, #a3bbec 90%, #fff 100%);
   --caption-close: radial-gradient(circle at 90% 90%, #cc4600 0%, #dc6527 55%, #cd7546 70%, #ffccb2 90%, #fff 100%);
@@ -147,6 +154,45 @@ img { max-width: 100%; }
 .btn:disabled svg { opacity: .45; filter: grayscale(1); }
 .tbtn:disabled { color: var(--shade); text-shadow: 1px 1px var(--hi); }
 .tbtn:disabled svg { opacity: .45; filter: grayscale(1); }
+
+/* ---- page keys: one set of buttons for the pages themselves (Home and About). The page's main step is the REC key,
+   the next step a Silver key, and a way on is a printed link. Dialogs, the programs drawn in a page (New Message,
+   Help Topics), toolbars and the game keep XP's push buttons; the case player and the contact skin keep their own. ---- */
+.page-key { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 20px;
+  border: 1px solid; border-radius: 4px; font: 700 14px/1 var(--ui); white-space: nowrap; }
+.page-key .px { width: 16px; height: 16px; flex: none; }
+.page-key:not(:disabled):active > * { translate: 1px 1px; }
+/* the REC key: a gloss kept above the label, a lit rim, a shaded lip, and the soft lift of a key resting on the page */
+.page-key.rec { border-color: var(--rec-edge); color: #fff; text-shadow: 0 1px 0 rgba(90, 0, 0, .55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .32) 0%, rgba(255, 255, 255, .1) 29%, rgba(255, 255, 255, 0) 30%), var(--rec-face);
+  box-shadow: inset 0 1px 0 rgba(255, 214, 208, .6), inset 0 -2px 3px rgba(90, 0, 0, .35), 0 1px 1px rgba(60, 0, 0, .25), 0 8px 14px -8px rgba(126, 20, 16, .6); }
+.page-key.rec .px { --ic-line: #fff; --ic-fill: rgba(255, 255, 255, .22); }
+.page-key.rec .rec-dot { background: radial-gradient(circle at 35% 35%, #fff, #ffd9d4 60%, #f3a79f); box-shadow: none; transition: box-shadow .15s; }
+.page-key.rec:not(:disabled):hover { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6), inset 0 -2px 3px rgba(90, 0, 0, .35), 0 0 14px rgba(214, 38, 28, .45), 0 8px 14px -8px rgba(126, 20, 16, .6); }
+/* the REC lamp (Start a project only) lights under the pointer and burns bright while the key is held */
+.page-key.rec:not(:disabled):hover .rec-dot { box-shadow: 0 0 6px 1px rgba(255, 255, 255, .7); }
+.page-key.rec:not(:disabled):active { background: linear-gradient(180deg, #a8170f, #c4241b 40%, #d83127); box-shadow: inset 0 2px 4px rgba(60, 0, 0, .55); }
+.page-key.rec:not(:disabled):active .rec-dot { box-shadow: 0 0 8px 2px #fff; }
+.page-key.rec:focus-visible { outline: 1px dotted #fff; outline-offset: -5px; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--rec-edge), inset 0 -2px 3px rgba(90, 0, 0, .35); }
+/* the Silver key: the remote's and the TV's silver under the same gloss and lift; its edge is a step darker than Silver
+   Edge so it stands off the hero's steel as well as the white page. Under the pointer it takes XP's orange glow */
+.page-key.silver { border-color: #4a4f59; color: #1d2a3a; text-shadow: 0 1px 0 rgba(255, 255, 255, .75);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .7) 0%, rgba(255, 255, 255, .15) 29%, rgba(255, 255, 255, 0) 30%), var(--silver-face);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -2px 3px rgba(40, 44, 60, .25), 0 1px 1px rgba(0, 0, 0, .15), 0 8px 14px -8px rgba(0, 20, 70, .4); }
+.page-key.silver .px { --ic-line: #1d2a3a; }
+.page-key.silver:not(:disabled):hover { box-shadow: var(--btn-hot), 0 1px 1px rgba(0, 0, 0, .15), 0 8px 14px -8px rgba(0, 20, 70, .4); }
+.page-key.silver:not(:disabled):active { background: linear-gradient(180deg, #b3b8c2, #d4d7de 55%, #e4e6ea); box-shadow: inset 0 2px 4px rgba(20, 24, 40, .35); }
+.page-key.silver:focus-visible { outline: 1px dotted #1d2a3a; outline-offset: -5px; }
+/* off: no page key is off today; drawn anyway, so the fifth state never repeats the resting one */
+.page-key:disabled { border-color: #c9c7ba; background: #f5f4ea; color: var(--shade); text-shadow: 1px 1px var(--hi); box-shadow: none; }
+.page-key:disabled svg { opacity: .45; filter: grayscale(1); }
+/* the printed link: a way on after the keys, Noto Sans bold in Ink over a 35% underline that goes solid under the pointer */
+.page-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 4px; border: 0; background: none; color: var(--ink);
+  font: 700 14px/1.2 var(--ui); text-decoration: underline; text-decoration-color: rgba(20, 20, 20, .35); text-underline-offset: 4px; }
+.page-link .px { width: 16px; height: 16px; flex: none; }
+.page-link:hover { text-decoration-color: currentColor; }
+.page-link:active { color: #000; text-decoration-color: currentColor; text-decoration-thickness: 2px; }
+.page-link:focus-visible { outline-offset: 1px; }
 /* the hand on the page, the arrow on the system: Home and About read like web pages, so everything that acts on
    them takes the hand; the Luna chrome keeps XP's arrow, except the hyperlinks XP itself drew with the hand */
 :is(.home, .doc) :is(button, select, label.chk, [role="button"]):not(:disabled), .tp-links button, .pl-ask { cursor: pointer; }
@@ -165,7 +211,6 @@ img { max-width: 100%; }
    ============================================================ */
 .boot-screen {
   --bt-band: 56px;
-  --bt-fade: 32px;       /* the empty run where the account band fades into the blue */
   position: fixed; inset: 0; z-index: 10000;
   display: none; grid-template-rows: var(--bt-band) minmax(0, 1fr) var(--bt-band);
   overflow: hidden; background: #5a7edc; color: #fff;
@@ -183,61 +228,79 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .boot-top::after { top: 100%; background: linear-gradient(90deg, transparent, #a6c4f7 25%, rgba(166, 196, 247, .5) 60%, transparent); }
 .boot-foot::before { bottom: 100%; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
 .boot-main {
+  position: relative; overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px;
   min-height: 0; padding: 24px 16px;
   background: radial-gradient(90% 90% at 0 0, rgba(166, 196, 247, .8), rgba(166, 196, 247, 0) 60%);
 }
+/* the same light, drawn by boot.js in 2px ordered-dither dots, the wallpaper's own material, so the welcome and
+   the desktop it hands over to read as one screen; the gradient above shows until it has painted */
+.boot-dots { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.boot-main > :is(.boot-hello, .boot-user) { position: relative; }
 /* "hello" in a pointed pen: boot.js cuts the hand-drawn line (.boot-line) into short pieces weighted like a nib,
    heavy down the slant and hairline going up, and reveals them as the pen writes; whole under reduced motion */
 .boot-hello { display: block; flex: none; width: min(320px, 100%); height: auto; overflow: visible; filter: drop-shadow(0 4px 8px rgba(0, 20, 90, .35)); }
 .boot-line { display: none; }
 .boot-ink path { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
 .boot-ink path.on, .boot-hello.whole .boot-ink path { visibility: visible; }
-/* the account logging in: XP's selected tile, a navy band fading out to the right, the picture in its gold frame */
+/* the account logging in, stacked downward (owner's request, 2026-09-28): XP's selected account as a card, Task
+   Blue On down to Heading Cobalt with a faint Welcome Light edge and a glossy top line, lifted off the field;
+   the dark card is also what keeps the small status text legible. Two groups inside: who is logging in (the
+   picture, the name, the role), then what is loading (the status and the bar) */
 .boot-user {
-  display: flex; align-items: center; gap: 12px; max-width: 100%;
-  margin-right: calc(-1 * var(--bt-fade)); padding: 12px var(--bt-fade) 12px 12px; border-radius: 8px;
-  background: linear-gradient(90deg, #0c3a9e, #1e52b7 calc(100% - var(--bt-fade)), rgba(30, 82, 183, 0));
+  display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: 100%;
+  padding: 20px 24px; border-radius: 8px; text-align: center;
+  background: linear-gradient(180deg, #1e52b7, #0c3a9e);
+  box-shadow: inset 0 0 0 1px rgba(166, 196, 247, .35), inset 0 1px rgba(255, 255, 255, .22), 0 8px 24px -8px rgba(0, 16, 60, .55);
 }
 /* the picture waits in the Start menu's pale frame and takes XP's gold selected frame as the pen touches down */
 .boot-pic { flex: none; width: 72px; height: 72px; border-radius: 6px; overflow: hidden; background: #fff; box-shadow: 0 0 0 3px #d8e4f8, 0 0 0 4px transparent, 0 6px 12px 2px rgba(0, 16, 60, .45); transition: box-shadow .4s cubic-bezier(.2, .8, .2, 1); }
 .boot-screen.chosen .boot-pic { box-shadow: 0 0 0 3px #fbc761, 0 0 0 4px #e5a01a, 0 6px 12px 2px rgba(0, 16, 60, .45); }
 .boot-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.boot-who { flex: 0 1 208px; min-width: 0; display: grid; gap: 8px; }
-.boot-name { margin: 0; font: 700 20px/1.15 var(--display); letter-spacing: -0.01em; text-wrap: balance; text-shadow: 0 1px 2px rgba(0, 16, 60, .4); }
-.boot-status { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; font: 12px/16px var(--ui); color: #d6e2f8; }
+.boot-who { width: 240px; max-width: 100%; display: grid; }
+.boot-name { margin: 0; font: 700 20px/1.2 var(--display); letter-spacing: -0.01em; text-wrap: balance; text-shadow: 0 1px 2px rgba(0, 16, 60, .4); }
+.boot-role { margin: 4px 0 0; font: 12px/16px var(--ui); color: #d6e2f8; }
+.boot-status { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 20px 0 0; font: 12px/16px var(--ui); color: #d6e2f8; text-align: left; }
 .boot-status span:first-child { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 /* what the line says on a slow connection, before boot.js has arrived to name the parts */
 .boot-status span:first-child:empty::before { content: "Loading\2026"; }
 html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2026"; }
 .boot-status span:last-child { flex: none; font-variant-numeric: tabular-nums; }
 /* XP's progress bar, as the game loader draws it: green blocks, 8px with 2px gaps, in a white trough */
-.boot-bar { height: 16px; padding: 2px; border: 1px solid var(--dark); border-radius: 3px; background: #fff; box-shadow: 0 1px 2px rgba(0, 16, 60, .35); }
+.boot-bar { height: 16px; margin-top: 8px; padding: 2px; border: 1px solid var(--dark); border-radius: 3px; background: #fff; box-shadow: 0 1px 2px rgba(0, 16, 60, .35); }
 .boot-bar i { display: block; width: 0; height: 100%; background: repeating-linear-gradient(90deg, transparent 0 8px, #fff 8px 10px), var(--progress); }
-.boot-foot { display: flex; align-items: center; justify-content: center; padding: 0 16px; }
-.boot-hint { margin: 0; font: 12px/16px var(--ui); text-align: center; }
 /* sizes step at the screen's width (and height, for the bands), never in between */
 @media (min-width: 720px) {
-  .boot-screen { --bt-fade: 96px; }
   .boot-main { gap: 40px; }
   .boot-hello { width: 480px; }
-  .boot-user { gap: 16px; }
+  .boot-user { padding: 24px 32px; }
   .boot-pic { width: 96px; height: 96px; }
-  .boot-who { flex-basis: 288px; }
+  .boot-who { width: 288px; }
   .boot-name { font-size: 24px; }
-  .boot-status { font-size: 14px; line-height: 20px; }
-  .boot-foot { justify-content: flex-end; padding: 0 32px; }
+  .boot-role, .boot-status { font-size: 14px; line-height: 20px; }
+  .boot-status { margin-top: 24px; }
 }
 @media (min-width: 720px) and (min-height: 640px) { .boot-screen { --bt-band: 80px; } }
 @media (min-width: 1200px) { .boot-hello { width: 560px; } }
 @media (min-width: 1200px) and (min-height: 820px) { .boot-screen { --bt-band: 96px; } .boot-main { gap: 48px; } }
-/* a phone on its side: thinner bands and a smaller hand, so the tile stays on the screen */
+/* a short screen or a phone on its side: thinner bands, a smaller hand and picture, so the column still fits */
+@media (max-height: 640px) {
+  .boot-main { gap: 16px; padding: 16px; }
+  .boot-hello { width: 240px; }
+  .boot-user { padding: 16px 24px; gap: 12px; }
+  .boot-pic { width: 56px; height: 56px; }
+  .boot-name { font-size: 20px; }
+  .boot-role, .boot-status { font-size: 12px; line-height: 16px; }
+  .boot-status { margin-top: 12px; }
+}
 @media (max-height: 520px) {
   .boot-screen { --bt-band: 40px; }
-  .boot-main { gap: 24px; padding: 16px; }
-  .boot-hello { width: 280px; }
-  .boot-pic { width: 72px; height: 72px; }
-  .boot-name { font-size: 20px; }
+  .boot-main { gap: 12px; }
+  .boot-hello { width: 180px; }
+  .boot-user { padding: 12px 20px; gap: 8px; }
+  .boot-pic { width: 48px; height: 48px; }
+  .boot-status { margin-top: 8px; }
+  .boot-bar { margin-top: 4px; }
 }
 
 /* ============================================================
@@ -488,7 +551,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .ad-photo { margin: 0; aspect-ratio: 1; padding: 4px; border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px var(--paper-line), 0 10px 18px -12px rgba(0, 20, 70, .45); }
 .ad-photo img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 2px; }
 .sp-name { min-width: 0; }
-.sp-name h2 { margin: 0; font: 700 24px/1.05 var(--display); letter-spacing: -0.02em; color: var(--heading-ink); text-wrap: balance; }
+.sp-name h2 { margin: 0; font: 700 24px/1.2 var(--display); letter-spacing: -0.02em; color: var(--heading-ink); text-wrap: balance; }
 .ad-role { margin: 8px 0 0; font-size: 16px; line-height: 1.4; }
 /* availability wears the work log's current-role marker: the same green square, the same green ink */
 .sp-status { display: flex; align-items: center; gap: 8px; margin: 12px 0 0; font: 700 12px/1.3 var(--ui); color: var(--ok-ink); }
@@ -500,7 +563,10 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .sp-facts dt { font: 700 12px/20px var(--ui); color: var(--muted); }
 .sp-facts dd { margin: 0; font-size: 14px; line-height: 20px; }
 .ad-lede { margin: 0; max-width: 62ch; font-size: 14px; line-height: 1.6; }
-.ad-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font: 12px var(--ui); }
+/* the card's two ways out as page keys: the CV is the main step (REC), the portfolio the next (Silver); a message is
+   the order form's, at the foot of the page. No new class here starts with ad-: ad blockers hide names like ad-link
+   (EasyList ##.ad-link) */
+.ad-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 @container doc (min-width: 480px) {
   .sp-id { grid-template-columns: 128px minmax(0, 1fr); gap: 24px; }
   .sp-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -523,7 +589,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 
 /* panels */
 .panel { --pad: clamp(20px, 3.6cqi, 32px); min-width: 0; display: flex; flex-direction: column; border-radius: 4px 4px 0 0; background: var(--paper-2); border: 1px solid var(--paper-line); }
-.panel > h2 { margin: 0; padding: 9px var(--pad) 8px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #fff 0%, #c6d3f7 100%); color: #215dc6; font: 700 14px/1.2 var(--display); }
+.panel > h2 { margin: 0; padding: 9px var(--pad) 8px; border-radius: 3px 3px 0 0; background: linear-gradient(90deg, #fff 0%, #c6d3f7 100%); color: #215dc6; font: 700 14px/1.3 var(--display); }
 .panel .pb { flex: 1; padding: var(--pad) var(--pad) calc(var(--pad) + 4px); }
 .lead { margin: 0 0 20px; max-width: 60ch; font-size: 14px; line-height: 1.55; color: #2b2a26; }
 .sp-sec { margin-top: 38px; }
@@ -551,16 +617,18 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 }
 .pj-pb { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: start; }
 @container doc (min-width: 520px) { .pj-pb { grid-template-columns: 118px minmax(0, 1fr); column-gap: 72px; } }
-.floppy { position: relative; width: 118px; margin: 6px 0 0 4px; transform: rotate(-6deg); filter: drop-shadow(3px 5px 4px rgba(0, 0, 0, .3)); }
+/* the disk rests on the panel: a short contact shadow, then the navy lift the page's other objects cast */
+.floppy { position: relative; width: 118px; margin: 6px 0 0 4px; transform: rotate(-6deg); filter: drop-shadow(0 1px 1px rgba(4, 14, 32, .35)) drop-shadow(3px 7px 6px rgba(0, 20, 70, .28)); }
 .floppy-art { display: block; width: 100%; height: auto; }
 .floppy-art text { fill: #1a1a1a; }
 .floppy-art .fl-t1 { font: 700 10.5px var(--display); letter-spacing: -0.02em; }
 .floppy-art .fl-t2 { font: 400 10.5px var(--display); }
+.floppy-art .fl-hd { font: 700 6px var(--display); letter-spacing: .02em; fill: #fff; }
 .pj { list-style: none; margin: 0; padding: 0; }
 .pj li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: 16px 0; border-top: 1px solid var(--paper-rule); }
 .pj li:first-child { border-top: 0; padding-top: 0; }
 .pj-no { font: 700 18px/1.1 var(--display); color: var(--heading-ink); }
-.pj h3 { margin: 0; font: 700 14px/1.25 var(--display); }
+.pj h3 { margin: 0; font: 700 14px/1.3 var(--display); }
 .pj h3 a { color: inherit; }
 .pj .pj-meta { margin: 2px 0 4px; font: 12px/1.35 var(--ui); color: var(--muted); }
 .pj p { margin: 0; font-size: 14px; line-height: 1.5; }
@@ -598,7 +666,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 /* let's build: the order form at the bottom of the document (spacing on a 4px scale) */
 .order { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 48px; padding: clamp(28px, 5cqi, 44px); border: 1px solid var(--paper-line); border-radius: 4px; background: var(--paper-2); }
 .bd-main { min-width: 0; }
-.bd-main h2 { margin: 0; font: 700 24px/1.05 var(--display); letter-spacing: -0.02em; color: var(--heading-ink); text-wrap: balance; }
+.bd-main h2 { margin: 0; font: 700 24px/1.2 var(--display); letter-spacing: -0.02em; color: var(--heading-ink); text-wrap: balance; }
 @container doc (min-width: 720px) { .bd-main h2 { font-size: 32px; } }
 .bd-lead { margin: 12px 0 0; max-width: 48ch; font-size: 16px; line-height: 1.55; }
 .bd-need { min-inline-size: 0; margin: 28px 0 0; padding: 12px 20px 16px; border: 1px solid #d0d0bf; border-radius: 4px; }
@@ -611,7 +679,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .chk input:focus-visible + span { outline: 1px dotted #000; outline-offset: 2px; }
 .bd-send { margin-top: 24px; }
 .bd-side { min-width: 0; padding-top: 28px; border-top: 1px solid var(--paper-rule); }
-.bd-side h3 { margin: 0 0 12px; font: 700 14px/1.2 var(--display); color: #1a1a1a; }
+.bd-side h3 { margin: 0 0 12px; font: 700 14px/1.3 var(--display); color: #1a1a1a; }
 .bd-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .bd-links a { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: center; margin: 0 -8px; padding: 8px; border-radius: 3px; color: #141414; text-decoration: none; }
 .bd-links a:hover, .bd-links a:active { background: var(--sel); color: #fff; }
@@ -692,7 +760,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   position: relative; isolation: isolate;
   flex: 1; min-height: 0;
   display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr); gap: 8px;
-  padding: 0 12px 12px; border-radius: 18px 18px 26px 26px;
+  padding: 0 8px 8px; border-radius: 18px 18px 26px 26px; container: skin / inline-size;
   background:
     radial-gradient(90% 55% at 18% 0%, rgba(255, 255, 255, .8), rgba(255, 255, 255, 0) 60%),
     repeating-linear-gradient(90deg, rgba(255, 255, 255, .08) 0 1px, rgba(0, 0, 0, .035) 1px 3px),
@@ -705,7 +773,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .pl-print, .pl-tool small, .pl-kgrp small, .pl-vol small, .pl-vrow b { font: 12px/1 var(--ui); color: #2b2c33; text-shadow: 0 1px rgba(255, 255, 255, .7); white-space: nowrap; }
 .pl-well { display: flex; gap: 8px; padding: 4px; border-radius: 24px; background: #1b1d22; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .7), 0 1px rgba(255, 255, 255, .8); }
 /* the caption plate: the skin's own title strip, dragged like a title bar; its keys sit in a dark well */
-.pl-cap { display: flex; align-items: center; gap: 8px; min-height: 40px; margin: 0 -12px; padding: 4px 8px 4px 12px; border-radius: 18px 18px 0 0; touch-action: none; user-select: none;
+.pl-cap { display: flex; align-items: center; gap: 8px; min-height: 40px; margin: 0 -8px; padding: 4px 8px; border-radius: 18px 18px 0 0; touch-action: none; user-select: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, 0) 70%);
   border-bottom: 1px solid #9a9ca6; box-shadow: 0 1px rgba(255, 255, 255, .8); }
 .win.max .pl-cap { border-radius: 0; }
@@ -724,7 +792,8 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   background: radial-gradient(circle at 36% 30%, #ffffff 0, #d6d7dd 42%, #9a9ca6 100%);
   box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .25), 0 1px 0 rgba(255, 255, 255, .8); }
 .orb svg { width: 16px; height: 16px; }
-.skin-body { min-height: 0; display: grid; grid-template-columns: 184px minmax(0, 1fr); gap: 12px; }
+/* the screen is what the client came for, so the tray and the deck around it stay slim (owner's request, 2026-09-28) */
+.skin-body { min-height: 0; display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px; }
 /* the side tray: the case picker (an LCD field, like WMP's playlist picker), the chapters as the playlist, and the tools */
 .pl-side { min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 12px;
   background: linear-gradient(180deg, rgba(40, 42, 52, .08), rgba(255, 255, 255, .2)); box-shadow: inset 0 1px 3px rgba(40, 42, 52, .35), 0 1px rgba(255, 255, 255, .8); }
@@ -736,12 +805,12 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .pl-select:has(select:focus-visible) { outline: 1px dotted #000; outline-offset: 2px; }
 .skin-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
 .skin-nav button, .skin-nav .off {
-  flex: 0 0 auto; min-height: 48px; padding: 8px 12px 8px 8px;
+  flex: 0 0 auto; min-height: 40px; padding: 4px 8px;
   display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; text-align: right;
   border: 1px solid #7f818b; border-radius: 3px 12px 12px 3px;
   background: linear-gradient(180deg, #f4f4f7, #c9cad1 62%, #b5b6be);
   box-shadow: inset 0 1px #fff, inset 0 -1px rgba(0, 0, 0, .18);
-  font: 700 14px/1.1 var(--ui); color: #1d1e26;
+  font: 700 12px/16px var(--ui); color: #1d1e26;
 }
 .skin-nav .no { grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; text-align: left; font: 400 12px/1 var(--ui); color: #2b2c33; font-variant-numeric: tabular-nums; }
 .skin-nav .nm { min-width: 0; overflow-wrap: anywhere; }
@@ -756,8 +825,8 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 /* a chapter the case has not published yet keeps its place in the list, flat and dashed like the skin's notes */
 .skin-nav .off { min-height: 40px; padding-top: 4px; padding-bottom: 4px; border-style: dashed; border-color: #8e909a; background: rgba(255, 255, 255, .4); box-shadow: none; }
 .skin-nav .off, .skin-nav .off small, .skin-nav .off .no { color: #50525e; }
-.pl-tools { flex: none; display: flex; justify-content: space-between; padding: 8px 4px 0; border-top: 1px solid rgba(40, 42, 52, .2); box-shadow: inset 0 1px rgba(255, 255, 255, .6); }
-.pl-tool { min-width: 44px; display: grid; justify-items: center; gap: 4px; }
+.pl-tools { flex: none; display: flex; gap: 12px; padding: 8px 0 0; border-top: 1px solid rgba(40, 42, 52, .2); box-shadow: inset 0 1px rgba(255, 255, 255, .6); }
+.pl-tool { display: grid; justify-items: center; gap: 4px; }
 .pl-tool .orb { width: 32px; height: 32px; }
 .screen {
   min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: #000;
@@ -785,10 +854,11 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .screen-view::-webkit-scrollbar-track { background-image: none; background: #2c2e36; }
 .screen-view::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #9a9ca6, #d4d5db 50%, #9a9ca6); box-shadow: none; border-radius: 8px; border: 3px solid #2c2e36; }
 .screen-view::-webkit-scrollbar-button { display: none; }
-/* a chapter is one section of the page, on the Figma's own lines: the tags' column, a step in (155 of its 1440),
-   and the content column (385 to 1400); under 760px of screen everything stacks in one column */
+/* a chapter is one section of the page, on the owner's Figma lines (the KROOL page at the player's 1029): 60px
+   gutters, the tags' column (244.8 of the 909 between them, with a step in at a third of it) and the content column;
+   under 760px of screen everything stacks in one column. --feat is the space above a feature of the showcase */
 .cs-ch {
-  --g: 20px; --sec: 64px; --blk: 40px; --lead: 24px;
+  --g: 20px; --sec: 64px; --blk: 40px; --lead: 24px; --feat: var(--sec);
   display: grid; grid-template-columns: [full-start] var(--g) [tag-start wide-start main-start] minmax(0, 1fr) [main-end] var(--g) [full-end];
   row-gap: var(--blk); align-content: start; padding: var(--sec) 0 40px; background: #fff;
 }
@@ -799,9 +869,11 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .cs-ch:last-child { padding-bottom: var(--sec); }
 @container (min-width: 640px) { .cs-ch { --g: 32px; --sec: 96px; --blk: 64px; --lead: 32px; } }
 @container (min-width: 760px) {
-  .cs-ch { grid-template-columns: [full-start] var(--g) [tag-start] minmax(0, 115fr) [wide-start] minmax(0, 230fr) [main-start] minmax(0, 1015fr) [main-end] var(--g) [full-end]; }
+  .cs-ch { --g: 60px; --sec: 180px; --feat: 112px; grid-template-columns: [full-start] var(--g) [tag-start] minmax(0, 408fr) [wide-start] minmax(0, 816fr) [main-start] minmax(0, 3321fr) [main-end] var(--g) [full-end]; }
+  /* the first section opens 96px under the hero; the charts' section keeps 80px under its collage */
+  .cs-ch.hero + .cs-ch { padding-top: 96px; }
+  .cs-ch:has(> .cs-trio:last-child) { padding-bottom: 80px; }
 }
-@container (min-width: 1100px) { .cs-ch { --g: 40px; --sec: 128px; --blk: 80px; --lead: 40px; } }
 /* the hero: the case's name, logline and tags on the dark-to-ember ground of the owner's hero, centred over its big
    screen on a CRT; a case without a page shows its cover behind the words instead */
 .cs-hero {
@@ -815,7 +887,7 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 /* on a cover a shade under the words keeps them readable */
 .cs-hero.on-cover::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(0deg, rgba(12, 8, 5, .85), rgba(12, 8, 5, 0) 64%); }
 .cs-hero-text { max-width: 560px; display: grid; gap: 16px; }
-.cs-hero h2 { margin: 0; font: 700 40px/1 var(--display); letter-spacing: -0.03em; }
+.cs-hero h2 { margin: 0; font: 700 40px/1.1 var(--display); letter-spacing: -0.03em; }
 .cs-hero p { margin: 0; font-size: var(--pl-size); line-height: 1.5; color: rgba(255, 255, 255, .8); }
 .cs-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
 .on-cover .cs-chips { justify-content: flex-start; }
@@ -835,11 +907,24 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .cs-ph-tag { position: absolute; left: 12px; top: 12px; max-width: calc(100% - 24px); display: grid; padding: 4px 8px; border-radius: 3px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); font: 12px/16px var(--ui); color: #000; }
 .cs-ph-tag b { overflow-wrap: anywhere; }
 .cs-ph-tag small { font-size: 12px; color: #5b5f6b; }
+/* on a local preview, the owner's export in a slot (app.js, DRAFTS): its name tag is XP's tooltip, shown on hover,
+   and it stays up with the warning icon when the picture's ratio is not the slot's */
+.cs-draft-tag { position: absolute; left: 8px; top: 8px; z-index: 3; max-width: calc(100% - 16px); display: grid; padding: 4px 8px; background: var(--tip); color: #000; border: 1px solid #000; box-shadow: var(--menu-shadow); font: 12px/16px var(--ui); text-align: left; pointer-events: none; opacity: 0; }
+.cs-draft-tag b { overflow-wrap: anywhere; }
+.cs-draft-tag small { font-size: 12px; }
+.cs-win-body:hover > .cs-draft-tag, .crt-glass:hover > .cs-draft-tag, .cs-pic.pic-bare:hover > .cs-draft-tag, .cs-draft-tag.off { opacity: 1; }
+.cs-draft-tag .dt-off { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+.cs-draft-tag .dt-off svg { flex: none; }
 .cs-pic.apart { margin-top: calc(var(--sec) - var(--blk)); }
+/* the design focus's device shot, bare: edge to edge across its section and flush with its foot, a lead under the
+   quote */
+.cs-ch > .cs-pic.pic-bare { grid-column: full-start / full-end; }
+.cs-quote + .cs-pic.pic-bare { margin-top: calc(var(--lead) - var(--blk)); }
+.cs-ch:has(> .cs-pic.pic-bare:last-child) { padding-bottom: 0; }
 /* an XP window of the case's app around its screen: Home's mini window, its caption buttons drawn faded, since it is
    a picture of a window and not one to close */
-.cs-win { display: flex; flex-direction: column; padding: 0 3px 3px; border-radius: 8px 8px 0 0; background: var(--face); box-shadow: var(--frame), 0 20px 34px -20px rgba(0, 20, 70, .55); }
-.cs-win-body { display: block; background: #fff; }
+.cs-win { display: flex; flex-direction: column; padding: 0 3px 3px; border-radius: 8px 8px 0 0; background: var(--face); box-shadow: var(--frame), 0 20px 30px -10px rgba(0, 20, 70, .08); }
+.cs-win-body { position: relative; display: block; background: #fff; }
 /* a CRT monitor of the XP years around a big screen, drawn front on: a beige case in the Luna face, lit along its
    top and left and shaded along its right and foot, the tube sunk in a moulded recess, a chin with a speaker grille,
    a blank badge, four menu keys, the power lamp and key, then its stand */
@@ -879,21 +964,30 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 /* a section's tag, a black badge; its heading and text in the content column */
 .cs-intro, .cs-quote, .cs-feat { grid-column: full-start / full-end; display: grid; grid-template-columns: subgrid; row-gap: var(--lead); }
 .cs-intro > *, .cs-quote > *, .cs-feat > * { grid-column: main-start / main-end; min-width: 0; }
-.cs-tag { justify-self: start; align-self: start; margin: 0; padding: 4px 8px; background: #141414; color: #fff; font: 700 12px/16px var(--ui); letter-spacing: .06em; text-transform: uppercase; }
+.cs-tag { justify-self: start; align-self: start; margin: 0; padding: 4px 8px; background: #141414; color: #fff; font: 700 12px/16px var(--ui); }
 .cs-title { margin: 0; max-width: 13em; font: 700 28px/1.1 var(--display); letter-spacing: -0.025em; color: #141414; text-wrap: balance; }
 .cs-lede { display: grid; gap: 16px; max-width: 700px; }
 .cs-lede p { margin: 0; font-size: var(--pl-size); line-height: 1.5; }
+/* the solution's tag and text share a row from 760px up; on a narrow screen the tag heads the section like the others */
+.cs-under { display: contents; }
+.cs-under > * { grid-column: main-start / main-end; min-width: 0; }
+.cs-under > .cs-tag { order: -1; }
 /* the challenge as a quote, its opening mark hung in the margin once there is room */
-.cs-quote blockquote { margin: 0; max-width: 900px; }
+.cs-quote blockquote { margin: 0; max-width: 640px; }
 .cs-quote blockquote p { position: relative; margin: 0; font-size: var(--pl-lede); line-height: 1.45; color: #141414; }
 .cs-quote blockquote p::before { content: "\201C"; }
 .cs-quote blockquote p::after { content: "\201D"; }
-/* the showcase: each screen of the app as a feature, its label, heading and line of text over its window */
-.cs-feat { row-gap: 12px; margin-top: calc(var(--sec) - var(--blk)); }
+/* the showcase: each screen of the app as a feature, its bulleted label, heading and line of text over its window */
+.cs-feat { row-gap: 12px; margin-top: calc(var(--feat) - var(--blk)); }
 .cs-feat > .cs-pic { margin-top: calc(var(--lead) - 12px); }
-.cs-flabel { margin: 0; font: 700 14px/20px var(--ui); color: #1d2939; }
-.cs-ftitle { margin: 0; max-width: 16em; font: 700 20px/1.3 var(--display); letter-spacing: -0.01em; color: #1d2939; text-wrap: balance; }
-.cs-body { margin: 0; max-width: 450px; font-size: var(--pl-size); line-height: 1.5; }
+.cs-flabel { display: list-item; list-style: disc outside; margin: 0 0 0 20px; font: 700 14px/20px var(--ui); color: #1d2939; }
+/* where the page stacks (a phone), the label heads its feature as a badge like a section's tag, filled in the feature's
+   ink (owner's request, 2026-09-28) */
+@container (max-width: 759px) {
+  .cs-flabel { display: block; justify-self: start; margin: 0; padding: 4px 8px; background: #1d2939; color: #fff; font: 700 12px/16px var(--ui); }
+}
+.cs-ftitle { margin: 0; max-width: 500px; font: 700 20px/1.2 var(--display); letter-spacing: -0.01em; color: #1d2939; text-wrap: balance; }
+.cs-body { margin: 0; max-width: 500px; font-size: var(--pl-size); line-height: 1.5; }
 /* the inbox's teammate card opens over its window, the way an XP dialog does (under it on a narrow screen) */
 .cs-pop { display: block; width: min(100%, 320px); margin: 16px 0 0 auto; }
 .cs-trio { display: grid; gap: var(--blk); }
@@ -915,30 +1009,34 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   .cs-quote blockquote p { font-size: var(--pl-quote); }
 }
 @container (min-width: 760px) {
-  .cs-intro .cs-tag, .cs-quote .cs-tag, .cs-feat .cs-flabel { grid-column: tag-start / main-start; grid-row: 1; margin-top: 8px; }
+  .cs-intro > .cs-tag, .cs-quote .cs-tag, .cs-feat .cs-flabel { grid-column: tag-start / main-start; grid-row: 1; margin-top: 8px; }
   .cs-intro > .cs-title, .cs-quote > blockquote, .cs-feat > .cs-ftitle { grid-row: 1; }
   .cs-intro > .cs-lede { grid-row: 2; }
-  /* the solution's tag sits under its heading, with its text stepped in beside it */
-  .cs-intro.under .cs-tag { grid-column: main-start / main-end; grid-row: 2; margin-top: 4px; }
-  .cs-intro.under .cs-lede { margin-left: 18%; max-width: 480px; }
+  /* a section's heading runs the content column at the Figma's 44px */
+  .cs-title { max-width: none; font-size: 44px; line-height: 52px; letter-spacing: -0.03em; text-wrap: pretty; }
+  /* a heading with no text under it (the showcase's) sits 44px over its CRT */
+  .cs-intro:not(:has(.cs-lede)) + .cs-pic { margin-top: calc(44px - var(--blk)); }
+  /* the solution's tag sits under its heading and its text is stepped in beside it: 19.5% in, or past a wider tag
+     (a longer label, the Indonesian one), so the text never runs over the tag */
+  .cs-under { grid-row: 2; display: grid; grid-template-columns: minmax(max-content, calc(19.5% - 32px)) minmax(0, 480px); column-gap: 32px; align-items: start; }
+  .cs-under > * { grid-column: auto; }
+  .cs-under > .cs-tag { margin-top: 4px; }
   .cs-quote blockquote p::before { position: absolute; right: 100%; padding-right: 8px; }
   .cs-pic.has-pop { margin-bottom: 48px; }
-  .cs-pop { position: absolute; right: 4%; bottom: -48px; width: 38%; margin: 0; }
+  .cs-pop { position: absolute; right: 4%; bottom: -48px; width: 41%; margin: 0; }
   /* over a phone the dialog opens across the phone's right edge */
   .cs-pic.phone .cs-pop { right: auto; left: 238px; }
   .cs-ch > .cs-row, .cs-feat > .cs-row { grid-column: wide-start / main-end; }
-  /* the three charts step down the page as in the Figma: the widest at the left, a small one a little lower at the
-     right, one below between them */
-  .cs-trio { grid-column: wide-start / main-end; gap: 0; grid-template-columns: minmax(0, 230fr) minmax(0, 430fr) minmax(0, 151fr) minmax(0, 89fr) minmax(0, 345fr); }
-  .cs-trio .t1 { grid-column: 1 / 3; grid-row: 1; }
-  .cs-trio .t2 { grid-column: 4 / 6; grid-row: 1; align-self: start; margin-top: 12%; }
-  .cs-trio .t3 { grid-column: 2 / 5; grid-row: 2; margin-top: 8%; }
-  /* a window narrower than its cell keeps the Figma's places: the right one to the right, the lower one centred */
-  .cs-trio .t2 .cs-win { margin-left: auto; }
-  .cs-trio .t3 .cs-win { margin: 0 auto; }
+  /* the three charts overlap down the page as in the Figma: the widest up top, a small one lower at the right over
+     its corner, one below at the left over the small one's. Places are shares of the 909px they span at 1029, and
+     each laps the one above by a share too, so a case with taller charts still stacks without spilling; 1064px is
+     where the windows reach their exports at 1x */
+  .cs-trio { grid-column: tag-start / main-end; justify-self: center; display: flex; flex-direction: column; align-items: flex-start; gap: 0; width: 100%; max-width: 1064px; }
+  .cs-trio .t1 { width: 51.52%; margin: 2.54% 0 0 15.56%; }
+  .cs-trio .t2 { width: 33.88%; margin: -6.64% 0 0 57.54%; }
+  .cs-trio .t3 { width: 52.3%; margin: -5.95% 0 2.54% 8.69%; }
 }
 @container (min-width: 1100px) {
-  .cs-title { font-size: 40px; }
   .cs-ftitle { font-size: 28px; }
 }
 /* a case whose write-up is not published yet says so in a dashed note, with a way to ask about it */
@@ -948,7 +1046,9 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .pl-ask:hover { background: var(--face); }
 .pl-ask:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
 /* the deck: a raised plate under the tray, the timeline across its top, then the keys, the LCD and the text size */
-.pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "tl tl tl tl" "keys lcd vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px 12px; border-radius: 16px 16px 22px 22px;
+/* one slim row, so the screen gets the height: the transport, the timeline, the LCD, the text size and the wordmark.
+   The keys carry their names as tooltips instead of printed labels */
+.pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) minmax(220px, 300px) auto auto; grid-template-areas: "keys tl lcd vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
   background: linear-gradient(180deg, #dcdee3, #b2b4bd 55%, #a0a2ab);
   box-shadow: inset 0 1px #fff, inset 0 -2px 3px rgba(40, 42, 52, .3), 0 1px 0 rgba(255, 255, 255, .8), 0 3px 6px rgba(20, 22, 30, .25); }
 .range { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: none; margin: 0; }
@@ -970,16 +1070,17 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .pl-tl .seek::-webkit-slider-thumb { margin-top: calc((var(--tl-h) - 20px) / 2); }
 .pl-tl .seek::-moz-range-track { background: none; box-shadow: none; }
 /* the transport: the big play key in its chrome rings, the portfolio key and the case pair in dark wells, labels printed under them */
-.pl-keys { grid-area: keys; display: grid; grid-auto-flow: column; grid-template-rows: auto auto; align-items: center; justify-items: center; gap: 4px 12px; }
+.pl-keys { grid-area: keys; display: grid; grid-auto-flow: column; grid-template-rows: auto; align-items: center; justify-items: center; gap: 12px; }
+.pl-keys small, .pl-vol small { display: none; }
 .pl-kgrp { display: contents; }
-.pl-key { width: 36px; height: 36px; padding: 0; border-radius: 50%; border: 1px solid #55575f; display: grid; place-items: center;
+.pl-key { width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 1px solid #55575f; display: grid; place-items: center;
   background: radial-gradient(circle at 36% 30%, #ffffff 0, #d9dae0 40%, #9fa1aa 80%, #7c7e87 100%); box-shadow: inset 0 -3px 5px rgba(0, 0, 0, .22); }
 .pl-key .px { width: 16px; height: 16px; }
-.pl-key.big { width: 56px; height: 56px; margin: 6px; box-shadow: 0 0 0 4px #b6b8c0, 0 0 0 5px #6f717a, 0 0 0 6px rgba(255, 255, 255, .7), 0 4px 8px rgba(0, 0, 0, .3), inset 0 -3px 6px rgba(0, 0, 0, .2); }
+.pl-key.big { width: 44px; height: 44px; margin: 4px; box-shadow: 0 0 0 4px #b6b8c0, 0 0 0 5px #6f717a, 0 0 0 6px rgba(255, 255, 255, .7), 0 4px 8px rgba(0, 0, 0, .3), inset 0 -3px 6px rgba(0, 0, 0, .2); }
 .pl-key.big:active { box-shadow: 0 0 0 4px #b6b8c0, 0 0 0 5px #6f717a, inset 0 3px 6px rgba(0, 0, 0, .45); }
 .pl-key.big .px { width: 24px; height: 24px; }
 /* the LCD, kept simple: a seven-segment clock (the unlit segments ghost through), then the case over the chapter being read */
-.lcd { grid-area: lcd; justify-self: center; width: 100%; max-width: 440px; min-width: 0; height: 56px; display: flex; align-items: center; gap: 16px; padding: 0 16px; border-radius: 8px;
+.lcd { grid-area: lcd; justify-self: center; width: 100%; max-width: 440px; min-width: 0; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border-radius: 8px;
   background: #070707; border: 1px solid #3e4048; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .8), 0 1px 0 #fff;
   color: var(--lcd); text-shadow: 0 0 6px rgba(99, 240, 107, .45); white-space: nowrap; overflow: hidden; }
 .lcd-clock { flex: none; display: flex; align-items: center; gap: 2px; filter: drop-shadow(0 0 3px rgba(99, 240, 107, .45)); }
@@ -987,12 +1088,13 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .seg polygon { fill: var(--lcd); opacity: .12; }
 .seg polygon.on { opacity: 1; }
 .seg-colon { width: 5px; height: 24px; fill: var(--lcd); }
-.lcd-text { flex: 1; min-width: 0; display: grid; gap: 4px; padding-left: 16px; border-left: 1px solid rgba(99, 240, 107, .2); }
+.lcd-text { flex: 1; min-width: 0; display: grid; gap: 4px; padding-left: 12px; border-left: 1px solid rgba(99, 240, 107, .2); }
 .lcd-title, .lcd-now { overflow: hidden; text-overflow: ellipsis; }
 .lcd-title { font: 700 14px/1.1 var(--ui); }
 .lcd-now { font: 12px/1.2 var(--ui); }
-/* a narrow deck drops the wordmark */
+/* a narrow deck drops the wordmark, and the narrowest (a 320px phone) the LCD's clock, so the case and chapter still read */
 @container (max-width: 960px) { .skin-logo { display: none; } }
+@container (max-width: 299px) { .lcd-clock { display: none; } .lcd .lcd-text { padding-left: 0; border-left: 0; } }
 /* text size as a volume wedge that rises to the right, a notch under each of its three sizes */
 .pl-vol { --wg-h: 20px; grid-area: vol; display: grid; justify-items: center; gap: 4px; }
 .pl-vrow { display: flex; align-items: center; gap: 8px; }
@@ -1009,6 +1111,10 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .pl-wedge .tsize::-webkit-slider-thumb { margin-top: calc((var(--wg-h) - 20px) / 2); }
 .pl-wedge .tsize::-moz-range-track { background: none; box-shadow: none; }
 .skin-logo { grid-area: logo; font: 700 12px/1 var(--ui); color: #2b2c33; letter-spacing: .02em; text-shadow: 0 1px rgba(255, 255, 255, .7); white-space: nowrap; }
+/* a skin under 800px wide has no room for the timeline in the row, so it runs across the deck's top again */
+@container skin (max-width: 799px) {
+  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "tl tl tl tl" "keys lcd vol logo"; }
+}
 
 /* ============================================================
    CONTACT — Y2K red skin
@@ -1410,6 +1516,32 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
 .pet-x:hover { border-color: var(--shade); background: var(--hi); }
 
 /* ============================================================
+   SCREEN SAVER XP: the second game (the desktop's right-click
+   menu → Properties, the screensaver's offer, Boss Rush XP's
+   phone gate, #/screensaver). Its stage draws itself in a shadow
+   root (screensaver.js); the portfolio gives it a window, the
+   desktop's balloons, the idle screensaver and the reward.
+   ============================================================ */
+.saver-body { position: relative; background: #04163f; box-shadow: var(--well); overflow: hidden; }
+.px-moon { --ic-fill: var(--ic-blue); }
+/* a tray balloon whose body is one button beside its close box: the Recycle Bin hint and the screensaver's offer */
+.tray-note .note-go { display: grid; gap: 4px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.tray-note .note-go b { margin-bottom: 0; }
+.tray-note .note-go:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+/* on a touch screen a balloon's close box keeps its drawn cross inside a 44px press, as Home's mail balloon does (Touch
+   Size Rule); the stickman's install note has the same box */
+@media (max-width: 720px), (pointer: coarse) {
+  .pet-note { padding-right: 44px; }
+  .pet-note .pet-x { top: 0; right: 0; width: 44px; height: 44px; border: 0; }
+  .pet-note .pet-x::before, .pet-note .pet-x::after { left: 16px; right: 16px; top: 21px; }
+}
+/* a menu item that would do nothing just then (the game's Pause out of a fight) is greyed, as XP greyed it */
+.menu button:disabled, .menu button:disabled:hover { background: none; color: var(--shade); text-shadow: 1px 1px #fff; cursor: default; }
+/* XP's Starfield over everything once the desktop has sat still, the pointer hidden, and the reward's trail of arrows */
+.ss-idle { position: fixed; inset: 0; z-index: 10002; width: 100vw; height: 100vh; background: #000; cursor: none; touch-action: none; }
+.trails { position: fixed; inset: 0; z-index: 9990; width: 100vw; height: 100vh; pointer-events: none; }
+
+/* ============================================================
    SMALL SCREENS: one maximized window at a time. A phone turned sideways (a short touch screen) counts too;
    app.js, boot.js and wallpaper3d.js ask the same question
    ============================================================ */
@@ -1423,7 +1555,6 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   .tb { width: 28px; height: 28px; }
   .start-btn { height: 100%; }
   .menubar > button { padding: 8px 10px; }
-  .ad-actions .btn { min-height: 44px; }
   .chk { min-height: 44px; }
   .statusbar .long { display: none; }
   .statusbar .short { display: inline; }
@@ -1431,7 +1562,12 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   .desk-icons { right: 8px; bottom: auto; grid-auto-flow: row; grid-template-rows: none; grid-template-columns: repeat(4, 1fr); justify-items: center; }
   .win, .win.skinned { left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; }
   .win .tb.max, .win .resize { display: none; }
+  /* on a phone the game's own pause button and dialogs stand in for the menu bar, and the status bar's key hints go */
+  .win[data-id="screensaver"] > .menubar, .win[data-id="screensaver"] > .statusbar { display: none; }
   .win.dialog { left: 8px !important; right: 8px; top: 20% !important; width: calc(100% - 16px) !important; height: auto !important; }
+  /* Boss Rush XP's gate, taller with its board and Screen Saver XP's button, centres between the top and the taskbar
+     and scrolls inside itself rather than run under the taskbar */
+  .win[data-id="gamegate"] { top: 8px !important; bottom: 8px; height: fit-content !important; max-height: calc(100% - 16px); margin-block: auto; }
   .toolbar .tbtn { min-width: 44px; }
   .toolbar .tbtn span { display: none; }
   .xp-main { grid-template-columns: 1fr; }
@@ -1444,22 +1580,35 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   .pl-caps [data-wact="max"] { display: none; }
   .skin-body { display: flex; flex-direction: column; gap: 8px; }
   .skin-body .screen { flex: 1; }
-  /* a phone keeps the screen tall: the case picker and the chapter strip share one row */
-  .pl-side { flex: none; flex-direction: row; align-items: center; gap: 8px; padding: 0; background: none; box-shadow: none; }
-  .pl-select { flex: 1 1 46%; min-width: 0; }
-  .pl-print, .pl-tools { display: none; }
-  .skin-nav { flex: 1 1 54%; min-width: 0; flex-direction: row; overflow-x: auto; }
-  /* a phone lists only the chapters a case plays, and no list at all for a case that plays one */
-  .skin-nav .off, .skin-nav:not(:has(button ~ button)) { display: none; }
-  .skin-nav button { display: block; padding: 8px 12px; border-radius: 10px; text-align: center; white-space: nowrap; }
-  .skin-nav button .no, .skin-nav button small { display: none; }
-  /* on a phone the text size sits beside the LCD and the keys take their own row */
-  .pl-deck { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "lcd vol" "tl tl" "keys keys"; gap: 8px 12px; padding: 8px 12px 12px; border-radius: 16px; }
+  /* a phone keeps the screen tall: the tray is only the case picker, across the width. It lists no chapters (owner's
+     request, 2026-09-28): the timeline's notches and the play key move through them, and the LCD names the current one */
+  .pl-side { flex: none; padding: 0; background: none; box-shadow: none; }
+  .pl-print, .pl-tools, .skin-nav { display: none; }
+  /* on a phone the deck is two compact rows, laid out like a pocket player and 8px apart everywhere (owner's request,
+     2026-09-28): play, the timeline and the text size, then the LCD beside the case pair, at the desktop deck's sizes.
+     The picker and the Start menu already reach the Portfolio, so its key and the printed labels go */
+  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play tl vol" "lcd lcd case"; gap: 8px; padding: 8px; border-radius: 16px; }
+  .pl-keys { display: contents; }
+  .pl-key.big { grid-area: play; }
+  .pl-kgrp:has([data-act="prev-case"]) .pl-well { grid-area: case; justify-self: end; }
+  .pl-kgrp:has([data-act="stop"]), .pl-keys small { display: none; }
   .skin-logo, .pl-vol small { display: none; }
   .pl-wedge { width: 56px; }
-  .pl-key.big { width: 48px; height: 48px; margin: 4px; }
-  .lcd { height: 48px; gap: 12px; padding: 0 12px; }
-  .lcd-text { padding-left: 12px; }
+  /* a phone's play key and LCD are smaller still (owner's request, 2026-09-28): a 36px play dome in its rings, and a
+     36px LCD with a smaller clock and 12px lines. The case pair follows at 28px so the LCD's row keeps one height;
+     every key keeps its 44px reach */
+  .pl-key.big { width: 36px; height: 36px; }
+  .pl-well .pl-key { width: 28px; height: 28px; }
+  .pl-well .pl-key::after { inset: -9px; }
+  /* the pair's reaches meet in the middle of the 8px between them, so neither key takes the other's */
+  .pl-well .pl-key:first-child::after { right: -5px; }
+  .pl-well .pl-key:last-child::after { left: -5px; }
+  .lcd { max-width: none; height: 36px; gap: 8px; padding: 0 8px; }
+  .lcd-text { gap: 0; padding-left: 8px; }
+  .lcd-title { font-size: 12px; line-height: 16px; }
+  .lcd-now { line-height: 16px; }
+  .seg { width: 12px; height: 18px; }
+  .seg-colon { width: 4px; height: 18px; }
   .screen { border-radius: 16px; border-width: 5px; }
   .nero { border-radius: 0; }
   /* the tabs already choose the category on a phone, so the combo gives its room to the caption keys */
@@ -1469,6 +1618,29 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   .task { flex-basis: 44px; }
   .task span { display: none; }
   .tray .speaker { display: none; }
+}
+
+/* a 320px phone gives the badge's room to the caption, so "Case Study Player" reads whole */
+@media (max-width: 340px) { .pl-badge { display: none; } }
+/* a wide phone window has room for the desktop's deck: the timeline across the top, then play, the LCD, the text size
+   and the case pair in one row, so the LCD is not a long empty strip */
+@media (min-width: 560px) and (max-width: 720px) {
+  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "tl tl tl tl" "play lcd vol case"; }
+}
+
+/* a phone on its side: the screen keeps the whole height, and the caption, the case picker and the deck stand in a
+   rail beside it, the deck as the timeline over play and the case pair. The LCD and the text size come back when the
+   phone stands up */
+@media (max-height: 500px) and (orientation: landscape) and (pointer: coarse), (max-width: 720px) and (max-height: 500px) and (orientation: landscape) {
+  .skin { grid-template-columns: minmax(0, 1fr) 224px; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "screen cap" "screen side" "screen deck"; padding: 8px; }
+  .skin-body { display: contents; }
+  .screen { grid-area: screen; }
+  .pl-cap, .win.max .pl-cap { grid-area: cap; margin: 0; padding: 4px 4px 4px 12px; border-radius: 12px; }
+  .pl-cap-t { display: none; }
+  .pl-caps { margin-left: auto; }
+  .pl-side { grid-area: side; }
+  .pl-deck { grid-area: deck; grid-template-columns: auto auto; grid-template-areas: "tl tl" "play case"; justify-content: start; }
+  .lcd, .pl-vol { display: none; }
 }
 
 /* touch: every control in the Portfolio window and the case player is at least 44px, on a phone and on any coarse pointer */
@@ -1482,14 +1654,29 @@ html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2
   .tb { position: relative; z-index: 1; width: 28px; height: 28px; }
   .tb::after { content: ""; position: absolute; inset: -9px; }
   .btn, .btn.lg { min-height: 44px; }
+  .page-key, .page-link { min-height: 44px; }
+  /* the keys share one width, so where they stack (a phone) they stand as an even pair */
+  .page-key { min-width: 240px; }
   .sm-item, .sm-sub .sm-item, .sm-foot .sm-item, .menu button { min-height: 44px; }
   .bin-list .bin-run { min-height: 44px; }
   .radio, .chk { min-height: 44px; }
   .menubar > button { min-width: 44px; min-height: 44px; }
   .tp-links button, .details th button, .pl-ask { min-height: 44px; }
   .details td { height: 44px; }
-  .pl-cap { min-height: 52px; }
-  .pl-cb, .skin .orb, .pl-key { width: 44px; height: 44px; }
+  .pl-cap { min-height: 48px; }
+  /* the caption keys draw a 32px dome inside a 44px reach, 12px apart, so the plate stays light (owner's request,
+     2026-09-28); the deck's keys draw the whole 44px */
+  .pl-caps { gap: 12px; border-radius: 20px; }
+  .pl-cb { position: relative; width: 32px; height: 32px; }
+  .pl-cb::after { content: ""; position: absolute; inset: -7px; }
+  /* the tray's tools keep their 32px domes 12px apart with the same 44px reach, so the row fits the tray */
+  .skin .orb { position: relative; }
+  .skin .orb::after { content: ""; position: absolute; inset: -7px; }
+  /* the deck's small keys draw 36px domes inside the same 44px reach, 8px apart in their wells (owner's request,
+     2026-09-28); the wells stay pills */
+  .pl-key { position: relative; width: 36px; height: 36px; }
+  .pl-key::after { content: ""; position: absolute; inset: -5px; }
+  .pl-well { border-radius: 22px; }
   .skin-nav button { min-height: 44px; }
   .pl-select { height: 44px; }
   .nero-top { flex-basis: 56px; }

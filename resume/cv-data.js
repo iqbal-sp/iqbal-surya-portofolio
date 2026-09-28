@@ -13,8 +13,8 @@
 
     // the site's letter and stats notes, plus LinkedIn's "interfaces and animations for web and mobile"
     summary: {
-      en: 'Product designer in Indonesia, designing websites and apps since 2020 for teams in Canada, the Netherlands, the US and Indonesia. I design interfaces and animations for web and mobile, and build many of the sites myself in Webflow and Framer. My rule: a screen is finished when the person using it knows what to do next.',
-      id: 'Product designer di Indonesia yang merancang website dan aplikasi sejak 2020 untuk tim di Kanada, Belanda, AS, dan Indonesia. Saya merancang antarmuka dan animasi untuk web dan mobile, dan membangun banyak website-nya sendiri di Webflow dan Framer. Aturan saya: layar baru selesai saat pemakainya tahu apa yang harus dilakukan berikutnya.',
+      en: "Product designer based in Indonesia, designing websites, dashboards, and mobile apps since 2020. My work covers user flows, detailed interface design, and Figma prototypes. I also build websites in Webflow and Framer, with experience across agencies, product teams, and international freelance clients.",
+      id: "Product designer di Indonesia yang merancang website, dashboard, dan aplikasi mobile sejak 2020. Pekerjaan saya mencakup alur pengguna, detail antarmuka, dan prototipe Figma. Saya juga membangun website di Webflow dan Framer, dengan pengalaman di agensi, tim produk, dan proyek freelance untuk klien dari berbagai negara.",
     },
 
     // the work log's places, shortened for print; keys are the place strings in shared/content.js
@@ -30,10 +30,10 @@
     // what a role involved, keyed "org from" as in the work log: the owner's LinkedIn descriptions, shortened
     duties: {
       'TeamUp Agency 2022/08': [
-        { en: 'Designed to the brief in cross-functional teams and researched each design problem.', id: 'Merancang sesuai brief di tim lintas fungsi dan meriset masalah desain tiap project.' },
+        { en: 'Designed to the brief in cross-functional teams and researched each design problem.', id: "Merancang sesuai brief di tim lintas fungsi dan meriset masalah desain tiap proyek." },
       ],
       'TeamUp Agency 2022/05': [
-        { en: 'Delivered projects to the brief alongside the project manager, with responsive pages.', id: 'Menuntaskan project sesuai brief bersama project manager, dengan halaman responsif.' },
+        { en: 'Delivered projects to the brief alongside the project manager, with responsive pages.', id: "Menuntaskan proyek sesuai brief bersama project manager, dengan halaman responsif." },
       ],
       'Omic 2022/08': [
         { en: 'Researched and designed an AI platform for therapy design and treatment optimization.', id: 'Meriset dan merancang platform AI untuk desain terapi dan optimasi pengobatan.' },
@@ -45,8 +45,8 @@
     // with the site's services and offers
     skills: [
       { group: { en: 'Design', id: 'Desain' }, items: [{ en: 'Product and UX design', id: 'Desain produk dan UX' }, { en: 'Website and mobile app design', id: 'Desain website dan aplikasi mobile' }, { en: 'Interaction design and prototyping', id: 'Desain interaksi dan prototipe' }, { en: 'UX research', id: 'Riset UX' }, { en: 'UI animation', id: 'Animasi UI' }, { en: 'Design systems', id: 'Design system' }, { en: 'AI products', id: 'Produk AI' }] },
-      { group: { en: 'Build', id: 'Build' }, items: [{ en: 'Webflow and Framer sites I build myself', id: 'Website Webflow dan Framer yang saya bangun sendiri' }, { en: 'Figma handoff for developers', id: 'Handoff Figma' }] },
-      { group: { en: 'Tools', id: 'Tools' }, items: ['Figma', 'Adobe Creative Suite', 'Webflow', 'Framer'] },
+      { group: { en: 'Build', id: "Pembuatan" }, items: [{ en: 'Webflow and Framer sites I build myself', id: 'Website Webflow dan Framer yang saya bangun sendiri' }, { en: 'Figma handoff for developers', id: "Handoff Figma" }] },
+      { group: { en: 'Tools', id: "Alat" }, items: ['Figma', 'Adobe Creative Suite', 'Webflow', 'Framer'] },
     ],
 
     education: [

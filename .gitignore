@@ -24,6 +24,9 @@ asset/Home/close-photo.jpg
 asset/Home/newsprint.jpg
 asset/Home/cover - *.jpg
 asset/Home/UI/ui-*.png
+# the owner's exports for the case study pages, checked on a local preview before their web copies are made
+asset/Work/*/*.png
+asset/Work/*/*.jpg
 # where each picture came from (notes for the owner, not served)
 *.png.json
 *.jpg.json

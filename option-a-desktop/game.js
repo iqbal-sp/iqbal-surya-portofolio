@@ -4,7 +4,7 @@
    OWN-WORLD: an XP hillside of its own (not the Bliss photograph): a deep-to-pale sky with cumulus and two green
    hills over the canvas taskbar; the Start menu open bottom left; Luna windows for the leaderboard (a podium in
    Icon Yellow, Silver and Orange Rule, the other ranks in a white well) and for the guide (XP tabs: Bosses, Moves,
-   Items); Tahoma. Motion is XP's own: a 0.15s menu rise, a stepped zoom rectangle.
+   Items); Noto Sans. Motion is XP's own: a 0.15s menu rise, a stepped zoom rectangle.
    STORY: The visitor reads the board (or the empty podium), looks up the bosses and the combos, picks Start the
    fight, gives a name, and plays to get it onto the board; the win returns them here with their row lit.
    FIRST VIEWPORT: the title top left; the leaderboard and the guide side by side at the top right, no lower than
@@ -33,9 +33,11 @@
   const MIN_W = 640, MIN_H = 460;
   const STEP = 1 / 120;
   const TAU = Math.PI * 2;
-  const FONT = 'Tahoma, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+  const FONT = '"Noto Sans", sans-serif';
   // the blue screen's own face
-  const MONO = '"Lucida Console", "Courier New", monospace';
+  const MONO = '"Noto Sans Mono", monospace';
+  // fetched now: a canvas only asks for a web font the first time it draws with it, and that frame gets the fallback
+  if (document.fonts && document.fonts.load) ['400', 'bold'].forEach((w) => document.fonts.load(`${w} 15px ${MONO}`).catch(() => {}));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const DEBUG = /[?&]debug\b/.test(location.search);
   // runs gained a fourth boss: best times from three-boss runs stay behind under the old key
@@ -80,19 +82,19 @@
   /* ------------------------------------------------------------ strings */
   const STR = {
     en: {
-      tagline: 'One stickman against three built-in games.',
+      tagline: 'One stickman. Three games to uninstall.',
       howTo: 'How to play',
-      keys: [['← →', 'Move. Tap twice toward where you face to dash, twice the other way for a backflip that keeps you facing the boss'], ['↑ or Space', 'Jump; press again in the air to double jump. Thrown by a big hit: press just before landing to flip up'],
+      keys: [['← →', 'Move. Tap twice toward where you face to dash, twice the other way for a backflip that keeps you facing the boss'], ['↑ or Space', 'Jump. Press again in the air to double jump. After a heavy hit throws you, press just before landing to recover'],
         ['A', 'Punch; tap up to four times for a combo. Hold for a heavy punch: walk or jump with it held, and let go in the air to fly at the boss. With a weapon, A uses it (the Items tab lists each one’s moves)'],
         ['S', 'Kick; tap up to three times for Ap Chagi, Dollyo Chagi and Twio Dollyo Chagi. Hold for Twio Yeop Chagi, the flying side kick. In the air, S S is Narae Chagi. Mix A and S mid-combo for knees and elbows'],
-        ['← → + A / S', 'Toward your back: a spinning backfist, or Dwi Chagi (S again for Dwi Hurigi)'], ['↓ + A / S', 'Uppercut or sweep. In the air: hammer slam, or Naeryo Chagi, the axe kick'],
-        ['W', 'Makki, the guard: hold it and hits from the front cost no health, though three in a row break it. Press it just before a hit to parry: thrown things go back at the boss'],
+        ['← → + A / S', 'Press toward the boss while facing away: a spinning backfist or Dwi Chagi. Press S again for Dwi Hurigi'], ['↓ + A / S', 'Uppercut or sweep. In the air: hammer slam, or Naeryo Chagi, the axe kick'],
+        ['W', 'Hold to guard against hits from the front. Three blocked hits in a row break your guard. Press just before a hit to parry and send projectiles back'],
         ['D', 'Dash through attacks. Just before a hit lands: perfect dodge'],
         ['F', 'Full blue bar: 8 seconds of shadow mode, every hit +1. F again: End Task'], ['P or Esc', 'Pause']],
       itemTip: 'Weapons drop in by parachute. Grab one before it vanishes; each lasts 20 seconds.',
       healTip: 'Health refills slowly: land hits without taking one and the next block fills back up. Coffee (+2) is rare: it only drops when you are down to two blocks, once a fight.',
       start: 'Start', resume: 'Resume', menu: 'Main menu', retry: 'Try again', again: 'Play again',
-      startMenu: 'Boss Rush XP menu', startFight: 'Start the fight', startFightSub: 'Three games are waiting', practiceSub: '12 steps, about 2 minutes', exitGame: 'Exit the game',
+      startMenu: 'Boss Rush XP menu', startFight: 'Start the fight', startFightSub: 'Take on the built-in games', practiceSub: '12 steps, about 2 minutes', exitGame: 'Exit the game',
       achToast: (n) => `Achievement: ${n}`,
       bossOf: (i, n) => `Boss ${i} of ${n}`,
       loading: 'Loading…',
@@ -104,7 +106,7 @@
       errMsg: { idle: 'Stickman.exe has performed an illegal operation.', cascade: 'Too many windows are open.', icons: 'Critical error!', freeze: 'This program is not responding.', slam: 'Click OK to continue.', text: '*** STOP: 0x0000B055', rain: 'Please wait…', die: 'Error.exe will now close.' },
       removed: 'has been removed.',
       paused: 'Paused', pausedText: 'The game is paused.',
-      tooSmall: 'This window is too small to play. Make your browser window bigger to continue.',
+      tooSmall: 'There isn’t enough room to play. Enlarge your browser window to continue.',
       crashTitle: 'Stickman.exe',
       crash: 'Stickman.exe has encountered a problem and needs to close.',
       sorry: 'We are sorry for the inconvenience.',
@@ -114,21 +116,21 @@
       time: 'Time', hits: 'Hits taken', best: 'Best time', newBest: 'New record!',
       rank: 'Grade', copy: 'Copy result', copied: 'Copied!', copyHand: 'Copy this text:',
       share: (r, t, n, who, url, pos) => `I beat Boss Rush XP${who ? ` on ${who}’s portfolio` : ''}: grade ${r}, ${t}, ${n} ${n === 1 ? 'hit' : 'hits'} taken${pos ? `, #${pos.rank} of ${pos.total} ${pos.total === 1 ? 'player' : 'players'}` : ''}. Can you do better? ${url}`,
-      board: 'Leaderboard', lbLoading: 'Checking the leaderboard…', lbAsk: (r, n) => `This run takes #${r} of ${n} on the leaderboard.`,
+      board: 'Leaderboard', lbLoading: 'Checking the leaderboard…', lbAsk: (r, n) => `This run ranks #${r} of ${n} on the leaderboard.`,
       lbName: 'Your name', lbSave: 'Save', lbSaving: 'Saving…',
-      nameTitle: 'New player', nameText: 'Type the name the leaderboard will show when you beat the game.', nameRule: 'Up to 12 letters, numbers, spaces, - or _.',
-      namePlay: 'Play', nameChange: 'Change name', nameChangeText: 'Your next saved record goes on the leaderboard under this name.', cancel: 'Cancel',
+      nameTitle: 'New player', nameText: 'Choose the public name shown with your completed runs.', nameRule: 'Up to 12 letters, numbers, spaces, - or _.',
+      namePlay: 'Play', nameChange: 'Change name', nameChangeText: 'Future saved records will use this public name.', cancel: 'Cancel',
       guide: 'Guide', tabBoard: 'Board', tabBoss: 'Bosses', tabMoves: 'Moves', tabItems: 'Items',
-      lbEmptyHead: 'The board is still empty', lbEmptyText: 'Beat every boss and your name goes up here first.', lbPractice: 'Practice first',
-      lbJoin: 'Your name isn’t on the board yet. Beat the game to get it here.', lockText: 'Locked. Beat the first three games to meet it.',
+      lbEmptyHead: 'No completed runs yet', lbEmptyText: 'Beat every boss to post the first completed run.', lbPractice: 'Practice first',
+      lbJoin: 'Finish a run to add your name to the leaderboard.', lockText: 'Locked. Beat the first three games to meet it.',
       // the guide's Moves tab, in groups: keys (a word in brackets is an instruction, not a key) and what they make
       moveList: [
-        ['Punches', [['A A A A', 'Jab, cross, overhand, uppercut, the hands in turn'], ['A (hold)', 'Heavy punch. Walk or jump with it held; let go in the air and it flies at the boss'],
+        ['Punches', [['A A A A', 'Jab, cross, overhand, uppercut, the hands in turn'], ['A (hold)', 'Heavy punch. You can move while holding it; release in the air to launch toward the boss'],
           ['↓ + A', 'Rising uppercut. In the air: hammer slam'], ['← → + A', 'Toward your back: spinning backfist']]],
-        ['Kicks', [['S S S', 'Ap Chagi, Dollyo Chagi, then Twio Dollyo Chagi: a jump, and the rear leg whips round'], ['S (hold)', 'Twio Yeop Chagi, the flying side kick. It carries like the heavy punch'],
+        ['Kicks', [['S S S', 'Ap Chagi, Dollyo Chagi, then Twio Dollyo Chagi: a jump, and the rear leg whips round'], ['S (hold)', 'Twio Yeop Chagi, the flying side kick. You can move while holding it, as with the heavy punch'],
           ['↑ S S', 'Narae Chagi: two kicks in the air, one leg then the other'], ['↓ + S', 'Sweep. In the air: Naeryo Chagi, the axe kick, chopping down'],
           ['← → + S', 'Toward your back: Dwi Chagi, the back kick. S again: Dwi Hurigi, the spinning hook kick']]],
-        ['Mixed', [['A S A S', 'Jab, knee, cross, low kick'], ['S A A', 'Ap Chagi, elbow, overhand'], ['A S A S A S S', 'The longest string: seven moves to Twio Dollyo Chagi']]],
+        ['Mixed', [['A S A S', 'Jab, knee, cross, low kick'], ['S A A', 'Ap Chagi, elbow, overhand'], ['A S A S A S S', 'Seven-move combo ending in Twio Dollyo Chagi']]],
         ['Defense', [['W (hold)', 'Makki: blocks hits from the front. Three in a row break it and you reel'],
           ['W (timed)', 'Parry, pressed just before a hit: mines, balls and red icons go back at the boss, cards and windows break, and the blue bar grows']]],
         ['Movement', [['→ →', 'Tap twice the way you face: dash through attacks'], ['← ←', 'Tap twice the other way: backflip, still facing the boss'],
@@ -144,15 +146,15 @@
       lbErr: { format: 'Use 1 to 12 letters, numbers, spaces, - or _.', name: 'That name can’t be used. Try another one.', slow: 'Too many saves from here. Try again in a few minutes.', net: 'Couldn’t save. Try again.' },
       lbCols: ['#', 'Name', 'Time', 'Hits', 'Grade'], lbCount: (n) => `${n} ${n === 1 ? 'player' : 'players'}`, lbHow: 'Ranked by time plus 10 seconds for every hit taken.',
       lbEmpty: 'Nobody has finished yet. Be the first!', lbYou: 'you', lbAll: 'See all',
-      shareOpen: 'Share result…', shareTitle: 'Share your result', shareHint: 'Paste the picture into WhatsApp, LinkedIn or X, then add the text: it carries the link to the game.',
-      cardMaking: 'Drawing your result card…', cardFail: 'The picture couldn’t be made. The text can still be copied.', cardNoRank: 'Save your name first to put your place on the card.',
-      copyImg: 'Copy image', imgCopied: 'Image copied!', imgFail: 'This browser can’t copy pictures. Download it instead.', saveImg: 'Download image', imgSaved: (f) => `Downloading ${f}…`, copyText: 'Copy text', shareTo: 'Share to…',
+      shareOpen: 'Share result…', shareTitle: 'Share your result', shareHint: 'Copy the image and text to share your result. The text includes a link to the game.',
+      cardMaking: 'Drawing your result card…', cardFail: 'The result image couldn’t be created. You can still copy the result text.', cardNoRank: 'Save your run first to include your leaderboard rank.',
+      copyImg: 'Copy image', imgCopied: 'Image copied!', imgFail: 'This browser couldn’t copy the image. Download it instead.', saveImg: 'Download image', imgSaved: (f) => `Downloading ${f}…`, copyText: 'Copy text', shareTo: 'Share to…',
       cardAll: 'All four bosses uninstalled', cardRank: 'Leaderboard', cardPos: (r, n) => `#${r} of ${n}`, cardAsk: 'Can you beat it?', cardOwner: (o) => `${o}’s portfolio`,
       cardAlt: (g, t, n, pos) => `Boss Rush XP result card: grade ${g}, ${t}, ${n} ${n === 1 ? 'hit' : 'hits'} taken${pos ? `, #${pos.rank} of ${pos.total} on the leaderboard` : ''}.`,
-      cta: 'Enjoyed this little game? Let’s build something together.', contact: 'Contact me',
-      gift: 'Reward: the stickman now lives on your taskbar.',
+      cta: 'Enjoyed exploring? Tell me about your website or app.', contact: 'Contact me',
+      gift: 'Unlocked: a stickman for your taskbar.',
       practice: 'Practice', lesStep: (i, n) => `Step ${i} of ${n}:`, lesSkip: 'Enter: skip',
-      practiceEta: (n) => `Practice will complete in approximately: ${n > 6 ? '2 minutes' : n > 3 ? '1 minute' : 'less than a minute'}`,
+      practiceEta: (n) => `About ${n > 6 ? '2 minutes' : n > 3 ? '1 minute' : 'less than a minute'} of practice remaining`,
       lesGood: 'Nice!', lesDodgeHit: 'Hit! Press D just as the paper is about to touch you.', lesDodgeLate: 'Through it! Now a little later, for a perfect dodge.',
       lesGuardHit: 'Hit! Hold W as the paper comes.', lesGuardBlock: 'Blocked! Now press W just before it touches you.',
       les: {
@@ -169,7 +171,7 @@
         weapon: ['Weapons', 'Grab the keyboard that drops in, then attack with [A].'],
         special: ['Shadow mode', 'Press [F] for shadow mode, then [F] again for End Task.'],
       },
-      drillDone: 'Practice complete!', drillText: 'You have the basics down. The built-in games are waiting to be uninstalled.', drillFight: 'Start the fight', drillAgain: 'Practice again',
+      drillDone: 'Practice complete!', drillText: 'You’ve tried the main moves. Start the fight, or practice again.', drillFight: 'Start the fight', drillAgain: 'Practice again',
       status: (i, n, name) => `Boss ${i}/${n}: ${name}`,
       statusMenu: 'Main menu',
       canvasLabel: 'Boss Rush XP. Arrow keys move, A punches, S kicks, W guards, D dashes, F starts shadow mode, P pauses.',
@@ -204,7 +206,7 @@
       ended: 'Task ended',
     },
     id: {
-      tagline: 'Satu stickman melawan tiga game bawaan.',
+      tagline: "Satu stickman. Tiga game untuk dihapus.",
       howTo: 'Cara bermain',
       keys: [['← →', 'Bergerak. Ketuk dua kali ke arah hadap untuk dash, dua kali ke arah sebaliknya untuk salto belakang yang tetap menghadap bos'], ['↑ atau Spasi', 'Lompat; tekan lagi di udara untuk lompat ganda. Terpental serangan besar: tekan tepat sebelum mendarat untuk salto'],
         ['A', 'Pukul; tekan sampai empat kali untuk kombo. Tahan untuk pukulan berat: bisa dibawa berjalan dan melompat, dan kalau dilepas di udara meluncur ke bos. Dengan senjata, A memakai senjata itu (jurus tiap senjata ada di tab Item)'],
@@ -216,7 +218,7 @@
       itemTip: 'Senjata turun dengan parasut. Ambil sebelum hilang; tiap senjata bertahan 20 detik.',
       healTip: 'Nyawa pulih perlahan: serang tanpa terkena serangan dan blok berikutnya terisi lagi. Kopi (+2) langka: hanya jatuh saat nyawa tinggal dua, sekali per pertarungan.',
       start: 'Mulai', resume: 'Lanjut', menu: 'Menu utama', retry: 'Coba lagi', again: 'Main lagi',
-      startMenu: 'Menu Boss Rush XP', startFight: 'Mulai pertarungan', startFightSub: 'Tiga game menunggu', practiceSub: '12 langkah, 2 menit', exitGame: 'Keluar dari game',
+      startMenu: 'Menu Boss Rush XP', startFight: 'Mulai pertarungan', startFightSub: "Hadapi game bawaan", practiceSub: "12 langkah, sekitar 2 menit", exitGame: 'Keluar dari game',
       achToast: (n) => `Pencapaian: ${n}`,
       bossOf: (i, n) => `Bos ${i} dari ${n}`,
       loading: 'Memuat…',
@@ -228,7 +230,7 @@
       errMsg: { idle: 'Stickman.exe telah melakukan operasi ilegal.', cascade: 'Terlalu banyak jendela terbuka.', icons: 'Kesalahan kritis!', freeze: 'Program ini tidak merespons.', slam: 'Klik OK untuk melanjutkan.', text: '*** STOP: 0x0000B055', rain: 'Harap tunggu…', die: 'Kesalahan.exe akan ditutup.' },
       removed: 'berhasil dihapus.',
       paused: 'Jeda', pausedText: 'Permainan sedang dijeda.',
-      tooSmall: 'Jendela ini terlalu kecil untuk bermain. Perbesar jendela browser Anda untuk melanjutkan.',
+      tooSmall: "Ruang layar belum cukup untuk bermain. Perbesar jendela browser untuk melanjutkan.",
       crashTitle: 'Stickman.exe',
       crash: 'Stickman.exe mengalami masalah dan harus ditutup.',
       sorry: 'Mohon maaf atas ketidaknyamanan ini.',
@@ -240,18 +242,18 @@
       share: (r, t, n, who, url, pos) => `Aku menamatkan Boss Rush XP${who ? ` di portofolio ${who}` : ''}: nilai ${r}, waktu ${t}, terkena ${n} serangan${pos ? `, peringkat #${pos.rank} dari ${pos.total} pemain` : ''}. Bisa lebih baik? ${url}`,
       board: 'Papan peringkat', lbLoading: 'Mengecek papan peringkat…', lbAsk: (r, n) => `Waktu ini masuk peringkat #${r} dari ${n} pemain.`,
       lbName: 'Namamu', lbSave: 'Simpan', lbSaving: 'Menyimpan…',
-      nameTitle: 'Pemain baru', nameText: 'Ketik nama yang akan tampil di papan peringkat saat kamu menamatkan game.', nameRule: 'Maksimal 12 huruf, angka, spasi, - atau _.',
-      namePlay: 'Main', nameChange: 'Ganti nama', nameChangeText: 'Rekor berikutnya yang tersimpan akan tampil dengan nama ini.', cancel: 'Batal',
+      nameTitle: 'Pemain baru', nameText: "Pilih nama publik yang akan tampil bersama rekormu.", nameRule: 'Maksimal 12 huruf, angka, spasi, - atau _.',
+      namePlay: 'Main', nameChange: 'Ganti nama', nameChangeText: "Rekor berikutnya akan disimpan dengan nama publik ini.", cancel: 'Batal',
       guide: 'Panduan', tabBoard: 'Papan', tabBoss: 'Bos', tabMoves: 'Jurus', tabItems: 'Item',
-      lbEmptyHead: 'Papan ini masih kosong', lbEmptyText: 'Kalahkan semua bos, dan namamu jadi yang pertama di sini.', lbPractice: 'Latihan dulu',
-      lbJoin: 'Namamu belum ada di papan. Tamatkan game untuk masuk ke sini.', lockText: 'Terkunci. Kalahkan tiga game pertama untuk bertemu dengannya.',
+      lbEmptyHead: "Belum ada yang menamatkan game", lbEmptyText: "Kalahkan semua bos untuk mencatat rekor pertama.", lbPractice: 'Latihan dulu',
+      lbJoin: "Tamatkan game agar namamu masuk papan peringkat.", lockText: 'Terkunci. Kalahkan tiga game pertama untuk bertemu dengannya.',
       moveList: [
         ['Pukulan', [['A A A A', 'Jab, cross, overhand, uppercut, tangan bergantian'], ['A (tahan)', 'Pukulan berat. Bisa dibawa berjalan dan melompat; lepas di udara untuk meluncur ke bos'],
-          ['↓ + A', 'Upper lompat. Di udara: hantaman palu'], ['← → + A', 'Ke arah belakangmu: backfist berputar']]],
+          ['↓ + A', 'Uppercut. Di udara: hantaman palu'], ['← → + A', 'Ke arah belakangmu: backfist berputar']]],
         ['Tendangan', [['S S S', 'Ap Chagi, Dollyo Chagi, lalu Twio Dollyo Chagi: melompat, kaki belakang menyapu memutar'], ['S (tahan)', 'Twio Yeop Chagi, tendangan samping terbang. Bisa dibawa seperti pukulan berat'],
           ['↑ S S', 'Narae Chagi: dua tendangan di udara, kaki bergantian'], ['↓ + S', 'Sapuan. Di udara: Naeryo Chagi, tendangan kapak yang menebas ke bawah'],
           ['← → + S', 'Ke arah belakangmu: Dwi Chagi, tendangan belakang. S lagi: Dwi Hurigi, tendangan kait berputar']]],
-        ['Campuran', [['A S A S', 'Jab, lutut, cross, tendangan rendah'], ['S A A', 'Ap Chagi, siku, overhand'], ['A S A S A S S', 'Rangkaian terpanjang: tujuh jurus sampai Twio Dollyo Chagi']]],
+        ['Campuran', [['A S A S', 'Jab, lutut, cross, tendangan rendah'], ['S A A', 'Ap Chagi, siku, overhand'], ['A S A S A S S', 'Kombo tujuh jurus yang diakhiri Twio Dollyo Chagi']]],
         ['Bertahan', [['W (tahan)', 'Makki: menahan serangan dari depan. Tiga kali beruntun memecahkannya dan kamu terhuyung'],
           ['W (tepat)', 'Tangkis tepat, ditekan sesaat sebelum kena: ranjau, bola dan ikon merah berbalik ke bos, kartu dan jendela hancur, bar biru bertambah']]],
         ['Gerak', [['→ →', 'Ketuk dua kali ke arah hadap: dash menembus serangan'], ['← ←', 'Ketuk dua kali ke arah sebaliknya: salto belakang, tetap menghadap bos'],
@@ -262,17 +264,17 @@
         ['cd', 'Dilempar saat A dilepas, lalu kembali dan kena saat pergi dan pulang; A lagi memanggilnya pulang. Tahan A: pergi-pulang dua kali. ↓ + A: digelindingkan di lantai. Di udara: dilempar ke bawah.'],
         ['paint', 'Dilempar melengkung saat A dilepas; bos yang basah cat kena +1 tiap pukulan selama 5 detik. Tahan A: seluruh ember sekaligus. ↓ + A: genangan di depan kaki. Di udara: dituang ke bawah.'], ['coffee', 'Mengisi 2 blok nyawa.']],
       lbSaved: (name, r, n) => `Tersimpan sebagai ${name}: peringkat #${r} dari ${n}.`, lbKept: (r, n, t) => `Rekor terbaikmu (${t}) tetap peringkat #${r} dari ${n}.`,
-      lbOff: 'Papan peringkat sedang tidak bisa dihubungi.', lbView: 'Lihat papan',
+      lbOff: 'Papan peringkat sedang tidak bisa dihubungi.', lbView: "Lihat papan peringkat",
       lbErr: { format: 'Pakai 1 sampai 12 huruf, angka, spasi, - atau _.', name: 'Nama itu tidak bisa dipakai. Coba nama lain.', slow: 'Terlalu sering menyimpan dari sini. Coba lagi beberapa menit lagi.', net: 'Gagal menyimpan. Coba lagi.' },
-      lbCols: ['#', 'Nama', 'Waktu', 'Kena', 'Nilai'], lbCount: (n) => `${n} pemain`, lbHow: 'Diurutkan dari waktu + 10 detik untuk tiap serangan yang kena.',
+      lbCols: ['#', 'Nama', 'Waktu', 'Kena', 'Nilai'], lbCount: (n) => `${n} pemain`, lbHow: "Peringkat dihitung dari waktu bermain ditambah 10 detik untuk setiap serangan yang diterima.",
       lbEmpty: 'Belum ada yang menamatkan. Jadilah yang pertama!', lbYou: 'kamu', lbAll: 'Lihat semua',
-      shareOpen: 'Bagikan hasil…', shareTitle: 'Bagikan hasil', shareHint: 'Tempel gambarnya di WhatsApp, LinkedIn, atau X, lalu tambahkan teksnya: di situ ada link ke game.',
-      cardMaking: 'Menggambar kartu hasil…', cardFail: 'Gambarnya gagal dibuat. Teksnya tetap bisa disalin.', cardNoRank: 'Simpan namamu dulu agar peringkatmu ikut tampil di kartu.',
+      shareOpen: 'Bagikan hasil…', shareTitle: 'Bagikan hasil', shareHint: "Salin gambar dan teks untuk membagikan hasilmu. Teksnya menyertakan tautan ke game.",
+      cardMaking: 'Menggambar kartu hasil…', cardFail: 'Gambarnya gagal dibuat. Teksnya tetap bisa disalin.', cardNoRank: "Simpan rekormu dulu agar peringkat ikut tampil di kartu.",
       copyImg: 'Salin gambar', imgCopied: 'Gambar tersalin!', imgFail: 'Browser ini tidak bisa menyalin gambar. Unduh saja gambarnya.', saveImg: 'Unduh gambar', imgSaved: (f) => `Mengunduh ${f}…`, copyText: 'Salin teks', shareTo: 'Bagikan ke…',
-      cardAll: 'Keempat bos terhapus', cardRank: 'Peringkat', cardPos: (r, n) => `#${r} dari ${n}`, cardAsk: 'Bisa lebih cepat?', cardOwner: (o) => `Portofolio ${o}`,
+      cardAll: 'Keempat bos terhapus', cardRank: 'Peringkat', cardPos: (r, n) => `#${r} dari ${n}`, cardAsk: "Bisa mengalahkan rekor ini?", cardOwner: (o) => `Portofolio ${o}`,
       cardAlt: (g, t, n, pos) => `Kartu hasil Boss Rush XP: nilai ${g}, waktu ${t}, terkena ${n} serangan${pos ? `, peringkat #${pos.rank} dari ${pos.total}` : ''}.`,
-      cta: 'Suka game kecil ini? Mari bangun sesuatu bersama.', contact: 'Hubungi saya',
-      gift: 'Hadiah: stickman kini tinggal di taskbar Anda.',
+      cta: "Suka menjelajahi portofolio ini? Ceritakan rencana website atau aplikasimu.", contact: 'Hubungi saya',
+      gift: "Hadiah terbuka: stickman untuk taskbar-mu.",
       practice: 'Latihan', lesStep: (i, n) => `Langkah ${i} dari ${n}:`, lesSkip: 'Enter: lewati',
       practiceEta: (n) => `Latihan selesai dalam sekitar: ${n > 6 ? '2 menit' : n > 3 ? '1 menit' : 'kurang dari 1 menit'}`,
       lesGood: 'Bagus!', lesDodgeHit: 'Kena! Tekan D tepat saat kertas hampir menyentuhmu.', lesDodgeLate: 'Tembus! Sekarang sedikit lebih lambat untuk dodge sempurna.',
@@ -291,7 +293,7 @@
         weapon: ['Senjata', 'Ambil keyboard yang jatuh, lalu serang dengan [A].'],
         special: ['Mode bayangan', 'Tekan [F] untuk mode bayangan, lalu [F] lagi untuk Akhiri tugas.'],
       },
-      drillDone: 'Latihan selesai!', drillText: 'Dasarnya sudah kamu kuasai. Game-game bawaan menunggu untuk dihapus.', drillFight: 'Mulai pertarungan', drillAgain: 'Latihan lagi',
+      drillDone: 'Latihan selesai!', drillText: "Kamu sudah mencoba jurus utama. Mulai pertarungan atau latihan lagi.", drillFight: 'Mulai pertarungan', drillAgain: 'Latihan lagi',
       status: (i, n, name) => `Bos ${i}/${n}: ${name}`,
       statusMenu: 'Menu utama',
       canvasLabel: 'Boss Rush XP. Tombol panah untuk bergerak, A memukul, S menendang, W menangkis, D dash, F mode bayangan, P jeda.',
@@ -2331,7 +2333,7 @@
     x.font = `bold 11px ${FONT}`;
     const w = Math.ceil(x.measureText(str).width) + 2;
     c.width = w; c.height = 13;
-    x.font = `bold 11px ${FONT}`; x.fillStyle = '#fff'; x.textBaseline = 'top'; x.fillText(str, 1, 1);
+    x.font = `bold 11px ${FONT}`; x.fillStyle = '#fff'; x.textBaseline = 'alphabetic'; x.fillText(str, 1, 10);
     const d = x.getImageData(0, 0, w, 13).data, bits = [];
     for (let j = 0; j < 13; j++) for (let i = 0; i < w; i++) if (d[(j * w + i) * 4 + 3] > 110) bits.push(i, j);
     const r = { w, h: 13, bits };
@@ -2440,7 +2442,7 @@
       x.fillStyle = '#ff8fb8'; dot(x, 38, 75, 3.5); dot(x, 58, 75, 3.5);
       x.fillStyle = '#111'; dot(x, 42, 66, 2.3); dot(x, 54, 66, 2.3);
       x.strokeStyle = RED; x.lineWidth = 2.4; x.beginPath(); x.arc(48, 72, 9, 0.15 * Math.PI, 0.85 * Math.PI); x.stroke();
-      x.fillStyle = '#7b3fe4'; x.font = `bold 9px ${FONT}`; x.textAlign = 'center'; x.fillText('JOKER', 48, 104);
+      x.fillStyle = '#7b3fe4'; x.font = `bold 9px ${FONT}`; x.textAlign = 'center'; x.fillText('Joker', 48, 104);
     });
     SPR.aces = ['s', 'h', 'c', 'd'].map((kind) => sprite(56, 78, (x, w, h) => {
       cardBase(x, w, h);
@@ -3057,9 +3059,9 @@
     const light = ctx.createRadialGradient(470, 40, 10, 470, 40, 320);
     light.addColorStop(0, 'rgba(255,255,255,.26)'); light.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = light; ctx.fillRect(0, 0, CW, floor);
-    fitFont(ctx, 'BOSS RUSH XP', 'bold ', 24, 16, 236);
+    fitFont(ctx, 'Boss Rush XP', 'bold ', 24, 16, 236);
     ctx.save(); ctx.shadowColor = 'rgba(0,20,70,.5)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
-    ctx.fillStyle = '#fff'; ctx.fillText('BOSS RUSH XP', 348, 52);
+    ctx.fillStyle = '#fff'; ctx.fillText('Boss Rush XP', 348, 52);
     ctx.restore();
     const rule = ctx.createLinearGradient(348, 0, 540, 0);
     rule.addColorStop(0, '#e8943a'); rule.addColorStop(1, 'rgba(232,148,58,0)');
@@ -3121,7 +3123,7 @@
       ctx.fillStyle = '#000'; ctx.textAlign = 'left'; fitFont(ctx, value, 'bold ', px, 11, col - 62); ctx.fillText(value, mx + 54, y + 25);
       ctx.fillStyle = '#5b5f6b'; fitFont(ctx, label, '', 11, 8, col - 62); ctx.fillText(label, mx + 54, y + 40);
     };
-    // the grade leads: the menu's big pinned program, its tile in the grade's colour, the letter in Tahoma
+    // the grade leads: the menu's big pinned program, its tile in the grade's colour, the letter in Noto Sans
     const gy = top + 6;
     ctx.fillStyle = bg; rr(ctx, mx + 10, gy, 56, 56, 4); ctx.fill();
     ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 1; rr(ctx, mx + 10.5, gy + 0.5, 55, 55, 4); ctx.stroke();
@@ -3185,10 +3187,10 @@
     ctx.fillStyle = '#4cda50'; for (let i = 0; i < 3; i++) ctx.fillRect(x - 10 + i * 5, y - 4, 4, 8);
     ctx.fillStyle = '#e0301e'; ctx.fillRect(x + 5, y - 4, 4, 8);
   }
-  // the fonts are the page's own; Space Grotesk may still be on its way when the first card is drawn
+  // the fonts are the page's own; Noto Sans may still be on its way when the first card is drawn
   async function makeCard(d, s) {
     if (document.fonts && document.fonts.load) {
-      try { await Promise.race([document.fonts.load(`bold 58px "Space Grotesk"`), new Promise((r) => setTimeout(r, 1500))]); } catch (e) { /* its fallback will do */ }
+      try { await Promise.race([document.fonts.load(`bold 58px "Noto Sans"`), new Promise((r) => setTimeout(r, 1500))]); } catch (e) { /* its fallback will do */ }
     }
     const c = document.createElement('canvas');
     c.width = CARD.w * CARD.k; c.height = CARD.h * CARD.k;
@@ -3941,14 +3943,14 @@
       this.balls = []; this.beams = [];
       this.bumpers = [{ x: 184, y: 262, r: 30, lit: 0 }, { x: 776, y: 262, r: 30, lit: 0 }];
       this.flips = [{ side: -1, px: 44, a: 0.14, up: 0, cd: 0, stand: 0 }, { side: 1, px: 916, a: 0.14, up: 0, cd: 0, stand: 0 }];
-      this.dmd = { text: 'PINBALL.EXE', t: 0 };
+      this.dmd = { text: 'Pinball.exe', t: 0 };
     }
     say(text, dur) { this.dmd = { text, t: dur }; }
     update(dt) {
       super.update(dt);
       const g = this.g, p = g.player, p2 = this.phase === 2;
       this.mouth = Math.max(0, this.mouth - dt * 2.5);
-      if (this.dmd.t > 0) { this.dmd.t -= dt; if (this.dmd.t <= 0) this.dmd = { text: 'PINBALL.EXE', t: 0 }; }
+      if (this.dmd.t > 0) { this.dmd.t -= dt; if (this.dmd.t <= 0) this.dmd = { text: 'Pinball.exe', t: 0 }; }
       if (this.state !== 'enter' && !this.dying) {
         this.ph += dt * (p2 ? 0.8 : 0.5);
         this.x = W / 2 + Math.sin(this.ph) * 200;
@@ -3981,7 +3983,7 @@
           if (this.st > 1.5) this.go('idle');
           break;
         case 'tilt': {
-          if (this.step === 0) { this.step = 1; this.tiltDir = Math.random() < 0.5 ? -1 : 1; this.say('TILT', 2.4); g.snd.play('tilt'); g.fx.shake(6, 0.3); }
+          if (this.step === 0) { this.step = 1; this.tiltDir = Math.random() < 0.5 ? -1 : 1; this.say('Tilt', 2.4); g.snd.play('tilt'); g.fx.shake(6, 0.3); }
           const k = this.st < 0.3 ? this.st / 0.3 : this.st > 2.1 ? Math.max(0, (2.4 - this.st) / 0.3) : 1;
           g.tilt = this.tiltDir * 0.03 * k; g.windX = this.tiltDir * 700 * k; g.slip = k > 0;
           const low = this.flips[this.tiltDir < 0 ? 0 : 1];
@@ -4035,7 +4037,7 @@
           if (b.charge > 0) {
             b.charge = 0;
             this.bigHit(3, b.x, b.y); g.achieve('jackpot');
-            if (!this.dying) { this.say('JACKPOT', 1.2); g.snd.play('jackpot'); }
+            if (!this.dying) { this.say('Jackpot', 1.2); g.snd.play('jackpot'); }
           }
           this.bounce(b, this.x, this.y, this.r, 520);
           if (b.vy < 150) b.vy = 150;
@@ -4128,7 +4130,7 @@
     dieUpdate() {
       const g = this.g;
       this.mouth = 1;
-      if (this.step === 0) { this.step = 1; this.say('UNINSTALLED', 5); }
+      if (this.step === 0) { this.step = 1; this.say('Uninstalled', 5); }
       this.x += rand(-2, 2);
       if (this.step === 1 && this.st > 1.2) {
         this.step = 2; this.st = 0; this.gone = true;
@@ -4138,7 +4140,7 @@
       } else if (this.step === 2 && this.st > 0.8) this.done = true;
     }
     drawBack(ctx) {
-      const on = this.dmd.t > 0 && Math.floor(this.dmd.t * 6) % 2 === 0 && this.dmd.text !== 'UNINSTALLED';
+      const on = this.dmd.t > 0 && Math.floor(this.dmd.t * 6) % 2 === 0 && this.dmd.text !== 'Uninstalled';
       dotText(ctx, this.dmd.text, W / 2, FLOOR + 35, 3, on ? '#ffe0a0' : '#ff8c1a');
       for (const b of this.beams) {
         if (b.t > 0.85) continue;
@@ -6082,7 +6084,7 @@
     drawSteps(ctx) {
       const pr = this.practice, s = this.s;
       ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.font = `bold 11px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.fillText(s.practice.toUpperCase(), 38, 110);
+      ctx.font = `bold 11px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,.65)'; ctx.fillText(s.practice, 38, 110);
       LESSONS.forEach(([id], i) => {
         const y = 134 + i * 26, done = i < pr.step || (i === pr.step && pr.good > 0), now = i === pr.step && !done;
         if (done) {
@@ -6229,12 +6231,12 @@
       const s = this.s;
       ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       ctx.font = `bold 66px ${FONT}`;
-      const size = clamp((66 * this.titleMax) / ctx.measureText('BOSS RUSH XP').width, 28, 60), top = 22 + size * 0.76;
+      const size = clamp((66 * this.titleMax) / ctx.measureText('Boss Rush XP').width, 28, 60), top = 22 + size * 0.76;
       ctx.font = `bold ${size}px ${FONT}`;
       ctx.save(); ctx.shadowColor = 'rgba(0,20,70,.55)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 4;
-      ctx.fillStyle = '#fff'; ctx.fillText('BOSS RUSH XP', 40, top);
+      ctx.fillStyle = '#fff'; ctx.fillText('Boss Rush XP', 40, top);
       ctx.restore();
-      const w = ctx.measureText('BOSS RUSH XP').width, rule = ctx.createLinearGradient(42, 0, 42 + w, 0);
+      const w = ctx.measureText('Boss Rush XP').width, rule = ctx.createLinearGradient(42, 0, 42 + w, 0);
       rule.addColorStop(0, '#e8943a'); rule.addColorStop(1, 'rgba(232,148,58,0)');
       ctx.fillStyle = rule; ctx.fillRect(42, top + 12, w, 2);
       ctx.save(); ctx.shadowColor = 'rgba(0,20,70,.5)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 1;

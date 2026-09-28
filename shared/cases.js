@@ -5,15 +5,21 @@
   here plays its overview only.
 
   Pictures are the owner's plain UI screenshots, no device around them: each sits on a CRT monitor (frame 'crt',
-  4:3) or in an XP window of the app ('win', a 'tool' window or a 'dialog', titled by title). They go in
+  4:3) or in an XP window of the app ('win', a 'tool' window or a 'dialog', titled by title). The design focus's
+  picture is the exception ('bare'): the owner's device shot on a transparent ground, with no frame, running edge to
+  edge across its section and flush with its foot. Its slot is the part the Figma shows at 1029 (the Feature Section
+  and the 40px under it, 1029 by 580). They go in
   asset/Work/<slug>/ under each slot's file name; until a slot has a src, the player shows a grey slot tagged with
-  that file name and the size to export. node is the Figma frame the screen comes from.
+  that file name and the size to export. On a local preview it already shows the owner's export saved there under
+  that name (.png or .jpg, with or without Figma's @2x), so each screen is checked in place before its web copies
+  are made and src is set. node is the Figma frame the screen comes from.
 */
 (function () {
   const PF = (window.PF = window.PF || {});
   const pic = (frame, title, file, w, h, node, alt) => ({ frame, title, file, w, h, node, alt, src: null });
   const crt = (file, node, alt) => pic('crt', null, file, 1024, 768, node, alt);
   const win = (title, file, node, alt) => pic('win', title, file, 1440, 900, node, alt);
+  const bare = (file, node, alt) => pic('bare', null, file, 1029, 580, node, alt);
 
   PF.cases = {
     // Figma node 574:12566, "Krool Detail Page". The hero's title, logline and tags are the case's own (content.js).
@@ -25,19 +31,19 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: 'About project', id: 'Tentang project' },
+          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
           blocks: [
             {
               type: 'intro',
-              title: { en: 'Turning Conversations Into Conversions', id: 'Mengubah Percakapan Menjadi Konversi' },
+              title: { en: "A design study for a shared CRM workspace", id: "Studi desain untuk ruang kerja CRM" },
               text: [
                 {
-                  en: 'An AI-powered multi-channel communication and CRM platform that centralizes conversations, automates workflows, and enhances team collaboration.',
-                  id: 'Platform komunikasi multikanal dan CRM berbasis AI yang menyatukan percakapan, mengotomatiskan alur kerja, dan mempererat kolaborasi tim.',
+                  en: "KROOL is a design study for a multi-channel CRM. It explores how an interface can bring customer conversations, lead information, and team activity into one workspace.",
+                  id: "KROOL adalah studi desain CRM multikanal. Konsep ini mengeksplorasi cara menyatukan percakapan pelanggan, informasi prospek, dan aktivitas tim dalam satu ruang kerja.",
                 },
                 {
-                  en: 'Featuring customizable dashboards, lead scoring, and prompt-based commands, it streamlines sales, support, and marketing operations for maximum efficiency.',
-                  id: 'Dengan dasbor yang bisa diatur sendiri, penilaian prospek, dan perintah berbasis prompt, platform ini merampingkan operasional penjualan, dukungan, dan pemasaran agar seefisien mungkin.',
+                  en: "The screens cover a dashboard, inbox, sales pipeline, calendar, and analytics. AI-assisted features are part of the concept; this showcase presents the interface design.",
+                  id: "Desainnya mencakup dashboard, kotak masuk, pipeline penjualan, kalender, dan analitik. Fitur berbantuan AI merupakan bagian dari konsep. Karya yang ditampilkan di sini berfokus pada desain antarmukanya.",
                 },
               ],
             },
@@ -51,18 +57,18 @@
           ],
         },
         {
-          id: 'challenge', tone: 'tint', label: { en: 'Challenge', id: 'Tantangan' },
+          id: 'challenge', tone: 'tint', label: { en: "Design focus", id: "Fokus desain" },
           blocks: [
             {
               type: 'quote',
               text: {
-                en: 'Coordinating customer interactions across various platforms can be chaotic, leading to fragmented conversations, excessive manual tasks, and a lack of transparency among team members, resulting in delays, lost opportunities, and ineffective teamwork',
-                id: 'Mengoordinasikan interaksi pelanggan di berbagai platform bisa kacau: percakapan jadi terpecah-pecah, tugas manual menumpuk, dan anggota tim kurang transparan satu sama lain, sehingga muncul keterlambatan, peluang yang hilang, dan kerja tim yang tidak efektif',
+                en: "The design question: how can a team move between a conversation, the contact behind it, and the next follow-up without losing context?",
+                id: "Pertanyaan desainnya: bagaimana tim berpindah dari percakapan ke informasi kontak dan tindak lanjut berikutnya tanpa kehilangan konteks?",
               },
             },
             {
               type: 'pic',
-              pic: win('KROOL - Contact Detail', '03-inbox-contact', '574:12746', {
+              pic: bare('03-contact-detail', '641:60988', {
                 en: 'KROOL’s inbox with a lead’s contact details, tags and linked deal beside the chat',
                 id: 'Kotak masuk KROOL dengan detail kontak prospek, tag, dan deal terkait di samping chat',
               }),
@@ -70,14 +76,14 @@
           ],
         },
         {
-          id: 'solution', label: { en: 'Solution', id: 'Solusi' },
+          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
           blocks: [
             {
               type: 'intro', under: true,
-              title: { en: 'From Chaos To Clarity', id: 'Dari Kekacauan Menjadi Kejelasan' },
+              title: { en: "Keep the conversation and its context together", id: "Satukan percakapan dan konteksnya" },
               text: [{
-                en: 'Our solution serves as a control center for all customer interactions. One dashboard for all channels, powered by AI to ensure no messages are missed, every prospect is automatically assessed, and every repetitive task is executed without manual intervention.',
-                id: 'Solusi kami menjadi pusat kendali untuk semua interaksi pelanggan. Satu dasbor untuk semua kanal, didukung AI agar tidak ada pesan yang terlewat, setiap prospek dinilai otomatis, dan setiap tugas berulang berjalan tanpa campur tangan manual.',
+                en: "The inbox places the conversation list, open chat, and contact details side by side. The dashboard groups activity by channel and region, while the pipeline gives leads their own cards and stages. These views explore different ways to navigate the same customer information.",
+                id: "Kotak masuk menempatkan daftar percakapan, chat yang terbuka, dan detail kontak berdampingan. Dashboard mengelompokkan aktivitas berdasarkan kanal dan wilayah, sementara pipeline menampilkan prospek sebagai kartu dalam tahapan penjualan. Tampilan ini mengeksplorasi beberapa cara menavigasi informasi pelanggan yang sama.",
               }],
             },
             {
@@ -97,20 +103,13 @@
                 }),
               ],
             },
-            {
-              type: 'pic', apart: true,
-              pic: win('KROOL - Pipeline', '07-pipeline', '574:13084', {
-                en: 'KROOL’s pipeline: lead cards in the New, Contacted, Demo Booked and Negotiation columns',
-                id: 'Pipeline KROOL: kartu prospek di kolom New, Contacted, Demo Booked, dan Negotiation',
-              }),
-            },
           ],
         },
         {
           // from the dashboard on, the Figma's "showcase apps" section: one story, the product's screens
-          id: 'showcase', label: { en: 'UI showcase', id: 'Showcase UI' },
+          id: 'showcase', label: { en: "Interface details", id: "Detail antarmuka" },
           blocks: [
-            { type: 'intro', title: { en: 'One Dashboard, Endless Possibilities', id: 'Satu Dasbor, Kemungkinan Tanpa Batas' } },
+            { type: 'intro', title: { en: "Inside the CRM workspace", id: "Di dalam ruang kerja CRM" } },
             {
               type: 'pic',
               pic: crt('08-dashboard', '574:13983', {
@@ -119,11 +118,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Calendar', id: 'Kalender' },
-              title: { en: 'Keep your team in sync, let the ideas link', id: 'Jaga tim tetap selaras, biarkan ide saling terhubung' },
+              type: 'feature', label: { en: 'Calendar', id: "Kalender" },
+              title: { en: "Plan the next follow-up", id: "Rencanakan tindak lanjut berikutnya" },
               text: {
-                en: 'Simplify your team’s workflow by managing schedules, deadlines, and events with an intuitive, integrated calendar designed for seamless collaboration.',
-                id: 'Sederhanakan alur kerja tim dengan mengelola jadwal, tenggat, dan acara di kalender terintegrasi yang intuitif, dirancang untuk kolaborasi yang lancar.',
+                en: "The calendar lays out follow-ups and tasks across the month. It gives scheduling a dedicated view alongside the inbox and pipeline.",
+                id: "Kalender menampilkan tindak lanjut dan tugas selama sebulan. Penjadwalan mendapat tampilan tersendiri di samping kotak masuk dan pipeline.",
               },
               pic: win('KROOL - Calendar', '09-calendar', '574:13554', {
                 en: 'KROOL’s calendar: a month of follow-ups and tasks',
@@ -131,11 +130,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Inbox', id: 'Kotak masuk' },
-              title: { en: 'One powerful view for every conversation', id: 'Satu tampilan andal untuk setiap percakapan' },
+              type: 'feature', label: { en: 'Inbox', id: "Kotak masuk" },
+              title: { en: "Read the chat with the contact in view", id: "Baca chat sambil melihat informasi kontak" },
               text: {
-                en: 'Our unified inbox ensures you stay connected by consolidating messages from email, chat, social networks, and more into a single, easy-to-manage stream.',
-                id: 'Kotak masuk terpadu kami membuat Anda tetap terhubung dengan menyatukan pesan dari email, chat, media sosial, dan lainnya ke dalam satu aliran yang mudah dikelola.',
+                en: "The inbox groups conversations in a list and keeps the selected chat beside the contact’s details. Tags and linked deals provide context without opening another screen.",
+                id: "Kotak masuk mengelompokkan percakapan dalam daftar, dengan chat yang dipilih di samping detail kontak. Tag dan transaksi terkait memberi konteks tanpa perlu membuka layar lain.",
               },
               pic: win('KROOL - Inbox', '10-inbox', '574:13674', {
                 en: 'KROOL’s unified inbox: conversations, the open chat and the contact’s details',
@@ -147,11 +146,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Analytics', id: 'Analitik' },
-              title: { en: 'Turn data into actionable growth', id: 'Ubah data menjadi langkah untuk bertumbuh' },
+              type: 'feature', label: { en: 'Analytics', id: "Analitik" },
+              title: { en: "Compare activity across channels", id: "Bandingkan aktivitas antar kanal" },
               text: {
-                en: 'Our analytics hub lets you track performance across all platforms, uncover new trends, and discover growth opportunities effortlessly.',
-                id: 'Pusat analitik kami memudahkan Anda memantau kinerja di semua platform, menemukan tren baru, dan melihat peluang pertumbuhan tanpa repot.',
+                en: "The analytics layout brings together pipeline conversion, channel volume, a lead heatmap, and revenue by lead source. Each chart has its own space within the shared dashboard structure.",
+                id: "Tampilan analitik menyatukan konversi pipeline, volume percakapan per kanal, heatmap prospek, dan pendapatan berdasarkan sumber prospek. Setiap grafik memiliki ruang tersendiri dalam struktur dashboard yang sama.",
               },
               pic: win('KROOL - Analytics', '12-analytics', '574:14057', {
                 en: 'KROOL’s analytics: pipeline conversion, volume per channel, lead heatmap and revenue by lead source',
@@ -162,68 +161,76 @@
         },
       ],
     },
-    // Figma node 577:37604 (named "Finova Detail Page" in the file). The hero's title, logline and tags are the case's
-    // own (content.js). Its Figma sets the pictures in a laptop and tablets; the frames here take their place.
+    // Figma file "Sensorstock.ai" (o6kneYuABLITrPvlHJjLWP), the website the owner redesigned (design only): twelve pages on
+    // desktop (page HiFi, 2058:34) and mobile. Every screen is a page of it; the hero and the three cards are the owner's
+    // shots from "Work area iqbal", so their nodes (577:…) point there.
     sensorstack: {
       dir: 'asset/Work/sensorstack',
       hero: crt('01-hero-website', '577:37637', {
-        en: 'SensorStack’s website: the Smart Monitoring Made Simple landing page over a preview of the live dashboard',
-        id: 'Website SensorStack: halaman depan Smart Monitoring Made Simple di atas pratinjau dasbor langsung',
+        en: 'SensorStack’s home page on a laptop: Smart Monitoring Made Simple, over a preview of the monitoring dashboard',
+        id: 'Beranda SensorStack di laptop: Smart Monitoring Made Simple, di atas pratinjau dashboard pemantauan',
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: 'About project', id: 'Tentang project' },
+          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
           blocks: [
             {
               type: 'intro',
-              title: { en: 'See It Before It Breaks', id: 'Lihat Gejalanya Sebelum Rusak' },
-              text: [{
-                en: 'SensorStack is a wireless IoT monitoring platform built for operations teams and facility leaders alike. It unifies door, temperature, and energy sensors across every location into one clear dashboard, giving plant managers instant alerts and executives the savings story. Simple to install, powerful in insight, and built to stop downtime before it starts.',
-                id: 'SensorStack adalah platform pemantauan IoT nirkabel untuk tim operasional sekaligus pimpinan fasilitas. Platform ini menyatukan sensor pintu, suhu, dan energi dari semua lokasi ke dalam satu dasbor yang jelas, memberi manajer pabrik peringatan seketika dan memberi para eksekutif gambaran penghematannya. Mudah dipasang, kaya wawasan, dan dibuat untuk menghentikan downtime sebelum terjadi.',
-              }],
+              title: { en: "A website redesign for SensorStack", id: "Desain ulang website SensorStack" },
+              text: [
+                {
+                  en: "SensorStack offers wireless IoT sensors and a dashboard for monitoring equipment, energy use, and conditions such as temperature and humidity. The website has its own page for each of four industries: facilities management, commercial property, industrial and manufacturing, and food and beverage.",
+                  id: "SensorStack menawarkan sensor IoT nirkabel dan dashboard untuk memantau peralatan, pemakaian energi, serta kondisi seperti suhu dan kelembapan. Websitenya memiliki halaman tersendiri untuk empat industri: pengelolaan fasilitas, properti komersial, industri dan manufaktur, serta makanan dan minuman.",
+                },
+                {
+                  en: "I redesigned the website between March and May 2025. I began with greyscale wireframes for every page, then designed twelve pages in desktop and mobile versions. The site is live at sensorstack.ai.",
+                  id: "Saya mendesain ulang website ini antara Maret dan Mei 2025. Saya memulai dari wireframe abu-abu untuk setiap halaman, lalu merancang dua belas halaman dalam versi desktop dan mobile. Website ini sudah bisa dikunjungi di sensorstack.ai.",
+                },
+              ],
             },
             {
               type: 'pic',
-              pic: pic('tool', 'F1-C', '02-sensor-f1-c', 946, 334, '577:37647', {
-                en: 'Sensor F1-C over two days: temperature, door and current on one chart, under a dotted limit line',
-                id: 'Sensor F1-C selama dua hari: suhu, pintu, dan arus listrik dalam satu grafik, di bawah garis batas bertitik',
+              pic: pic('win', 'SensorStack - Home', '02-industry-list', 1440, 918, '20488:626', {
+                en: 'The home page’s list of industries: Industrial & Manufacturing open, with a short description and Learn More, beside a photo of a factory floor; Facilities Management, Food & Beverage, ESG & Waste Management, Energy & Sustainability and Commercial Real Estate below it',
+                id: 'Daftar industri di beranda: Industrial & Manufacturing terbuka, dengan deskripsi singkat dan tautan Learn More, di samping foto lantai pabrik; di bawahnya Facilities Management, Food & Beverage, ESG & Waste Management, Energy & Sustainability, dan Commercial Real Estate',
               }),
             },
           ],
         },
         {
-          id: 'challenge', tone: 'tint', label: { en: 'Challenge', id: 'Tantangan' },
+          id: 'challenge', tone: 'tint', label: { en: "Design focus", id: "Fokus desain" },
           blocks: [
             {
               type: 'quote',
               text: {
-                en: 'One of the biggest challenges was turning thousands of raw sensor readings into something a plant manager could read at a glance. Making real-time alerts and multi-site data feel calm and actionable for every skill level required thoughtful design and development.',
-                id: 'Salah satu tantangan terbesarnya adalah mengubah ribuan pembacaan sensor mentah menjadi sesuatu yang bisa dibaca manajer pabrik dalam sekali lihat. Membuat peringatan real-time dan data dari banyak lokasi terasa tenang dan bisa langsung ditindaklanjuti oleh pengguna dari semua tingkat keahlian butuh desain dan pengembangan yang matang.',
+                en: "The design question: how can one website introduce the same sensors and dashboard to four industries, each with its own problems?",
+                id: "Pertanyaan desainnya: bagaimana satu website memperkenalkan sensor dan dashboard yang sama kepada empat industri dengan masalah yang berbeda?",
               },
             },
             {
+              // the four industry pages side by side, their tops level (20488:1681, 20488:960, 20488:4852, 20488:5376)
               type: 'pic',
-              pic: win('SensorStack - Dashboard', '03-dashboard', '577:37728', {
-                en: 'SensorStack’s dashboard: door and temperature sensors by site, with a live chart for each cooler and freezer',
-                id: 'Dasbor SensorStack: sensor pintu dan suhu per lokasi, dengan grafik langsung untuk setiap cooler dan freezer',
+              pic: bare('03-industry-pages', '20488:1681', {
+                en: 'The four industry pages side by side, each opening on a headline beside a photo, then a row of logos and that industry’s problems',
+                id: 'Empat halaman industri berdampingan, masing-masing dibuka dengan judul di samping foto, lalu deretan logo dan masalah industri tersebut',
               }),
             },
           ],
         },
         {
-          id: 'solution', label: { en: 'Solution', id: 'Solusi' },
+          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
           blocks: [
             {
               type: 'intro', under: true,
-              title: { en: 'Built For Uptime, Designed For Clarity', id: 'Dibuat untuk Uptime, Dirancang untuk Kejelasan' },
+              title: { en: "Give every industry page the same opening", id: "Awali setiap halaman industri dengan cara yang sama" },
               text: [
                 {
-                  en: 'A major challenge was designing a dashboard that combines live sensor streams, alerts, and energy analytics in one layout, making complex equipment data easy to read for users of all skill levels.',
-                  id: 'Tantangan besarnya adalah merancang dasbor yang menggabungkan aliran data sensor langsung, peringatan, dan analitik energi dalam satu tata letak, sehingga data peralatan yang rumit mudah dibaca oleh pengguna dari semua tingkat keahlian.',
+                  en: "Each industry page opens with a headline beside a photo, a row of logos, and then that industry’s problems with a cost figure. The sections after that change with the industry, and every page ends on the same demo request form.",
+                  id: "Setiap halaman industri dibuka dengan judul di samping foto, deretan logo, lalu masalah industri tersebut beserta angka biayanya. Bagian setelahnya menyesuaikan industrinya, dan setiap halaman ditutup dengan formulir permintaan demo yang sama.",
                 },
                 {
-                  en: 'By prioritizing clarity and smart hierarchy, the dashboard surfaces what matters first (door status, temperature drift, and power draw) so teams can act fast, no matter their tech background.',
-                  id: 'Dengan mengutamakan kejelasan dan hierarki yang cermat, dasbor menampilkan hal terpenting lebih dulu (status pintu, pergeseran suhu, dan pemakaian daya) agar tim bisa bertindak cepat, apa pun latar belakang teknisnya.',
+                  en: "The product appears in small pieces of its interface. On the home page each feature gets its own piece, such as an energy curve, an integration chip, or an alert card. The industry pages place alert and status cards in the same style on photos of equipment and the people who run it.",
+                  id: "Produk ditampilkan lewat potongan kecil antarmukanya. Di beranda, setiap fitur mendapat potongannya sendiri, seperti kurva energi, chip integrasi, atau kartu peringatan. Halaman industri menempatkan kartu peringatan dan status dengan gaya yang sama pada foto peralatan dan orang yang mengoperasikannya.",
                 },
               ],
             },
@@ -231,12 +238,12 @@
               type: 'trio',
               pics: [
                 pic('tool', 'Integrations', '04-integrations', 660, 542, '577:37737', {
-                  en: 'How SensorStack connects: Seamless Integration, Cost-Effective and No Complex Setup around a chip',
-                  id: 'Cara SensorStack terhubung: Seamless Integration, Cost-Effective, dan No Complex Setup mengelilingi sebuah chip',
+                  en: 'The home page’s integrations card: Seamless Integration, Cost-Effective and No Complex Setup around a chip',
+                  id: 'Kartu integrasi di beranda: Seamless Integration, Cost-Effective, dan No Complex Setup mengelilingi sebuah chip',
                 }),
                 pic('tool', 'Energy', '05-energy', 434, 267, '577:37802', {
-                  en: 'Energy use over the week, falling toward Friday',
-                  id: 'Pemakaian energi selama seminggu, menurun menjelang hari Jumat',
+                  en: 'The home page’s energy card: energy use over the week, falling toward Friday',
+                  id: 'Kartu energi di beranda: pemakaian energi selama seminggu, menurun menjelang hari Jumat',
                 }),
                 pic('tool', 'Alerts', '06-alerts', 670, 450, '577:37752', {
                   en: 'Alerts: a low temperature alert issued in the freezer room, over an earlier one for extreme temperature swings in the same room',
@@ -244,67 +251,108 @@
                 }),
               ],
             },
+          ],
+        },
+        {
+          id: 'pages', label: { en: 'Pages', id: "Halaman" },
+          blocks: [
             {
-              type: 'pic', apart: true,
-              pic: win('SensorStack - Cooler C1', '07-cooler-c1', '577:37816', {
-                en: 'Cooler C1: its door sensor reads Closed, its temperature updates live, and a chart tracks temperature, door and current',
-                id: 'Cooler C1: sensor pintunya terbaca Closed, suhunya diperbarui langsung, dan grafik memantau suhu, pintu, serta arus listrik',
+              type: 'intro', under: true,
+              title: { en: "Twelve pages under five menus", id: "Dua belas halaman dalam lima menu" },
+              text: [{
+                en: "The menu sorts the pages under Solutions, Industries, Technology, Resources, and Company, beside Login and Request Demo. The industry and solution pages each follow a template of their own, and the other pages reuse the same navigation bar, cards, demo form, and footer.",
+                id: "Menu mengelompokkan halaman ke dalam Solutions, Industries, Technology, Resources, dan Company, di samping Login dan Request Demo. Halaman industri dan halaman solusi masing-masing punya template sendiri, sedangkan halaman lainnya memakai bilah navigasi, kartu, formulir demo, dan footer yang sama.",
+              }],
+            },
+            {
+              type: 'feature', label: { en: 'Industries', id: "Industri" },
+              title: { en: "Start with the industry’s problems", id: "Mulai dari masalah industrinya" },
+              text: {
+                en: "On the facilities page, the problems sit in an accordion beside a photo with a cost card: HVAC inefficiency, pipe leaks, and faults caught too late. The other industry pages bring their own problems and figures.",
+                id: "Di halaman fasilitas, masalahnya tersusun dalam akordeon di samping foto dengan kartu biaya: HVAC yang boros, kebocoran pipa, dan gangguan yang terlambat ditangani. Halaman industri lainnya memuat masalah dan angkanya sendiri.",
+              },
+              pic: pic('win', 'SensorStack - Facilities Management', '07-industry-problems', 1440, 765, '20488:1730', {
+                en: 'The Hidden Challenges in Facility Management: a photo of rooftop ductwork with a card for the money wasted each year, beside three problems, the first one open',
+                id: 'The Hidden Challenges in Facility Management: foto saluran udara di atap dengan kartu biaya yang terbuang setiap tahun, di samping tiga masalah, yang pertama terbuka',
               }),
+            },
+            {
+              type: 'feature', label: { en: 'Solutions', id: "Solusi" },
+              title: { en: "One solution per page", id: "Satu solusi di setiap halaman" },
+              text: {
+                en: "The three solution pages cover operational efficiency, waste management, and energy use. Each opens with its headline above a large picture, then takes its features one at a time with photos and checklists.",
+                id: "Tiga halaman solusi membahas efisiensi operasional, pengelolaan sampah, dan pemakaian energi. Setiap halaman dibuka dengan judul di atas gambar besar, lalu membahas fiturnya satu per satu dengan foto dan daftar periksa.",
+              },
+              pic: pic('win', 'SensorStack - Smart Waste Management', '08-solution-hero', 1440, 1255, '20488:2436', {
+                en: 'Smart Waste Management for a Greener Future: the headline and Schedule a Demo above a photo of an overflowing waste container with an operational cost card',
+                id: 'Smart Waste Management for a Greener Future: judul dan tombol Schedule a Demo di atas foto kontainer sampah yang penuh, dengan kartu biaya operasional',
+              }),
+            },
+            {
+              type: 'feature', label: { en: 'Resources and technology', id: "Sumber daya dan teknologi" },
+              title: { en: "Customer stories and supported systems", id: "Kisah pelanggan dan sistem yang didukung" },
+              text: {
+                en: "Case studies and articles share one card style, a photo above the title. The integrations page shows the industry protocols SensorStack connects to: Modbus, BACnet, and LonWorks.",
+                id: "Studi kasus dan artikel memakai gaya kartu yang sama, foto di atas judul. Halaman integrasi menampilkan protokol industri yang terhubung dengan SensorStack: Modbus, BACnet, dan LonWorks.",
+              },
+              pics: [
+                pic('win', 'SensorStack - Case Studies', '09-case-studies', 1440, 942, '20488:3136', {
+                  en: 'Case Studies: two customer stories as photo cards, from food and beverage manufacturing and from residential real estate',
+                  id: 'Case Studies: dua kisah pelanggan dalam kartu berfoto, dari manufaktur makanan dan minuman serta properti hunian',
+                }),
+                pic('win', 'SensorStack - Integrations', '10-integrations', 1440, 619, '20488:4268', {
+                  en: 'Industry-Standard Protocols for Effortless Integration: the Modbus, BACnet and LonWorks logos in three tiles',
+                  id: 'Industry-Standard Protocols for Effortless Integration: logo Modbus, BACnet, dan LonWorks dalam tiga kotak',
+                }),
+              ],
+            },
+            {
+              type: 'feature', label: { en: 'Company', id: "Perusahaan" },
+              title: { en: "Open roles and a contact form", id: "Lowongan dan formulir kontak" },
+              text: {
+                en: "Careers lists open positions with a filter for each team, and each role shows its location and work time beside Apply Job. Contact puts the message form next to the support email and phone number.",
+                id: "Careers menampilkan lowongan dengan filter per tim, dan setiap posisi memuat lokasi serta waktu kerjanya di samping tombol Apply Job. Contact menempatkan formulir pesan di sebelah email dukungan dan nomor telepon.",
+              },
+              pics: [
+                pic('win', 'SensorStack - Careers', '11-careers', 1440, 921, '20488:4756', {
+                  en: 'Available Positions: team filters above four roles, each with its location, work time and Apply Job',
+                  id: 'Available Positions: filter tim di atas empat posisi, masing-masing dengan lokasi, waktu kerja, dan tombol Apply Job',
+                }),
+                pic('win', 'SensorStack - Contact', '12-contact', 1440, 1296, '20488:4388', {
+                  en: 'Get in Touch with SensorStack: the message form beside the support email, phone number and website address',
+                  id: 'Get in Touch with SensorStack: formulir pesan di samping email dukungan, nomor telepon, dan alamat website',
+                }),
+              ],
             },
           ],
         },
         {
-          // from the dashboard on, the Figma's "showcase apps" section: one story, the product's screens
-          id: 'showcase', label: { en: 'UI showcase', id: 'Showcase UI' },
+          id: 'mobile', label: { en: 'Mobile', id: "Mobile" },
           blocks: [
-            { type: 'intro', title: { en: 'Built To Catch Failures Before They Cost You', id: 'Dibuat untuk Menangkap Kerusakan Sebelum Merugikan Anda' } },
             {
-              type: 'pic',
-              pic: crt('08-website', '577:37958', {
-                en: 'SensorStack’s website: Smart Monitoring Made Simple, with the live dashboard below it',
-                id: 'Website SensorStack: Smart Monitoring Made Simple, dengan dasbor langsung di bawahnya',
-              }),
+              type: 'intro',
+              title: { en: "The same pages on a phone", id: "Halaman yang sama di ponsel" },
+              text: [{
+                en: "Each of the twelve pages has a mobile version. The menus fold into one button and the sections stack into a single column. The home page’s industry list opens one industry at a time with its photo inside, and the industry pages move their photo above the headline.",
+                id: "Kedua belas halaman memiliki versi mobile. Menu diringkas menjadi satu tombol dan setiap bagian tersusun dalam satu kolom. Daftar industri di beranda membuka satu industri dalam satu waktu beserta fotonya, dan halaman industri memindahkan fotonya ke atas judul.",
+              }],
             },
             {
-              type: 'feature', label: { en: 'Analytics', id: 'Analitik' },
-              title: { en: 'Watch every sensor, spot every signal', id: 'Pantau setiap sensor, tangkap setiap sinyal' },
-              text: {
-                en: 'SensorStack’s dashboard pulls door status, temperature, and current draw from every site into a single live view, so your team stops walking the floor and starts making decisions.',
-                id: 'Dasbor SensorStack menarik status pintu, suhu, dan arus listrik dari setiap lokasi ke dalam satu tampilan langsung, sehingga tim Anda tidak perlu lagi berkeliling dan bisa langsung mengambil keputusan.',
-              },
-              pic: win('SensorStack - Analytics', '09-analytics', '577:37955', {
-                en: 'SensorStack’s analytics screen',
-                id: 'Layar analitik SensorStack',
-              }),
-            },
-            {
-              type: 'feature', label: { en: 'API Connection', id: 'Koneksi API' },
-              title: { en: 'Plug it in, power it up', id: 'Pasang, lalu nyalakan' },
-              text: {
-                en: 'Pre-programmed wireless sensors and a plug-and-play data collector connect to your existing systems. No rewiring, no heavy IT lift, just actionable data from day one.',
-                id: 'Sensor nirkabel yang sudah terprogram dan pengumpul data plug-and-play langsung terhubung ke sistem yang sudah Anda punya. Tanpa kabel ulang, tanpa beban IT yang berat, hanya data yang bisa langsung dipakai sejak hari pertama.',
-              },
-              pic: win('SensorStack - API Connection', '10-api-connection', '577:37956', {
-                en: 'SensorStack’s API connection screen',
-                id: 'Layar koneksi API SensorStack',
-              }),
-              // the Figma keeps an empty 440 by 440 frame here, as KROOL's page does for its teammate card
-              pop: pic('dialog', 'SensorStack', '11-api-card', 440, 440, '577:37971', {
-                en: 'A SensorStack card for the API connection',
-                id: 'Kartu SensorStack untuk koneksi API',
-              }),
-            },
-            {
-              type: 'feature', label: { en: 'R-Management', id: 'R-Management' },
-              title: { en: 'Catch the fault before it halts', id: 'Tangkap gangguan sebelum semuanya berhenti' },
-              text: {
-                en: 'SensorStack flags every out-of-spec reading the moment it happens, surfacing freezer drift, open doors, and failing compressors before they ever cost you product.',
-                id: 'SensorStack menandai setiap pembacaan di luar batas saat itu juga, memunculkan suhu freezer yang bergeser, pintu yang terbuka, dan kompresor yang mulai gagal sebelum semuanya merugikan produk Anda.',
-              },
-              pic: win('SensorStack - R-Management', '12-r-management', '577:37986', {
-                en: 'SensorStack’s R-Management screen',
-                id: 'Layar R-Management SensorStack',
-              }),
+              type: 'row',
+              pics: [
+                pic('tool', 'Home', '13-m-home', 375, 812, '20564:7921', {
+                  en: 'The home page on a phone: Smart Monitoring Made Simple under a bar with the logo and a menu button, above the dashboard preview',
+                  id: 'Beranda di ponsel: Smart Monitoring Made Simple di bawah bilah berisi logo dan tombol menu, di atas pratinjau dashboard',
+                }),
+                pic('tool', 'Industries', '14-m-industries', 375, 812, '20564:8132', {
+                  en: 'The list of industries on a phone: Industrial & Manufacturing open, with its description, Learn More and its photo inside, above the next industries',
+                  id: 'Daftar industri di ponsel: Industrial & Manufacturing terbuka, dengan deskripsi, tautan Learn More, dan fotonya di dalam, di atas industri berikutnya',
+                }),
+                pic('tool', 'Food & Beverage', '15-m-food', 375, 812, '20574:11895', {
+                  en: 'The food and beverage page on a phone: a photo of a bottling line above Cut Waste, Optimize Operations and Request a Demo',
+                  id: 'Halaman makanan dan minuman di ponsel: foto lini pembotolan di atas Cut Waste, Optimize Operations, dan tombol Request a Demo',
+                }),
+              ],
             },
           ],
         },
@@ -320,19 +368,19 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: 'About project', id: 'Tentang project' },
+          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
           blocks: [
             {
               type: 'intro',
-              title: { en: 'Connect With A Mentor, Shape Your Tomorrow', id: 'Terhubung dengan Mentor, Bentuk Masa Depan Anda' },
+              title: { en: "Designing the mentorship workspace", id: "Merancang ruang kerja mentoring" },
               text: [
                 {
-                  en: 'FindMentor is a mentorship platform designed specifically to help mentees progress toward their professional and personal goals through structured guidance.',
-                  id: 'FindMentor adalah platform mentoring yang dirancang khusus untuk membantu mentee mencapai tujuan profesional dan pribadinya lewat bimbingan yang terstruktur.',
+                  en: "FindMentor brings mentor discovery, scheduled sessions, and learning tasks into a connected interface.",
+                  id: "FindMentor menghubungkan pencarian mentor, jadwal sesi, dan tugas belajar dalam satu antarmuka.",
                 },
                 {
-                  en: 'The platform provides a seamless, goal-oriented user experience with features that support mentee learning, skill development, and consistent progress tracking.',
-                  id: 'Platform ini memberikan pengalaman pengguna yang lancar dan berorientasi pada tujuan, dengan fitur yang mendukung pembelajaran mentee, pengembangan keterampilan, dan pemantauan progres yang konsisten.',
+                  en: "The design covers separate mentor and mentee dashboards, with views for exploring mentors, booking sessions, reviewing assignments, and checking progress.",
+                  id: "Desainnya mencakup dashboard terpisah untuk mentor dan mentee, dengan tampilan untuk mencari mentor, memesan sesi, meninjau tugas, dan melihat progres.",
                 },
               ],
             },
@@ -346,18 +394,18 @@
           ],
         },
         {
-          id: 'challenge', tone: 'tint', label: { en: 'Challenge', id: 'Tantangan' },
+          id: 'challenge', tone: 'tint', label: { en: "Design focus", id: "Fokus desain" },
           blocks: [
             {
               type: 'quote',
               text: {
-                en: 'Finding a compatible mentor and managing the mentorship process can be overwhelming for mentees. Many struggle to identify mentors that align with their goals, track progress effectively, and stay engaged throughout their learning journey.',
-                id: 'Menemukan mentor yang cocok dan mengelola proses mentoring bisa terasa berat bagi mentee. Banyak yang kesulitan menemukan mentor yang sejalan dengan tujuan mereka, memantau progres dengan efektif, dan tetap terlibat sepanjang perjalanan belajar mereka.',
+                en: "The design question: how can a mentee move from finding a mentor to managing sessions and assignments, while keeping their progress in view?",
+                id: "Pertanyaan desainnya: bagaimana mentee beralih dari mencari mentor ke mengelola sesi dan tugas, sambil tetap melihat progres belajarnya?",
               },
             },
             {
               type: 'pic',
-              pic: win('FindMentor - Mentor Dashboard', '03-mentor-dashboard', '577:38635', {
+              pic: bare('03-mentor-dashboard', '577:38635', {
                 en: 'A mentor’s dashboard in FindMentor: mentoring time statistics, the week’s sessions, mentorship insights and recent bookings',
                 id: 'Dasbor mentor di FindMentor: statistik waktu mentoring, sesi minggu ini, mentorship insights, dan booking terbaru',
               }),
@@ -365,14 +413,14 @@
           ],
         },
         {
-          id: 'solution', label: { en: 'Solution', id: 'Solusi' },
+          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
           blocks: [
             {
               type: 'intro', under: true,
-              title: { en: 'Findmentor As A Solution', id: 'Findmentor Sebagai Solusi' },
+              title: { en: "Connect sessions, assignments, and progress", id: "Hubungkan sesi, tugas, dan progres" },
               text: [{
-                en: 'FindMentor simplifies mentorship by providing AI-driven mentor matching, a streamlined dashboard for tracking assignments and goals, and real-time progress analytics. It empowers mentees to stay organized, achieve their objectives & build meaningful relationships with mentors efficiently.',
-                id: 'FindMentor menyederhanakan mentoring lewat pencocokan mentor berbasis AI, dasbor yang ringkas untuk memantau tugas dan tujuan, serta analitik progres real-time. Platform ini membantu mentee tetap teratur, mencapai targetnya, dan membangun hubungan yang bermakna dengan mentor secara efisien.',
+                en: "The mentee dashboard places active assignments and upcoming sessions near recommended mentors. Session history and recordings sit alongside progress views, linking the work between meetings with the guidance received in them.",
+                id: "Dashboard mentee menempatkan tugas aktif dan sesi mendatang dekat dengan rekomendasi mentor. Riwayat sesi dan rekaman tersedia bersama tampilan progres, sehingga pekerjaan di antara pertemuan terhubung dengan arahan dari mentor.",
               }],
             },
             {
@@ -392,20 +440,13 @@
                 }),
               ],
             },
-            {
-              type: 'pic', apart: true,
-              pic: pic('win', 'FindMentor - Progress', '07-progress', 1204, 564, '577:38822', {
-                en: 'FindMentor’s progress view: assignments left, attended sessions, completion rate, assignment submissions, attendance and recent activity by day',
-                id: 'Tampilan progres FindMentor: sisa tugas, sesi yang dihadiri, tingkat penyelesaian, pengumpulan tugas, kehadiran, dan aktivitas terbaru per hari',
-              }),
-            },
           ],
         },
         {
           // from the dashboard on, the Figma's "showcase apps" section: one story, the product's screens
-          id: 'showcase', label: { en: 'UI showcase', id: 'Showcase UI' },
+          id: 'showcase', label: { en: "Interface details", id: "Detail antarmuka" },
           blocks: [
-            { type: 'intro', title: { en: 'Guidance That Scales With Your Ambition', id: 'Bimbingan yang Tumbuh Bersama Ambisi Anda' } },
+            { type: 'intro', title: { en: "The mentorship interface in detail", id: "Detail antarmuka mentoring" } },
             {
               type: 'pic',
               pic: crt('08-dashboard', '577:39043', {
@@ -415,11 +456,11 @@
             },
             {
               // the owner's labels, matched to each feature (2026-09-25); the Figma still says Calendar, Inbox and Analytics
-              type: 'feature', label: { en: 'Goals', id: 'Tujuan' },
-              title: { en: 'Set Goals, Track Progress, and Achieve Greatness!', id: 'Tetapkan Tujuan, Pantau Progres, dan Raih Pencapaian!' },
+              type: 'feature', label: { en: 'Goals', id: "Target" },
+              title: { en: "Break a goal into tasks", id: "Uraikan target menjadi tugas" },
               text: {
-                en: 'Set, prioritize, and track your goals effortlessly. Manage assignments with deadlines, monitor milestones, and celebrate achievements with tools designed to keep you on the path to success.',
-                id: 'Tetapkan, prioritaskan, dan pantau tujuan Anda dengan mudah. Kelola tugas beserta tenggatnya, pantau tonggak pencapaian, dan rayakan keberhasilan dengan alat yang dirancang untuk menjaga Anda tetap di jalur menuju sukses.',
+                en: "The goal view pairs a due date and completion bar with a task list. Assignments connect that goal to a mentor and a deadline.",
+                id: "Tampilan target memasangkan tenggat dan indikator penyelesaian dengan daftar tugas. Tugas-tugas menghubungkan target tersebut dengan mentor dan jadwal pengerjaan.",
               },
               pic: pic('win', 'FindMentor - Goals', '09-goals', 838, 560, '577:38951', {
                 en: 'A goal in FindMentor, Draft Your Unique Personal Brand Statement, with its due date, completion bar and task list',
@@ -427,11 +468,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Booking', id: 'Jadwal sesi' },
-              title: { en: 'Schedule Easily, Learn Freely!', id: 'Jadwalkan dengan Mudah, Belajar dengan Leluasa!' },
+              type: 'feature', label: { en: 'Booking', id: "Pemesanan" },
+              title: { en: "Choose a session time", id: "Pilih waktu sesi" },
               text: {
-                en: 'Easily schedule mentoring sessions with an intuitive booking system. Adjusts for time zones automatically, ensuring a seamless experience for global users.',
-                id: 'Jadwalkan sesi mentoring dengan mudah lewat sistem booking yang intuitif. Zona waktu menyesuaikan secara otomatis, sehingga pengalaman tetap lancar bagi pengguna di seluruh dunia.',
+                en: "The booking view presents session duration and available times by day, with a clear confirmation action once a time is selected.",
+                id: "Tampilan pemesanan menampilkan durasi sesi dan waktu yang tersedia per hari. Setelah memilih waktu, pengguna bisa mengonfirmasi pemesanan lewat tombol yang jelas.",
               },
               pic: pic('win', 'FindMentor - Book Session', '10-book-session', 488, 484, '577:38991', {
                 en: 'Book Session: pick a duration and one of the open times for today and the next two days, then Book Now',
@@ -443,11 +484,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Feedback', id: 'Masukan' },
-              title: { en: 'Capture Insights, Track Growth!', id: 'Tangkap Wawasan, Pantau Pertumbuhan!' },
+              type: 'feature', label: { en: 'Feedback', id: "Masukan" },
+              title: { en: "Keep assignments and guidance together", id: "Satukan tugas dan arahan mentor" },
               text: {
-                en: 'Capture and review mentor feedback with ease. Keep track of session highlights, action items, and guidance to ensure continuous improvement.',
-                id: 'Tangkap dan tinjau masukan mentor dengan mudah. Catat sorotan sesi, poin tindakan, dan arahan untuk memastikan perbaikan yang berkelanjutan.',
+                en: "Assignment details show the mentor, deadline, and tasks in one card. Session summaries and recordings provide a separate place to revisit earlier guidance.",
+                id: "Detail tugas menampilkan mentor, tenggat, dan daftar pekerjaan dalam satu kartu. Ringkasan dan rekaman sesi menyediakan tempat terpisah untuk melihat kembali arahan sebelumnya.",
               },
               // the Figma shows the card's top 545 of its 740
               pic: pic('win', 'FindMentor - Assignment', '12-assignment', 539, 545, '577:39126', {
@@ -470,14 +511,14 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: 'About project', id: 'Tentang project' },
+          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
           blocks: [
             {
               type: 'intro',
-              title: { en: 'Helping you find space when you need it most', id: 'Membantu Anda menemukan ruang saat paling dibutuhkan' },
+              title: { en: "Designing the self-storage experience", id: "Merancang pengalaman penyimpanan barang" },
               text: [{
-                en: 'Boxify combines innovative mobile and web platforms to deliver a seamless self-storage experience tailored for modern individuals and businesses. With advanced features, flexible services, and a focus on user experience, Boxify transforms storage into a user-friendly, secure, and tech-driven process.',
-                id: 'Boxify memadukan platform mobile dan web yang inovatif untuk menghadirkan pengalaman self-storage yang mulus, dirancang untuk individu dan bisnis modern. Dengan fitur canggih, layanan yang fleksibel, dan fokus pada pengalaman pengguna, Boxify mengubah penyimpanan barang menjadi proses yang mudah digunakan, aman, dan berbasis teknologi.',
+                en: "Boxify is a website and mobile app design for self-storage. The screens cover finding a unit, comparing its details, making a booking, and managing a booked space.",
+                id: "Boxify adalah desain website dan aplikasi mobile untuk penyewaan unit penyimpanan barang. Layarnya mencakup pencarian unit, perbandingan detail, pemesanan, dan pengelolaan ruang yang sudah dipesan.",
               }],
             },
             {
@@ -498,15 +539,15 @@
           ],
         },
         {
-          id: 'process', tone: 'tint', label: { en: 'Process', id: 'Proses' },
+          id: 'process', tone: 'tint', label: { en: 'Process', id: "Proses" },
           blocks: [
             {
               // the Behance shows the sitemap and the wireframes without words; this text reads them
               type: 'intro',
-              title: { en: 'Sitemap and wireframe', id: 'Sitemap dan wireframe' },
+              title: { en: 'Sitemap and wireframe', id: "Sitemap dan wireframe" },
               text: [{
-                en: 'The sitemap follows the app from Sign In / Sign Up to its five tabs: Home, Find, My Box, Notification and Profile. In Find, a map or a list leads to each unit’s detail: its price, size, security and cameras, an AR preview and the booking button. My Box keeps the units already booked, with the time left, the humidity and temperature, and the booking history. The wireframes set out the website’s pages in greyscale.',
-                id: 'Sitemap memetakan aplikasi dari Sign In / Sign Up ke lima tabnya: Home, Find, My Box, Notification, dan Profile. Di Find, peta atau daftar mengantar ke detail setiap unit: harga, ukuran, keamanan dan kamera, pratinjau AR, serta tombol pemesanan. My Box menyimpan unit yang sudah dipesan, lengkap dengan sisa waktu, kelembapan dan suhu, serta riwayat pemesanan. Wireframe menyusun halaman-halaman website dalam skala abu-abu.',
+                en: "The sitemap maps the app’s five tabs: Home, Find, My Box, Notification, and Profile. Find leads from a map or list to unit details and booking. My Box holds active units, conditions, and booking history. Greyscale website wireframes establish page structure before the detailed design.",
+                id: "Sitemap memetakan lima tab aplikasi: Home, Find, My Box, Notification, dan Profile. Find mengarahkan pengguna dari peta atau daftar ke detail unit dan pemesanan. My Box memuat unit aktif, kondisi unit, dan riwayat pemesanan. Wireframe website dalam skala abu-abu menetapkan struktur halaman sebelum desain detail.",
               }],
             },
             {
@@ -526,15 +567,15 @@
           ],
         },
         {
-          id: 'website', label: { en: 'Website', id: 'Website' },
+          id: 'website', label: { en: 'Website', id: "Website" },
           blocks: [
             {
               // the heading is the website's own headline
               type: 'intro', under: true,
-              title: { en: 'Your flexible self-storage solutions', id: 'Solusi self-storage yang fleksibel untuk Anda' },
+              title: { en: "Compare units before booking", id: "Bandingkan unit sebelum memesan" },
               text: [{
-                en: 'We are designing a new website for a platform to enhance the user experience in booking rooms.',
-                id: 'Kami merancang website baru untuk sebuah platform, agar pengalaman pengguna saat memesan ruang penyimpanan jadi lebih baik.',
+                en: "The website presents storage locations and unit sizes with pricing and feature details. A booking form collects the customer’s information and start date.",
+                id: "Website menampilkan lokasi dan ukuran unit penyimpanan, lengkap dengan harga dan detail fasilitasnya. Formulir pemesanan meminta informasi pelanggan dan tanggal mulai sewa.",
               }],
             },
             {
@@ -557,15 +598,15 @@
           ],
         },
         {
-          id: 'app', label: { en: 'Mobile app', id: 'Aplikasi mobile' },
+          id: 'app', label: { en: 'Mobile app', id: "Aplikasi mobile" },
           blocks: [
             {
               // the heading is the website's own line for the app
               type: 'intro',
-              title: { en: 'Take control of your private storage', id: 'Kendalikan penyimpanan pribadi Anda' },
+              title: { en: "Manage a booked unit on mobile", id: "Kelola unit yang dipesan lewat ponsel" },
               text: [{
-                en: 'Features that make it easy for users to access and obtain information about the rooms they want to book and their own rooms. Monitor everything in one convenient place.',
-                id: 'Fitur-fitur yang memudahkan pengguna mengakses dan mendapatkan informasi tentang ruang yang ingin mereka pesan maupun ruang milik mereka sendiri. Pantau semuanya dari satu tempat yang praktis.',
+                en: "The mobile design connects unit discovery and booking with views for active storage units. The showcase includes interface concepts for unit conditions, access, camera views, and an AR preview.",
+                id: "Desain mobile menghubungkan pencarian dan pemesanan dengan tampilan unit penyimpanan aktif. Karya ini mencakup konsep antarmuka untuk kondisi unit, akses, kamera, dan pratinjau AR.",
               }],
             },
             {
@@ -580,11 +621,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Storage needs', id: 'Kebutuhan penyimpanan' },
-              title: { en: 'Simplify your storage journey', id: 'Sederhanakan perjalanan penyimpanan Anda' },
+              type: 'feature', label: { en: 'Storage needs', id: "Kebutuhan penyimpanan" },
+              title: { en: "Start with the storage needs", id: "Mulai dari kebutuhan penyimpanan" },
               text: {
-                en: 'From finding the perfect unit to secure access and effortless management, we make storing your belongings seamless, safe, and stress-free.',
-                id: 'Dari menemukan unit yang pas hingga akses yang aman dan pengelolaan yang mudah, kami membuat penyimpanan barang Anda lancar, aman, dan bebas repot.',
+                en: "The flow asks whether storage is for personal or business use, then presents room sizes and matching units. Each size includes a description of what it can hold.",
+                id: "Alur ini menanyakan apakah penyimpanan dibutuhkan untuk keperluan pribadi atau bisnis, lalu menampilkan ukuran ruang dan unit yang sesuai. Setiap ukuran disertai penjelasan tentang barang yang dapat ditampung.",
               },
               pics: [
                 pic('tool', 'Storage Type', '12-storage-type', 393, 852, '577:41380', {
@@ -601,11 +642,11 @@
               ],
             },
             {
-              type: 'feature', label: { en: 'Find', id: 'Cari' },
-              title: { en: 'Find the nearest room unit to you', id: 'Temukan unit ruang terdekat dari Anda' },
+              type: 'feature', label: { en: 'Find', id: "Pencarian" },
+              title: { en: "Find and compare storage units", id: "Cari dan bandingkan unit penyimpanan" },
               text: {
-                en: 'Easily discover room units at affordable prices within the Boxify app and tailor the space to your needs.',
-                id: 'Temukan unit ruang dengan harga terjangkau di aplikasi Boxify dengan mudah, lalu sesuaikan ruangnya dengan kebutuhan Anda.',
+                en: "The list shows unit photos, locations, availability, and prices. Filters narrow the options by size, availability, and price, with a map providing another way to explore locations.",
+                id: "Daftar menampilkan foto unit, lokasi, ketersediaan, dan harga. Filter mempersempit pilihan berdasarkan ukuran, ketersediaan, dan harga. Peta menyediakan cara lain untuk menjelajahi lokasi.",
               },
               pic: pic('tool', 'Find', '15-find', 393, 852, '577:41565', {
                 en: 'Find: storage rooms with their photo, availability, location and monthly price, filtered by room size, availability and price',
@@ -617,11 +658,11 @@
               }),
             },
             {
-              type: 'feature', label: { en: 'Booking', id: 'Pemesanan' },
-              title: { en: 'Book your space in minutes', id: 'Pesan ruang Anda dalam hitungan menit' },
+              type: 'feature', label: { en: 'Booking', id: "Pemesanan" },
+              title: { en: "Move from unit details to booking", id: "Dari detail unit ke pemesanan" },
               text: {
-                en: 'Find, select, and secure your storage unit anytime, anywhere, all from the palm of your hand.',
-                id: 'Temukan, pilih, dan amankan unit penyimpanan Anda kapan saja, di mana saja, cukup dari genggaman tangan.',
+                en: "A unit’s detail view leads into a form for the booking purpose, payment cycle, start date, and payment method. A confirmation screen closes the flow.",
+                id: "Detail unit mengarahkan pengguna ke formulir untuk tujuan sewa, periode pembayaran, tanggal mulai, dan metode pembayaran. Layar konfirmasi menutup alur pemesanan.",
               },
               pics: [
                 pic('tool', 'Detail', '17-detail', 393, 852, '577:41784', {
@@ -640,10 +681,10 @@
             {
               // the title and text are the app's own, from its second onboarding screen
               type: 'feature', label: { en: 'My Box', id: 'My Box' },
-              title: { en: 'Control at your fingertips', id: 'Kendali di ujung jari Anda' },
+              title: { en: "Explore access and monitoring views", id: "Eksplorasi tampilan akses dan pemantauan" },
               text: {
-                en: 'Book, access, and monitor your storage unit effortlessly with our intuitive mobile app.',
-                id: 'Pesan, akses, dan pantau unit penyimpanan Anda dengan mudah lewat aplikasi mobile kami yang intuitif.',
+                en: "The design includes camera selection, an AR room preview, and fingerprint or PIN access prompts. These screens show the proposed interface for managing a unit.",
+                id: "Desain ini mencakup pilihan kamera, pratinjau ruang dengan AR, serta layar akses sidik jari atau PIN. Layar-layar ini memperlihatkan usulan antarmuka untuk mengelola unit.",
               },
               pics: [
                 pic('tool', 'AR View', '20-ar-view', 393, 852, '577:42140', {
@@ -669,26 +710,32 @@
         },
       ],
     },
-    // Figma file "Serenity SPA Webflow", page HiFi (2058:34). The owner has only the design, a Webflow template: seven
-    // pages, each for desktop and mobile, and a style guide. So the text only describes what the design shows, and each
-    // page's feature is titled with that page's own headline. A crop takes the top of its node unless its alt says.
+    // Figma file "Serenity SPA Webflow" (UzwDb65Mrm4TLzciDlaRTP), page HiFi (2058:34): the owner's personal exploration,
+    // a spa website template for Webflow (design only). Its sample guests, team, prices and lorem ipsum are never quoted
+    // as fact, and a crop takes the top of its node unless its alt says.
     'serenity-spa': {
       dir: 'asset/Work/serenity-spa',
       hero: crt('01-hero-home', '18414:80', {
-        en: 'Serenity SPA’s home page: Luxury Wellness & Tranquility, Redefined, over a photo of a head massage by candlelight',
-        id: 'Beranda Serenity SPA: Luxury Wellness & Tranquility, Redefined, di atas foto pijat kepala dengan cahaya lilin',
+        en: 'Serenity SPA’s home page: Luxury Wellness & Tranquility, Redefined, over a photo of a head massage by candlelight, under a menu bar with Book a Treatment',
+        id: 'Beranda Serenity SPA: Luxury Wellness & Tranquility, Redefined, di atas foto pijat kepala dengan cahaya lilin, di bawah bilah menu dengan tombol Book a Treatment',
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: 'About project', id: 'Tentang project' },
+          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
           blocks: [
             {
               type: 'intro',
-              title: { en: 'A spa website template for Webflow', id: 'Template website spa untuk Webflow' },
-              text: [{
-                en: 'Serenity SPA is a website template for spas, designed for Webflow. Each of its seven pages (Home, About, Services, a service page, Treatments & Therapies, Blog and Contact) comes in a desktop and a mobile version, and a style guide page sets out the type and colours they share.',
-                id: 'Serenity SPA adalah template website untuk spa, dirancang untuk Webflow. Ketujuh halamannya (Home, About, Services, halaman layanan, Treatments & Therapies, Blog, dan Contact) masing-masing punya versi desktop dan mobile, dan halaman style guide memuat huruf serta warna yang dipakai bersama.',
-              }],
+              title: { en: 'A spa website template for Webflow', id: "Template website spa untuk Webflow" },
+              text: [
+                {
+                  en: 'Serenity SPA is a personal exploration: a website template for a spa, designed for Webflow. It has seven pages (Home, About, Services, a service page, Treatments & Therapies, Blog, and Contact), each in a desktop and a mobile version, plus a style guide page.',
+                  id: "Serenity SPA adalah eksplorasi pribadi: template website spa yang dirancang untuk Webflow. Template ini punya tujuh halaman (Home, About, Services, halaman layanan, Treatments & Therapies, Blog, dan Contact), masing-masing dalam versi desktop dan mobile, ditambah halaman panduan gaya.",
+                },
+                {
+                  en: 'I designed the whole template: greyscale wireframes for the seven pages first, then the final desktop pages, the style guide, and the mobile layouts.',
+                  id: "Saya merancang seluruh template ini: wireframe abu-abu untuk ketujuh halaman terlebih dahulu, lalu halaman desktop final, panduan gaya, dan tampilan mobile-nya.",
+                },
+              ],
             },
             {
               type: 'pic',
@@ -700,24 +747,49 @@
           ],
         },
         {
-          id: 'style', tone: 'tint', label: { en: 'Style guide', id: 'Panduan gaya' },
+          id: 'challenge', tone: 'tint', label: { en: "Design focus", id: "Fokus desain" },
           blocks: [
             {
-              // the title is the style guide's own phrase, "the core design elements used throughout the template"
-              type: 'intro',
-              title: { en: 'The core design elements', id: 'Elemen desain inti' },
-              text: [{
-                en: 'The template sets its headings and body text in Playfair Display, with six heading sizes from 88px down to 24px. Its palette has four colours: black for headings, a deep green as the primary colour (#253828), a pale lime for buttons (#D8F089) and an off-white for section backgrounds (#F5F7F4).',
-                id: 'Template ini memakai Playfair Display untuk judul dan teks isi, dengan enam ukuran judul dari 88px sampai 24px. Paletnya berisi empat warna: hitam untuk judul, hijau tua sebagai warna utama (#253828), hijau limau pucat untuk tombol (#D8F089), dan putih keabuan untuk latar section (#F5F7F4).',
-              }],
+              type: 'quote',
+              text: {
+                en: "The design question: how can a spa website feel calm and still keep a booking one step away on every page?",
+                id: "Pertanyaan desainnya: bagaimana website spa terasa tenang, tetapi pemesanan tetap hanya satu langkah dari setiap halaman?",
+              },
+            },
+            {
+              // the home page's Book Now band, the section above the footer on six of the seven pages
+              type: 'pic',
+              pic: bare('03-book-now-band', '18217:87', {
+                en: 'The Book Now band that closes six of the seven pages: a headline about relaxing and restoring over a photo of a woman resting on a massage table, with Book Now',
+                id: 'Bagian Book Now yang menutup enam dari tujuh halaman: judul tentang relaksasi dan pemulihan di atas foto seorang perempuan yang beristirahat di meja pijat, dengan tombol Book Now',
+              }),
+            },
+          ],
+        },
+        {
+          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
+          blocks: [
+            {
+              type: 'intro', under: true,
+              title: { en: "A quiet style, with booking in the same places", id: "Gaya yang tenang, dengan tempat memesan yang tetap" },
+              text: [
+                {
+                  en: "The style guide keeps the palette small: black for headings, a deep green, pale lime for buttons, and an off-white for sections. Headings and text share one serif, Playfair Display, and every page but the blog opens on a large, softly lit photo.",
+                  id: "Panduan gaya menjaga palet tetap sedikit: hitam untuk judul, hijau tua, hijau limau muda untuk tombol, dan putih gading untuk latar bagian. Judul dan teks memakai satu huruf serif, Playfair Display, dan setiap halaman kecuali blog dibuka dengan foto besar bercahaya lembut.",
+                },
+                {
+                  en: "Book a Treatment stays in the menu bar on every page, and six of the seven pages close on the same Book Now band. The service page keeps its price list and Book Now beside the description, and the treatment page puts Book a Treatment next to what the treatment includes.",
+                  id: "Tombol Book a Treatment selalu ada di bilah menu, dan enam dari tujuh halaman ditutup dengan bagian Book Now yang sama. Halaman layanan menaruh daftar harga dan tombol Book Now di samping deskripsinya, dan halaman perawatan menaruh Book a Treatment di sebelah isi perawatannya.",
+                },
+              ],
             },
             {
               type: 'pic',
-              pic: pic('win', 'Serenity SPA - Style Guide', '03-type-scale', 1440, 895, '18335:752', {
+              pic: pic('win', 'Serenity SPA - Style Guide', '04-type-scale', 1440, 895, '18335:752', {
                 en: 'The style guide’s headings in Playfair Display, from Heading 1 at 88px down to Heading 6 at 24px, each with its line height',
                 id: 'Judul-judul di style guide dengan Playfair Display, dari Heading 1 berukuran 88px sampai Heading 6 berukuran 24px, masing-masing dengan tinggi barisnya',
               }),
-              pop: pic('dialog', 'Color palette', '04-color-palette', 700, 240, '18335:889', {
+              pop: pic('dialog', 'Color palette', '05-color-palette', 700, 240, '18335:889', {
                 en: 'The colour palette: Heading Color #000000, Primary Color #253828, Btn Color #D8F089 and Section Bg Color #F5F7F4',
                 id: 'Palet warna: Heading Color #000000, Primary Color #253828, Btn Color #D8F089, dan Section Bg Color #F5F7F4',
               }),
@@ -725,84 +797,84 @@
           ],
         },
         {
-          id: 'pages', label: { en: 'Pages', id: 'Halaman' },
+          id: 'pages', label: { en: 'Pages', id: "Halaman" },
           blocks: [
             {
               type: 'intro', under: true,
-              title: { en: 'Seven pages', id: 'Tujuh halaman' },
+              title: { en: 'Seven pages, each laid out for its content', id: "Tujuh halaman, masing-masing sesuai isinya" },
               text: [{
-                en: 'Every page opens on a large headline and closes on the same footer, with a Book Now banner above it on every page but Contact.',
-                id: 'Setiap halaman dibuka dengan judul besar dan ditutup dengan footer yang sama, dengan banner Book Now di atasnya di semua halaman kecuali Contact.',
+                en: 'The menu bar and the footer repeat on every page, and the Book Now band on all but Contact. Between them, each page gets a layout for its own content.',
+                id: "Bilah menu dan footer muncul di setiap halaman, begitu juga bagian Book Now kecuali di Contact. Di antaranya, setiap halaman mendapat tata letak untuk isinya sendiri.",
               }],
             },
             {
-              type: 'feature', label: { en: 'Services', id: 'Layanan' },
-              title: { en: 'Our Signature Services', id: 'Layanan unggulan kami' },
+              type: 'feature', label: { en: 'Services', id: "Layanan" },
+              title: { en: "Treatment cards", id: "Kartu perawatan" },
               text: {
                 en: 'The services page sets the five treatments in a staggered grid of cards, each with a photo and a short description.',
-                id: 'Halaman layanan menata kelima perawatan dalam grid kartu yang berselang-seling, masing-masing dengan foto dan deskripsi singkat.',
+                id: "Halaman layanan menampilkan lima perawatan dalam susunan kartu berselang-seling, masing-masing dengan foto dan deskripsi singkat.",
               },
-              pic: pic('win', 'Serenity SPA - Services', '05-services', 1440, 1448, '18239:24', {
+              pic: pic('win', 'Serenity SPA - Services', '06-services', 1440, 1448, '18239:24', {
                 en: 'The services grid: Therapeutic Massages, its photo filling the card behind Learn More, then Facial & Skin Treatments and Aromatherapy & Essential Oils',
                 id: 'Grid layanan: Therapeutic Massages dengan fotonya memenuhi kartu di balik tombol Learn More, lalu Facial & Skin Treatments dan Aromatherapy & Essential Oils',
               }),
             },
             {
-              type: 'feature', label: { en: 'Service page', id: 'Halaman layanan' },
-              title: { en: 'Therapeutic Massages', id: 'Pijat terapeutik' },
+              type: 'feature', label: { en: 'Service page', id: "Halaman layanan" },
+              title: { en: "Service details", id: "Detail layanan" },
               text: {
                 en: 'Each service has its own page: a price list with Book Now sits beside the description, and three other services follow it.',
-                id: 'Setiap layanan punya halamannya sendiri: daftar harga dengan tombol Book Now ada di samping deskripsi, lalu tiga layanan lain menyusul di bawahnya.',
+                id: "Setiap layanan memiliki halaman tersendiri. Daftar harga dengan tombol Book Now ditempatkan di samping deskripsi, lalu diikuti tiga layanan lainnya.",
               },
-              pic: pic('win', 'Serenity SPA - Therapeutic Massages', '06-service-page', 1440, 960, '18261:145', {
+              pic: pic('win', 'Serenity SPA - Therapeutic Massages', '07-service-page', 1440, 960, '18261:145', {
                 en: 'A service page: the price list for four massages with Book Now, beside Learn About Services and Why choose our signature massage?',
                 id: 'Halaman layanan: daftar harga empat jenis pijat dengan tombol Book Now, di samping Learn About Services dan Why choose our signature massage?',
               }),
             },
             {
-              type: 'feature', label: { en: 'Treatment', id: 'Perawatan' },
-              title: { en: 'Signature Serenity Experience', id: 'Signature Serenity Experience' },
+              type: 'feature', label: { en: 'Treatment', id: "Perawatan" },
+              title: { en: "Treatments and add-ons", id: "Perawatan dan layanan tambahan" },
               text: {
                 en: 'The signature treatment’s page lists what it includes in an accordion beside Book a Treatment, then offers two add-ons with their prices.',
-                id: 'Halaman perawatan unggulan memuat isi perawatannya dalam akordeon di samping tombol Book a Treatment, lalu menawarkan dua tambahan beserta harganya.',
+                id: "Halaman perawatan unggulan menjelaskan isi paket dalam panel yang bisa dibuka-tutup di samping tombol Book a Treatment, lalu menawarkan dua layanan tambahan beserta harganya.",
               },
-              pic: pic('win', 'Serenity SPA - Treatments & Therapies', '07-treatment', 1440, 955, '18300:2793', {
+              pic: pic('win', 'Serenity SPA - Treatments & Therapies', '08-treatment', 1440, 955, '18300:2793', {
                 en: 'What’s Included in the Treatments?: Full-Body Therapeutic Massage open with its photo, above Luxury Facial & Skin Rejuvenation and Hydrotherapy & Detox Ritual',
                 id: 'What’s Included in the Treatments?: Full-Body Therapeutic Massage terbuka dengan fotonya, di atas Luxury Facial & Skin Rejuvenation dan Hydrotherapy & Detox Ritual',
               }),
             },
             {
-              type: 'feature', label: { en: 'About', id: 'Tentang' },
-              title: { en: 'A Sanctuary of Serenity and Wellness', id: 'Tempat yang tenang untuk kebugaran' },
+              type: 'feature', label: { en: 'About', id: "Tentang spa" },
+              title: { en: "The spa and its team", id: "Spa dan timnya" },
               text: {
                 en: 'The about page introduces the spa, its services and why to choose it, then the team: three people, each with a portrait, a name and a role.',
-                id: 'Halaman tentang memperkenalkan spa, layanannya, dan alasan memilihnya, lalu timnya: tiga orang, masing-masing dengan foto, nama, dan perannya.',
+                id: "Halaman tentang spa memperkenalkan spa, layanan, dan alasan memilihnya, lalu menampilkan tiga anggota tim dengan foto, nama, dan peran masing-masing.",
               },
-              pic: pic('win', 'Serenity SPA - About', '08-about', 1440, 800, '18261:4', {
+              pic: pic('win', 'Serenity SPA - About', '09-about', 1440, 800, '18261:4', {
                 en: 'The about page’s opening: A Sanctuary of Serenity and Wellness over a photo of a bathtub, with a second photo, of a woman in a robe, set into it',
                 id: 'Pembuka halaman tentang: A Sanctuary of Serenity and Wellness di atas foto bak mandi, dengan foto kedua, seorang perempuan berjubah mandi, di tengahnya',
               }),
             },
             {
               type: 'feature', label: { en: 'Blog', id: 'Blog' },
-              title: { en: 'Latest Wellness Insights & Self-Care Tips', id: 'Wawasan kebugaran dan tips perawatan diri terbaru' },
+              title: { en: "Browse wellness articles", id: "Jelajahi artikel kebugaran" },
               text: {
                 en: 'The blog sorts its posts by category, and each card carries a photo, a title, a short excerpt and the date.',
-                id: 'Blog memilah artikelnya menurut kategori, dan setiap kartu memuat foto, judul, kutipan singkat, dan tanggal.',
+                id: "Blog mengelompokkan artikel berdasarkan kategori. Setiap kartu memuat foto, judul, cuplikan singkat, dan tanggal.",
               },
-              pic: pic('win', 'Serenity SPA - Blog', '09-blog', 1440, 880, '18333:73', {
+              pic: pic('win', 'Serenity SPA - Blog', '10-blog', 1440, 880, '18333:73', {
                 en: 'Our Blog: category tabs above a grid of posts, each with a photo, a title, an excerpt and a date',
                 id: 'Our Blog: tab kategori di atas grid artikel, masing-masing dengan foto, judul, kutipan, dan tanggal',
               }),
             },
             {
-              type: 'feature', label: { en: 'Contact', id: 'Kontak' },
-              title: { en: 'Get in Touch', id: 'Hubungi kami' },
+              type: 'feature', label: { en: 'Contact', id: "Kontak" },
+              title: { en: "Contact and common questions", id: "Kontak dan pertanyaan umum" },
               text: {
                 en: 'The contact page opens with the message form, then answers common questions in an accordion and lists the email addresses and the phone number.',
-                id: 'Halaman kontak dibuka dengan formulir pesan, lalu menjawab pertanyaan umum dalam akordeon dan mencantumkan alamat email serta nomor telepon.',
+                id: "Halaman kontak dibuka dengan formulir pesan, lalu menjawab pertanyaan umum dalam panel yang bisa dibuka-tutup dan mencantumkan alamat email serta nomor telepon.",
               },
-              pic: pic('win', 'Serenity SPA - Contact', '10-contact', 1440, 800, '18284:243', {
+              pic: pic('win', 'Serenity SPA - Contact', '11-contact', 1440, 800, '18284:243', {
                 en: 'Get in Touch beside the Send us a message form: full name, email address, phone number and message, then Submit Now',
                 id: 'Get in Touch di samping formulir Send us a message: nama lengkap, alamat email, nomor telepon, dan pesan, lalu tombol Submit Now',
               }),
@@ -810,28 +882,28 @@
           ],
         },
         {
-          id: 'mobile', label: { en: 'Mobile', id: 'Mobile' },
+          id: 'mobile', label: { en: 'Mobile', id: "Mobile" },
           blocks: [
             {
               type: 'intro',
-              title: { en: 'The same pages at 393px', id: 'Halaman yang sama di lebar 393px' },
+              title: { en: "Layouts for mobile", id: "Tata letak untuk ponsel" },
               text: [{
-                en: 'On a phone the menu folds into one button, the sections stack into a single column, and the service page moves its price list under the text.',
-                id: 'Di ponsel, menu dilipat menjadi satu tombol, section-section ditumpuk dalam satu kolom, dan halaman layanan memindahkan daftar harganya ke bawah teks.',
+                en: 'On a phone the menu folds into one button and the sections stack into a single column. The lime buttons grow to the width of their column, and the service page moves its price list under the text.',
+                id: "Di ponsel, menu diringkas menjadi satu tombol dan setiap bagian tersusun dalam satu kolom. Tombol hijau limau melebar selebar kolomnya, dan halaman layanan memindahkan daftar harga ke bawah teks.",
               }],
             },
             {
               type: 'row',
               pics: [
-                pic('tool', 'Home', '11-m-home', 393, 852, '18311:75', {
+                pic('tool', 'Home', '12-m-home', 393, 852, '18311:75', {
                   en: 'The home page on a phone: Luxury Wellness & Tranquility, Redefined over the photo, with the menu bar under it',
                   id: 'Beranda di ponsel: Luxury Wellness & Tranquility, Redefined di atas foto, dengan bilah menu di bawahnya',
                 }),
-                pic('tool', 'Services', '12-m-services', 393, 852, '18320:3167', {
+                pic('tool', 'Services', '13-m-services', 393, 852, '18320:3167', {
                   en: 'The services on a phone: cards in one column, each with a photo, a description and Learn More',
                   id: 'Layanan di ponsel: kartu dalam satu kolom, masing-masing dengan foto, deskripsi, dan tombol Learn More',
                 }),
-                pic('tool', 'Therapeutic Massages', '13-m-service', 393, 852, '18320:3765', {
+                pic('tool', 'Therapeutic Massages', '14-m-service', 393, 852, '18320:3765', {
                   en: 'A service page on a phone: the price list under the text, with Book Now',
                   id: 'Halaman layanan di ponsel: daftar harga di bawah teks, dengan tombol Book Now',
                 }),
@@ -840,15 +912,15 @@
             {
               type: 'row',
               pics: [
-                pic('tool', 'Treatments & Therapies', '14-m-treatment', 393, 852, '18320:4023', {
+                pic('tool', 'Treatments & Therapies', '15-m-treatment', 393, 852, '18320:4023', {
                   en: 'What’s Included in the Treatments? on a phone: Book a Treatment above the accordion',
                   id: 'What’s Included in the Treatments? di ponsel: tombol Book a Treatment di atas akordeon',
                 }),
-                pic('tool', 'Blog', '15-m-blog', 393, 852, '18333:419', {
+                pic('tool', 'Blog', '16-m-blog', 393, 852, '18333:419', {
                   en: 'The blog on a phone: category tabs, then the posts in one column',
                   id: 'Blog di ponsel: tab kategori, lalu artikel dalam satu kolom',
                 }),
-                pic('tool', 'Contact', '16-m-contact', 393, 852, '18320:4261', {
+                pic('tool', 'Contact', '17-m-contact', 393, 852, '18320:4261', {
                   en: 'Get in Touch on a phone, with the message form under the headline',
                   id: 'Get in Touch di ponsel, dengan formulir pesan di bawah judul',
                 }),

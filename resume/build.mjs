@@ -56,19 +56,19 @@ try {
     const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
     const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
     await send('Page.enable', {}, sessionId);
-    // Google Fonts sends a modern browser the variable Space Grotesk, which Chrome can only put in a PDF as
+    // Google Fonts sends a modern browser the variable Noto Sans, which Chrome can only put in a PDF as
     // Type3 glyphs (text extracts badly, so CV-screening software misreads it). An old user agent gets one
     // static TrueType file per weight instead, which Chrome embeds as a real font.
     await send('Emulation.setUserAgentOverride', { userAgent: 'Mozilla/4.0' }, sessionId);
     const loaded = once('Page.loadEventFired', sessionId);
     await send('Page.navigate', { url: `${pathToFileURL(path.join(here, 'cv.html')).href}?lang=${lang}` }, sessionId);
     await loaded;
-    // wait for Space Grotesk (a fallback face would print silently otherwise) and for the portrait
+    // wait for Noto Sans (a fallback face would print silently otherwise) and for the portrait
     const { result } = await send('Runtime.evaluate', {
-      expression: `(async () => { await document.fonts.ready; await Promise.all([...document.images].map((i) => i.decode().catch(() => {}))); return document.fonts.check('700 12px "Space Grotesk"') && document.fonts.check('400 12px "Space Grotesk"'); })()`,
+      expression: `(async () => { await document.fonts.ready; await Promise.all([...document.images].map((i) => i.decode().catch(() => {}))); return document.fonts.check('700 12px "Noto Sans"') && document.fonts.check('400 12px "Noto Sans"'); })()`,
       awaitPromise: true, returnByValue: true,
     }, sessionId);
-    if (!result.value) throw new Error(`Space Grotesk did not load for ${lang}; check the network and try again`);
+    if (!result.value) throw new Error(`Noto Sans did not load for ${lang}; check the network and try again`);
     const { data } = await send('Page.printToPDF', { preferCSSPageSize: true, printBackground: true, generateTaggedPDF: true }, sessionId);
     writeFileSync(path.join(out, name), Buffer.from(data, 'base64'));
     console.log(`${lang}: asset/cv/${name} (${Math.round(Buffer.byteLength(data, 'base64') / 1024)} KB)`);

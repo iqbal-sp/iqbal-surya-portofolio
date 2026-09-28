@@ -74,6 +74,15 @@ DELETE FROM scores WHERE name = 'NamaYangMauDihapus';
 DELETE FROM scores;
 ```
 
+Papan Screen Saver XP ada di tabel `ssxp_scores`, dengan kolom yang sama. Semua perintah di atas berlaku untuk papan itu kalau `scores` diganti `ssxp_scores`:
+
+```sql
+-- 50 teratas Screen Saver XP
+SELECT pid, name, time_ms / 1000.0 AS detik, hits FROM ssxp_scores ORDER BY score_ms, at LIMIT 50;
+-- hapus satu nama dari papan Screen Saver XP
+DELETE FROM ssxp_scores WHERE name = 'NamaYangMauDihapus';
+```
+
 Perintah yang sama bisa dijalankan dari terminal:
 
 ```bash
@@ -83,10 +92,12 @@ npx wrangler@latest d1 execute brxp-board --remote --command "DELETE FROM scores
 ## Yang ditolak server, dan yang tidak bisa dicegah
 
 - **Ditolak otomatis:**
-  - Waktu di bawah 60 detik. Tidak mungkin dicapai: bot yang tidak pernah kena serangan butuh sekitar 107 detik. Batasnya bisa diubah lewat `MIN_TIME` di `worker/index.js`.
+  - Waktu yang terlalu cepat untuk bisa dicapai. Batasnya diatur per game lewat `GAMES` di `worker/index.js`:
+    - Boss Rush XP: di bawah 60 detik. Bot yang tidak pernah kena serangan butuh sekitar 107 detik.
+    - Screen Saver XP: di bawah 120 detik. Total darah kelima bos 2.500, jadi butuh 125 detik tembakan walaupun semua peluru kena. Bot yang tidak pernah kena dan selalu membidik cincin butuh sekitar 240 detik. Kalau darah bos dikurangi, turunkan juga batas ini.
   - Nama kasar, dari daftar kata Inggris dan Indonesia.
-  - Lebih dari 20 kiriman per 10 menit dari satu alamat internet.
-- **Tidak bisa dicegah sepenuhnya:** orang yang paham teknis tetap bisa mengirim waktu palsu di atas 60 detik. Kalau muncul, hapus lewat Console di atas.
+  - Lebih dari 20 kiriman per 10 menit dari satu alamat internet, dihitung terpisah untuk setiap game.
+- **Tidak bisa dicegah sepenuhnya:** orang yang paham teknis tetap bisa mengirim waktu palsu di atas batas itu. Kalau muncul, hapus lewat Console di atas.
 - **Data yang disimpan:** hanya nama, waktu, jumlah serangan yang kena, dan ID acak dari browser pemain. Alamat internet tidak disimpan, hanya hash-nya selama 10 menit untuk pembatasan kiriman.
 
 ## Batas paket gratis
@@ -123,13 +134,56 @@ Menyiapkan Resend (sekali saja, paket gratis 3.000 email per bulan):
    ```
 6. Deploy, lalu coba kirim pesan dari situs.
 
-Alamat tujuan dan pengirim ada di `vars` pada `wrangler.jsonc` (`MESSAGE_TO`, `MESSAGE_FROM`). Satu alamat internet bisa mengirim paling banyak 5 pesan per jam.
+Alamat tujuan dan pengirim ada di `vars` pada `wrangler.jsonc` (`MESSAGE_TO`, `MESSAGE_FROM`).
 
 Melihat pesan yang tersimpan (Console D1, seperti di bagian moderasi):
 
 ```sql
--- 20 pesan terbaru; mailed = 0 artinya Resend menolaknya
-SELECT id, datetime(at / 1000, 'unixepoch') AS waktu, sender, subject, body, mailed FROM messages ORDER BY at DESC LIMIT 20;
+-- 20 pesan terbaru; mailed = 0 artinya belum sampai inbox: ditahan (held terisi) atau ditolak Resend (held kosong)
+SELECT id, datetime(at / 1000, 'unixepoch') AS waktu, sender, subject, body, held, mailed FROM messages ORDER BY at DESC LIMIT 20;
+```
+
+### Alamat email pengirim
+
+Sebelum pesan disimpan, server memeriksa alamat di kolom Dari. Dalam dua kasus berikut, pesan dikembalikan ke form: tidak ada yang disimpan atau dikirim, dan di atas tombol kirim muncul balon XP.
+
+- **Salah ketik nama penyedia email besar** (gmail.com, yahoo.com, yahoo.co.id, hotmail.com, outlook.com, icloud.com), misalnya `gmai.com` atau `yaho.com`. Balon menawarkan "Maksudnya …@gmail.com?" dengan tombol "Pakai alamat ini". Sebagian domain salah ketik dimiliki orang lain yang ikut menerima emailnya (`gmai.com`), jadi balasanmu bisa nyasar ke sana. Kalau pengirim yakin alamatnya benar, dia cukup mengirim sekali lagi, dan alamatnya diterima apa adanya. Daftarnya ada di `PROVIDERS` dan `NEIGHBOURS` di `worker/index.js`.
+- **Domain yang tidak bisa menerima email**: domain yang tidak ada (`asdf.asdf`), tidak punya server email (`test.com`), atau menolak email (`example.com`). Balon meminta pengirim memeriksa ejaannya. Pemeriksaannya lewat DNS Cloudflare. Kalau DNS tidak menjawab dalam 2 detik, alamatnya dianggap benar supaya klien asli tidak tertolak.
+
+Alamat karangan di penyedia asli (`asal123@gmail.com`) tidak bisa dikenali tanpa email verifikasi. Pesan dari alamat seperti itu diperlakukan seperti pesan lain: bisa ditahan, dan jaringannya bisa diblokir.
+
+### Pesan yang ditahan
+
+Pesan yang mencurigakan tidak masuk inbox. Pesannya tetap disimpan di database, dan pengirimnya tetap melihat "Pesan terkirim", jadi orang iseng tidak tahu pesannya ditahan. Alasannya tercatat di kolom `held`:
+
+| `held` | artinya |
+|---|---|
+| `blocked` | jaringan pengirimnya sedang diblokir (lihat di bawah) |
+| `day` | sudah ada 10 pesan dari jaringan yang sama dalam 24 jam |
+| `hour` | sudah ada 3 pesan dari jaringan yang sama dalam 1 jam |
+| `same` | isinya sama persis dengan pesan lain dalam 24 jam |
+| `rude` | ada kata kasar di pesan atau di alamat email (daftar yang sama dengan nama di papan peringkat, dicek per kata). Di alamat email hanya kata yang panjang yang dihitung, karena kata pendek seperti "tai" juga bisa nama orang |
+| `links` | ada 3 link atau lebih |
+| `short` | kurang dari 3 kata, misalnya "tes" atau "halo bang" |
+
+Lebih dari 20 kiriman per jam dari satu alamat internet dianggap skrip. Pesannya tidak disimpan sama sekali, tapi pengirimnya tetap melihat "Pesan terkirim". Semua angka ini ada di `HOLD` dan `MSG` di `worker/index.js`.
+
+**Ringkasan pagi.** Setiap pagi jam 08.00 WIB, Worker mengirim satu email berisi pesan yang ditahan sejak ringkasan sebelumnya. Isinya paling banyak 30 pesan; kalau lebih, sisanya hanya disebut jumlahnya. Kalau tidak ada yang ditahan, tidak ada email. Setiap pesan di ringkasan punya dua tautan:
+
+- **Loloskan ke inbox**: pesannya dikirim ke inbox seperti pesan biasa, dan Reply langsung ke pengirimnya.
+- **Blokir 7 hari**: semua pesan dari jaringan yang sama ditahan selama 7 hari, apa pun alamat email yang dipakai.
+
+Setiap pesan yang langsung masuk inbox juga punya tautan "Blokir pengirim ini" di bagian bawahnya. Semua tautan itu membuka halaman konfirmasi dulu dan baru bertindak setelah tombolnya ditekan, karena aplikasi email kadang membuka tautan sendiri untuk memeriksanya. Jadwal ringkasan ada di `triggers` pada `wrangler.jsonc` (`0 1 * * *`, jam 01.00 UTC).
+
+**Jaringan pengirim** adalah alamat internet (IP) dari wifi atau data seluler yang dipakai; untuk IPv6, separuh depan alamatnya. Yang disimpan hanya hash-nya, bukan alamatnya, dan dikosongkan setelah 30 hari. Setelah itu, pesan lama tidak bisa lagi dipakai untuk memblokir. Kalau pengirim pindah jaringan, pesannya bisa masuk lagi sampai diblokir sekali lagi.
+
+```sql
+-- pesan yang sedang ditahan
+SELECT id, datetime(at / 1000, 'unixepoch') AS waktu, sender, held AS alasan, substr(body, 1, 200) AS isi FROM messages WHERE held IS NOT NULL AND mailed = 0 ORDER BY at DESC LIMIT 50;
+-- jaringan yang sedang diblokir
+SELECT net, datetime(until / 1000, 'unixepoch') AS sampai FROM blocked WHERE until > unixepoch() * 1000;
+-- buka semua blokir
+DELETE FROM blocked;
 ```
 
 ## Apa yang dilakukan pengunjung
@@ -139,18 +193,27 @@ Situs menghitung beberapa kejadian per hari, tanpa cookie dan tanpa data apa pun
 | name | detail | artinya |
 |---|---|---|
 | `case` | slug kasus, misalnya `krool` | studi kasus dibuka di player |
-| `window` | `about`, `work`, `contact`, `resume`, `game` | jendela dibuka |
+| `window` | `about`, `work`, `contact`, `resume`, `game`, `recycle`, `gamegate`, `screensaver` | jendela dibuka (`gamegate` adalah pesan "mainkan di komputer" Boss Rush XP di HP) |
 | `cv` | `open`, `save`, `request` | CV dibuka, diunduh, atau diminta lewat email |
 | `send` | `api`, `mailto` | pesan terkirim dari form, atau jatuh ke aplikasi email |
 | `copy` | `email` | alamat email disalin |
 | `start` | (kosong) | tombol "Start a project" ditekan |
 | `social` | `linkedin`, `dribbble`, `behance`, `upwork` | tautan profil diklik |
+| `door` | `ss:display`, `ss:idle`, `ss:gate`, `ss:link` | Screen Saver XP dibuka dari menu klik kanan desktop (Properties), dari balon tawaran setelah screensaver, dari tombol di gate HP Boss Rush XP, atau dari link `#/screensaver` |
+| `door` | `br:bin`, `br:balloon`, `br:konami`, `br:pet`, `br:link` | Boss Rush XP dibuka dari jangan-dibuka.exe di Tempat Sampah, dari exe yang sama setelah balon petunjuk membuka Tempat Sampah, dari kode Konami, dari stickman di taskbar, atau dari link `#/game` |
+| `hint` | `bin`, `idle`, `offer` | balon petunjuk Tempat Sampah tampil, screensaver saat diam muncul, atau balon tawaran Screen Saver XP tampil |
+| `run` | `ss:start`, `ss:boss2`, `ss:boss3`, `ss:boss4`, `ss:final`, `ss:win` | run penuh Screen Saver XP dimulai, sampai di Mystify, 3D Pipes, Marquee, Blank, lalu menang. Main lagi dan Mulai ulang dihitung sebagai start baru, sedangkan Coba lagi setelah kalah tidak dihitung |
+| `run` | `ss:practice`, `ss:practice-done` | latihan dimulai, atau selesai sampai langkah terakhir |
 
 ```sql
 -- total 30 hari terakhir
 SELECT name, detail, SUM(n) AS total FROM events WHERE day >= date('now', '-30 day') GROUP BY name, detail ORDER BY name, total DESC;
 -- per hari untuk satu kejadian
 SELECT day, detail, n FROM events WHERE name = 'case' ORDER BY day DESC, n DESC;
+-- sejauh mana run Screen Saver XP bertahan, 30 hari terakhir
+SELECT detail, SUM(n) AS total FROM events WHERE name = 'run' AND day >= date('now', '-30 day') GROUP BY detail ORDER BY total DESC;
+-- dari mana kedua game dibuka, dan petunjuk yang tampil
+SELECT name, detail, SUM(n) AS total FROM events WHERE name IN ('door', 'hint') AND day >= date('now', '-30 day') GROUP BY name, detail ORDER BY name, total DESC;
 ```
 
 Untuk jumlah pengunjung, halaman yang dibuka, negara dan perangkat, aktifkan **Cloudflare Web Analytics** (gratis, tanpa cookie): Dashboard → **Analytics & Logs → Web Analytics → Add a site** → `iqbalsurya.com`, pilih pemasangan otomatis. Kalau setelah sehari datanya masih kosong, pilih pemasangan manual dan salin token-nya; satu baris script lalu ditambahkan ke `option-a-desktop/index.html`.

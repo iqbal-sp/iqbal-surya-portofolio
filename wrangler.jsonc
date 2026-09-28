@@ -20,6 +20,9 @@
     "MESSAGE_TO": "hello@iqbalsurya.com",
     "MESSAGE_FROM": "Portfolio iqbalsurya.com <portfolio@iqbalsurya.com>"
   },
+  // every morning at 08.00 WIB (01.00 UTC) the Worker emails MESSAGE_TO the messages it held back since the last one
+  // (digest() in worker/index.js; DEPLOY.md, "Pesan yang ditahan")
+  "triggers": { "crons": ["0 1 * * *"] },
   "d1_databases": [
     {
       "binding": "DB",
