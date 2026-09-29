@@ -204,103 +204,89 @@ img { max-width: 100%; }
 .hr { height: 1px; margin: 6px 0; background: var(--shade); box-shadow: 0 1px var(--hi); }
 
 /* ============================================================
-   WELCOME SCREEN (boot.js)
-   XP's Welcome screen, the one that said "welcome" while it loaded your settings: the logon blue lit from the
-   top left between two navy bands, a faded light rule under the top band and XP's orange light over the foot.
-   Here it says hello while the desktop really loads. index.html's head shows it (html.booting).
+   LOADING SCREEN (boot.js, crt3d/)
+   An old beige PC in a dark room, its CRT running a power-on self test while the portfolio really loads; when
+   everything is in, the tube turns XP's welcome blue and the camera flies into the glass. The room is a still of
+   the 3D (asset/boot/room.png, a phone's room-phone.png) until the 3D takes over; the test is HTML laid on the
+   glass with a projective transform (boot.js). index.html's head shows it (html.booting).
    ============================================================ */
 .boot-screen {
-  --bt-band: 56px;
   position: fixed; inset: 0; z-index: 10000;
-  display: none; grid-template-rows: var(--bt-band) minmax(0, 1fr) var(--bt-band);
-  overflow: hidden; background: #5a7edc; color: #fff;
+  display: none; overflow: hidden; background: #141414;
   cursor: progress; user-select: none; -webkit-user-select: none;
 }
-html.booting .boot-screen { display: grid; }
+html.booting .boot-screen { display: block; }
 .boot-screen.ready { cursor: default; }
-/* the desktop builds and loads behind the screen but is not painted until the screen starts to leave, so the
-   hand has the frames to itself; then it comes up in XP's order: the wallpaper, the taskbar and icons, and the
-   startup window last (boot.js) */
+/* the desktop builds and loads behind the screen but is not painted until the screen starts to leave; then it
+   comes up in XP's order: the wallpaper, the taskbar and icons, and the startup window last (boot.js) */
 html.booting:not(.boot-out) :is(.desktop, .taskbar) { visibility: hidden; }
 html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: hidden; }
-.boot-top, .boot-foot { position: relative; z-index: 1; background: #00309c; }
-.boot-top::after, .boot-foot::before { content: ""; position: absolute; left: 0; right: 0; height: 2px; }
-.boot-top::after { top: 100%; background: linear-gradient(90deg, transparent, #a6c4f7 25%, rgba(166, 196, 247, .5) 60%, transparent); }
-.boot-foot::before { bottom: 100%; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
-.boot-main {
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px;
-  min-height: 0; padding: 24px 16px;
-  background: radial-gradient(90% 90% at 0 0, rgba(166, 196, 247, .8), rgba(166, 196, 247, 0) 60%);
+/* the room: the still (dithered by boot.js) covers the screen the way the 3D frames it, and the 3D's canvas takes
+   over once it has drawn the same picture; both in 2px dots */
+.boot-scene { position: absolute; inset: 0; }
+.boot-room, .boot-3d { position: absolute; inset: 0; display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.boot-3d { visibility: hidden; }
+.boot-scene.live .boot-3d { visibility: visible; }
+.boot-scene.live .boot-room { visibility: hidden; }
+/* the tube: the test's own 1024 x 768 box, laid on the glass by boot.js (a matrix3d from its top left corner),
+   under the glass the site's CRT draws (.crt-glass): the window's reflection and the tube's dark edge. Not its fine
+   lines: scaled onto the glass they beat against the screen's pixels, and the room's dots carry the texture */
+.boot-crt {
+  position: absolute; left: 0; top: 0; z-index: 1; width: 1024px; height: 768px; overflow: hidden;
+  transform-origin: 0 0; border-radius: 40px; visibility: hidden;
+  background: radial-gradient(120% 110% at 50% 45%, #0b0c0d, #020202 70%);
+  color: #d8d2bd; font: 400 34px/42px "Noto Sans Mono", monospace;
+  text-shadow: 0 0 6px rgba(216, 210, 189, .35);
 }
-/* the same light, drawn by boot.js in 2px ordered-dither dots, the wallpaper's own material, so the welcome and
-   the desktop it hands over to read as one screen; the gradient above shows until it has painted */
-.boot-dots { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
-.boot-main > :is(.boot-hello, .boot-user) { position: relative; }
-/* "hello" in a pointed pen: boot.js cuts the hand-drawn line (.boot-line) into short pieces weighted like a nib,
-   heavy down the slant and hairline going up, and reveals them as the pen writes; whole under reduced motion */
-.boot-hello { display: block; flex: none; width: min(320px, 100%); height: auto; overflow: visible; filter: drop-shadow(0 4px 8px rgba(0, 20, 90, .35)); }
-.boot-line { display: none; }
-.boot-ink path { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
-.boot-ink path.on, .boot-hello.whole .boot-ink path { visibility: visible; }
-/* the account logging in, stacked downward (owner's request, 2026-09-28): XP's selected account as a card, Task
-   Blue On down to Heading Cobalt with a faint Welcome Light edge and a glossy top line, lifted off the field;
-   the dark card is also what keeps the small status text legible. Two groups inside: who is logging in (the
-   picture, the name, the role), then what is loading (the status and the bar) */
-.boot-user {
-  display: flex; flex-direction: column; align-items: center; gap: 16px; max-width: 100%;
-  padding: 20px 24px; border-radius: 8px; text-align: center;
-  background: linear-gradient(180deg, #1e52b7, #0c3a9e);
-  box-shadow: inset 0 0 0 1px rgba(166, 196, 247, .35), inset 0 1px rgba(255, 255, 255, .22), 0 8px 24px -8px rgba(0, 16, 60, .55);
+/* hidden until boot.js has laid it on the glass (on a slow connection the box would show at the top left first) */
+.boot-crt.laid { visibility: visible; }
+.boot-crt::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 80% at 22% 6%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 44%), linear-gradient(115deg, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, .06) 61%, rgba(255, 255, 255, 0) 68%);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .06);
 }
-/* the picture waits in the Start menu's pale frame and takes XP's gold selected frame as the pen touches down */
-.boot-pic { flex: none; width: 72px; height: 72px; border-radius: 6px; overflow: hidden; background: #fff; box-shadow: 0 0 0 3px #d8e4f8, 0 0 0 4px transparent, 0 6px 12px 2px rgba(0, 16, 60, .45); transition: box-shadow .4s cubic-bezier(.2, .8, .2, 1); }
-.boot-screen.chosen .boot-pic { box-shadow: 0 0 0 3px #fbc761, 0 0 0 4px #e5a01a, 0 6px 12px 2px rgba(0, 16, 60, .45); }
-.boot-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.boot-who { width: 240px; max-width: 100%; display: grid; }
-.boot-name { margin: 0; font: 700 20px/1.2 var(--display); letter-spacing: -0.01em; text-wrap: balance; text-shadow: 0 1px 2px rgba(0, 16, 60, .4); }
-.boot-role { margin: 4px 0 0; font: 12px/16px var(--ui); color: #d6e2f8; }
-.boot-status { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 20px 0 0; font: 12px/16px var(--ui); color: #d6e2f8; text-align: left; }
-.boot-status span:first-child { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-/* what the line says on a slow connection, before boot.js has arrived to name the parts */
-.boot-status span:first-child:empty::before { content: "Loading\2026"; }
-html[lang="id"] .boot-status span:first-child:empty::before { content: "Memuat\2026"; }
-.boot-status span:last-child { flex: none; font-variant-numeric: tabular-nums; }
-/* XP's progress bar, as the game loader draws it: green blocks, 8px with 2px gaps, in a white trough */
-.boot-bar { height: 16px; margin-top: 8px; padding: 2px; border: 1px solid var(--dark); border-radius: 3px; background: #fff; box-shadow: 0 1px 2px rgba(0, 16, 60, .35); }
-.boot-bar i { display: block; width: 0; height: 100%; background: repeating-linear-gradient(90deg, transparent 0 8px, #fff 8px 10px), var(--progress); }
-/* sizes step at the screen's width (and height, for the bands), never in between */
-@media (min-width: 720px) {
-  .boot-main { gap: 40px; }
-  .boot-hello { width: 480px; }
-  .boot-user { padding: 24px 32px; }
-  .boot-pic { width: 96px; height: 96px; }
-  .boot-who { width: 288px; }
-  .boot-name { font-size: 24px; }
-  .boot-role, .boot-status { font-size: 14px; line-height: 20px; }
-  .boot-status { margin-top: 24px; }
+/* the self test, English on both languages as a BIOS was: the head, the memory count, one line per part (dim
+   until tested, a cursor on the one being tested, then OK or FAILED), XP's green blocks, and a foot line */
+.bios { position: absolute; inset: 0; padding: 44px 56px; }
+.bios p { margin: 0; white-space: pre; }
+.bios-head { color: #fff; font-weight: 700; }
+.bios :is(.bios-mem, .bios-test, .bios-tail) { margin-top: 20px; }
+.bios-test p { display: flex; }
+.bios-test span { flex: none; width: 29ch; overflow: hidden; }
+.bios-test span::after { content: " ............................"; }
+.bios-test p:not([data-state]), .bios-test p[data-state=""] { color: #aca899; }
+.bios-test b { margin-left: 1ch; font-weight: 400; color: #fff; }
+.bios-test p[data-state="failed"] b { font-weight: 700; }
+.bios-test p[data-state="cur"] b::after, .bios-tail:not(:empty)::after { content: "_"; animation: bios-cursor 1.06s steps(1) infinite; }
+@keyframes bios-cursor { 50% { opacity: 0; } }
+.bios-meter { display: flex; align-items: center; gap: 24px; margin-top: 18px; }
+.bios-bar { display: flex; gap: 4px; padding: 5px; border: 2px solid #aca899; }
+.bios-bar i { display: block; width: 14px; height: 26px; background: #2a2d35; }
+.bios-bar i.on { background: #4cda50; }
+.bios-pct { min-width: 4ch; color: #fff; font-weight: 700; text-align: right; }
+.bios-foot { position: absolute; left: 56px; bottom: 24px; color: #aca899; }
+/* everything is in: XP's welcome with no one logging in yet, the blue between its navy bands and their light rules */
+.bios-blue { position: absolute; inset: 0; display: grid; grid-template-rows: 48px 1fr 48px; background: #5a7edc; visibility: hidden; }
+.bios-blue i { position: relative; display: block; }
+.bios-blue i:first-child, .bios-blue i:last-child { background: #00309c; }
+.bios-blue i:first-child::after, .bios-blue i:last-child::before { content: ""; position: absolute; left: 0; right: 0; height: 2px; }
+.bios-blue i:first-child::after { top: 100%; background: linear-gradient(90deg, transparent, #a6c4f7 25%, rgba(166, 196, 247, .5) 60%, transparent); }
+.bios-blue i:last-child::before { bottom: 100%; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
+.bios-blue i:nth-child(2) { background: radial-gradient(90% 90% at 0 0, rgba(166, 196, 247, .8), rgba(166, 196, 247, 0) 60%); }
+.boot-crt.blue .bios-blue { visibility: visible; }
+.boot-crt.blue .bios { visibility: hidden; }
+/* a phone shows the whole tube in about 310px: the test half again as large, keeping only the parts and the bar */
+@media (max-width: 720px), (max-height: 500px) and (pointer: coarse) {
+  .boot-crt { font-size: 44px; line-height: 54px; }
+  .bios { padding: 44px 52px; }
+  .bios-copy, .bios-mem, .bios-foot { display: none; }
+  .boot-screen.failing .bios-foot { display: block; }
+  .bios-test { margin-top: 24px; }
+  .bios-test span { width: 27ch; }
+  .bios-bar i { width: 22px; height: 38px; }
 }
-@media (min-width: 720px) and (min-height: 640px) { .boot-screen { --bt-band: 80px; } }
-@media (min-width: 1200px) { .boot-hello { width: 560px; } }
-@media (min-width: 1200px) and (min-height: 820px) { .boot-screen { --bt-band: 96px; } .boot-main { gap: 48px; } }
-/* a short screen or a phone on its side: thinner bands, a smaller hand and picture, so the column still fits */
-@media (max-height: 640px) {
-  .boot-main { gap: 16px; padding: 16px; }
-  .boot-hello { width: 240px; }
-  .boot-user { padding: 16px 24px; gap: 12px; }
-  .boot-pic { width: 56px; height: 56px; }
-  .boot-name { font-size: 20px; }
-  .boot-role, .boot-status { font-size: 12px; line-height: 16px; }
-  .boot-status { margin-top: 12px; }
-}
-@media (max-height: 520px) {
-  .boot-screen { --bt-band: 40px; }
-  .boot-main { gap: 12px; }
-  .boot-hello { width: 180px; }
-  .boot-user { padding: 12px 20px; gap: 8px; }
-  .boot-pic { width: 48px; height: 48px; }
-  .boot-status { margin-top: 8px; }
-  .boot-bar { margin-top: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .bios-test p[data-state="cur"] b::after, .bios-tail:not(:empty)::after { animation: none; }
 }
 
 /* ============================================================

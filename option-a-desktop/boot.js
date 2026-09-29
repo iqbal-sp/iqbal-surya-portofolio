@@ -1,10 +1,14 @@
 /*
-  Option A: the welcome screen, after Windows XP's own (the screen that said "welcome" while it loaded your
-  settings). It shows once a session while the desktop loads: "hello" is written in a pointed pen, and below it
-  the owner's picture, name and the bar that counts what has really arrived. The bar alone decides when the
-  portfolio is in; the hand keeps its own tempo. There is no skip: the screen is there so every part has loaded
-  before the visitor moves around. A part that fails, or has not answered in 9s, is left out of the bar, the
-  status says so, and the screen never stays past 12s. Then the desktop comes up in XP's order.
+  Option A: the loading screen. An old beige PC in a dark room, modelled in Blender and drawn by three.js through the
+  wallpaper's dither (crt3d/crt.js); a still of the same picture shows from the first paint, and on a phone, or
+  with reduced motion, the still is all there is. Its CRT runs a power-on self test in HTML laid on the glass: one
+  line per part of the portfolio, printed when that part has really arrived, and a bar that counts them.
+  There is no skip and no time limit: the screen waits until every part is in (owner's request, 2026-09-29). A part
+  that fails is marked FAILED and the page tries again on its own, after 4s, then 8s, 16s and every 30s, and once the
+  network is back when it is offline; the foot of the test names F5 (Reload on a phone) as the way to start over.
+  When everything is in, the tube turns XP's welcome blue and the camera flies into the glass (a CSS zoom on the
+  still), then the desktop comes up in XP's order. The test is English on both languages, as a BIOS was; the screen
+  reader's status follows the page's language.
   index.html's head adds html.booting before the first paint; app.js hands over Home (PF.boot.home) and runs its
   first-view moments through PF.bootDone.
 */
@@ -20,40 +24,40 @@
     return;
   }
   const $ = (s) => box.querySelector(s);
-  const main = $('.boot-main'), hello = $('.boot-hello'), line = $('.boot-line'), inkLayer = $('.boot-ink'), pic = $('.boot-pic img');
-  const dots = $('.boot-dots'), what = $('#bootWhat'), pct = $('#bootPct'), bar = $('#bootBar'), fill = $('#bootBar i'), say = $('#bootSay');
+  const scene = $('.boot-scene'), room = $('.boot-room'), crt = $('.boot-crt'), lines = $('.bios-test');
+  const mem = $('.bios-mem'), cells = $('.bios-bar'), pctEl = $('.bios-pct'), tail = $('.bios-tail'), foot = $('.bios-foot');
+  const meter = $('#bootMeter'), say = $('#bootSay');
   const themeColor = document.querySelector('meta[name="theme-color"]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const liveWall = !matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)').matches && !/[?&]wall=static\b/.test(location.search);
+  // a phone gets the still and a CSS zoom, never the 3D (as the live wallpaper and desk3d)
+  const small = matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
+  const liveWall = !small.matches && !/[?&]wall=static\b/.test(location.search);
 
   const TXT = {
-    en: {
-      photo: 'Loading your host’s photo', fonts: 'Preparing the text', content: 'Loading the portfolio', cases: 'Loading the projects',
-      icons: 'Loading icons', app: 'Starting the desktop', wall: 'Loading the wallpaper',
-      home: 'Opening Home', wall3d: 'Preparing the wallpaper', ready: 'Welcome in', aria: 'Loading the portfolio',
-      missed: 'Some parts haven’t loaded', missedSay: 'Some parts haven’t loaded. Opening the desktop.',
-    },
-    id: {
-      photo: "Memuat foto Iqbal", fonts: "Menyiapkan teks", content: "Memuat portofolio", cases: "Memuat proyek",
-      icons: 'Memuat ikon', app: 'Menyiapkan desktop', wall: 'Memuat wallpaper',
-      home: "Membuka Beranda", wall3d: "Menyiapkan wallpaper", ready: "Selamat datang", aria: 'Memuat portofolio',
-      missed: 'Sebagian belum termuat', missedSay: 'Sebagian belum termuat. Membuka desktop.',
-    },
+    en: { aria: 'Loading the portfolio', failed: 'A part did not load. Trying again.', offline: 'You are offline. Waiting for the network.', ready: 'Welcome in' },
+    id: { aria: 'Memuat portofolio', failed: 'Sebagian gagal dimuat. Mencoba lagi.', offline: 'Kamu sedang offline. Menunggu jaringan.', ready: 'Selamat datang' },
   };
   const t = (k) => (TXT[root.lang === 'id' ? 'id' : 'en'])[k];
 
-  // what the bar counts, in the order the status line names it; each weight is the part's rough share of
-  // the bytes, so the bar moves with the wait and not with the count
-  const PARTS = [['photo', 2], ['fonts', 6], ['content', 3], ['cases', 5], ['icons', 4], ['app', 10], ['wall', 3], ['home', 30]]
-    .concat(liveWall ? [['wall3d', 25]] : []);
+  // what the bar counts, in the order the test prints it; each weight is the part's rough share of the bytes, so the
+  // bar moves with the wait and not with the count
+  const PARTS = [
+    ['fonts', 6, 'Preparing the text'], ['content', 3, 'Loading the portfolio'], ['cases', 5, 'Loading the projects'],
+    ['icons', 4, 'Loading icons'], ['app', 10, 'Starting the desktop'], ['wall', 3, 'Loading the wallpaper'], ['home', 30, 'Opening Home'],
+  ].concat(liveWall ? [['wall3d', 25, 'Preparing the wallpaper']] : []);
   const TOTAL = PARTS.reduce((s, [, w]) => s + w, 0);
-  const PART_WAIT = 9000;   // a part that has not answered by then is left out of the bar
-  const CAP = 12000;        // the visitor never waits longer than this; the rest keeps loading behind the desktop
-  const MISSED_HOLD = 1200; // long enough to read that some parts are missing
-  const TOUCH_DOWN = 0.25;  // seconds before the pen touches down, so the picture's pale frame is seen first
-  const DRAW = 2.1;         // seconds the hand takes to write "hello"
-  const DRAW_AGAIN = 1.2;   // the same hand for a visitor it has welcomed before
-  const WELCOMED = 'pf-a-welcomed';
+  const TEMPO = 0.11;         // s: the least time between two printed lines, so a cached load still reads as a boot
+  const DONE_HOLD = 0.6;      // s the finished test stays before the tube turns blue
+  const FLY = 1500;           // ms into the glass (the 3D); the still's CSS zoom takes the same
+  const RETRY = [4, 8, 16, 30];  // s before each new try after a part failed
+  const WELCOMED = 'pf-a-welcomed', TRIES = 'pf-a-boot-tries';
+  // where the glass sits on each still, as fractions of it (tools/poster.mjs): top left, top right, bottom right,
+  // bottom left; and each still's size in CSS px (one dot is 2px)
+  const STILL = {
+    room: { src: '../asset/boot/room.webp?v=1', w: 1920, h: 1200, glass: [[0.36476, 0.15812], [0.6108, 0.14806], [0.60731, 0.43451], [0.36914, 0.45205]] },
+    phone: { src: '../asset/boot/room-phone.webp?v=1', w: 480, h: 1040, glass: [[0.163, 0.32809], [0.82551, 0.32802], [0.81053, 0.54838], [0.17894, 0.55453]] },
+  };
+  const SCREEN = { w: 1024, h: 768 };   // the test's own box in CSS px, before it is laid on the glass
 
   /* ---------- arrivals, recorded from the first byte so a later replay finds them settled ---------- */
   const SCRIPTS = { 'content.js': 'content', 'cases.js': 'cases', 'icons.js': 'icons', 'app.js': 'app' };
@@ -121,140 +125,83 @@
     return allOk(waits);
   }
 
-  /* ---------- the field: XP's logon light, drawn in the wallpaper's ordered-dither dots ---------- */
-  // 2px dots, 16 levels a channel. Around "hello" the light is held back to where even the dither's lighter
-  // dot keeps white's 3:1, easing back over a wide feather, so the hand never loses its contrast to the dots and
-  // the light simply fades a little sooner there
-  const BAYER = [0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20, 62, 30, 54, 22, 3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47, 7, 39, 13, 45, 5, 37, 63, 31, 55, 23, 61, 29, 53, 21];
-  const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
-  const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
-  const LUM_MAX = 1.05 / 3 - 0.05;   // the lightest a dot may be for white to keep 3:1 on it
-  const BASE = [0x5a, 0x7e, 0xdc], LIGHT = [0xa6, 0xc4, 0xf7], LEVEL = 255 / 15;
-  // the most light the field may take under the word: the lighter dot the dither can draw there (every
-  // channel rounded up a level) still under the ceiling
-  const A_WORD = (() => {
-    const top = (a) => BASE.map((b, c) => Math.min(255, Math.ceil((b + (LIGHT[c] - b) * a) / LEVEL) * LEVEL));
-    let a = 0;
-    while (a < 0.8 && lum(top(a + 0.005)) <= LUM_MAX) a += 0.005;
-    return a;
+  /* ---------- the glass: the test's box laid on the picture's four corners ---------- */
+  // the projective map from the box (0,0 w,0 w,h 0,h) onto four points, as a CSS matrix3d (transform-origin 0 0)
+  function onto(q) {
+    const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q, { w, h } = SCREEN;
+    const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2, sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+    const det = dx1 * dy2 - dx2 * dy1;
+    const g = (sx * dy2 - dx2 * sy) / det, hh = (dx1 * sy - sx * dy1) / det;
+    const a = x1 - x0 + g * x1, b = x3 - x0 + hh * x3, d = y1 - y0 + g * y1, e = y3 - y0 + hh * y3;
+    const m = [a / w, d / w, 0, g / w, b / h, e / h, 0, hh / h, 0, 0, 1, 0, x0, y0, 0, 1];
+    return `matrix3d(${m.map((v) => +v.toFixed(8)).join(',')})`;
+  }
+  // where the glass is on the still as the page shows it (object-fit: cover, centred)
+  function stillGlass() {
+    const s = small.matches ? STILL.phone : STILL.room;
+    const vw = box.clientWidth, vh = box.clientHeight, k = Math.max(vw / s.w, vh / s.h);
+    const ox = (vw - s.w * k) / 2, oy = (vh - s.h * k) / 2;
+    return s.glass.map(([fx, fy]) => [ox + fx * s.w * k, oy + fy * s.h * k]);
+  }
+  let glassNow = null;
+  function layGlass(q) { glassNow = q; crt.style.transform = onto(q); crt.classList.add('laid'); }
+
+  /* ---------- the room's still, dithered here at the page's own dots ---------- */
+  // the still is the 3D's first frame before its lines and dither (tools/poster.mjs); it gets them here, at exactly
+  // 2px a dot for this window, with the 3D's own 4 by 4 matrix counted from the bottom left, so it is the picture
+  // the 3D draws and a scaled still never shows bands
+  const BAYER4 = (() => {
+    const fract = (v) => v - Math.floor(v), b2 = (x, y) => fract(0.5 * x + 0.75 * y * y);
+    const m = new Float32Array(16);
+    for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) m[y * 4 + x] = b2(x >> 1, y >> 1) * 0.25 + b2(x, y);
+    return m;
   })();
-  function paintField() {
-    const DOT = 2, step = LEVEL, FEATHER = 96;
-    if (!dots) return;
-    const w = Math.ceil(main.clientWidth / DOT), h = Math.ceil(main.clientHeight / DOT);
-    if (!w || !h) return;
-    dots.width = w; dots.height = h;
-    const ctx = dots.getContext('2d'), img = ctx.createImageData(w, h), d = img.data;
-    const m = main.getBoundingClientRect(), hr = hello.getBoundingClientRect();
-    const x0 = (hr.left - m.left) / DOT, x1 = (hr.right - m.left) / DOT, y0 = (hr.top - m.top) / DOT, y1 = (hr.bottom - m.top) / DOT;
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        // Welcome Light from the top left: 80% at the corner, gone by 60% of a 90% radius
-        let a = 0.8 * Math.max(0, 1 - Math.hypot(x / w / 0.9, y / h / 0.9) / 0.6);
-        // how close the dot is to the word's box: 1 inside, easing to 0 over FEATHER dots outside
-        const dist = Math.hypot(Math.max(x0 - x, 0, x - x1), Math.max(y0 - y, 0, y - y1));
-        const t = Math.min(1, dist / FEATHER), near = 1 - t * t * (3 - 2 * t);
-        if (near > 0 && a > A_WORD) a -= (a - A_WORD) * near;
-        const th = (BAYER[(y & 7) * 8 + (x & 7)] + 0.5) / 64, i = (y * w + x) * 4;
-        for (let c = 0; c < 3; c++) {
-          const lv = (BASE[c] + (LIGHT[c] - BASE[c]) * a) / step, lo = Math.floor(lv);
-          d[i + c] = Math.min(255, (lv - lo > th ? lo + 1 : lo) * step);
+  const stills = {};
+  const stillImage = () => {
+    const s = small.matches ? STILL.phone : STILL.room;
+    if (!stills[s.src]) stills[s.src] = new Promise((res) => { const img = new Image(); img.onload = () => res(img); img.onerror = () => res(null); img.src = s.src; });
+    return stills[s.src];
+  };
+  function paintRoom() {
+    return stillImage().then((img) => {
+      if (!img || !run) return;
+      const w = Math.max(1, Math.round(box.clientWidth / 2)), h = Math.max(1, Math.round(box.clientHeight / 2));
+      room.width = w; room.height = h;
+      const ctx = room.getContext('2d', { willReadFrequently: true });
+      // cover, centred: the framing the 3D keeps at any window shape
+      const k = Math.max(w / img.naturalWidth, h / img.naturalHeight), dw = img.naturalWidth * k, dh = img.naturalHeight * k;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      const px = ctx.getImageData(0, 0, w, h), d = px.data;
+      for (let row = 0; row < h; row++) {
+        const y = h - 1 - row, scan = (1 - 0.06 * (y & 1)) * 5 / 255, by = (y & 3) * 4;
+        for (let x = 0, i = row * w * 4; x < w; x++, i += 4) {
+          const b = BAYER4[by + (x & 3)] + 0.03125;
+          d[i] = Math.min(5, Math.floor(d[i] * scan + b)) * 51;
+          d[i + 1] = Math.min(5, Math.floor(d[i + 1] * scan + b)) * 51;
+          d[i + 2] = Math.min(5, Math.floor(d[i + 2] * scan + b)) * 51;
         }
-        d[i + 3] = 255;
       }
-    }
-    ctx.putImageData(img, 0, 0);
-  }
-  let resizing;
-  addEventListener('resize', () => { if (!run) return; clearTimeout(resizing); resizing = setTimeout(paintField, 150); });
-
-  /* ---------- the hand ---------- */
-  // "hello" is one centreline (the hidden .boot-line, M and C only), sampled from its own curves every 1.5 units
-  // (getPointAtLength is too slow); both the pen's weight and its pace are read from it
-  const LINE = (() => {
-    const n = line.getAttribute('d').match(/-?\d*\.?\d+/g).map(Number);
-    const pts = [[n[0], n[1]]];
-    for (let i = 2; i + 5 < n.length; i += 6) {
-      const [x0, y0] = pts[pts.length - 1];
-      for (let k = 1; k <= 24; k++) {
-        const q = k / 24, u = 1 - q, a = u * u * u, b = 3 * u * u * q, c = 3 * u * q * q, e = q * q * q;
-        pts.push([a * x0 + b * n[i] + c * n[i + 2] + e * n[i + 4], a * y0 + b * n[i + 1] + c * n[i + 3] + e * n[i + 5]]);
-      }
-    }
-    const along = [0];
-    for (let i = 1; i < pts.length; i++) along.push(along[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
-    const length = along[along.length - 1], N = Math.ceil(length / 1.5), step = length / N, P = [];
-    for (let i = 0, j = 0; i <= N; i++) {
-      const s = i * step;
-      while (j < along.length - 2 && along[j + 1] < s) j++;
-      const f = Math.min(1, (s - along[j]) / (along[j + 1] - along[j] || 1));
-      P.push([pts[j][0] + (pts[j + 1][0] - pts[j][0]) * f, pts[j][1] + (pts[j + 1][1] - pts[j][1]) * f]);
-    }
-    return { P, step, length };
-  })();
-
-  // a pointed pen, in viewBox units: the line swells to `heavy` where it runs down the lettering's 13.5deg slant
-  // and thins to a `hair` going up or across, softened over a few units and lifted to a hairline at both ends.
-  // It is drawn as 3-unit round-capped pieces, so the pen can reveal them one after another
-  const PEN = { hair: 3.8, heavy: 13.5, swell: 1.6, soften: 14, lift: 10, slant: Math.atan(0.24) };
-  let pieces = null, starts = null, hand = null;
-  function inkReady() {
-    if (pieces) return;
-    const { P, step } = LINE, n = P.length;
-    const ax = -Math.sin(PEN.slant), ay = Math.cos(PEN.slant);
-    const raw = P.map((_, i) => {
-      const a = P[Math.max(0, i - 2)], b = P[Math.min(n - 1, i + 2)];
-      const dx = b[0] - a[0], dy = b[1] - a[1];
-      return PEN.hair + (PEN.heavy - PEN.hair) * Math.max(0, (dx * ax + dy * ay) / (Math.hypot(dx, dy) || 1)) ** PEN.swell;
+      ctx.putImageData(px, 0, 0);
     });
-    const R = Math.round(PEN.soften / step), T = Math.round(PEN.lift / step);
-    const w = raw.map((_, i) => {
-      let s = 0, c = 0;
-      for (let j = Math.max(0, i - R); j <= Math.min(n - 1, i + R); j++) { s += raw[j]; c++; }
-      const edge = Math.min(i, n - 1 - i);
-      return (s / c) * (edge < T ? 0.35 + 0.65 * (edge / T) : 1);
-    });
-    let html = '';
-    starts = [];
-    for (let i = 0; i < n - 1; i += 2) {
-      const k = Math.min(n - 1, i + 2);
-      html += `<path d="M${P.slice(i, k + 1).map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('L')}" stroke-width="${((w[i] + w[k]) / 2).toFixed(2)}"/>`;
-      starts.push(i * step);
-    }
-    inkLayer.innerHTML = html;
-    pieces = Array.from(inkLayer.children);
   }
 
-  // the pen slows where the line bends hard (the loop tops, the foot of the h) and runs on the straights,
-  // easing in as it touches down and out on the last flick; the result is an ease over the line's length
-  function handEase() {
-    if (hand) return hand;
-    const { P, step } = LINE, N = P.length - 1;
-    const bend = new Float32Array(N + 1);
-    for (let i = 1; i < N; i++) {
-      const a = Math.atan2(P[i][1] - P[i - 1][1], P[i][0] - P[i - 1][0]);
-      const b = Math.atan2(P[i + 1][1] - P[i][1], P[i + 1][0] - P[i][0]);
-      bend[i] = Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))) / step;
-    }
-    const R = Math.round(18 / step);
-    const time = new Float32Array(N + 1);
-    for (let i = 1; i <= N; i++) {
-      let k = 0, count = 0;
-      for (let j = Math.max(1, i - R); j <= Math.min(N - 1, i + R); j++) { k += bend[j]; count++; }
-      const s = i / N;
-      const v = (1 / (1 + 22 * (k / (count || 1)))) * Math.min(1, 0.25 + s * 12) * Math.min(1, 0.35 + (1 - s) * 10);
-      time[i] = time[i - 1] + 1 / v;
-    }
-    const T = time[N];
-    hand = (x) => {
-      if (x <= 0) return 0;
-      if (x >= 1) return 1;
-      const at = x * T;
-      let lo = 0, hi = N;
-      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (time[m] < at) lo = m; else hi = m; }
-      return (lo + (at - time[lo]) / (time[hi] - time[lo])) / N;
-    };
-    return hand;
+  /* ---------- the 3D, when this screen can have it ---------- */
+  let crt3d = null, crt3dReady = null;
+  function webgl() {
+    try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
+  }
+  function start3d() {
+    if (small.matches || reduce || !webgl()) return null;
+    return import('./crt3d/crt.js?v=1').then((m) => {
+      if (!run) return null;
+      crt3d = m.createCrt(scene, { onFrame: (q) => { if (!run || run.zooming) return; layGlass(q); } });
+      return crt3d.ready.then(() => {
+        if (!run) return null;
+        scene.classList.add('live');   // the canvas takes over from the still: the same picture
+        return crt3d;
+      });
+    }).catch((e) => { console.warn('loading screen: staying on the still', e); if (crt3d) { crt3d.destroy(); crt3d = null; } return null; });
   }
 
   /* ---------- one showing of the screen ---------- */
@@ -266,12 +213,10 @@
     if (run) return;
     let welcomed = false;
     try { welcomed = localStorage.getItem(WELCOMED) === '1'; } catch (e) { /* storage unavailable */ }
-    // a visitor welcomed before gets the quicker hand; Restart plays the full one again
-    const quick = welcomed && !replayed;
     const now = performance.now();
     const r = (run = {
-      ok: new Set(), missed: new Set(), shown: 0, label: '', penT: 0, next: 0, drawn: reduce, holding: false, leaving: false,
-      t0: now, last: now, quick, draw: quick ? DRAW_AGAIN : DRAW,
+      ok: new Set(), failed: new Set(), shown: 0, printed: 0, lastPrint: 0, kb: 0, holding: false, leaving: false, zooming: false,
+      t0: now, last: now, q: welcomed && !replayed ? 0.6 : 1, replayed: !!replayed,
     });
     let homeIn;
     r.home = new Promise((res) => (homeIn = res));
@@ -279,24 +224,28 @@
 
     root.classList.remove('boot-out', 'boot-in');
     root.classList.add('booting');
-    box.classList.remove('ready', 'chosen');
-    [box, main].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
-    inkReady();
-    hello.classList.toggle('whole', reduce);
-    inkLayer.querySelectorAll('.on').forEach((p) => p.classList.remove('on'));
-    if (reduce) box.classList.add('chosen');
-    drawBar(r);
-    bar.setAttribute('aria-label', t('aria'));
+    box.classList.remove('ready', 'failing');
+    crt.classList.remove('blue', 'done');
+    scene.classList.remove('live');
+    [box, scene, room].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
+    lines.innerHTML = PARTS.map(([k, , label]) => `<p data-part="${k}"><span>${label}</span><b></b></p>`).join('');
+    const n = small.matches ? 20 : 26;
+    cells.innerHTML = '<i></i>'.repeat(n);
+    tail.textContent = '';
+    foot.textContent = foot.dataset.id;
+    meter.setAttribute('aria-label', t('aria'));
     say.textContent = `${t('aria')}…`;
-    if (themeColor) { r.theme = themeColor.content; themeColor.content = '#00309c'; }
-    frozen = Array.from(document.body.children).filter((n) => n !== box && n.tagName !== 'SCRIPT' && !n.inert);
-    frozen.forEach((n) => (n.inert = true));
-    requestAnimationFrame(paintField);
+    if (themeColor) { r.theme = themeColor.content; themeColor.content = '#141414'; }
+    frozen = Array.from(document.body.children).filter((el) => el !== box && el.tagName !== 'SCRIPT' && !el.inert);
+    frozen.forEach((el) => (el.inert = true));
+    layGlass(stillGlass());
+    paintRoom();
+    draw(r);
+    crt3dReady = start3d();
 
     const checks = {
-      photo: () => imgReady(pic),
       fonts: () => (document.fonts
-        ? Promise.all(['400 16px "Noto Sans"', '700 16px "Noto Sans"'].map((f) => document.fonts.load(f))).then((sets) => sets.every((s) => s.length > 0))
+        ? Promise.all(['400 16px "Noto Sans"', '700 16px "Noto Sans"', '400 16px "Noto Sans Mono"'].map((f) => document.fonts.load(f))).then((sets) => sets.every((s) => s.length > 0))
         : true),
       content: () => scriptIn('content'),
       cases: () => scriptIn('cases'),
@@ -304,110 +253,156 @@
       app: () => scriptIn('app'),
       wall: () => allOk(cssUrls(getComputedStyle(document.getElementById('desktop')).backgroundImage).map(urlReady)),
       home: () => r.home,
-      // once its first frame is up, the live wallpaper waits behind the screen so the hand gets every frame
+      // once its first frame is up, the live wallpaper waits behind the screen
       wall3d: () => wall3dReady().then((ok) => { if (run === r && PF.wall3d) { PF.wall3d.pause(); r.wallPaused = true; } return ok; }),
     };
-    PARTS.forEach(([k]) => {
-      const late = new Promise((res) => setTimeout(() => res(false), PART_WAIT));
-      Promise.race([Promise.resolve().then(checks[k]), late]).catch(() => false).then((ok) => settle(r, k, !!ok));
-    });
-    // whatever has not arrived by the cap is left out, the status says so, and the screen goes at 12s
-    r.warn = setTimeout(() => { PARTS.forEach(([k]) => settle(r, k, false)); }, CAP - MISSED_HOLD);
-    r.cap = setTimeout(() => leave(r), CAP);
+    PARTS.forEach(([k]) => Promise.resolve().then(checks[k]).catch(() => false).then((ok) => settle(r, k, !!ok)));
     requestAnimationFrame((ts) => tick(r, ts));
   }
 
   function settle(r, key, ok) {
-    if (run !== r || r.ok.has(key) || r.missed.has(key)) return;
-    (ok ? r.ok : r.missed).add(key);
+    if (run !== r || r.ok.has(key) || r.failed.has(key)) return;
+    // on a replay the page is already up: nothing there is worth a reload, so what answered is taken as in
+    (ok || r.replayed ? r.ok : r.failed).add(key);
+    if (r.failed.size && !r.retrying) retry(r);
   }
   const got = (r) => PARTS.reduce((s, [k, w]) => s + (r.ok.has(k) ? w : 0), 0) / TOTAL;
-  const settled = (r) => PARTS.every(([k]) => r.ok.has(k) || r.missed.has(k));
 
-  // the bar fills in XP's whole blocks (8px green, 2px gap), eases toward what has arrived and never runs ahead
-  // of it; the status names the first part still coming and says welcome only once the bar has landed
-  function drawBar(r) {
-    const inner = Math.max(0, bar.clientWidth - 4);
-    fill.style.width = `${r.shown >= 0.999 ? inner : Math.floor((r.shown * inner) / 10) * 10}px`;
-    const p = Math.round(r.shown * 100);
-    pct.textContent = `${p}%`;
-    const next = PARTS.find(([k]) => !r.ok.has(k) && !r.missed.has(k));
-    if (next) r.label = t(next[0]);
-    what.textContent = r.missed.size && settled(r) ? t('missed')
-      : r.shown >= 0.999 ? t('ready')
-      : `${r.label || t(PARTS[0][0])}…`;
-    bar.setAttribute('aria-valuenow', p);
-    bar.setAttribute('aria-valuetext', `${p}%, ${what.textContent}`);
+  // a part failed: the page loads again after a pause that grows with each try, and not while offline
+  function retry(r) {
+    r.retrying = true;
+    box.classList.add('failing');
+    let tries = 0;
+    try { tries = +sessionStorage.getItem(TRIES) || 0; sessionStorage.setItem(TRIES, String(tries + 1)); } catch (e) { /* storage unavailable */ }
+    let left = RETRY[Math.min(tries, RETRY.length - 1)];
+    foot.textContent = small.matches ? 'Reload to start over' : 'Press F5 to start over';
+    say.textContent = t('failed');
+    const count = () => {
+      if (run !== r) return;
+      if (!navigator.onLine) {
+        tail.textContent = 'Waiting for the network';
+        say.textContent = t('offline');
+        addEventListener('online', () => { if (run === r) location.reload(); }, { once: true });
+        return;
+      }
+      if (left <= 0) { tail.textContent = 'Retrying'; location.reload(); return; }
+      tail.textContent = `Retrying in ${left}s`;
+      left -= 1;
+      setTimeout(count, 1000);
+    };
+    count();
   }
 
-  // one frame: the bar and the pen, each at its own pace
+  // the test as it stands: the lines printed so far, the memory count, the bar in whole blocks and the percent
+  function draw(r) {
+    const rows = lines.children;
+    for (let i = 0; i < rows.length; i++) {
+      const k = rows[i].dataset.part, row = rows[i];
+      const state = i < r.printed ? (r.ok.has(k) ? 'ok' : 'failed') : r.failed.has(k) && i === r.printed ? 'failed' : i === r.printed ? 'cur' : '';
+      if (row.dataset.state !== state) {
+        row.dataset.state = state;
+        row.lastChild.textContent = state === 'ok' ? 'OK' : state === 'failed' ? 'FAILED' : '';
+      }
+    }
+    const blocks = cells.children, on = Math.floor(r.shown * blocks.length + 1e-6);
+    for (let i = 0; i < blocks.length; i++) blocks[i].classList.toggle('on', i < on);
+    const p = Math.round(r.shown * 100);
+    pctEl.textContent = `${p}%`;
+    mem.textContent = `Memory Test : ${String(Math.round(r.kb)).padStart(5, ' ')}K${p >= 100 ? ' OK' : ''}`;
+    meter.setAttribute('aria-valuenow', p);
+  }
+
+  // the bytes that have really arrived, in KB: the page and everything it fetched
+  function loadedKB() {
+    let bytes = 0;
+    for (const e of performance.getEntriesByType('navigation').concat(performance.getEntriesByType('resource'))) bytes += e.encodedBodySize || e.transferSize || 0;
+    return bytes / 1024;
+  }
+
+  // one frame: lines print in order, never ahead of what arrived and never faster than TEMPO; the bar eases to them
   function tick(r, now) {
     if (run !== r || r.leaving) return;
     const dt = Math.min(0.25, (now - r.last) / 1000);
     r.last = now;
-    const target = got(r);
-    r.shown = reduce ? target : r.shown + (target - r.shown) * (1 - Math.exp(-dt / 0.16));
+    const k = PARTS[r.printed];
+    if (k && (r.ok.has(k[0])) && (now - r.lastPrint) / 1000 >= TEMPO * r.q) { r.printed++; r.lastPrint = now; }
+    const target = PARTS.slice(0, r.printed).reduce((s, [key, w]) => s + (r.ok.has(key) ? w : 0), 0) / TOTAL;
+    r.shown = reduce ? target : r.shown + (target - r.shown) * (1 - Math.exp(-dt / 0.12));
     if (Math.abs(target - r.shown) < 0.002) r.shown = target;
-    drawBar(r);
-    // the account is chosen as the hand touches down: its picture takes XP's gold selected frame
-    if (!r.drawn && (now - r.t0) / 1000 >= TOUCH_DOWN) {
-      box.classList.add('chosen');
-      r.penT = Math.min(r.draw, r.penT + dt);
-      const at = handEase()(r.penT / r.draw) * LINE.length;
-      while (r.next < pieces.length && starts[r.next] <= at) pieces[r.next++].classList.add('on');
-      if (r.penT >= r.draw) { r.drawn = true; hello.classList.add('whole'); }
-    }
+    const kb = loadedKB();
+    r.kb = reduce ? kb : r.kb + (kb - r.kb) * (1 - Math.exp(-dt / 0.2));
+    draw(r);
+    // the camera's push while loading, at about 30 frames a second: it moves a few centimetres over seconds
+    if (crt3d && !r.zooming && !r.flying && !reduce && now - (r.leant || 0) > 30) { r.leant = now; crt3d.lean((now - r.t0) / 1000); }
     ready(r);
     requestAnimationFrame((ts) => tick(r, ts));
   }
 
   /* ---------- leaving ---------- */
   function ready(r) {
-    if (r.holding || r.leaving || !r.drawn || !settled(r)) return;
-    const q = r.quick ? 0.6 : 1;
-    if (r.missed.size) {
-      // some parts are missing: the bar stays where it truly is, and the status says so before the desktop opens
-      r.holding = true;
-      box.classList.add('ready');
-      say.textContent = t('missedSay');
-      setTimeout(() => leave(r), MISSED_HOLD);
-      return;
-    }
-    if (r.shown < 0.999) return;
+    if (r.holding || r.leaving || r.printed < PARTS.length || r.shown < 0.999 || got(r) < 0.999) return;
     r.holding = true;
     box.classList.add('ready');
+    crt.classList.add('done');
+    tail.textContent = 'Starting iqbalsurya.com';
     say.textContent = t('ready');
-    // the bar holds its last block a beat; a still "hello" (reduced motion) stays long enough to be read
-    const hold = Math.max(400 * q, reduce ? 900 - (performance.now() - r.t0) : 0);
-    setTimeout(() => leave(r), hold);
+    meter.setAttribute('aria-valuenow', 100);
+    try { sessionStorage.removeItem(TRIES); } catch (e) { /* storage unavailable */ }
+    setTimeout(() => {
+      if (run !== r) return;
+      crt.classList.add('blue');
+      if (crt3d) crt3d.tube('blue');
+      // the flight waits a moment for the 3D if it is still on its way (a replay builds it again); after that the
+      // still flies instead, the same move in CSS
+      const wait = crt3dReady ? Promise.race([crt3dReady, new Promise((res) => setTimeout(() => res(null), 1200))]) : Promise.resolve(null);
+      wait.then((live) => {
+        if (reduce) return pause(450);
+        if (live && crt3d) { r.flying = true; return crt3d.fly(FLY); }
+        return zoomStill(r);
+      }).then(() => leave(r));
+    }, DONE_HOLD * 1000 * r.q);
+  }
+  const pause = (ms) => new Promise((res) => setTimeout(res, ms));
+
+  // the still's flight: the whole picture scales about the glass until only the blue is left (past the welcome's
+  // bands, as the 3D's last frame), and the room fades on the way, before its dots grow coarse
+  function zoomStill(r) {
+    r.zooming = true;
+    const q = glassNow || stillGlass();
+    const xs = q.map((p) => p[0]), ys = q.map((p) => p[1]);
+    const gx = (Math.min(...xs) + Math.max(...xs)) / 2, gy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const k = Math.max(box.clientWidth / (Math.max(...xs) - Math.min(...xs)), box.clientHeight / (Math.max(...ys) - Math.min(...ys))) * 1.2;
+    const to = `translate(${box.clientWidth / 2 - gx * k}px, ${box.clientHeight / 2 - gy * k}px) scale(${k})`;
+    scene.style.transformOrigin = '0 0';
+    room.animate([{ opacity: 1 }, { opacity: 1, offset: 0.35 }, { opacity: 0 }], { duration: FLY, easing: 'ease-in', fill: 'forwards' });
+    return scene.animate([{ transform: 'none' }, { transform: to }], { duration: FLY, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' }).finished.catch(() => {});
   }
 
   function leave(r) {
     if (run !== r || r.leaving) return;
     r.leaving = true;
-    clearTimeout(r.cap);
-    clearTimeout(r.warn);
     try { sessionStorage.setItem('pf-a-boot', '1'); localStorage.setItem(WELCOMED, '1'); } catch (e) { /* storage unavailable */ }
-    const q = r.quick ? 0.6 : 1;
+    const q = r.q;
     // the wallpaper is painted now, while the screen still covers it
     root.classList.add('boot-out');
     if (reduce) root.classList.add('boot-in');
     const end = () => {
       run = null;
+      if (crt3d) { crt3d.destroy(); crt3d = null; }
+      crt3dReady = null;
       root.classList.remove('booting', 'boot-out', 'boot-in');
-      box.classList.remove('ready', 'chosen');
-      [box, main].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
+      box.classList.remove('ready', 'failing');
+      [box, scene, room].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
+      scene.style.transformOrigin = '';
       if (themeColor && r.theme) themeColor.content = r.theme;
       if (r.wallPaused && PF.wall3d) PF.wall3d.play();
-      frozen.forEach((n) => (n.inert = false));
+      frozen.forEach((el) => (el.inert = false));
       frozen = [];
       waiters.splice(0).forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
     };
     if (reduce) return end();
-    // the content fades, then the screen, and the desktop comes up in XP's steps behind it
-    const fade = (el, ms, easing) => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: ms, easing, fill: 'forwards' }).finished;
-    fade(main, 300 * q, 'ease-in')
-      .then(() => fade(box, 500 * q, 'ease-out'))
+    // the blue fades, and the desktop comes up in XP's steps behind it
+    box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500 * q, easing: 'ease-out', fill: 'forwards' }).finished
       .then(() => enter(q))
       .catch(() => { root.classList.add('boot-in'); })
       .then(end);
@@ -442,13 +437,22 @@
       .then(() => { zr.style.display = 'none'; }, () => { zr.style.display = 'none'; });
   }
 
+  // the still moves with the window's shape; the 3D follows its own frames
+  let resizing = 0;
+  addEventListener('resize', () => {
+    if (!run || run.zooming || (crt3d && scene.classList.contains('live'))) return;
+    layGlass(stillGlass());
+    clearTimeout(resizing);
+    resizing = setTimeout(paintRoom, 120);
+  });
+
   /* ---------- hand-over ---------- */
-  // runs fn once the welcome screen has gone (right away when none is showing)
+  // runs fn once the loading screen has gone (right away when none is showing)
   PF.bootDone = (fn) => { if (run) waiters.push(fn); else fn(); };
   PF.boot = {
     // app.js hands over the Home window it opened at startup (null when Home does not open at startup)
     home: (el) => { if (run) run.giveHome(el); },
-    // Shut Down > Restart plays the welcome screen again
+    // Shut Down > Restart, and Blank's finale in Screen Saver XP, play the loading screen again
     replay: () => { try { sessionStorage.removeItem('pf-a-boot'); } catch (e) { /* storage unavailable */ } show(true); },
   };
 
