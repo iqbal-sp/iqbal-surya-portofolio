@@ -2006,20 +2006,18 @@
 
   /* ---- the screensaver: XP's Starfield after the desktop has sat still, twice a visit at most ---- */
   // Only on a desktop-sized screen with a mouse or trackpad (the stickman's test in pet.js), never under reduced motion:
-  // after 30 s without input on an empty desktop, or 2 min with a window open (a reader still scrolls or moves the
-  // mouse in that time).
+  // after 20 s without input, with windows open or not (the owner's call, 2026-09-29).
   const roomy = matchMedia('(min-width: 721px) and (any-pointer: fine)');
-  const IDLE_EMPTY = 30000, IDLE_OPEN = 120000, IDLE_MAX = 2;
-  // the wait is read every few seconds against the desktop as it is then, so closing the last window starts the short one
+  const IDLE_WAIT = 20000, IDLE_MAX = 2;
+  // read every second, so it comes within a second of the wait
   let idleTick = 0, idleRuns = 0, idleLast = performance.now(), saverUp = null;
   function idleArm() {
     clearInterval(idleTick); idleTick = 0;
     if (reduceMotion || idleRuns >= IDLE_MAX || saverUp || !roomy.matches) return;
-    idleTick = setInterval(idleCheck, 5000);
+    idleTick = setInterval(idleCheck, 1000);
   }
   function idleCheck() {
-    const open = Array.from(wins.values()).some((x) => !x.min);
-    if (performance.now() - idleLast < (open ? IDLE_OPEN : IDLE_EMPTY) || idleBlocked()) return;
+    if (performance.now() - idleLast < IDLE_WAIT || idleBlocked()) return;
     clearInterval(idleTick); idleTick = 0;
     idleRuns += 1;
     loadSaver().then((S) => {
