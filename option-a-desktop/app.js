@@ -2037,11 +2037,10 @@
   function idleWake() {
     saverUp = null; idleLast = performance.now();
     if (PF.wall3d) PF.wall3d.play();
-    if (!saverPlayed()) showNote('offer');
+    // the offer follows every screensaver, for players too (the owner's call, 2026-09-29)
+    showNote('offer');
     idleArm();
   }
-  // a visitor who has named a player or run the game has played it: no offer for them
-  const saverPlayed = () => { try { return !!(localStorage.getItem('ssxp-name') || localStorage.getItem('ssxp-pid')); } catch (e) { return true; } };
   // any input starts the wait again
   const idleInput = () => { if (!saverUp) idleLast = performance.now(); };
   ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach((k) => window.addEventListener(k, idleInput, { capture: true, passive: true }));
