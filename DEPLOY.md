@@ -199,8 +199,8 @@ Situs menghitung beberapa kejadian per hari, tanpa cookie dan tanpa data apa pun
 | `copy` | `email` | alamat email disalin |
 | `start` | (kosong) | tombol "Start a project" ditekan |
 | `social` | `linkedin`, `dribbble`, `behance`, `upwork` | tautan profil diklik |
-| `door` | `ss:display`, `ss:idle`, `ss:gate`, `ss:link` | Screen Saver XP dibuka dari menu klik kanan desktop (Properties), dari balon tawaran setelah screensaver, dari tombol di gate HP Boss Rush XP, atau dari link `#/screensaver` |
-| `door` | `br:bin`, `br:balloon`, `br:konami`, `br:pet`, `br:link` | Boss Rush XP dibuka dari jangan-dibuka.exe di Tempat Sampah, dari exe yang sama setelah balon petunjuk membuka Tempat Sampah, dari kode Konami, dari stickman di taskbar, atau dari link `#/game` |
+| `door` | `ss:display`, `ss:idle`, `ss:gate`, `ss:menu`, `ss:link` | Screen Saver XP dibuka dari menu klik kanan desktop (Properties), dari balon tawaran setelah screensaver, dari tombol di gate HP Boss Rush XP, dari Start > Accessories, atau dari link `#/screensaver` |
+| `door` | `br:bin`, `br:balloon`, `br:konami`, `br:pet`, `br:menu`, `br:link` | Boss Rush XP dibuka dari jangan-dibuka.exe di Tempat Sampah, dari exe yang sama setelah balon petunjuk membuka Tempat Sampah, dari kode Konami, dari stickman di taskbar, dari Start > Accessories, atau dari link `#/game` |
 | `hint` | `bin`, `idle`, `offer` | balon petunjuk Tempat Sampah tampil, screensaver saat diam muncul, atau balon tawaran Screen Saver XP tampil |
 | `run` | `ss:start`, `ss:boss2`, `ss:boss3`, `ss:boss4`, `ss:final`, `ss:win` | run penuh Screen Saver XP dimulai, sampai di Mystify, 3D Pipes, Marquee, Blank, lalu menang. Main lagi dan Mulai ulang dihitung sebagai start baru, sedangkan Coba lagi setelah kalah tidak dihitung |
 | `run` | `ss:practice`, `ss:practice-done` | latihan dimulai, atau selesai sampai langkah terakhir |

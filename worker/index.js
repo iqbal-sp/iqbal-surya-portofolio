@@ -524,7 +524,7 @@ const EVENTS = {
   send: /^(api|mailto)$/, copy: /^email$/, start: /^$/, social: /^(linkedin|dribbble|behance|upwork)$/,
   // the games: where each was opened from (ss: Screen Saver XP, br: Boss Rush XP), the nudges toward them that
   // showed, and how far a Screen Saver XP run got
-  door: /^(ss:(display|idle|gate|link)|br:(bin|balloon|konami|pet|link))$/, hint: /^(bin|idle|offer)$/,
+  door: /^(ss:(display|idle|gate|link|menu)|br:(bin|balloon|konami|pet|link|menu))$/, hint: /^(bin|idle|offer)$/,
   run: /^ss:(start|boss[2-4]|final|win|practice|practice-done)$/,
 };
 const EVENT_RATE = { limit: 120, window: 600 };

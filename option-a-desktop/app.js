@@ -21,7 +21,7 @@
   const UI = {
     en: {
       start: 'Start', about: 'About Me', work: 'Portfolio', resume: 'Resume', resumeFile: 'Resume.pdf', contact: 'Contact',
-      network: 'Network', recycle: 'Recycle Bin', language: 'Language', shutdown: 'Shut Down…', openFolder: 'Open folder',
+      network: 'Network', accessories: 'Accessories', recycle: 'Recycle Bin', language: 'Language', shutdown: 'Shut Down…', openFolder: 'Open folder',
       minimize: 'Minimize', maximize: 'Maximize', close: 'Close',
       photoAlt: 'Portrait of Iqbal Surya',
       openPortfolio: 'View selected work', downloadCV: 'Download resume', contactMe: 'Contact me',
@@ -82,7 +82,7 @@
     },
     id: {
       start: 'Mulai', about: 'Tentang Saya', work: 'Portofolio', resume: 'CV', resumeFile: 'CV.pdf', contact: 'Kontak',
-      network: 'Jaringan', recycle: 'Tempat Sampah', language: 'Bahasa', shutdown: 'Matikan…', openFolder: 'Buka folder',
+      network: 'Jaringan', accessories: 'Aksesori', recycle: 'Tempat Sampah', language: 'Bahasa', shutdown: 'Matikan…', openFolder: 'Buka folder',
       minimize: 'Kecilkan', maximize: 'Besarkan', close: 'Tutup',
       photoAlt: 'Potret Iqbal Surya',
       openPortfolio: "Lihat karya pilihan", downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
@@ -487,6 +487,8 @@
   const startMenu = $('#startMenu');
   const socialIcon = { linkedin: 'linkedin', dribbble: 'dribbble', behance: 'behance', upwork: 'upwork' };
   function renderStartBtn() { startBtn.innerHTML = `<span>${esc(u('start'))}</span>`; }
+  // the two games sit in Accessories at the foot of the programs column, as XP kept its small programs there; the
+  // menu never calls them games (owner's decision, 2026-09-29)
   function renderStart() {
     const o = PF.owner;
     const item = (attrs, icon, label, size = 24, sub = false) => `<button class="sm-item" role="menuitem" ${attrs}>${I(icon, size)}<span>${esc(label)}</span>${sub ? `<span class="arrow">${GLYPH.arrow}</span>` : ''}</button>`;
@@ -501,6 +503,12 @@
               <li class="sm-sep" role="separator"></li><li role="none">${item('data-sm="work"', 'folder', u('openFolder'), 16)}</li></ul></li>
           <li role="none">${item('data-sm="resume"', 'resume', u('resume'))}</li>
           <li role="none">${item('data-sm="contact"', 'envelope', u('contact'))}</li>
+          <li class="sm-sep" role="separator"></li>
+          <li role="none" class="has-sub">${item('data-sub aria-haspopup="menu"', 'grid', u('accessories'), 24, true)}
+            <ul class="sm-sub" role="menu">
+              <li role="none">${item('data-sm="brxp"', 'trophy', 'Boss Rush XP', 16)}</li>
+              <li role="none">${item('data-sm="ssxp"', 'moon', 'Screen Saver XP', 16)}</li>
+            </ul></li>
         </ul>
         <ul class="sm-list places" role="none">
           <li role="none" class="has-sub">${item('data-sub aria-haspopup="menu"', 'globe', u('network'), 24, true)}
@@ -2305,6 +2313,8 @@
       const k = sm.dataset.sm, from = rectOf(sm);
       closeStart();
       if (k === 'case') openCase(sm.dataset.slug, from, true);
+      else if (k === 'brxp') { track('door', 'br:menu'); openGame(from); }
+      else if (k === 'ssxp') { track('door', 'ss:menu'); openSaver(from); }
       else if (k === 'lang') setLang(sm.dataset.lang);
       else if (k === 'shutdown' || k === 'credits') openWin(k, { from });
       else openWin(k, { from, pushHistory: true });

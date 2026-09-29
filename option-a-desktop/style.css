@@ -518,6 +518,12 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 }
 .sm-foot .sm-list { flex: 0 0 auto; padding: 0; }
 .sm-foot .sm-item { min-height: 30px; padding: 3px 10px 3px 6px; border-radius: 3px; color: #fff; font-weight: 400; }
+/* the Start menu fills a phone's width, so its submenus keep inside the screen: the programs column's open over the
+   places column, and the places column's (Network, Language) open to the left, over the programs */
+@media (max-width: 720px) {
+  .sm-sub { min-width: 0; width: max-content; max-width: calc(100vw - 100%); }
+  .sm-list.places .sm-sub { left: auto; right: calc(100% - 2px); }
+}
 .sm-foot .sm-item:hover, .sm-foot .sm-item:active, .sm-foot .sm-item:focus-visible { background: rgba(255, 255, 255, .2); }
 
 /* ============================================================
