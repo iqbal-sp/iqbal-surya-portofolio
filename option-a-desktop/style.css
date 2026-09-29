@@ -745,8 +745,8 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 /* ============================================================
    CASE STUDY PLAYER: a skinned window drawn after the Windows
    Media Player 7 skins. A caption plate, the chapter list and
-   the screen in a tray, and a deck with the chapter timeline,
-   the transport keys, an LCD and a text-size wedge
+   the LCD in a tray beside the screen, and a deck with the
+   chapter timeline, the transport keys and a text-size wedge
    ============================================================ */
 .skin {
   position: relative; isolation: isolate;
@@ -786,7 +786,8 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .orb svg { width: 16px; height: 16px; }
 /* the screen is what the client came for, so the tray and the deck around it stay slim (owner's request, 2026-09-28) */
 .skin-body { min-height: 0; display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px; }
-/* the side tray: the case picker (an LCD field, like WMP's playlist picker), the chapters as the playlist, and the tools */
+/* the side tray: the case picker (an LCD field, like WMP's playlist picker), the chapters as the playlist, the LCD and
+   the tools */
 .pl-side { min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 12px;
   background: linear-gradient(180deg, rgba(40, 42, 52, .08), rgba(255, 255, 255, .2)); box-shadow: inset 0 1px 3px rgba(40, 42, 52, .35), 0 1px rgba(255, 255, 255, .8); }
 .pl-print { margin: 4px 4px 0; font-weight: 700; }
@@ -1037,10 +1038,9 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .pl-ask { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 16px; border: 1px solid #141414; border-radius: 4px; background: #fff; color: #141414; font: 700 14px/1.2 var(--read); }
 .pl-ask:hover { background: var(--face); }
 .pl-ask:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
-/* the deck: a raised plate under the tray, the timeline across its top, then the keys, the LCD and the text size */
-/* one slim row, so the screen gets the height: the transport, the timeline, the LCD, the text size and the wordmark.
-   The keys carry their names as tooltips instead of printed labels */
-.pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) minmax(220px, 300px) auto auto; grid-template-areas: "keys tl lcd vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
+/* the deck: a raised plate under the tray, one slim row so the screen gets the height: the transport, the timeline,
+   the text size and the wordmark. The keys carry their names as tooltips instead of printed labels */
+.pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) auto auto; grid-template-areas: "keys tl vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
   background: linear-gradient(180deg, #dcdee3, #b2b4bd 55%, #a0a2ab);
   box-shadow: inset 0 1px #fff, inset 0 -2px 3px rgba(40, 42, 52, .3), 0 1px 0 rgba(255, 255, 255, .8), 0 3px 6px rgba(20, 22, 30, .25); }
 .range { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: none; margin: 0; }
@@ -1072,7 +1072,7 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .pl-key.big:active { box-shadow: 0 0 0 4px #b6b8c0, 0 0 0 5px #6f717a, inset 0 3px 6px rgba(0, 0, 0, .45); }
 .pl-key.big .px { width: 24px; height: 24px; }
 /* the LCD, kept simple: a seven-segment clock (the unlit segments ghost through), then the case over the chapter being read */
-.lcd { grid-area: lcd; justify-self: center; width: 100%; max-width: 440px; min-width: 0; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border-radius: 8px;
+.lcd { grid-area: lcd; width: 100%; min-width: 0; height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 12px; border-radius: 8px;
   background: #070707; border: 1px solid #3e4048; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .8), 0 1px 0 #fff;
   color: var(--lcd); text-shadow: 0 0 6px rgba(99, 240, 107, .45); white-space: nowrap; overflow: hidden; }
 .lcd-clock { flex: none; display: flex; align-items: center; gap: 2px; filter: drop-shadow(0 0 3px rgba(99, 240, 107, .45)); }
@@ -1084,6 +1084,12 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .lcd-title, .lcd-now { overflow: hidden; text-overflow: ellipsis; }
 .lcd-title { font: 700 14px/1.1 var(--ui); }
 .lcd-now { font: 12px/1.2 var(--ui); }
+/* the LCD stands in the side tray over the tools (owner's request, 2026-09-29). The tray is too narrow for one row, so
+   the clock sits over the case and the chapter, the green divider between them. A phone's tray lists nothing, so
+   there the deck's LCD shows instead */
+.pl-side .lcd { flex: none; height: auto; flex-direction: column; align-items: stretch; gap: 8px; padding: 8px 12px; }
+.pl-side .lcd-text { flex: none; padding: 8px 0 0; border-left: 0; border-top: 1px solid rgba(99, 240, 107, .2); }
+.pl-deck .lcd { display: none; }
 /* a narrow deck drops the wordmark, and the narrowest (a 320px phone) the LCD's clock, so the case and chapter still read */
 @container (max-width: 960px) { .skin-logo { display: none; } }
 @container (max-width: 299px) { .lcd-clock { display: none; } .lcd .lcd-text { padding-left: 0; border-left: 0; } }
@@ -1103,10 +1109,6 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .pl-wedge .tsize::-webkit-slider-thumb { margin-top: calc((var(--wg-h) - 20px) / 2); }
 .pl-wedge .tsize::-moz-range-track { background: none; box-shadow: none; }
 .skin-logo { grid-area: logo; font: 700 12px/1 var(--ui); color: #2b2c33; letter-spacing: .02em; text-shadow: 0 1px rgba(255, 255, 255, .7); white-space: nowrap; }
-/* a skin under 800px wide has no room for the timeline in the row, so it runs across the deck's top again */
-@container skin (max-width: 799px) {
-  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "tl tl tl tl" "keys lcd vol logo"; }
-}
 
 /* ============================================================
    CONTACT — Y2K red skin
@@ -1573,9 +1575,10 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   .skin-body { display: flex; flex-direction: column; gap: 8px; }
   .skin-body .screen { flex: 1; }
   /* a phone keeps the screen tall: the tray is only the case picker, across the width. It lists no chapters (owner's
-     request, 2026-09-28): the timeline's notches and the play key move through them, and the LCD names the current one */
+     request, 2026-09-28): the timeline's notches and the play key move through them, and the deck's LCD names the
+     current one */
   .pl-side { flex: none; padding: 0; background: none; box-shadow: none; }
-  .pl-print, .pl-tools, .skin-nav { display: none; }
+  .pl-print, .pl-tools, .skin-nav, .pl-side .lcd { display: none; }
   /* on a phone the deck is two compact rows, laid out like a pocket player and 8px apart everywhere (owner's request,
      2026-09-28): play, the timeline and the text size, then the LCD beside the case pair, at the desktop deck's sizes.
      The picker and the Start menu already reach the Portfolio, so its key and the printed labels go */
@@ -1595,7 +1598,7 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   /* the pair's reaches meet in the middle of the 8px between them, so neither key takes the other's */
   .pl-well .pl-key:first-child::after { right: -5px; }
   .pl-well .pl-key:last-child::after { left: -5px; }
-  .lcd { max-width: none; height: 36px; gap: 8px; padding: 0 8px; }
+  .pl-deck .lcd { display: flex; height: 36px; gap: 8px; padding: 0 8px; }
   .lcd-text { gap: 0; padding-left: 8px; }
   .lcd-title { font-size: 12px; line-height: 16px; }
   .lcd-now { line-height: 16px; }
@@ -1614,8 +1617,8 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 
 /* a 320px phone gives the badge's room to the caption, so "Case Study Player" reads whole */
 @media (max-width: 340px) { .pl-badge { display: none; } }
-/* a wide phone window has room for the desktop's deck: the timeline across the top, then play, the LCD, the text size
-   and the case pair in one row, so the LCD is not a long empty strip */
+/* a wide phone window has room for a wider deck: the timeline across the top, then play, the LCD, the text size and
+   the case pair in one row, so the LCD is not a long empty strip */
 @media (min-width: 560px) and (max-width: 720px) {
   .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "tl tl tl tl" "play lcd vol case"; }
 }
@@ -1632,7 +1635,7 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   .pl-caps { margin-left: auto; }
   .pl-side { grid-area: side; }
   .pl-deck { grid-area: deck; grid-template-columns: auto auto; grid-template-areas: "tl tl" "play case"; justify-content: start; }
-  .lcd, .pl-vol { display: none; }
+  .skin .lcd, .pl-vol { display: none; }
 }
 
 /* touch: every control in the Portfolio window and the case player is at least 44px, on a phone and on any coarse pointer */

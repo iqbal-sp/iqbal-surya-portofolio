@@ -1525,8 +1525,8 @@
     }));
     return [over, ...secs];
   }
-  // The player is a skin drawn after Windows Media Player 7: a caption plate, the chapter list and the screen in a
-  // tray, and a deck with the chapter timeline, the transport keys, an LCD and a text-size wedge.
+  // The player is a skin drawn after Windows Media Player 7: a caption plate, the chapter list and the LCD in a tray
+  // beside the screen, and a deck with the chapter timeline, the transport keys and a text-size wedge.
   function buildPlayer(w) {
     const p = PF.bySlug(w.state.slug);
     const all = sectionsFor(p), secs = all.filter((s) => s.ready);
@@ -1537,6 +1537,9 @@
     const cap = (wact, glyph, label) => `<button type="button" class="pl-cb" data-wact="${wact}" aria-label="${esc(label)}" title="${esc(label)}">${glyph}</button>`;
     const key = (act, icon, label, cls = '') => `<button type="button" class="pl-key${cls}" data-act="${act}" aria-label="${esc(label)}" title="${esc(label)}">${icon}</button>`;
     const tool = (act, icon, label, print) => `<span class="pl-tool"><button type="button" class="orb" data-act="${act}" aria-label="${esc(label)}" title="${esc(label)}">${I(icon, 16)}</button><small aria-hidden="true">${esc(print)}</small></span>`;
+    // the LCD stands in the tray over the tools; a phone's tray lists nothing, so its deck has the same LCD and
+    // style.css shows one of the two
+    const lcd = `<div class="lcd"><span class="lcd-clock" aria-hidden="true">${segClock()}</span><span class="lcd-text"><b class="lcd-title">${esc(p.title)}</b><span class="lcd-now" aria-live="polite"><span class="sr-only">${esc(u('nowReading'))}: </span><span class="lcd-sec">${esc(secs[0].label)}</span></span></span></div>`;
     return `
       <div class="skin">
         <header class="pl-cap" data-drag>
@@ -1552,6 +1555,7 @@
             <nav class="skin-nav" aria-label="${esc(u('chapters'))}">${all.map((s, i) => (s.ready
               ? `<button data-sec="${s.id}" aria-current="${s === secs[0]}"><span class="no">${no(i)}</span><span class="nm">${esc(s.label)}</span><small>${fmtTime(s.words * 0.3)}</small></button>`
               : `<span class="off"><span class="no">${no(i)}</span><span class="nm">${esc(s.label)}</span><small>${esc(u('notYet'))}</small></span>`)).join('')}</nav>
+            ${lcd}
             <div class="pl-tools">${tool('copy-link', 'link', u('copyLink'), u('lblLink'))}${tool('resume', 'resume', u('downloadCV'), u('resume'))}${tool('contact', 'envelope', u('contactMe'), u('contact'))}</div>
           </aside>
           <div class="screen">
@@ -1565,10 +1569,7 @@
             <span class="pl-kgrp"><span class="pl-well">${key('stop', I('folderOpen', 16), u('stop'))}</span><small aria-hidden="true">${esc(u('work'))}</small></span>
             <span class="pl-kgrp"><span class="pl-well">${key('prev-case', I('prev', 16), u('prevCase'))}${key('next-case', I('next', 16), u('nextCase'))}</span><small aria-hidden="true">${esc(u('lblCase'))}</small></span>
           </div>
-          <div class="lcd">
-            <span class="lcd-clock" aria-hidden="true">${segClock()}</span>
-            <span class="lcd-text"><b class="lcd-title">${esc(p.title)}</b><span class="lcd-now" aria-live="polite"><span class="sr-only">${esc(u('nowReading'))}: </span><span class="lcd-sec">${esc(secs[0].label)}</span></span></span>
-          </div>
+          ${lcd}
           <label class="pl-vol"><span class="pl-vrow"><b aria-hidden="true">A</b><span class="pl-wedge"><input class="range tsize" type="range" min="0" max="2" step="1" value="${w.state.size}" aria-label="${esc(u('textSize'))}" aria-valuetext="${esc(u('sizes')[w.state.size])}"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span><b class="lg" aria-hidden="true">A</b></span><small aria-hidden="true">${esc(u('textSize'))}</small></label>
           <span class="skin-logo" aria-hidden="true">iqbal·player</span>
         </div>
@@ -1636,8 +1637,8 @@
     const id = cur ? cur.dataset.sec : 'overview';
     $$('.skin-nav button', w.el).forEach((b) => b.setAttribute('aria-current', String(b.dataset.sec === id)));
     const meta = w.secs.find((s) => s.id === id);
-    const lab = $('.lcd-sec', w.el); if (lab && meta && lab.textContent !== meta.label) lab.textContent = meta.label;
-    const clock = $('.lcd-clock', w.el); if (clock) segSet(clock, fmtTime(prog * w.total));
+    $$('.lcd-sec', w.el).forEach((lab) => { if (meta && lab.textContent !== meta.label) lab.textContent = meta.label; });
+    $$('.lcd-clock', w.el).forEach((clock) => segSet(clock, fmtTime(prog * w.total)));
     const at = w.knots ? tlTrack(w.knots, prog) : prog;
     const fill = $('.tl-fill', w.el); if (fill) fill.style.width = pct(at);
     const seek = $('.seek', w.el); if (seek && document.activeElement !== seek) seek.value = Math.round(at * 1000);
