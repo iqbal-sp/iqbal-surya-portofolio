@@ -1,492 +1,223 @@
-/* DIRECTION CONTRACT: Screen Saver XP's front door and its desktop ways in
-   THESIS: The front door is XP's own Display Properties at the Screen Saver tab: pick a screensaver, watch it on the
-   little monitor, press Preview to fight it. It refuses the title-screen default, a logo over a Play button.
-   OWN-WORLD: Luna mini windows on the beige face; one working tab with its orange line; etched group boxes captioned in
-   Group Caption Blue; an XP drop-down and push buttons; a beige monitor on a stand playing the live screensaver; the
-   Leaderboard window's gold, silver and orange podium, grade chips, a Selection Blue "you"; XP tray balloons; Noto Sans.
-   STORY: The visitor meets it from the desktop (right-click, Properties; the Starfield that wakes and offers the fight;
-   Boss Rush XP's phone gate), sees the screensaver they will fight, knows they play the cursor, checks the board, and
-   presses Preview, or picks (Practice) first. A win ends on the grade stamp, the board, and a result card that is the
-   same Display Properties with the result on its monitor.
-   FIRST VIEWPORT: The dialog, its monitor the largest thing in it, beside the Leaderboard (under it on a phone); Preview
-   is the default button, above the fold on a phone.
-   FORM: brief-pinned (GAME2_BRIEF.md, Layar dan alur), no roll; code-led.
-   FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and
-   every shipping raster carrying its provenance */
 /* Screen Saver XP: the portfolio's second game, a bullet hell for a phone as much as a desk (GAME2_BRIEF.md). The
    visitor is the mouse cursor, with Boss Rush XP's stickman riding it, against XP's own screensavers one after another:
-   Starfield, Mystify, 3D Pipes, Marquee, and last Blank, which the front door shows as ??? until a run has reached it.
-   The cursor fires on its own and only the tip of the arrow can be hit; passing close to danger fills the meter, and a
-   full meter is Show Desktop.
-   The front door is XP's Display Properties at its Screen Saver tab, a live demo of the picked screensaver on its
-   monitor, with the Leaderboard beside it (worker/index.js, ?game=ssxp). The arena is 360 by 480 units on one canvas;
-   the HUD, the dialogs and the front door are Luna DOM in a shadow root, so their classes and the portfolio's never
-   meet. app.js loads this file the first time the game's window opens or the idle screensaver runs, as it loads game.js.
-   window.ScreenSaverXP.create({ lang, owner, onContact, onWin, onReboot, onStatus, onRun, trails }) -> game: attach(host),
-   setLang(l), newGame(), togglePause(), toggleSound(), isPaused(), isMuted(), help(), board(), can(item), focus(), destroy().
+   Starfield, Mystify, 3D Pipes, Marquee, and last Blank, kept out of the menu's demo until a run has reached it. The
+   cursor fires on its own and only the tip of the arrow can be hit.
+   The game's window is a device, drawn after the owner's reference (2026-09-30): app.js draws its warm grey body and
+   its two keys, sound and start/pause, and this file draws its screen, in a shadow root so its classes and the
+   portfolio's never meet. The screen holds the HUD over the arena (360 by 480 units on one canvas), a menu before each
+   run (Start game, How to play, Leaderboard, About this game) over a dim live demo, and every other screen, all in the
+   game's own pixel letters (SSXP Pixel, asset/fonts): grey, with orange for what matters. The leaderboard is
+   worker/index.js with ?game=ssxp. app.js loads this file the first time the game's window opens or the idle
+   screensaver runs, as it loads game.js.
+   window.ScreenSaverXP.create({ lang, owner, onContact, onWin, onReboot, onRun, onKeys, touchArea }) -> game:
+   attach(host), setLang(l), primary(), toggleSound(), isPaused(), isMuted(), focus(), destroy().
    onWin: a full run is won; the portfolio answers 'new' the first time (the pointer trails go on its desktop).
-   onReboot(done): Blank.scr is beaten; the portfolio plays its Welcome screen, then calls done for the result.
+   onReboot(done): Blank.scr is beaten; the portfolio replays its loading screen, then calls done for the result.
    onRun(step): how far a full run got, for the portfolio's day counts: start, boss2 to boss4, final, win, practice,
    practice-done.
-   trails: { on(), set(on) }, the portfolio's pointer trails for the switch in Settings; on() is null until they are won.
-   can(item): whether the menu's 'pause', 'help' or 'board' would do anything now, so the portfolio greys the rest. */
+   onKeys({ muted, go }): what the device's keys show: the sound, and what start/pause does now ('start', 'pause',
+   'resume', 'ok' for a screen's default choice, or 'none').
+   primary(): the orange key: it starts a run from the menu, pauses and resumes a fight, and takes a screen's default.
+   touchArea: the device's body, where a finger may also start a drag. */
 (() => {
   'use strict';
 
-  /* ------------------------------------------------------------ the stage's own styles, inside its shadow root */
+  // SSXP Pixel (asset/fonts/ssxp-pixel.woff), the letters drawn for this game's screen; found from this file's own
+  // address, since the page may sit anywhere
+  const PIXEL_FONT_URL = new URL('../asset/fonts/ssxp-pixel.woff?v=1', document.currentScript ? document.currentScript.src : location.href).href;
+  let pixelFont = null;
+  function loadPixelFont() {
+    if (pixelFont || typeof FontFace === 'undefined' || !document.fonts) return;
+    try { pixelFont = new FontFace('SSXP Pixel', `url("${PIXEL_FONT_URL}") format("woff")`); document.fonts.add(pixelFont); pixelFont.load().catch(() => {}); } catch (e) { pixelFont = null; }
+  }
+
+  /* ------------------------------------------------------------ the screen's own styles, inside its shadow root */
   const CSS = `:host {
-  --face: #ece9d8;
-  --face-rule: #d8d2bd;
-  --shade: #aca899;
-  --dark: #444444;
-  --muted: #5b5f6b;
-  --sel: #316ac5;
-  --tip: #ffffe1;
-  --line: #7f9db9;
-  --btn-line: #003c74;
-  --tab-line: #919b9c;
-  --ok-ink: #11703a;
-  --start-deep: #237a23;
-  --group-ink: #0046d5;
-  --pane-ink: #215dc6;
-  --paper: #ffffff;
-  --paper-2: #f3f6fd;
-  --desk-deep: #04163f;
-  --desk-mid: #0d3a8f;
-  --desk-hi: #1d56b8;
-  --gold: #f7c948;
-  --silver: #d4d7de;
-  --orange-rule: #e8943a;
-  --tab-hi: #ffc83c;
-  --page: #fcfcfe;
-  --places: #d3e5fa;
-  --places-rule: #95bdee;
-  --link: #0b5bd3;
-  --cap: linear-gradient(180deg, #0997ff 0%, #0053ee 8%, #0050ee 40%, #0066ff 88%, #0066ff 93%, #005bff 95%, #003dd7 96%, #003dd7 100%);
-  --cap-shadow: #0f1089;
-  --cap-off: #7a96df;
-  --paper-rule: #d8e1f3;
-  --frame: inset -1px -1px #00138c, inset 1px 1px #0831d9, inset -2px -2px #001ea0, inset 2px 2px #166aee, inset -3px -3px #003bda, inset 3px 3px #0855dd;
-  --caption-btn: radial-gradient(circle at 90% 90%, #0054e9 0%, #2263d5 55%, #4479e4 70%, #a3bbec 90%, #fff 100%);
-  --caption-btn-hot: radial-gradient(circle at 90% 90%, #1c6cff 0%, #3a82f5 55%, #5f98f5 70%, #c0d4f8 90%, #fff 100%);
-  --caption-btn-down: radial-gradient(circle at 10% 10%, #0042c4 0%, #0a4ccf 55%, #2c61d0 70%, #7b98d9 90%, #d9e3f7 100%);
-  --btn-face: linear-gradient(180deg, #ffffff 0%, #ecebe6 86%, #d6d0c5 100%);
-  --btn-down: linear-gradient(180deg, #cdcac3 0%, #e3e3db 8%, #e5e5de 94%, #f2f2f1 100%);
-  --btn-hot: inset -1px 1px #fff0cf, inset 1px 2px #fdd889, inset -2px 2px #fbc761, inset 2px -2px #e5a01a;
-  --btn-focus: inset -1px 1px #cee7ff, inset 1px 2px #98b8ea, inset -2px 2px #bcd4f6, inset 1px -1px #89ade4, inset 2px -2px #89ade4;
-  --well: inset 0 0 0 1px var(--line);
-  --progress: linear-gradient(180deg, #acedad 0%, #7be47d 25%, #4cda50 50%, #2ed330 60%, #42d845 80%, #76e278 100%);
-  --taskbar: linear-gradient(180deg, #1f2f86 0%, #3165c4 3%, #3682e5 6%, #4490e6 10%, #3883e5 14%, #2b71e0 24%, #2157d6 50%, #245ddb 86%, #2158d4 92%, #1d4ec0 96%, #1941a5 100%);
-  --tray: linear-gradient(180deg, #0c59b9 1%, #139ee9 6%, #18b5f2 10%, #139beb 14%, #1290e8 19%, #0d8dea 63%, #0d9ff1 81%, #0f9eed 88%, #119be9 91%, #1392e2 94%, #137ed7 97%, #095bc9 100%);
-  --taskpane: linear-gradient(180deg, #7ba2e7, #6375d6);
-  --pane-head: linear-gradient(90deg, #ffffff, #c6d3f7);
+  --lcd: #d3cfc9;
+  --lcd-hi: #f1eee9;
+  --lcd-dim: #8a8580;
+  --lcd-off: #34312e;
+  --lcd-line: #5d5955;
+  --acc: #e0683f;
+  --hud: 28px;
+  --px: "SSXP Pixel", ui-monospace, monospace;
   --ui: "Noto Sans", sans-serif;
-  --read: "Noto Sans", sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
 }
-/* the game fills its window's body, the stage in the middle of it on the night desk around the arena */
-:host { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(120% 90% at 18% 0%, var(--desk-hi), var(--desk-mid) 45%, var(--desk-deep) 85%) var(--desk-deep); color: #000; font: 12px/1.35 var(--ui); -webkit-text-size-adjust: 100%; }
+/* the screen sits in the device's body (app.js), as large as the body lets it be; round it is the body's plastic */
+:host { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; color: var(--lcd); font: 16px/20px var(--px); -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; }
 *, *::before, *::after { box-sizing: border-box; }
-button { font: inherit; color: inherit; }
-::selection { background: var(--sel); color: #fff; }
-/* Luna scrollbars, as the portfolio's style.css draws them: a pale blue rounded thumb with a ribbed grip */
-::-webkit-scrollbar { width: 17px; height: 17px; }
-::-webkit-scrollbar-track:vertical { background: linear-gradient(90deg, #eeede5, #fcfcfa 25%, #f7f6f1 75%, #eeede5); }
-::-webkit-scrollbar-track:horizontal { background: linear-gradient(180deg, #eeede5, #fcfcfa 25%, #f7f6f1 75%, #eeede5); }
-::-webkit-scrollbar-thumb { border: 1px solid #fff; border-radius: 3px; box-shadow: inset 0 0 0 1px #9eb7f2; background-repeat: no-repeat; background-position: center; }
-::-webkit-scrollbar-thumb:vertical { background-color: #c1d3fb; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v1H0zM0 2h7v1H0zM0 4h7v1H0zM0 6h7v1H0z' fill='%23eef4fe'/%3E%3Cpath d='M1 1h7v1H1zM1 3h7v1H1zM1 5h7v1H1zM1 7h7v1H1z' fill='%238cb0f8'/%3E%3C/svg%3E"), linear-gradient(90deg, #c9d8fc, #bdd0fb 50%, #b0c6f7); }
-::-webkit-scrollbar-thumb:hover { box-shadow: inset 0 0 0 1px #7fa0ea; }
-::-webkit-scrollbar-corner { background: var(--face); }
-@supports (-moz-appearance: none) { * { scrollbar-color: #bdd0fb #f7f6f1; } }
+button, input, textarea { margin: 0; font: inherit; color: inherit; }
+::selection { background: var(--acc); color: #000; }
 [hidden] { display: none !important; }
+/* a screen with more on it than fits (a short phone's leaderboard) scrolls, with a thin dark bar */
+* { scrollbar-width: thin; scrollbar-color: var(--lcd-line) transparent; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { border-radius: 3px; background: var(--lcd-line); }
+/* read aloud, not shown: what the dot-matrix numbers say */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* the Luna title bar the game's own dialogs wear */
-.title { flex: 0 0 30px; display: flex; align-items: center; gap: 5px; margin: 0 -3px; padding: 0 5px 0 7px; border-radius: 7px 7px 0 0; background: var(--cap); color: #fff; text-shadow: 1px 1px var(--cap-shadow); font: 700 14px/1 var(--ui); user-select: none; -webkit-user-select: none; }
-.t-ico { display: flex; flex: none; }
-.t-ico svg { width: 16px; height: 16px; }
-.t-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tb { position: relative; width: 21px; height: 21px; padding: 0; border: 1px solid #fff; border-radius: 3px; display: grid; place-items: center; background: var(--caption-btn); color: #fff; font: 700 12px/1 var(--ui); text-shadow: none; cursor: pointer; }
-.tb:hover { background: var(--caption-btn-hot); }
-.tb:active { background: var(--caption-btn-down); }
-.tb:focus-visible { outline: 1px dotted #fff; outline-offset: -5px; }
-@media (pointer: coarse) { .tb::after { content: ""; position: absolute; inset: -12px; } }
-
-/* the stage: the arena, and the HUD around it (strips in portrait, task panes beside it in landscape) */
-.stage { position: relative; flex: none; margin: auto; display: grid; background: #000; overflow: hidden; outline: none; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-.stage.portrait { grid-template-columns: minmax(0, 1fr); grid-template-rows: 28px var(--ah) minmax(0, 1fr) 48px; grid-template-areas: "top" "arena" "thumb" "bar"; }
-.stage.landscape { grid-template-columns: var(--pane) var(--aw) var(--pane); grid-template-rows: var(--ah); grid-template-areas: "left arena right"; }
-.stage.portrait .pane, .stage.landscape .strip, .stage.landscape .bar, .stage.landscape .thumb { display: none; }
-.arena { grid-area: arena; position: relative; justify-self: center; width: var(--aw); height: var(--ah); }
+/* the screen: black glass with round corners, the HUD over the arena */
+.stage { position: relative; display: grid; grid-template-rows: var(--hud) var(--ah); width: var(--aw); background: #000; border-radius: 14px; overflow: hidden; outline: none; container: scr / inline-size; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; box-shadow: 0 0 0 1px #2c2926, 0 1px 0 1px rgba(255, 255, 255, .14); }
+.arena { position: relative; width: var(--aw); height: var(--ah); }
 .arena canvas { display: block; width: 100%; height: 100%; }
 .stage.fight .arena canvas { cursor: none; }
 
-.strip { grid-area: top; display: flex; align-items: center; min-width: 0; padding: 0 12px; background: var(--face); border-bottom: 1px solid var(--face-rule); }
-/* the thumb's pad under the arena on a phone: its own ground and a rim, so the arena's bottom edge shows */
-.thumb { grid-area: thumb; display: grid; place-items: center; min-height: 0; overflow: hidden; background: var(--desk-deep); box-shadow: inset 0 1px rgba(124, 129, 140, .55); }
-.thumb span { padding: 8px 12px; border: 1px dotted rgba(214, 226, 248, .35); border-radius: 4px; color: rgba(214, 226, 248, .65); font: 12px var(--ui); }
-/* under 48px of room there is no pad: the row stays black, and the first fight's balloon says to drag anywhere */
-.stage.nopad .thumb { visibility: hidden; }
-.bar { grid-area: bar; display: flex; align-items: center; gap: 8px; min-width: 0; padding-left: 8px; background: var(--taskbar); color: #fff; }
-.grow { flex: 1; }
-.tray { align-self: stretch; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 12px; background: var(--tray); border-left: 1px solid #0c59b9; box-shadow: inset 1px 0 #18bbff; }
-
-.pane { display: flex; flex-direction: column; gap: 12px; min-height: 0; padding: 12px; background: var(--taskpane); overflow: auto; }
-.pane-l { grid-area: left; }
-.pane-r { grid-area: right; }
-.panel { background: var(--paper-2); border-radius: 3px 3px 0 0; box-shadow: 0 1px 2px rgba(0, 0, 40, .25); }
-.panel h2 { margin: 0; padding: 8px 12px; border-radius: 3px 3px 0 0; background: var(--pane-head); color: var(--pane-ink); font: 700 12px/1.3 var(--ui); }
-.panel .pb { display: grid; gap: 8px; padding: 12px; }
-
-/* HUD pieces: one set, moved between the strips and the panes when the layout turns */
-.hud-boss { flex: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
-.panel .hud-boss { flex-direction: column; align-items: stretch; gap: 4px; }
-/* in the pane's column the bar keeps its own height instead of flexing to nothing */
-.panel .pbar { flex: none; }
-.hb-name { font: 700 12px var(--ui); white-space: nowrap; }
-.hb-phase { color: var(--muted); font-size: 12px; white-space: nowrap; }
-.pbar { position: relative; flex: 1; height: 16px; min-width: 60px; padding: 2px; border: 1px solid var(--dark); border-radius: 3px; background: #fff; }
-/* a fill ends on a 1px Start Green Deep line, so how much is left reads against the white by more than its hue */
-.pbar i { display: block; width: 100%; height: 100%; background: repeating-linear-gradient(90deg, transparent 0 8px, #fff 8px 10px), var(--progress); box-shadow: inset -1px 0 var(--start-deep); }
-.pbar s { position: absolute; top: 1px; bottom: 1px; left: 50%; width: 1px; background: var(--dark); }
-
-.hp { display: flex; gap: 2px; padding: 2px; background: #fff; box-shadow: var(--well); }
-.hp i { position: relative; width: 11px; height: 16px; background: var(--face-rule); overflow: hidden; }
-/* a full block is edged in Start Green Deep, so full and empty differ in lightness, not only in hue */
-.hp i.on { background: var(--progress); box-shadow: inset 0 0 0 1px var(--start-deep); }
-.hp i em { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: var(--progress); opacity: .5; }
+/* the HUD: health, the boss and its bar, the clock, over a dotted rule */
+.hud { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 12px; }
+.hud::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 2px; background: radial-gradient(circle, #45413d 0.9px, transparent 1.1px) 0 0 / 4px 2px repeat-x; }
+.hp { flex: none; display: flex; gap: 2px; }
+.hp i { position: relative; width: 8px; height: 8px; background: var(--lcd-off); overflow: hidden; }
+.hp i.on { background: var(--acc); }
+.hp i em { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: var(--acc); opacity: .5; }
 .hp i.lost { animation: lost .5s ease-out; }
-@keyframes lost { from { background: #ff3b30; } }
+@keyframes lost { from { background: var(--lcd-hi); } }
+.bname { flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; color: var(--lcd-dim); }
+/* the boss's health: a row of dots, lit for what is left, with an orange tick at the half where phase two begins */
+.bbar { position: relative; flex: 1 1 24px; min-width: 24px; height: 8px; }
+.bbar::before, .bbar b { position: absolute; top: 0; bottom: 0; left: 0; background: radial-gradient(circle, currentColor 1.6px, transparent 1.9px) 0 0 / 4px 8px repeat-x; }
+.bbar::before { content: ""; right: 0; color: var(--lcd-off); }
+.bbar b { width: 100%; color: var(--lcd); }
+.bbar i { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--acc); }
+.clock { flex: none; }
+/* Blank.scr: the light goes out of the screen, and only what still works stays lit (health and the clock) */
+.stage.blank :is(.bname, .bbar) { opacity: .3; transition: opacity 1.2s ease; }
+@media (prefers-reduced-motion: reduce) { .stage.blank :is(.bname, .bbar) { transition: none; } }
 
-.hud-sd { display: flex; align-items: center; gap: 8px; }
-.sd { position: relative; flex: none; width: 40px; height: 40px; padding: 0 0 8px; border: 1px solid var(--btn-line); border-radius: 3px; background: var(--btn-face); display: grid; place-items: center; cursor: pointer; }
-.sd svg { width: 24px; height: 24px; }
-.sd .meter { position: absolute; left: 4px; right: 4px; bottom: 4px; height: 5px; background: #fff; box-shadow: inset 0 0 0 1px var(--dark); }
-.sd .meter i { display: block; width: 0; height: 100%; background: var(--progress); box-shadow: inset -1px 0 var(--start-deep); }
-/* drawn at 40px so the phone's bar can be 48px tall; a finger still gets 44px */
-@media (pointer: coarse) { .sd::after { content: ""; position: absolute; inset: -3px; } }
-.sd.ready { box-shadow: var(--btn-hot); }
-.sd:disabled { cursor: default; }
-.sd:disabled svg { opacity: .5; filter: grayscale(1); }
-.sd:not(:disabled):active { background: var(--btn-down); }
-.sd:focus-visible { outline: 1px dotted #000; outline-offset: -5px; }
-.sd-lbl { display: grid; gap: 4px; font-size: 12px; }
-.sd-lbl kbd { justify-self: start; }
-.stage.portrait .sd-lbl { display: none; }
-/* a touch screen has no Space key to show */
-@media (pointer: coarse) { .sd-lbl kbd { display: none; } }
-
-.hud-clock { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
-.hud-clock .lbl { color: var(--muted); }
-/* on a phone the clock sits on the taskbar's blue beside the tray: on the tray's lighter blue white is only 3.3:1 */
-.bar > .hud-clock { padding: 0 4px; color: #fff; }
-.bar > .hud-clock .lbl { display: none; }
-.bar > .hud-clock b { font-weight: 400; }
-.hud-stats { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; margin: 0; }
-.hud-stats dt { color: var(--muted); }
-.hud-stats dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
-.hud-keys { display: grid; gap: 4px; color: var(--dark); font-size: 12px; }
-.hud-keys p { margin: 0; }
-/* a pane too short for the whole legend drops its last line, the reminder the balloons and the dialogs also give */
-.stage.short .hud-keys p:last-child { display: none; }
-
-.snd { flex: none; display: flex; align-items: center; gap: 4px; min-width: 32px; min-height: 32px; padding: 0 8px; border: 0; border-radius: 3px; background: transparent; cursor: pointer; }
-.snd svg { width: 16px; height: 16px; flex: none; }
-.snd:focus-visible { outline: 1px dotted currentColor; outline-offset: -3px; }
-.tray .snd { justify-content: center; color: #fff; }
-.tray .snd:hover { background: rgba(255, 255, 255, .16); }
-.tray .snd-t { display: none; }
-.panel .snd { justify-self: start; padding: 0 8px; border: 1px solid var(--btn-line); background: var(--btn-face); color: #000; }
-.panel .snd:hover { box-shadow: var(--btn-hot); }
-@media (pointer: coarse) { .snd { min-width: 44px; min-height: 44px; } }
-
-kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px solid var(--tab-line); border-radius: 3px; background: var(--btn-face); color: #000; font: 12px var(--ui); white-space: nowrap; }
-
-/* callouts over play: a selected label, as DESIGN.md's Announcement rule draws them */
-.chips { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-/* the first fight's pointers: XP notification balloons, one at the core and one at the hotspot */
-.tips { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.tip { position: absolute; left: 0; top: 0; width: max-content; max-width: 200px; padding: 8px 12px; border: 1px solid #000; border-radius: 7px; background: var(--tip); color: #000; font: 12px/1.35 var(--ui); box-shadow: 2px 3px 6px rgba(0, 0, 0, .35); opacity: 0; transition: opacity .25s ease-out; }
-.tip b { display: block; margin-bottom: 4px; }
+/* the first fight's pointers: a box at the core and one at the hotspot, each with its point */
+.tips, .chips { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.tip { position: absolute; left: 0; top: 0; width: max-content; max-width: min(260px, calc(100% - 16px)); padding: 8px 12px; border: 1px solid var(--lcd-line); border-radius: 8px; background: #000; color: var(--lcd-hi); opacity: 0; transition: opacity .25s ease-out; }
+.tip b { display: block; margin-bottom: 4px; color: var(--acc); font-weight: 400; }
 .tip.on { opacity: 1; }
-.tip::before, .tip::after { content: ""; position: absolute; left: calc(var(--sx, 24px) - 7px); border: 7px solid transparent; }
-.tip.up::before { top: -14px; border-bottom-color: #000; }
-.tip.up::after { top: -12px; border-bottom-color: var(--tip); }
-.tip.down::before { bottom: -14px; border-top-color: #000; }
-.tip.down::after { bottom: -12px; border-top-color: var(--tip); }
+.tip::after { content: ""; position: absolute; left: calc(var(--sx, 24px) - 6px); width: 12px; height: 12px; background: #000; transform: rotate(45deg); }
+.tip.up::after { top: -7px; border-left: 1px solid var(--lcd-line); border-top: 1px solid var(--lcd-line); }
+.tip.down::after { bottom: -7px; border-right: 1px solid var(--lcd-line); border-bottom: 1px solid var(--lcd-line); }
 @media (prefers-reduced-motion: reduce) { .tip { transition: none; } }
-.chip { position: absolute; left: 50%; top: 40%; translate: -50% -50%; padding: 4px 12px; background: var(--sel); color: #fff; font: 700 16px/1.25 var(--ui); white-space: nowrap; outline: 1px dotted #fff; outline-offset: -3px; box-shadow: 0 6px 14px -6px rgba(0, 0, 60, .8); animation: chip var(--dur, 1.5s) ease-out forwards; }
-/* the dotted rectangle is one device pixel wide at any density, as a selection is (DESIGN.md) */
-@media (min-resolution: 2dppx) { .chip { outline-width: 0.5px; } }
-.chip.big { top: 34%; padding: 8px 16px; font-size: 24px; }
-.chip.low { top: 78%; font-size: 14px; }
+/* callouts over play: a pill ringed in orange; a boss's name comes in big dot-matrix letters */
+.chip { position: absolute; left: 50%; top: 40%; translate: -50% -50%; padding: 4px 16px; border: 1px solid var(--acc); border-radius: 999px; background: rgba(0, 0, 0, .8); color: var(--lcd-hi); white-space: nowrap; animation: chip var(--dur, 1.5s) ease-out forwards; }
+.chip.big { top: 34%; width: max-content; max-width: calc(100% - 16px); padding: 0; border: 0; background: none; color: var(--lcd-hi); font-size: 24px; line-height: 30px; white-space: normal; text-align: center; -webkit-mask: radial-gradient(circle, #000 1.05px, transparent 1.3px) 0 0 / 3px 3px; mask: radial-gradient(circle, #000 1.05px, transparent 1.3px) 0 0 / 3px 3px; }
+.chip.low { top: 78%; width: max-content; max-width: calc(100% - 32px); white-space: normal; text-align: center; }
 @keyframes chip { 0% { opacity: 0; transform: scale(1.18); } 12% { opacity: 1; transform: scale(1); } 60% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes chip-still { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .chip { animation-name: chip-still; } }
 
-/* dialogs: Luna mini windows over the stage; one taller than the window scrolls inside itself */
-.layer { position: absolute; inset: 0; z-index: 6; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); place-items: center; padding: 16px; background: rgba(4, 22, 63, .35); }
-.mini { width: min(340px, 100%); max-height: 100%; display: flex; flex-direction: column; padding: 0 3px 3px; border-radius: 8px 8px 0 0; background: var(--face); box-shadow: var(--frame), 0 20px 34px -18px rgba(0, 0, 0, .7); }
-.mini.wide { width: min(420px, 100%); }
-.mini > .title { flex-basis: 26px; font-size: 12px; }
-.mini > .title svg { width: 14px; height: 14px; }
-.dlg { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 16px; }
-.dlg p { margin: 0; font: 14px/1.5 var(--read); text-wrap: pretty; }
-.dlg .lead { font: 700 14px/1.3 var(--ui); }
-.dlg .note { color: var(--dark); font-size: 12px; }
-.dlg-row { display: flex; gap: 12px; align-items: flex-start; }
-.dlg-row > svg { width: 32px; height: 32px; flex: none; }
-.dlg-row > div:not(.rank) { display: grid; gap: 8px; min-width: 0; }
-.btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-/* a dialog taller than the window scrolls under its buttons, which keep to its foot (-16px: a sticky box stops at the
-   dialog's padding, and this band carries that padding itself) */
-.dlg > .btns { position: sticky; bottom: -16px; z-index: 1; margin: -8px -16px -16px; padding: 8px 16px 16px; background: var(--face); }
-.btn { min-width: 75px; min-height: 24px; padding: 3px 12px; border: 1px solid var(--btn-line); border-radius: 3px; background: var(--btn-face); color: #000; font: 12px var(--ui); display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; cursor: pointer; }
-.btn:disabled, .btn:disabled:hover { color: var(--shade); cursor: default; box-shadow: none; }
-.btn.default { box-shadow: var(--btn-focus); }
-.btn:hover { box-shadow: var(--btn-hot); }
-.btn:active { background: var(--btn-down); box-shadow: none; }
-.btn:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
-@media (pointer: coarse) { .btn { min-height: 44px; } }
-.keys { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: baseline; margin: 0; padding: 12px; background: var(--paper); box-shadow: var(--well); }
-.keys dt { margin: 0; }
-.keys.stack { grid-template-columns: minmax(0, 1fr); gap: 4px; }
-.keys.stack dt { font: 700 12px/1.3 var(--ui); }
-.keys.stack dt:not(:first-child) { margin-top: 8px; }
-.keys dd { margin: 0; font: 12px/1.4 var(--read); }
-.stats { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; margin: 0; padding: 8px 12px; background: var(--paper); box-shadow: var(--well); }
-.stats dt { color: var(--muted); }
-.stats dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
-.rank { flex: none; width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0; border-radius: 3px; background: var(--muted); color: #fff; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25), inset 0 2px rgba(255, 255, 255, .28); animation: stamp .45s cubic-bezier(.2, .8, .3, 1) .2s both; }
-.rank small { font: 12px var(--ui); }
-.rank b { font: 700 32px/1 var(--ui); }
-.rank[data-rank="S"] { background: var(--gold); color: #000; }
-.rank[data-rank="A"] { background: var(--ok-ink); }
-.rank[data-rank="B"] { background: var(--group-ink); }
+/* practice: a box at the top of the arena with the lesson, its step, how to do it, and Skip */
+.les { position: absolute; left: 8px; right: 8px; top: 8px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 8px 12px; border: 1px solid var(--lcd-line); border-radius: 8px; background: rgba(0, 0, 0, .86); }
+.les-h { display: flex; justify-content: space-between; gap: 8px; }
+.les-h b { color: var(--acc); font-weight: 400; }
+.les-h span { color: var(--lcd-dim); }
+.les p { grid-column: 1; margin: 0; text-wrap: pretty; }
+.les .pill { grid-column: 2; grid-row: 1 / span 2; }
+
+/* the screens: the menu before a run and its pages over the demo, and a fight's screens over the arena */
+.front, .layer { position: absolute; inset: 0; z-index: 5; overflow-y: auto; overscroll-behavior: contain; padding: 16px; background: rgba(0, 0, 0, .92); }
+.front { background: rgba(0, 0, 0, .78); }
+/* a result and what follows it (sharing, the board) lie on plain black, clear of the arena's last picture */
+.layer.solid { background: #000; }
+/* under a screen only the arena shows through, dimmed: the HUD's figures, the pointers and the menu's page wait */
+.stage:is(.demo, .over) .hud > *, .stage:is(.demo, .over) .hud::after, .stage.over :is(.front, .tips, .chips, .les) { visibility: hidden; }
+.scr { display: flex; flex-direction: column; gap: 12px; min-height: 100%; }
+.scr.mid { align-items: center; text-align: center; }
+.scr p { margin: 0; text-wrap: pretty; }
+.scr-h { color: var(--acc); }
+.row-h { display: flex; justify-content: space-between; gap: 12px; }
+.dim { color: var(--lcd-dim); }
+.acc { color: var(--acc); }
+.hi { color: var(--lcd-hi); }
+.grow { flex: 1 1 auto; }
+.scr a { color: var(--acc); text-underline-offset: 3px; }
+.scr a:focus-visible { outline: 1px solid var(--acc); outline-offset: 2px; }
+/* a screen's choices: pills in a column, the picked one ringed in orange with its ▶ */
+.menu { display: flex; flex-direction: column; align-items: center; }
+.menu button { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 16px; border: 1px solid transparent; border-radius: 999px; background: none; cursor: pointer; }
+.menu button:hover { color: var(--lcd-hi); }
+.menu button:focus { outline: none; }
+.menu button:focus, .menu:not(:focus-within) button.sel { border-color: var(--acc); }
+.menu button:focus::before, .menu:not(:focus-within) button.sel::before { content: "▶"; color: var(--acc); }
+.menu button:disabled { color: var(--lcd-off); cursor: default; }
+/* a small action inside a screen (Save, Try again, Skip): a pill ringed in orange */
+.pill { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 16px; border: 1px solid var(--acc); border-radius: 999px; background: none; cursor: pointer; }
+.pill:hover { color: var(--lcd-hi); }
+.pill:focus-visible { outline: 1px solid var(--lcd-hi); outline-offset: 2px; }
+.pill:disabled { border-color: var(--lcd-off); color: var(--lcd-off); cursor: default; }
+@media (pointer: coarse) { .menu button, .pill { min-height: 44px; } }
+
+/* dot-matrix: numbers and marks drawn big, each of their pixels a round dot */
+.dots4 { display: inline-block; font-size: 32px; line-height: 40px; -webkit-mask: radial-gradient(circle, #000 1.45px, transparent 1.7px) 0 0 / 4px 4px; mask: radial-gradient(circle, #000 1.45px, transparent 1.7px) 0 0 / 4px 4px; }
+.dots3 { display: inline-block; line-height: 0; -webkit-mask: radial-gradient(circle, #000 1.05px, transparent 1.3px) 0 0 / 3px 3px; mask: radial-gradient(circle, #000 1.05px, transparent 1.3px) 0 0 / 3px 3px; }
+.dots3 svg { display: block; }
+.big { color: var(--lcd-hi); }
+.best { display: grid; justify-items: center; gap: 4px; }
+/* the grade, stamped: its letter in dots, in an orange frame */
+.res { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.grade { display: grid; place-items: center; width: 56px; height: 56px; border: 2px solid var(--acc); border-radius: 12px; color: var(--acc); animation: stamp .45s cubic-bezier(.2, .8, .3, 1) .2s both; }
+.grade.still { animation: none; }
 @keyframes stamp { from { opacity: 0; transform: scale(1.7) rotate(-10deg); } 70% { opacity: 1; transform: scale(.94) rotate(1deg); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .rank { animation: none; } }
-/* back on the win screen from the share dialog or the board, the stamp is already down */
-.rank.still { animation: none; }
-.lb-all { display: grid; gap: 8px; container-type: inline-size; }
-.lb-all .lb-note { color: var(--muted); font-size: 12px; }
-/* the portfolio's offer to talk, in an information bar with its one button */
-.cta { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 12px; border: 1px solid var(--shade); background: var(--tip); }
-.cta p { flex: 1; min-width: 0; font-size: 12px; }
-.cta .btn { flex: none; }
-/* the first win's reward, under the result */
-.gift { display: flex; align-items: center; gap: 4px; color: var(--group-ink); font-weight: 700; }
-.gift svg { flex: none; }
-.copy { display: grid; gap: 4px; color: var(--dark); }
-.copy textarea { width: 100%; resize: none; padding: 4px 8px; border: 1px solid var(--line); font: 12px/1.3 var(--ui); }
-
-.small { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px; }
-/* a hint under the cursor can be longer than a callout, so it wraps */
-.chip.low { width: max-content; max-width: calc(100% - 32px); white-space: normal; text-align: center; }
-
-/* practice: XP Setup's band at the top of the arena, in the welcome screen's navy with the orange rule under it */
-.les { position: absolute; left: 0; right: 0; top: 0; display: grid; gap: 4px; padding: 8px 12px 12px; background: #00309c; color: #fff; }
-.les::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 2px; background: linear-gradient(90deg, rgba(232, 148, 58, 0), #e8943a 30%, #e8943a 70%, rgba(232, 148, 58, 0)); }
-.les-h { display: flex; align-items: center; gap: 8px; }
-.les-h b { flex: 1; min-width: 0; font: 700 14px/1.3 var(--ui); }
-.les p { margin: 0; font: 12px/1.4 var(--ui); text-wrap: pretty; }
-.les .les-e { color: #a6c4f7; }
-.les .btn { min-width: 0; min-height: 24px; padding: 0 12px; }
-@media (pointer: coarse) { .les .btn { min-height: 44px; } }
-
-/* the front door: Display Properties at its Screen Saver tab, the Leaderboard beside it (under it on a phone), over the
-   screensaver running in the window */
-.front { position: absolute; inset: 0; z-index: 5; display: grid; place-items: start center; overflow-y: auto; padding: 16px; background: rgba(4, 22, 63, .6); }
-/* while the front door shows, the window holds only the screensaver it previews, dimmed behind it; the fight's HUD waits */
-.stage.demo :is(.strip, .bar, .pane, .thumb) { visibility: hidden; }
-/* under reduced motion the demo holds still on one frame, and only the little monitor shows it */
-@media (prefers-reduced-motion: reduce) { .stage.demo .arena { visibility: hidden; } }
-/* a dialog the front door opens floats over it without a scrim, and the front door goes inactive behind, as XP left
-   the window that opened a property sheet */
-.layer.over { background: transparent; }
-.front.inactive .mini > .title { background: var(--cap-off); color: var(--paper-rule); text-shadow: none; }
-.front.inactive .mini > .title .tb { opacity: .6; }
-.fd-wrap { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 16px; width: 100%; margin-block: auto; }
-/* side by side the board takes what the dialog leaves; stacked on a phone it matches the dialog's width */
-.fd-dp { flex: 0 1 380px; min-width: 0; max-height: none; }
-.fd-lb { flex: 1 1 260px; min-width: 0; max-width: 380px; max-height: none; }
-.dp-body { padding: 8px; }
-/* XP's tab strip, holding the one tab that works (DESIGN.md), joined to its page */
-.xtabs { display: flex; padding-left: 4px; }
-.xtab { position: relative; z-index: 1; margin-bottom: -1px; padding: 4px 12px 5px; border: 1px solid var(--tab-line); border-bottom: 0; border-radius: 3px 3px 0 0; background: var(--page); font: 12px var(--ui); box-shadow: inset 0 1px var(--tab-hi), inset 0 3px var(--orange-rule); }
-.xpage { display: grid; gap: 12px; padding: 12px; border: 1px solid var(--tab-line); background: var(--page); }
-/* the tab's monitor: a beige case on a stand, its screen playing whatever the drop-down picks */
-.mon { justify-self: center; display: grid; justify-items: center; }
-.mon-case { position: relative; padding: 12px 12px 16px; border-radius: 8px; background: linear-gradient(180deg, #fff, var(--face) 16%, var(--face-rule)); box-shadow: inset 0 0 0 1px var(--shade), inset 1px 1px #fff; }
-.mon-case::after { content: ""; position: absolute; right: 12px; bottom: 6px; width: 4px; height: 4px; border-radius: 50%; background: #4cda50; }
-.mon-case canvas { display: block; width: 192px; height: 144px; border-radius: 3px; background: #000; box-shadow: 0 0 0 2px #1b1d22; }
-.mon-neck { width: 32px; height: 12px; background: linear-gradient(90deg, var(--face-rule), var(--face) 50%, var(--face-rule)); box-shadow: inset 1px 0 var(--shade), inset -1px 0 var(--shade); }
-.mon-foot { width: 96px; height: 8px; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, var(--face), var(--face-rule)); box-shadow: inset 0 0 0 1px var(--shade); }
-/* XP's etched group box, captioned in Group Caption Blue */
-.grp { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 8px 12px 12px; border: 1px solid var(--face-rule); border-radius: 3px; box-shadow: inset 1px 1px #fff; }
-.grp legend { margin-left: -4px; padding: 0 4px; color: var(--group-ink); font: 12px var(--ui); }
-.grp p { margin: 0; color: var(--dark); font: 12px/1.4 var(--ui); text-wrap: pretty; }
-/* the drop-down takes the row; its buttons sit under it on the right, the default one last, as XP set them */
-.grp-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; }
-.grp-row .btn { min-width: 0; }
-/* XP's combo box: a white field with Luna's drop button inside its right edge; the native list still opens on a phone */
-.grp-row select {
-  flex: 1 1 100%; min-width: 0; min-height: 24px; padding: 2px 24px 2px 4px; border: 1px solid var(--line); border-radius: 0; color: #000; font: 12px var(--ui); cursor: pointer;
-  -webkit-appearance: none; appearance: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h2v1H0zM7 0h2v1H7zM1 1h2v1H1zM6 1h2v1H6zM2 2h2v1H2zM5 2h2v1H5zM3 3h3v1H3zM4 4h1v1H4z' fill='%234d6185'/%3E%3C/svg%3E") no-repeat right 5px center,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 20' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g'%3E%3Cstop stop-color='%23c9d8fc'/%3E%3Cstop offset='.5' stop-color='%23bdd0fb'/%3E%3Cstop offset='1' stop-color='%23b0c6f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='.5' y='.5' width='16' height='19' rx='2' fill='url(%23g)' stroke='%239eb7f2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat right 1px center / 17px calc(100% - 2px),
-    var(--paper);
-}
-.grp-row select:hover { border-color: #7fa0ea; }
-.grp-row select:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
-/* on a touch screen the field is 44px tall, so the drop button goes square to it and its arrow doubles */
-@media (pointer: coarse) {
-  .grp-row select {
-    min-height: 44px; padding-right: 52px; font-size: 16px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h2v1H0zM7 0h2v1H7zM1 1h2v1H1zM6 1h2v1H6zM2 2h2v1H2zM5 2h2v1H5zM3 3h3v1H3zM4 4h1v1H4z' fill='%234d6185'/%3E%3C/svg%3E") no-repeat right 13px center / 18px 10px,
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 17 20' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g'%3E%3Cstop stop-color='%23c9d8fc'/%3E%3Cstop offset='.5' stop-color='%23bdd0fb'/%3E%3Cstop offset='1' stop-color='%23b0c6f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='.5' y='.5' width='16' height='19' rx='2' fill='url(%23g)' stroke='%239eb7f2' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E") no-repeat right 1px center / 42px calc(100% - 2px),
-      var(--paper);
-  }
-}
-.grp .best b { color: #000; font-variant-numeric: tabular-nums; }
-/* a grade as a chip, in the colours of the win screen's stamp */
-.gd { display: inline-grid; place-items: center; width: 20px; height: 16px; border-radius: 3px; font: 700 12px/1 var(--ui); vertical-align: -3px; }
-.gd.gS { background: var(--gold); color: #000; }
-.gd.gA { background: var(--ok-ink); color: #fff; }
-.gd.gB { background: var(--group-ink); color: #fff; }
-.gd.gC { background: var(--muted); color: #fff; }
-/* the Leaderboard window: Boss Rush XP's board, the top three on a podium and the rest in a well */
-.lb { gap: 8px; padding: 12px; }
-.lb p { margin: 0; font: 12px/1.4 var(--ui); text-wrap: pretty; }
-.lb .lb-note { color: var(--muted); }
-.lb-podium { display: flex; align-items: flex-end; gap: 8px; margin: 0; padding: 8px 8px 0; list-style: none; border: 1px solid var(--places-rule); background: linear-gradient(180deg, #fff, var(--places)); }
-.lb-place { flex: 1 1 0; min-width: 0; display: grid; justify-items: center; gap: 4px; font: 12px var(--ui); text-align: center; }
-.lb-place.p1 { order: 2; }
-.lb-place.p2 { order: 1; }
-.lb-place.p3 { order: 3; }
-.lb-ava { width: 28px; height: 28px; border: 2px solid #fff; border-radius: 3px; box-shadow: 0 0 0 1px var(--shade); }
-.lb-q { width: 28px; height: 28px; display: grid; place-items: center; border: 1px dashed var(--shade); border-radius: 3px; background: #fff; color: var(--muted); font: 700 16px/1 var(--ui); }
-.lb-name { max-width: 100%; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
-.lb-place.me .lb-name { background: var(--sel); color: #fff; }
-.lb-name small, .lb-ranks small { font-size: 12px; font-weight: 400; }
-.lb-time { display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
-.lb-step { justify-self: stretch; display: grid; place-items: center; border: 1px solid var(--shade); border-bottom: 0; border-radius: 3px 3px 0 0; font: 700 16px/1 var(--ui); }
-.lb-place.p1 .lb-step { height: 36px; background: var(--gold); }
-.lb-place.p2 .lb-step { height: 28px; background: var(--silver); }
-.lb-place.p3 .lb-step { height: 20px; background: var(--orange-rule); }
-/* an open place's step fades to 60%, its number doesn't */
-.lb-place.open .lb-step { border-color: rgba(172, 168, 153, .6); }
-.lb-place.p1.open .lb-step { background: rgba(247, 201, 72, .6); }
-.lb-place.p2.open .lb-step { background: rgba(212, 215, 222, .6); }
-.lb-place.p3.open .lb-step { background: rgba(232, 148, 58, .6); }
-.lb-ranks { display: grid; margin: 0; padding: 0; list-style: none; background: #fff; box-shadow: var(--well); font: 12px var(--ui); }
-.lb-ranks li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 20px; align-items: center; gap: 8px; height: 24px; padding: 0 8px; }
-.lb-ranks li + li { border-top: 1px solid var(--places); }
-.lb-ranks .n { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
-.lb-ranks .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lb-ranks .t { font-variant-numeric: tabular-nums; }
-.lb-ranks li.me, .lb-ranks li.me .n { background: var(--sel); color: #fff; }
-.lb-ranks li.gap { display: block; height: 16px; line-height: 14px; text-align: center; color: var(--muted); }
-.lb-empty { display: grid; justify-items: center; gap: 8px; text-align: center; }
-.lb-empty .lb-podium { justify-self: stretch; }
-.lb-empty h3 { margin: 0; color: var(--group-ink); font: 700 14px/1.3 var(--ui); }
-.lb-empty > svg { width: 32px; height: 32px; }
-.lb-cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.lb-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 8px; color: var(--muted); font: 12px var(--ui); }
-.lb-link { position: relative; padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.lb-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
-@media (pointer: coarse) { .lb-link::after { content: ""; position: absolute; inset: -14px -8px; } }
-/* room under the board's last line for See all's touch area, so the window doesn't scroll by those few pixels */
-@media (pointer: coarse) { .lb { padding-bottom: 16px; } }
-.lb-ranks li.me .gd, .lb-place.me .gd { box-shadow: 0 0 0 1px #fff; }
-.lb-bar { height: 16px; padding: 2px; border: 1px solid var(--dark); border-radius: 3px; background: #fff; }
-.lb-bar i { display: block; width: 0; height: 100%; background: repeating-linear-gradient(90deg, transparent 0 8px, #fff 8px 10px), var(--progress); animation: lb-load 1.5s steps(14, end) forwards; }
-@keyframes lb-load { to { width: 100%; } }
-@media (prefers-reduced-motion: reduce) { .lb-bar i { width: 100%; animation: none; } }
-.lb-table { width: 100%; table-layout: fixed; border-collapse: collapse; background: #fff; box-shadow: var(--well); font: 12px var(--ui); }
-.lb-table th, .lb-table td { height: 24px; padding: 0 8px; text-align: left; }
-.lb-table th { background: var(--face); border-bottom: 1px solid var(--face-rule); font-weight: 400; }
-.lb-table tr + tr td { border-top: 1px solid var(--places); }
-.lb-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-.lb-table tr.me td { background: var(--sel); color: #fff; }
-/* the full board keeps inside its dialog: fixed columns, a long name cut with an ellipsis, no Time or Hits when narrow */
-.lb-table .c-rank { width: 32px; }
-.lb-table .c-time, .lb-table .c-score { width: 72px; }
-.lb-table .c-hits { width: 40px; }
-.lb-table .c-grade { width: 56px; }
-.lb-table td.c-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@container (max-width: 359px) { .lb-table .c-time, .lb-table .c-hits { display: none; } }
-.chk { display: flex; align-items: center; gap: 8px; font: 12px var(--ui); }
-.chk input { width: 13px; height: 13px; margin: 0; accent-color: #21a121; }
-@media (pointer: coarse) { .chk { min-height: 44px; } }
-/* the player's name: XP's text box under its label, the rule or what went wrong under it */
+@media (prefers-reduced-motion: reduce) { .grade { animation: none; } }
+.gift { display: flex; align-items: flex-start; gap: 8px; text-align: left; color: var(--lcd-hi); }
+.gift svg { flex: none; margin-top: 2px; }
+/* how to play: what each move is, the move in orange */
+.list { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 12px; margin: 0; }
+.list dt { color: var(--acc); }
+.list dd { margin: 0; }
+.credits { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+/* the leaderboard: rank, name, score and grade, and the time and hits too where the screen is wide */
+.lb { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.lb td { height: 24px; padding: 0 0 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb td:first-child { width: 28px; padding: 0; text-align: right; color: var(--lcd-dim); }
+.lb .t { width: 72px; text-align: right; }
+.lb .h { width: 40px; text-align: right; }
+.lb td:last-child { width: 32px; }
+.lb tr.me td { color: var(--acc); }
+.lb tr.gap td { height: 16px; text-align: center; color: var(--lcd-dim); }
+.gd { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--acc); border-radius: 4px; color: var(--acc); }
+@container scr (max-width: 419px) { .lb .w { display: none; } }
+/* the player's name, and the run's place on the board under the win */
 .name-form { display: grid; gap: 8px; }
-.field { display: grid; gap: 4px; min-width: 0; font: 12px var(--ui); }
-.field input { width: 100%; min-height: 24px; padding: 2px 4px; border: 1px solid var(--line); border-radius: 0; background: var(--paper); color: #000; font: 12px var(--ui); }
-.field input:focus-visible { outline: 1px solid var(--sel); outline-offset: 0; }
-.field input:disabled { background: var(--face); color: var(--shade); }
-@media (pointer: coarse) { .field input { min-height: 44px; font-size: 16px; } }
+.field { display: grid; gap: 8px; }
+.field input { width: 100%; min-height: 36px; padding: 0 12px; border: 1px solid var(--lcd-line); border-radius: 8px; background: #000; color: var(--lcd-hi); caret-color: var(--acc); user-select: text; -webkit-user-select: text; }
+.field input:focus { outline: none; border-color: var(--acc); }
+.field input:disabled { color: var(--lcd-dim); }
+@media (pointer: coarse) { .field input { min-height: 44px; } }
 .name-row { display: flex; align-items: flex-end; gap: 8px; }
 .name-row .field { flex: 1; }
-.err { display: flex; align-items: flex-start; gap: 4px; }
-.err svg { flex: none; }
-/* Settings: whose name the runs are saved under, and the way to change it */
-.name-now { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
-/* the win screen's place on the board, in a white well; empty until there is something to say */
-.lb-run { display: grid; gap: 8px; justify-items: start; padding: 8px 12px; background: var(--paper); box-shadow: var(--well); }
+.err { color: var(--acc); }
+.lb-run { display: grid; gap: 8px; justify-items: center; }
 .lb-run:empty { display: none; }
-.dlg .lb-run p { font: 12px/1.4 var(--ui); }
-.lb-run .name-form { justify-self: stretch; }
-/* the share dialog: the card's preview, its room kept while it draws, and the ways to send it */
-.card-frame { display: grid; place-items: center; aspect-ratio: 1200 / 630; padding: 1px; background: var(--paper); box-shadow: var(--well); }
+.lb-run .name-form { justify-self: stretch; text-align: left; }
+/* sharing: the card's picture, its room kept while it draws */
+.card-frame { display: grid; place-items: center; aspect-ratio: 1200 / 630; border: 1px solid var(--lcd-line); border-radius: 8px; overflow: hidden; }
 .card-frame img { display: block; width: 100%; height: auto; }
-.dlg .card-frame p { color: var(--muted); font-size: 12px; }
-.share-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.dlg .share-msg { font-size: 12px; }
 .share-msg:empty { display: none; }
-.dlg .tipbox { padding: 4px 8px; border: 1px solid var(--shade); background: var(--tip); font-size: 12px; }
-/* Preview: XP's zoom rectangle, drawn from the little monitor out to the arena */
-.zoomr { position: absolute; z-index: 7; border: 2px solid #808080; mix-blend-mode: difference; pointer-events: none; }
+.copy { display: grid; gap: 8px; }
+.copy textarea { width: 100%; resize: none; padding: 8px 12px; border: 1px solid var(--lcd-line); border-radius: 8px; background: #000; color: var(--lcd); font: 12px/16px var(--ui); user-select: text; -webkit-user-select: text; }
 
-/* Blank.scr: the monitor goes dark round the arena too; the arena and what the player reads stay lit */
-.stage::after { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(0, 0, 0, .62); opacity: 0; pointer-events: none; transition: opacity 1.2s ease; }
-.stage.blank::after { opacity: 1; }
-.arena, .hud-boss, .hp, .hud-sd, .hud-clock { position: relative; z-index: 2; }
-/* the lit pieces now sit on the dimmed bars, so their text turns light */
-.stage.blank .hb-name, .stage.blank .hud-clock, .stage.blank .sd-lbl { color: #fff; }
-.stage.blank .hb-phase, .stage.blank .hud-clock .lbl { color: #d6e2f8; }
-/* so do the buttons that still work, the run's numbers, the key legend and the panels' heads; the panels stay dark */
-.stage.blank :is(.snd, .hud-stats, .hud-keys, .panel h2) { position: relative; z-index: 2; }
-.stage.blank .panel h2 { background: transparent; color: #fff; }
-.stage.blank .hud-stats dd { color: #fff; }
-.stage.blank .hud-stats dt, .stage.blank .hud-keys { color: #d6e2f8; }
-@media (prefers-reduced-motion: reduce) { .stage::after { transition: none; } }`;
-  const MARKUP = `<div class="stage portrait" id="stage" tabindex="-1">
-  <div class="strip" id="top"></div>
-  <aside class="pane pane-l" id="paneL"></aside>
-  <div class="arena" id="arena"><canvas id="cv" role="img"></canvas><div class="chips" id="chips" aria-live="polite"></div><div class="tips" aria-live="polite"><div class="tip up" id="tipCore"></div><div class="tip down" id="tipCur"></div></div><div class="les" id="les" aria-live="polite" hidden><div class="les-h"><b id="lesName"></b><button class="btn" id="lesSkip" type="button"></button></div><p id="lesHow"></p><p class="les-e" id="lesEta"></p></div></div>
-  <aside class="pane pane-r" id="paneR"></aside>
-  <div class="thumb" id="thumb"><span id="thumbHint"></span></div>
-  <div class="bar" id="bar"></div>
+/* a window too small to play: the message on the dark glass */
+.small { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px; }
+.small p { max-width: 320px; margin: 0; padding: 16px; border-radius: 14px; background: #000; text-align: center; text-wrap: pretty; box-shadow: 0 0 0 1px #2c2926; }`;
+  const MARKUP = `<div class="stage" id="stage" tabindex="-1">
+  <div class="hud" id="hud"><span class="hp" id="hp" role="img"></span><span class="bname" id="bname"></span><span class="bbar" id="bbar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><b></b><i></i></span><span class="clock" id="clock">0:00</span></div>
+  <div class="arena" id="arena"><canvas id="cv" role="img"></canvas><div class="chips" id="chips" aria-live="polite"></div><div class="tips" aria-live="polite"><div class="tip up" id="tipCore"></div><div class="tip down" id="tipCur"></div></div><div class="les" id="les" aria-live="polite" hidden><div class="les-h"><b id="lesName"></b><span id="lesStep"></span></div><p id="lesHow"></p><button class="pill" id="lesSkip" type="button"></button></div></div>
   <div class="front" id="front" hidden></div>
   <div class="layer" id="layer" hidden></div>
 </div>
 <div class="small" id="small" hidden></div>`;
 
   function create(opts = {}) {
+    loadPixelFont();
 
     /* ------------------------------------------------------------ constants + helpers */
     const AW = 360, AH = 480;               // the arena in units (3:4)
-    const TOP_H = 28, BAR_H = 48;           // the HUD strips above and below the arena in portrait, in CSS px
-    const PAD_MIN = 48;                     // the thumb's pad under the arena shows only with this much room
+    const HUD_H = 28;                       // the HUD's row over the arena, in CSS px
     const MIN_SCALE = 0.8;                  // under this the bullets and the hotspot get too small to play fair
     const STEP = 1 / 120, TAU = Math.PI * 2;
     const MAX_SPEED = 520;                  // mouse and finger: the cursor chases the pointer no faster than this
     const KEY_SPEED = 250, KEY_SLOW = 110;
     const TOUCH_GAIN = 1.2;                 // a finger moves the cursor a little further than itself
-    const HIT_R = 2.4, GRAZE_R = 16, LASER_R = 1.4;
+    const HIT_R = 2.4, LASER_R = 1.4;
     // short mercy after a hit, so a cursor that stands still keeps losing blocks
     const HP_MAX = 6, INV_TIME = 1.2, REFILL_TIME = 12, CANCEL_R = 48;
     const SHOT_EVERY = 0.1, SHOT_SPEED = 820;
-    const GRAZE_FILL = 3.5, LASER_FILL = 1.2, SD_DMG = 20, SD_TIME = 0.45;
     const CORE_R = 18, NODE_R = 10;         // how close a shot must pass to a core (Starfield's, or Blank's dot), or to a Mystify corner
     // where the hotspot may go, so the arrow and its rider stay on the screen
     const X_MIN = 3, X_MAX = AW - 16, Y_MIN = 16, Y_MAX = AH - 26;
@@ -499,8 +230,8 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     const coarse = matchMedia('(pointer: coarse)');
     // the portfolio's small screens (style.css SMALL SCREENS), where its window is always maximised
     const smallScreen = matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
-    // ?debug in the address: the Backquote key shows the frame counter, Preview starts from the picked boss, and
-    // window.__ssxp drives the game from the console
+    // ?debug in the address: the Backquote key shows the frame counter, and window.__ssxp drives the game from the
+    // console
     const DEBUG = /[?&]debug\b/.test(location.search);
 
     const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -518,154 +249,129 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     /* ------------------------------------------------------------ strings */
     const STR = {
       en: {
-        goalHead: 'Goal:', goal: 'Shoot whatever wears a green ring until the ring runs out, and keep the tip of the arrow away from bullets, lines, pipes and letters.',
+        goal: 'Shoot whatever wears a green ring until the ring runs out, and keep the tip of the arrow away from bullets, lines, pipes and letters.',
         tips: { starfield: 'Shoot this core until its green ring runs out. The cursor fires on its own.', mystify: 'Shoot the corners with green rings. The lines hurt too, so stay off them.', pipes: 'Shoot the pipe heads with green rings. When a ring runs out, that pipe stops growing. Don’t touch the pipes.', marquee: 'Shoot the letters with green rings until they break. Get past each line through a gap. Every letter hurts.', blank: 'The screen went dark, but the ring is still there. Shoot it until it runs out. The No signal box hurts and stops your shots.' },
         tipCursor: 'Only this tip can be hit. Dodge the bullets.', tipCursorTouch: 'Only this tip can be hit. Drag anywhere to dodge.',
         premise: 'The computer was left alone too long, and the screensavers refuse to wake up. You are the cursor, and the stickman is along for the ride.',
-        keysTouch: [['Drag', 'Drag a finger anywhere on the screen. The cursor moves with it and never hides under your thumb.'], ['Fire', 'The cursor fires on its own. Keep it under whatever wears a green ring.'], ['Graze', 'Pass close to anything that can hit you to fill the meter. Only the tip of the arrow can be hit.'], ['Show Desktop', 'Full meter: tap the Show Desktop button to sweep every bullet away.']],
-        keysDesk: [['Mouse', 'Move the mouse. The cursor chases the pointer.'], ['← ↑ → ↓', 'Or the arrow keys and WASD. Hold Shift to move slowly.'], ['Space', 'Full meter: Show Desktop sweeps every bullet away. Grazing anything that can hit you fills the meter.'], ['P or Esc', 'Pause'], ['M', 'Sound on or off']],
-        keysShort: [['Mouse', 'move'], ['← ↑ → ↓ / WASD', 'move'], ['Shift', 'slow'], ['Space', 'Show Desktop'], ['P', 'pause']],
-        keysTouchShort: [['Drag', 'anywhere to move'], ['Tap', 'Show Desktop when the meter is full']],
-        tipOnly: 'Only the tip of the arrow can be hit.',
-        thumb: 'Drag anywhere',
-        bossHead: 'Screensaver', phase: (n) => `Phase ${n}`,
+        // how to play: what each move is, on a touch screen and at a desk
+        keysTouch: [['Drag', 'Drag a finger anywhere. The cursor moves with it and never hides under your thumb.'], ['Fire', 'The cursor fires on its own. Keep it under whatever wears a green ring.'], ['Pause', 'The orange key pauses the fight and plays it again.'], ['Sound', 'The grey key turns the sound on or off.']],
+        keysDesk: [['Mouse', 'Move the mouse. The cursor chases the pointer.'], ['← ↑ → ↓', 'Or the arrow keys and WASD. Hold Shift to move slowly.'], ['P', 'Pause, as the orange key does. Esc too.'], ['M', 'Sound on or off, as the grey key does.']],
+        howRun: 'A run is all five screensavers in a row, about four minutes. Only a whole run goes on the leaderboard.',
+        practiceInfo: 'The practice is three short lessons, under a minute. Nothing costs health there.',
+        phase: (n) => `Phase ${n}`,
         phase2: { starfield: 'Phase 2: warp', mystify: 'Phase 2: two polygons', pipes: 'Phase 2: screen full', marquee: 'Phase 2: both ways', blank: 'Phase 2: burn-in' },
         noSignal: 'No signal', corner: 'Corner!',
-        practice: 'Practice', lesStep: (i, n) => `Step ${i} of ${n}`, skip: 'Skip',
-        practiceEta: (n) => (n > 2 ? 'About 1 minute of practice remaining' : 'Less than a minute of practice remaining'),
-        lesGood: 'Nice!', lesDodgeHit: 'Hit! Only the tip of the arrow counts.', lesGrazeHit: 'Too close! Pass beside the bullets.',
+        practice: 'Practice', lesStep: (i, n) => `${i} of ${n}`, skip: 'Skip',
+        lesGood: 'Nice!', lesDodgeHit: 'Hit! Only the tip of the arrow counts.',
         // a lesson's how-to is one line, or [touch screen, desk] when the two are done differently
         les: {
-          move: ['Move', ['Drag a finger anywhere on the screen. The cursor moves with it and never hides under your thumb.', 'Move the mouse, or use the arrow keys and WASD.']],
+          move: ['Move', ['Drag a finger anywhere. The cursor moves with it and never hides under your thumb.', 'Move the mouse, or use the arrow keys and WASD.']],
           aim: ['Aim', 'The cursor fires on its own. Keep it under the green ring until the ring runs out.'],
           dodge: ['Dodge', 'Only the tip of the arrow can be hit. Keep it clear of the bullets for 8 seconds.'],
-          graze: ['Graze', 'Pass close to 10 bullets without touching the tip. Each close pass fills the Show Desktop meter.'],
-          bomb: ['Show Desktop', ['The meter is full. Tap the Show Desktop button to sweep every bullet away.', 'The meter is full. Press Space for Show Desktop: it sweeps every bullet away.']],
         },
         drillDone: 'Practice complete!', drillText: 'You’ve tried every move. Start the run, or practice again.', drillFight: 'Start the run', drillAgain: 'Practice again',
-        // the front door: Display Properties, its Settings dialog and the Leaderboard
-        dp: 'Display Properties', dpTab: 'Screen Saver', dpGroup: 'Screen saver', dpSettings: 'Settings', dpPreview: 'Preview', dpPractice: '(Practice)',
-        dpInfo: {
-          practice: 'Five short lessons, about a minute. Nothing costs health here.',
-          starfield: 'Boss 1 of 5. Stars stream out of one point, and that point is the core to shoot.',
-          mystify: 'Boss 2 of 5. Polygons with laser sides bounce around the screen, and their corners wear the rings.',
-          pipes: 'Boss 3 of 5. Pipes grow across the screen and stay as walls. Shoot the growing heads.',
-          marquee: 'Boss 4 of 5. Giant lines of text come down. Slip through a gap or break a letter.',
-          blank: 'The last boss. The screen goes dark. The ring and the bullets still show, and so does a No signal box that hurts to touch.',
-          hidden: 'Something else is waiting after Marquee.scr.',
-        },
-        dpRunHead: 'Run', dpRun: 'Preview starts the run: all five screensavers in a row, about four minutes.', dpRunPractice: 'Preview starts the practice. It doesn’t count toward the leaderboard.',
-        dpBest: 'Your best score on this device:', dpNoBest: 'No run finished on this device yet.',
-        monLabel: (n) => `Preview of ${n}`, noSignalLabel: 'The monitor shows No signal',
-        settings: 'Screen Saver XP Settings', ok: 'OK', soundOpt: 'Sound', trailsOpt: 'Pointer trails',
+        // the menu before a run, and its pages
+        menuStart: 'Start game', menuHow: 'How to play', menuBoard: 'Leaderboard', menuAbout: 'About this game',
+        back: 'Back', tryPractice: 'Try the practice', pressPre: 'press ', pressPost: ' to start',
+        yourBest: 'Your best', noBest: 'No finished run yet', rankOf: (r, n) => `#${r} of ${n}`,
+        aboutVer: 'version 2026',
+        aboutMusic: 'Music: eight songs made for this game, played on Boss Rush XP’s chiptune synth.',
+        aboutIcons: (a, b) => `Icons: ${a} by HackerNoon, ${b}.`,
+        aboutFont: 'Letters: SSXP Pixel, drawn for this game.',
         board: 'Leaderboard', lbLoading: 'Checking the leaderboard…', lbOff: 'The leaderboard can’t be reached right now.',
-        lbEmptyHead: 'No finished runs yet', lbEmptyText: 'Close all five screensavers to post the first run.', lbStart: 'Start the run', lbPractice: 'Practice first',
-        lbYou: 'you', lbCount: (n) => `${n} ${n === 1 ? 'player' : 'players'}`, lbAll: 'See all',
+        lbEmptyHead: 'No finished runs yet', lbEmptyText: 'Close all five screensavers to post the first run.',
+        lbYou: 'you', lbCount: (n) => `${n} ${n === 1 ? 'player' : 'players'}`,
         lbHow: 'Ranked by score: the time plus 10 seconds for every hit taken.', lbCols: ['#', 'Name', 'Time', 'Hits', 'Score', 'Grade'],
         // the player's name, the win screen's place on the board, and the result card (worded as in Boss Rush XP)
         nameTitle: 'New player', nameText: 'Choose the public name shown with your finished runs.', nameRule: 'Up to 12 letters, numbers, spaces, - or _.',
         nameLabel: 'Your name', namePlay: 'Play', nameChange: 'Change name', nameChangeText: 'Future saved runs will use this public name.',
-        nameNow: 'Player name:', cancel: 'Cancel', save: 'Save', saving: 'Saving…',
+        nameNow: 'Your name:', cancel: 'Cancel', save: 'Save', saving: 'Saving…',
         lbAsk: (r, n) => `This run ranks #${r} of ${n} on the leaderboard.`, lbSaved: (name, r, n) => `Saved as ${name}: #${r} of ${n}.`,
-        lbKept: (r, n, t) => `Your best run (${t}) stays #${r} of ${n}.`, lbView: 'View leaderboard',
+        lbKept: (r, n, t) => `Your best run (${t}) stays #${r} of ${n}.`,
         lbErr: { format: 'Use 1 to 12 letters, numbers, spaces, - or _.', name: 'That name can’t be used. Try another one.', slow: 'Too many saves from here. Try again in a few minutes.', net: 'Couldn’t save. Try again.' },
         cta: 'Enjoyed exploring? Tell me about your website or app.', contact: 'Contact me',
         gift: 'Your reward: pointer trails on the desktop.',
         share: (r, t, n, who, url, pos) => `I beat Screen Saver XP${who ? ` on ${who}’s portfolio` : ''}: grade ${r}, ${t}, ${n} ${n === 1 ? 'hit' : 'hits'} taken${pos ? `, #${pos.rank} of ${pos.total} ${pos.total === 1 ? 'player' : 'players'}` : ''}. Can you do better? ${url}`,
-        shareOpen: 'Share result…', shareTitle: 'Share your result', shareHint: 'Copy the image and text to share your result. The text includes a link to the game.',
+        shareOpen: 'Share result', shareTitle: 'Share your result', shareHint: 'Copy the image and text to share your result. The text includes a link to the game.',
         cardMaking: 'Drawing your result card…', cardFail: 'The result image couldn’t be created. You can still copy the result text.', cardNoRank: 'Save your run first to include your leaderboard rank.',
         copyImg: 'Copy image', imgCopied: 'Image copied!', imgFail: 'This browser couldn’t copy the image. Download it instead.', saveImg: 'Download image', imgSaved: (f) => `Downloading ${f}…`, copyText: 'Copy text', shareTo: 'Share to…',
-        cardDone: 'Closed', cardPos: (r, n) => `#${r} of ${n}`, cardAsk: 'Can you beat it?', cardOwner: (o) => `${o}’s portfolio`, startBtn: 'start',
+        cardPos: (r, n) => `#${r} of ${n}`, cardAsk: 'Can you beat it?', cardOwner: (o) => `${o}’s portfolio`, startBtn: 'start',
         cardAlt: (g, t, n, pos) => `Screen Saver XP result card: grade ${g}, ${t}, ${n} ${n === 1 ? 'hit' : 'hits'} taken${pos ? `, #${pos.rank} of ${pos.total} on the leaderboard` : ''}.`,
         // Marquee.scr's messages: system jokes, never lines about the owner (GAME2_BRIEF.md); the first always opens
         marquee: ['PLEASE WAIT...', 'ARE YOU SURE?', 'NOT RESPONDING...', 'PRESS ANY KEY!', 'ERROR: SUCCESS.', 'LOW DISK SPACE!', 'IT IS NOW SAFE TO TURN OFF YOUR COMPUTER.', 'YOUR TEXT HERE.', '404: CURSOR NOT FOUND', 'MOVE THE MOUSE TO CONTINUE...'],
-        closed: (n) => `${n} closed`, ready: 'Show Desktop ready',
-        paused: 'Paused', pausedText: 'The game is paused.', resume: 'Resume', restart: 'Restart',
-        dead: 'Out of health: the cursor is not responding.', deadText: (n) => `${n} starts over. The time and the hits still count.`, retry: 'Try again', menu: 'Menu',
-        runDone: (n) => `${n} ${n === 1 ? 'screensaver' : 'screensavers'} closed.`,
+        closed: (n) => `${n} closed`,
+        paused: 'Paused', resume: 'Resume', restart: 'Restart',
+        deadHead: 'Out of health', dead: 'The cursor is not responding.', deadText: (n) => `${n} starts over. The time and the hits still count.`, retry: 'Try again', menu: 'Menu',
+        runDone: (n) => `${n} ${n === 1 ? 'screensaver' : 'screensavers'} closed`,
         flavor: 'The screen is back on. For now.',
-        time: 'Fight time', hits: 'Hits taken', score: 'Score (time + 10 s per hit)', grazes: 'Grazes', bombs: 'Show Desktop used', losses: 'Losses',
+        hitsN: (n) => `${n} ${n === 1 ? 'hit' : 'hits'}`, scoreIs: (t) => `score ${t}`, lossesN: (n) => `${n} ${n === 1 ? 'loss' : 'losses'}`,
         rank: 'Grade', target: (t) => `Target for a clean run against these bosses: about ${t} without a hit.`,
         copied: 'Copied', copyHand: 'Copy this text:', again: 'Play again',
         tooSmall: 'This window is too small to play. Maximize it, or make the browser window bigger.',
         tooShort: 'This screen is too small to play. Try a computer, or a phone with a taller screen.',
         rotate: 'Turn your phone upright to play.',
-        run: 'Run', clock: 'Time', statHits: 'Hits', statGraze: 'Grazes', hp: 'Health', sd: 'Show Desktop', sdKey: 'Space', controls: 'Controls',
-        sound: 'Sound', soundOn: 'Sound on', soundOff: 'Sound off',
-        help: 'How to play', pauseBtn: 'Pause', sdBtn: 'Show Desktop: sweep every bullet away', arena: (n) => `${n}, with the cursor at the bottom`,
+        clock: 'Time', hp: 'Health',
+        arena: (n) => `${n}, with the cursor at the bottom`,
       },
       id: {
-        goalHead: 'Tujuan:', goal: 'Tembak apa pun yang bercincin hijau sampai cincinnya habis, dan jaga ujung panah dari peluru, garis, pipa, dan huruf.',
+        goal: 'Tembak apa pun yang bercincin hijau sampai cincinnya habis, dan jaga ujung panah dari peluru, garis, pipa, dan huruf.',
         tips: { starfield: 'Tembak inti ini sampai cincin hijaunya habis. Kursor menembak sendiri.', mystify: 'Tembak sudut-sudut yang bercincin hijau. Garisnya juga melukai, jadi jangan disentuh.', pipes: 'Tembak kepala pipa yang bercincin hijau. Kalau cincinnya habis, pipa itu berhenti tumbuh. Jangan sentuh pipanya.', marquee: 'Tembak huruf yang bercincin hijau sampai pecah. Lolos dari tiap baris lewat celahnya. Semua huruf melukai.', blank: 'Layarnya gelap, tapi cincinnya masih ada. Tembak sampai habis. Kotak Tidak ada sinyal melukai dan menahan tembakan.' },
         tipCursor: 'Hanya ujung ini yang bisa kena. Hindari peluru.', tipCursorTouch: 'Hanya ujung ini yang bisa kena. Geser di mana saja untuk menghindar.',
         premise: 'Komputer ditinggal terlalu lama, dan screensaver menolak dibangunkan. Kamu adalah kursornya, dan stickman ikut menumpang.',
-        keysTouch: [['Geser', 'Geser jari di bagian layar mana saja. Kursor ikut bergerak dan tidak tertutup jempol.'], ['Tembak', 'Kursor menembak sendiri. Jaga kursor di bawah apa pun yang bercincin hijau.'], ['Serempet', 'Lewat dekat apa pun yang bisa mengenaimu untuk mengisi meter. Hanya ujung panah yang bisa kena.'], ['Show Desktop', 'Meter penuh: ketuk tombol Show Desktop untuk menyapu semua peluru.']],
-        keysDesk: [['Mouse', 'Gerakkan mouse. Kursor mengejar pointer.'], ['← ↑ → ↓', 'Atau tombol panah dan WASD. Tahan Shift untuk bergerak pelan.'], ['Spasi', 'Meter penuh: Show Desktop menyapu semua peluru. Menyerempet apa pun yang bisa mengenaimu akan mengisi meter.'], ['P atau Esc', 'Jeda'], ['M', 'Suara nyala atau mati']],
-        keysShort: [['Mouse', 'gerak'], ['← ↑ → ↓ / WASD', 'gerak'], ['Shift', 'pelan'], ['Spasi', 'Show Desktop'], ['P', 'jeda']],
-        keysTouchShort: [['Geser', 'di mana saja untuk bergerak'], ['Ketuk', 'Show Desktop saat meter penuh']],
-        tipOnly: 'Hanya ujung panah yang bisa kena.',
-        thumb: 'Geser di mana saja',
-        bossHead: 'Screensaver', phase: (n) => `Fase ${n}`,
+        keysTouch: [['Geser', 'Geser jari di mana saja. Kursor ikut bergerak dan tidak tertutup jempol.'], ['Tembak', 'Kursor menembak sendiri. Jaga kursor di bawah apa pun yang bercincin hijau.'], ['Jeda', 'Tombol oranye menjeda pertarungan dan melanjutkannya lagi.'], ['Suara', 'Tombol abu-abu menyalakan atau mematikan suara.']],
+        keysDesk: [['Mouse', 'Gerakkan mouse. Kursor mengejar pointer.'], ['← ↑ → ↓', 'Atau tombol panah dan WASD. Tahan Shift untuk bergerak pelan.'], ['P', 'Jeda, sama seperti tombol oranye. Esc juga bisa.'], ['M', 'Suara nyala atau mati, sama seperti tombol abu-abu.']],
+        howRun: 'Satu run berisi kelima screensaver berturut-turut, sekitar empat menit. Hanya run penuh yang masuk papan peringkat.',
+        practiceInfo: 'Latihannya tiga langkah singkat, kurang dari semenit. Nyawa tidak berkurang di sana.',
+        phase: (n) => `Fase ${n}`,
         phase2: { starfield: 'Fase 2: warp', mystify: 'Fase 2: dua segi empat', pipes: 'Fase 2: layar penuh', marquee: 'Fase 2: dua arah', blank: 'Fase 2: burn-in' },
         noSignal: 'Tidak ada sinyal', corner: 'Pojok!',
-        practice: 'Latihan', lesStep: (i, n) => `Langkah ${i} dari ${n}`, skip: 'Lewati',
-        practiceEta: (n) => (n > 2 ? 'Latihan selesai dalam sekitar 1 menit' : 'Latihan selesai dalam kurang dari 1 menit'),
-        lesGood: 'Bagus!', lesDodgeHit: 'Kena! Yang dihitung hanya ujung panah.', lesGrazeHit: 'Terlalu dekat! Lewat di samping peluru.',
+        practice: 'Latihan', lesStep: (i, n) => `${i} dari ${n}`, skip: 'Lewati',
+        lesGood: 'Bagus!', lesDodgeHit: 'Kena! Yang dihitung hanya ujung panah.',
         les: {
-          move: ['Gerak', ['Geser jari di bagian layar mana saja. Kursor ikut bergerak dan tidak tertutup jempol.', 'Gerakkan mouse, atau pakai tombol panah dan WASD.']],
+          move: ['Gerak', ['Geser jari di mana saja. Kursor ikut bergerak dan tidak tertutup jempol.', 'Gerakkan mouse, atau pakai tombol panah dan WASD.']],
           aim: ['Bidik', 'Kursor menembak sendiri. Jaga kursor di bawah cincin hijau sampai cincinnya habis.'],
           dodge: ['Menghindar', 'Hanya ujung panah yang bisa kena. Jaga ujungnya dari peluru selama 8 detik.'],
-          graze: ['Serempet', 'Lewat dekat 10 peluru tanpa menyentuh ujung panah. Setiap serempetan mengisi meter Show Desktop.'],
-          bomb: ['Show Desktop', ['Meter sudah penuh. Ketuk tombol Show Desktop untuk menyapu semua peluru.', 'Meter sudah penuh. Tekan Spasi untuk Show Desktop: semua peluru tersapu.']],
         },
         drillDone: 'Latihan selesai!', drillText: 'Kamu sudah mencoba semua gerakan. Mulai run, atau latihan lagi.', drillFight: 'Mulai run', drillAgain: 'Latihan lagi',
-        dp: 'Properti Tampilan', dpTab: 'Screen Saver', dpGroup: 'Screen saver', dpSettings: 'Pengaturan', dpPreview: 'Pratinjau', dpPractice: '(Latihan)',
-        dpInfo: {
-          practice: 'Lima langkah singkat, sekitar satu menit. Nyawa tidak berkurang di sini.',
-          starfield: 'Bos 1 dari 5. Bintang menyembur dari satu titik, dan titik itulah inti yang harus ditembak.',
-          mystify: 'Bos 2 dari 5. Segi empat bersisi laser memantul ke sana kemari, dan sudut-sudutnya bercincin.',
-          pipes: 'Bos 3 dari 5. Pipa tumbuh memenuhi layar dan tertinggal sebagai dinding. Tembak kepalanya yang sedang tumbuh.',
-          marquee: 'Bos 4 dari 5. Baris teks raksasa turun. Lewati celahnya atau pecahkan hurufnya.',
-          blank: 'Bos terakhir. Layar menjadi gelap. Cincin dan peluru masih terlihat, begitu juga kotak Tidak ada sinyal yang melukai bila tersentuh.',
-          hidden: 'Ada yang lain menunggu setelah Marquee.scr.',
-        },
-        dpRunHead: 'Run', dpRun: 'Pratinjau memulai run: kelima screensaver berturut-turut, sekitar empat menit.', dpRunPractice: 'Pratinjau memulai latihan. Latihan tidak masuk papan peringkat.',
-        dpBest: 'Skor terbaikmu di perangkat ini:', dpNoBest: 'Belum ada run yang selesai di perangkat ini.',
-        monLabel: (n) => `Pratinjau ${n}`, noSignalLabel: 'Monitor menampilkan Tidak ada sinyal',
-        settings: 'Pengaturan Screen Saver XP', ok: 'OK', soundOpt: 'Suara', trailsOpt: 'Jejak pointer',
+        menuStart: 'Mulai main', menuHow: 'Cara bermain', menuBoard: 'Papan peringkat', menuAbout: 'Tentang game ini',
+        back: 'Kembali', tryPractice: 'Coba latihan', pressPre: 'tekan ', pressPost: ' untuk mulai',
+        yourBest: 'Rekor terbaikmu', noBest: 'Belum ada run yang selesai', rankOf: (r, n) => `#${r} dari ${n}`,
+        aboutVer: 'versi 2026',
+        aboutMusic: 'Musik: delapan lagu yang dibuat untuk game ini, dimainkan dengan synth chiptune Boss Rush XP.',
+        aboutIcons: (a, b) => `Ikon: ${a} oleh HackerNoon, ${b}.`,
+        aboutFont: 'Huruf: SSXP Pixel, digambar untuk game ini.',
         board: 'Papan peringkat', lbLoading: 'Mengecek papan peringkat…', lbOff: 'Papan peringkat sedang tidak bisa dihubungi.',
-        lbEmptyHead: 'Belum ada run yang selesai', lbEmptyText: 'Tutup kelima screensaver untuk mencatat run pertama.', lbStart: 'Mulai run', lbPractice: 'Latihan dulu',
-        lbYou: 'kamu', lbCount: (n) => `${n} pemain`, lbAll: 'Lihat semua',
+        lbEmptyHead: 'Belum ada run yang selesai', lbEmptyText: 'Tutup kelima screensaver untuk mencatat run pertama.',
+        lbYou: 'kamu', lbCount: (n) => `${n} pemain`,
         lbHow: 'Peringkat dihitung dari skor: waktu ditambah 10 detik untuk setiap hit yang diterima.', lbCols: ['#', 'Nama', 'Waktu', 'Hit', 'Skor', 'Grade'],
         nameTitle: 'Pemain baru', nameText: 'Pilih nama publik yang tampil bersama rekormu.', nameRule: 'Maksimal 12 huruf, angka, spasi, - atau _.',
         nameLabel: 'Namamu', namePlay: 'Main', nameChange: 'Ganti nama', nameChangeText: 'Run yang tersimpan setelah ini akan memakai nama publik ini.',
-        nameNow: 'Nama pemain:', cancel: 'Batal', save: 'Simpan', saving: 'Menyimpan…',
+        nameNow: 'Namamu:', cancel: 'Batal', save: 'Simpan', saving: 'Menyimpan…',
         lbAsk: (r, n) => `Run ini masuk peringkat #${r} dari ${n} pemain.`, lbSaved: (name, r, n) => `Tersimpan sebagai ${name}: peringkat #${r} dari ${n}.`,
-        lbKept: (r, n, t) => `Rekor terbaikmu (${t}) tetap peringkat #${r} dari ${n}.`, lbView: 'Lihat papan peringkat',
+        lbKept: (r, n, t) => `Rekor terbaikmu (${t}) tetap peringkat #${r} dari ${n}.`,
         lbErr: { format: 'Pakai 1 sampai 12 huruf, angka, spasi, - atau _.', name: 'Nama itu tidak bisa dipakai. Coba nama lain.', slow: 'Terlalu sering menyimpan dari sini. Coba lagi beberapa menit lagi.', net: 'Gagal menyimpan. Coba lagi.' },
         cta: 'Suka menjelajahi portofolio ini? Ceritakan rencana website atau aplikasimu.', contact: 'Hubungi saya',
         gift: 'Hadiahmu: jejak pointer di desktop.',
         share: (r, t, n, who, url, pos) => `Aku menamatkan Screen Saver XP${who ? ` di portofolio ${who}` : ''}: grade ${r}, waktu ${t}, kena ${n} hit${pos ? `, peringkat #${pos.rank} dari ${pos.total} pemain` : ''}. Bisa lebih baik? ${url}`,
-        shareOpen: 'Bagikan hasil…', shareTitle: 'Bagikan hasil', shareHint: 'Salin gambar dan teks untuk membagikan hasilmu. Teksnya menyertakan tautan ke game.',
+        shareOpen: 'Bagikan hasil', shareTitle: 'Bagikan hasil', shareHint: 'Salin gambar dan teks untuk membagikan hasilmu. Teksnya menyertakan tautan ke game.',
         cardMaking: 'Menggambar kartu hasil…', cardFail: 'Gambarnya gagal dibuat. Teksnya tetap bisa disalin.', cardNoRank: 'Simpan rekormu dulu agar peringkat ikut tampil di kartu.',
         copyImg: 'Salin gambar', imgCopied: 'Gambar tersalin!', imgFail: 'Browser ini tidak bisa menyalin gambar. Unduh saja gambarnya.', saveImg: 'Unduh gambar', imgSaved: (f) => `Mengunduh ${f}…`, copyText: 'Salin teks', shareTo: 'Bagikan ke…',
-        cardDone: 'Ditutup', cardPos: (r, n) => `#${r} dari ${n}`, cardAsk: 'Bisa mengalahkan rekor ini?', cardOwner: (o) => `Portofolio ${o}`, startBtn: 'mulai',
+        cardPos: (r, n) => `#${r} dari ${n}`, cardAsk: 'Bisa mengalahkan rekor ini?', cardOwner: (o) => `Portofolio ${o}`, startBtn: 'mulai',
         cardAlt: (g, t, n, pos) => `Kartu hasil Screen Saver XP: grade ${g}, waktu ${t}, kena ${n} hit${pos ? `, peringkat #${pos.rank} dari ${pos.total}` : ''}.`,
         marquee: ['HARAP TUNGGU...', 'YAKIN?', 'TIDAK MERESPONS...', 'TEKAN TOMBOL APA SAJA!', 'ERROR: BERHASIL.', 'RUANG DISK HAMPIR PENUH!', 'SEKARANG AMAN UNTUK MEMATIKAN KOMPUTER.', 'KETIK TEKS DI SINI.', '404: KURSOR TIDAK DITEMUKAN', 'GERAKKAN MOUSE UNTUK MELANJUTKAN...'],
-        closed: (n) => `${n} ditutup`, ready: 'Show Desktop siap',
-        paused: 'Dijeda', pausedText: 'Permainan dijeda.', resume: 'Lanjut', restart: 'Mulai ulang',
-        dead: 'Nyawa habis: kursor tidak merespons.', deadText: (n) => `${n} diulang dari awal. Waktu dan hit tetap dihitung.`, retry: 'Coba lagi', menu: 'Menu',
-        runDone: (n) => `${n} screensaver ditutup.`,
+        closed: (n) => `${n} ditutup`,
+        paused: 'Dijeda', resume: 'Lanjut', restart: 'Mulai ulang',
+        deadHead: 'Nyawa habis', dead: 'Kursor tidak merespons.', deadText: (n) => `${n} diulang dari awal. Waktu dan hit tetap dihitung.`, retry: 'Coba lagi', menu: 'Menu',
+        runDone: (n) => `${n} screensaver ditutup`,
         flavor: 'Layar menyala lagi. Untuk sementara.',
-        time: 'Waktu bertarung', hits: 'Kena hit', score: 'Skor (waktu + 10 dtk per hit)', grazes: 'Serempet', bombs: 'Show Desktop dipakai', losses: 'Kalah',
+        hitsN: (n) => `kena ${n} hit`, scoreIs: (t) => `skor ${t}`, lossesN: (n) => `kalah ${n}x`,
         rank: 'Grade', target: (t) => `Target run bersih untuk bos yang dilawan: sekitar ${t} tanpa kena hit.`,
         copied: 'Tersalin', copyHand: 'Salin teks ini:', again: 'Main lagi',
         tooSmall: 'Jendela ini terlalu kecil untuk bermain. Besarkan jendelanya, atau perbesar jendela browser.',
         tooShort: 'Layar ini terlalu kecil untuk bermain. Coba di komputer, atau di HP dengan layar yang lebih tinggi.',
         rotate: 'Putar HP ke posisi tegak untuk bermain.',
-        run: 'Run', clock: 'Waktu', statHits: 'Hit', statGraze: 'Serempet', hp: 'Nyawa', sd: 'Show Desktop', sdKey: 'Spasi', controls: 'Kontrol',
-        sound: 'Suara', soundOn: 'Suara nyala', soundOff: 'Suara mati',
-        help: 'Cara bermain', pauseBtn: 'Jeda', sdBtn: 'Show Desktop: sapu semua peluru', arena: (n) => `${n}, dengan kursor di bagian bawah`,
+        clock: 'Waktu', hp: 'Nyawa',
+        arena: (n) => `${n}, dengan kursor di bagian bawah`,
       },
     };
 
@@ -674,24 +380,12 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     const ICONS = {
       star: ['<path d="m16,8v-2h-1v-2h-1v-2h-1v-1h-2v1h-1v2h-1v2h-1v2H1v2h1v1h1v1h1v1h1v1h1v5h-1v4h2v-1h2v-1h2v-1h2v1h2v1h2v1h2v-4h-1v-5h1v-1h1v-1h1v-1h1v-1h1v-2h-7Zm4,3h-1v1h-1v1h-1v1h-1v5h1v1h-2v-1h-2v-1h-2v1h-2v1h-2v-1h1v-5h-1v-1h-1v-1h-1v-1h-1v-1h4v-1h1v-1h1v-2h1v-2h2v2h1v2h1v1h1v1h4v1Z"/>', '<polygon points="23 8 23 10 22 10 22 11 21 11 21 12 20 12 20 13 19 13 19 14 18 14 18 19 19 19 19 23 17 23 17 22 15 22 15 21 13 21 13 20 11 20 11 21 9 21 9 22 7 22 7 23 5 23 5 19 6 19 6 14 5 14 5 13 4 13 4 12 3 12 3 11 2 11 2 10 1 10 1 8 8 8 8 6 9 6 9 4 10 4 10 2 11 2 11 1 13 1 13 2 14 2 14 4 15 4 15 6 16 6 16 8 23 8"/>'],
       moon: ['<path d="m21,17v1h-2v1h-4v-1h-2v-1h-2v-1h-1v-2h-1v-2h-1v-4h1v-2h1v-2h1v-1h2v-1h2v-1h-5v1h-2v1h-2v1h-1v1h-1v2h-1v2h-1v6h1v2h1v2h1v1h1v1h2v1h2v1h6v-1h2v-1h2v-1h1v-1h1v-2h-1Zm-13,3v-1h-2v-2h-1v-2h-1v-6h1v-2h1v-2h2v1h-1v2h-1v4h1v2h1v2h1v1h1v1h1v1h2v1h2v1h-5v-1h-2Z"/>', '<polygon points="22 17 22 19 21 19 21 20 20 20 20 21 18 21 18 22 16 22 16 23 10 23 10 22 8 22 8 21 6 21 6 20 5 20 5 19 4 19 4 17 3 17 3 15 2 15 2 9 3 9 3 7 4 7 4 5 5 5 5 4 6 4 6 3 8 3 8 2 10 2 10 1 15 1 15 2 13 2 13 3 11 3 11 4 10 4 10 6 9 6 9 8 8 8 8 12 9 12 9 14 10 14 10 16 11 16 11 17 13 17 13 18 15 18 15 19 19 19 19 18 21 18 21 17 22 17"/>'],
-      'exclamation-triangle': ['<polygon points="14 11 14 14 13 14 13 17 11 17 11 14 10 14 10 11 14 11"/><rect x="11" y="18" width="2" height="2"/><path d="m22,20v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-1h-2v1h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h1v1h20v-1h1v-2h-1Zm-19,1v-1h1v-2h1v-2h1v-2h1v-2h1v-2h1v-2h1v-2h1v-2h2v2h1v2h1v2h1v2h1v2h1v2h1v2h1v2h1v1H3Z"/>', '<path d="m22,20v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-1h-2v1h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h1v1h20v-1h1v-2h-1Zm-12-9h4v3h-1v3h-2v-3h-1v-3Zm1,7h2v2h-2v-2Z"/>'],
-      'window-restore': ['<polygon points="23 2 23 18 22 18 22 19 20 19 20 17 21 17 21 3 7 3 7 4 5 4 5 2 6 2 6 1 22 1 22 2 23 2"/><path d="M18,6V5H2V6H1V22H2v1H18V22h1V6ZM3,21V7H17V21Z"/>', '<polygon points="18 6 19 6 19 22 18 22 18 23 2 23 2 22 1 22 1 6 2 6 2 5 18 5 18 6"/><polygon points="23 2 23 18 22 18 22 19 20 19 20 17 21 17 21 3 7 3 7 4 5 4 5 2 6 2 6 1 22 1 22 2 23 2"/>'],
       'sound-on': ['<polygon points="17 15 17 14 16 14 16 13 17 13 17 11 16 11 16 10 17 10 17 9 18 9 18 10 19 10 19 14 18 14 18 15 17 15"/><polygon points="23 10 23 14 22 14 22 16 21 16 21 17 20 17 20 18 19 18 19 17 18 17 18 16 19 16 19 15 20 15 20 14 21 14 21 10 20 10 20 9 19 9 19 8 18 8 18 7 19 7 19 6 20 6 20 7 21 7 21 8 22 8 22 10 23 10"/><path d="m11,2v1h-1v1h-1v1h-1v1h-1v1h-1v1H1v8h5v1h1v1h1v1h1v1h1v1h1v1h3V2h-3Zm1,17h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1H3v-4h4v-1h1v-1h1v-1h1v-1h1v-1h1v14Z"/>', '<polygon points="14 2 14 22 11 22 11 21 10 21 10 20 9 20 9 19 8 19 8 18 7 18 7 17 6 17 6 16 1 16 1 8 6 8 6 7 7 7 7 6 8 6 8 5 9 5 9 4 10 4 10 3 11 3 11 2 14 2"/><polygon points="17 15 17 14 16 14 16 13 17 13 17 11 16 11 16 10 17 10 17 9 18 9 18 10 19 10 19 14 18 14 18 15 17 15"/><polygon points="23 10 23 14 22 14 22 16 21 16 21 17 20 17 20 18 19 18 19 17 18 17 18 16 19 16 19 15 20 15 20 14 21 14 21 10 20 10 20 9 19 9 19 8 18 8 18 7 19 7 19 6 20 6 20 7 21 7 21 8 22 8 22 10 23 10"/>'],
-      'sound-mute': ['<polygon points="22 8 22 10 21 10 21 11 20 11 20 13 21 13 21 14 22 14 22 16 20 16 20 15 19 15 19 14 18 14 18 15 17 15 17 16 15 16 15 14 16 14 16 13 17 13 17 11 16 11 16 10 15 10 15 8 17 8 17 9 18 9 18 10 19 10 19 9 20 9 20 8 22 8"/><path d="m11,2v1h-1v1h-1v1h-1v1h-1v1h-1v1H1v8h5v1h1v1h1v1h1v1h1v1h1v1h3V2h-3ZM3,10h4v-1h1v-1h1v-1h1v-1h1v-1h1v14h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1H3v-4Z"/>', '<polygon points="14 2 14 22 11 22 11 21 10 21 10 20 9 20 9 19 8 19 8 18 7 18 7 17 6 17 6 16 1 16 1 8 6 8 6 7 7 7 7 6 8 6 8 5 9 5 9 4 10 4 10 3 11 3 11 2 14 2"/><polygon points="22 8 22 10 21 10 21 11 20 11 20 13 21 13 21 14 22 14 22 16 20 16 20 15 19 15 19 14 18 14 18 15 17 15 17 16 15 16 15 14 16 14 16 13 17 13 17 11 16 11 16 10 15 10 15 8 17 8 17 9 18 9 18 10 19 10 19 9 20 9 20 8 22 8"/>'],
-      pause: ['<path d="m9,1H2v1h-1v20h1v1h7v-1h1V2h-1v-1Zm-1,2v18H3V3h5Z"/><path d="m22,2v-1h-7v1h-1v20h1v1h7v-1h1V2h-1Zm-1,1v18h-5V3h5Z"/>', '<polygon points="23 2 23 22 22 22 22 23 15 23 15 22 14 22 14 2 15 2 15 1 22 1 22 2 23 2"/><polygon points="9 2 10 2 10 22 9 22 9 23 2 23 2 22 1 22 1 2 2 2 2 1 9 1 9 2"/>'],
-      trophy: ['<path d="m18,4v-2H6v2H1v5h1v2h1v1h1v1h1v1h1v1h3v1h2v3h-4v3h10v-3h-4v-3h2v-1h3v-1h1v-1h1v-1h1v-1h1v-2h1v-5h-5Zm-10,9h-2v-1h-1v-1h-1v-2h-1v-3h2v1h1v2h1v3h1v1Zm0-4v-5h8v5h-1v3h-1v2h-4v-2h-1v-3h-1Zm12,0v2h-1v1h-1v1h-2v-1h1v-2h1v-3h1v-1h2v3h-1Z"/>', '<path d="m18,4v-2H6v2H1v5h1v2h1v1h1v1h1v1h1v1h3v1h2v3h-4v3h10v-3h-4v-3h2v-1h3v-1h1v-1h1v-1h1v-1h1v-2h1v-5h-5ZM5,12v-1h-1v-2h-1v-3h2v1h1v2h1v3h1v1h-2v-1h-1Zm16-3h-1v2h-1v1h-1v1h-2v-1h1v-2h1v-3h1v-1h2v3Z"/>'],
-      'retro-pc': ['<rect x="11" y="14" width="7" height="2"/><rect x="6" y="14" width="2" height="2"/><polygon points="18 6 18 11 17 11 17 12 7 12 7 11 6 11 6 6 7 6 7 5 17 5 17 6 18 6"/><path d="M21,3V2H20V1H4V2H3V3H2V17H3v1H4v4H5v1H19V22h1V18h1V17h1V3ZM18,21H6V19H18Zm2-5H19v1H5V16H4V4H5V3H19V4h1Z"/>', '<rect x="4" y="21" width="16" height="2"/><path d="M21,3V2H20V1H4V2H3V3H2V17H3v1H4v1H20V18h1V17h1V3ZM8,16H6V14H8Zm10,0H11V14h7ZM6,12V11H5V5H6V4H18V5h1v6H18v1Z"/>'],
-      user: ['<path d="m17,5v-2h-1v-1h-2v-1h-4v1h-2v1h-1v2h-1v4h1v2h1v1h2v1h4v-1h2v-1h1v-2h1v-4h-1Zm-2,4v1h-1v1h-4v-1h-1v-1h-1v-4h1v-1h1v-1h4v1h1v1h1v4h-1Z"/><path d="m21,19v-1h-1v-1h-1v-1h-2v-1H7v1h-2v1h-1v1h-1v1h-1v3h1v1h18v-1h1v-3h-1Zm-16,0v-1h2v-1h10v1h2v1h1v2H4v-2h1Z"/>', '<polygon points="7 9 6 9 6 5 7 5 7 3 8 3 8 2 10 2 10 1 14 1 14 2 16 2 16 3 17 3 17 5 18 5 18 9 17 9 17 11 16 11 16 12 14 12 14 13 10 13 10 12 8 12 8 11 7 11 7 9"/><polygon points="22 19 22 22 21 22 21 23 3 23 3 22 2 22 2 19 3 19 3 18 4 18 4 17 5 17 5 16 7 16 7 15 17 15 17 16 19 16 19 17 20 17 20 18 21 18 21 19 22 19"/>'],
-      image: ['<polygon points="9 6 9 9 8 9 8 10 5 10 5 9 4 9 4 6 5 6 5 5 8 5 8 6 9 6"/><path d="m22,2v-1H2v1h-1v20h1v1h20v-1h1V2h-1Zm-5,12v1h1v1h1v1h1v1h1v3h-13v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v1h1Zm3,1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1V3h18v12h-1Zm-15,3v1h1v1h1v1H3v-4h1v1h1Z"/>', '<polygon points="23 20 23 22 22 22 22 23 2 23 2 22 1 22 1 15 2 15 2 16 3 16 3 17 4 17 4 18 5 18 5 19 6 19 6 20 7 20 7 21 8 21 8 20 9 20 9 19 10 19 10 18 11 18 11 17 12 17 12 16 13 16 13 15 14 15 14 14 15 14 15 13 16 13 16 14 17 14 17 15 18 15 18 16 19 16 19 17 20 17 20 18 21 18 21 19 22 19 22 20 23 20"/><path d="m22,2v-1H2v1h-1v10h1v1h1v1h1v1h1v1h1v1h1v1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v-1h1v1h1v1h1v1h1v1h1v1h1v1h1v1h1V2h-1Zm-13,4v3h-1v1h-3v-1h-1v-3h1v-1h3v1h1Z"/>'],
-      'bullet-list': ['<rect x="2" y="5" width="3" height="3"/><rect x="2" y="11" width="3" height="3"/><rect x="2" y="17" width="3" height="3"/><rect x="8" y="18" width="14" height="1"/><rect x="8" y="6" width="14" height="1"/><rect x="8" y="12" width="14" height="1"/>', '<rect x="2" y="5" width="3" height="3"/><rect x="2" y="17" width="3" height="3"/><rect x="2" y="11" width="3" height="3"/><polygon points="23 6 23 7 22 7 22 8 10 8 10 7 9 7 9 6 10 6 10 5 22 5 22 6 23 6"/><polygon points="22 12 23 12 23 13 22 13 22 14 10 14 10 13 9 13 9 12 10 12 10 11 22 11 22 12"/><polygon points="22 18 23 18 23 19 22 19 22 20 10 20 10 19 9 19 9 18 10 18 10 17 22 17 22 18"/>'],
     };
-    const ICON_FILL = { star: '#f7c948', moon: '#6aa8ff', 'exclamation-triangle': '#f7c948', 'window-restore': '#6aa8ff', 'sound-on': '#c9c6bd', 'sound-mute': '#c9c6bd', pause: '#c9c6bd', trophy: '#f7c948', 'retro-pc': '#7fd3dc', user: '#ff9f43', image: '#7fd3dc', 'bullet-list': '#b58fe8' };
-    function ico(name, size) {
-      const [line, body] = ICONS[name];
-      return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="${ICON_FILL[name]}">${body}</g><g fill="#000">${line}</g></svg>`;
-    }
-    // the same icon on a canvas (the share card): its shapes read back out of the markup, drawn size px wide at x, y
-    function icoDraw(c, name, x, y, size) {
+    const ICON_FILL = { star: '#f7c948', moon: '#6aa8ff', 'sound-on': '#c9c6bd' };
+    // the same icon on a canvas (the share card): its shapes read back out of the markup, drawn size px wide at x, y, in
+    // its own two colours or all in one ink
+    function icoDraw(c, name, x, y, size, ink) {
       const shapes = (markup) => {
         const p = new Path2D();
         for (const [, tag, attrs] of markup.matchAll(/<(\w+)([^>]*)\/>/g)) {
@@ -704,8 +398,8 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       };
       const [line, body] = ICONS[name];
       c.save(); c.translate(x, y); c.scale(size / 24, size / 24);
-      c.fillStyle = ICON_FILL[name]; c.fill(shapes(body));
-      c.fillStyle = '#000'; c.fill(shapes(line));
+      c.fillStyle = ink || ICON_FILL[name]; c.fill(shapes(body));
+      c.fillStyle = ink || '#000'; c.fill(shapes(line));
       c.restore();
     }
 
@@ -863,7 +557,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     /* ------------------------------------------------------------ sound: synth effects, and the music player from game.js */
     const sfx = (() => {
       const VOL = 0.5, MUSIC = 0.3;   // the music sits under the effects
-      let actx = null, master = null, noise = null, muted = store.get('ssxp-mute') === '1', lastGraze = 0, quiet = false;
+      let actx = null, master = null, noise = null, muted = store.get('ssxp-mute') === '1', quiet = false;
       // music state: the tune playing, its own fade bus, and a step clock scheduled a little ahead
       let tune = null, bus = null, duckBus = null, timer = 0, stepI = 0, nextT = 0, level = 1, want = null, held = false;
       function ensure() {
@@ -980,10 +674,8 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
           glide(duckBus.gain, k, 0.05);
           duckBus.gain.setTargetAtTime(1, actx.currentTime + d, 0.25);
         },
-        graze() { if (!actx || actx.currentTime - lastGraze < 0.05) return; lastGraze = actx.currentTime; tone('triangle', 1900, 2600, 0.04, 0.035); },
         hit() { hiss(0.2, 0.2, 'bandpass', 1200, 260); tone('square', 220, 90, 0.18, 0.07); },
         phase() { tone('sine', 260, 1300, 0.55, 0.07); hiss(0.6, 0.06, 'highpass', 800, 5000); },
-        bomb() { hiss(0.5, 0.14, 'lowpass', 4000, 180); tone('sine', 900, 200, 0.45, 0.06); },
         ready() { tone('triangle', 1319, 1319, 0.09, 0.05); tone('triangle', 1976, 1976, 0.12, 0.05, 0.09); },
         heal() { tone('triangle', 988, 1319, 0.12, 0.04); },
         burn() { tone('sawtooth', 110, 220, 0.6, 0.035); },
@@ -1003,40 +695,21 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     })();
 
     /* ------------------------------------------------------------ DOM */
-    // the stage lives in a shadow root on a host of its own, so its Luna classes and the portfolio's never meet
+    // the screen lives in a shadow root on a host of its own, so its classes and the portfolio's never meet
     const host = document.createElement('div');
     host.className = 'ss-host';
     const root = host.attachShadow({ mode: 'open' });
     root.innerHTML = `<style>${CSS}</style>${MARKUP}`;
     const $ = (q) => root.querySelector(q);
     const stage = $('#stage'), cv = $('#cv'), ctx = cv.getContext('2d');
-    const topEl = $('#top'), barEl = $('#bar'), paneL = $('#paneL'), paneR = $('#paneR'), layer = $('#layer'), chipsEl = $('#chips');
-    const smallEl = $('#small'), thumbHint = $('#thumbHint'), front = $('#front');
+    const hudEl = $('#hud'), layer = $('#layer'), chipsEl = $('#chips'), smallEl = $('#small'), front = $('#front');
     const tipCore = $('#tipCore'), tipCur = $('#tipCur');
-    const lesEl = $('#les'), lesName = $('#lesName'), lesHow = $('#lesHow'), lesEta = $('#lesEta'), lesSkip = $('#lesSkip');
-    const make = (tag, cls, html = '') => { const e = document.createElement(tag); if (cls) e.className = cls; e.innerHTML = html; return e; };
-
-    // one set of HUD pieces, moved between the portrait strips and the landscape task panes
-    const hud = {
-      boss: make('div', 'hud-boss', '<b class="hb-name"></b><span class="hb-phase"></span><div class="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i></i><s></s></div>'),
-      hp: make('div', 'hp', '<i><em></em></i>'.repeat(HP_MAX)),
-      sd: make('div', 'hud-sd', `<button class="sd" type="button" disabled>${ico('window-restore', 24)}<span class="meter"><i></i></span></button><span class="sd-lbl"><b></b><kbd></kbd></span>`),
-      clock: make('div', 'hud-clock', '<span class="lbl"></span><b>0:00</b>'),
-      stats: make('dl', 'hud-stats', '<dt data-k="hits"></dt><dd data-v="hits">0</dd><dt data-k="graze"></dt><dd data-v="graze">0</dd>'),
-      keys: make('div', 'hud-keys'),
-      snd: make('button', 'snd'),
-      // pausing without a keyboard: the window's menu bar is gone on a phone
-      pause: make('button', 'snd', `${ico('pause', 16)}<span class="snd-t"></span>`),
-    };
-    hud.snd.type = 'button'; hud.pause.type = 'button';
-    hud.hp.setAttribute('role', 'img');
-    const tray = make('div', 'tray'), spacer = make('span', 'grow');
-    const panel = () => { const p = make('section', 'panel', '<h2></h2><div class="pb"></div>'); p.h = p.firstElementChild; p.pb = p.lastElementChild; return p; };
-    const panels = { boss: panel(), run: panel(), cursor: panel(), sd: panel(), keys: panel() };
-    const sdBtn = hud.sd.querySelector('.sd'), sdMeter = sdBtn.querySelector('.meter i');
-    const bossName = hud.boss.querySelector('.hb-name'), bossFill = hud.boss.querySelector('.pbar i'), bossBar = hud.boss.querySelector('.pbar'), bossPhase = hud.boss.querySelector('.hb-phase'), bossTick = hud.boss.querySelector('.pbar s');
-    const hpBlocks = [...hud.hp.children], clockVal = hud.clock.querySelector('b');
-    const statHits = hud.stats.querySelector('[data-v="hits"]'), statGraze = hud.stats.querySelector('[data-v="graze"]');
+    const lesEl = $('#les'), lesName = $('#lesName'), lesStep = $('#lesStep'), lesHow = $('#lesHow'), lesSkip = $('#lesSkip');
+    const hpEl = $('#hp'), bossName = $('#bname'), bossBar = $('#bbar'), bossFill = bossBar.querySelector('b'), bossTick = bossBar.querySelector('i'), clockVal = $('#clock');
+    hpEl.innerHTML = '<i><em></em></i>'.repeat(HP_MAX);
+    const hpBlocks = [...hpEl.children];
+    // the pixel letters change the HUD's widths once they arrive, so the boss's bar is measured again then
+    if (pixelFont) pixelFont.loaded.then(() => { barDots = 0; }, () => {});
 
     // the portfolio's language, switched with it (setLang)
     let lang = opts.lang === 'id' ? 'id' : 'en';
@@ -1044,16 +717,16 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
 
     /* ------------------------------------------------------------ state */
     const G = {
-      mode: 'menu', paused: false, t: 0, fightTime: 0, hits: 0, grazes: 0, bombs: 0, deaths: 0, meter: 0, meterAtStart: 0,
-      bossIdx: 0, startIdx: 0, bossT0: 0, bossH0: 0, splits: [], introT: 0, introLen: 1.8, taught: {}, endT: 0,
-      warp: 0, shake: 0, zoom: null, sdT: { x: 22, y: AH + 20 }, dlg: null, practice: null, debug: false,
+      mode: 'menu', paused: false, t: 0, fightTime: 0, hits: 0, deaths: 0,
+      bossIdx: 0, startIdx: 0, bossT0: 0, bossH0: 0, splits: [], introT: 0, introLen: 1.8, taught: {}, endT: 0, demoT: 0,
+      warp: 0, shake: 0, dlg: null, front: null, practice: null, debug: false,
     };
     const P = { x: AW / 2 - 6, y: AH - 90, tx: AW / 2 - 6, ty: AH - 90, hp: HP_MAX, inv: 0, clean: 0, shotCd: 0, lean: 0, duck: 0, knock: 0, cheer: 0, press: 0, fall: 0 };
     const B = { def: null, on: false, x: AW / 2, y: 112, max: 480, hp: 480, phase: 1, inv: 0, pause: 0, pi: 0, p: null, t: 0, t2: 0, alpha: 0, flash: 0, dying: false, dieK: 0, m: null, p2At: null };
     const VP = { x: AW / 2, y: AH * 0.42 };   // where the stars come from while no boss is up
     const bullets = [], pool = [], shots = [], sparks = [], tele = [], stars = [];
     const keys = new Set();
-    let input = coarse.matches ? 'touch' : 'mouse', dragId = null, laserCd = 0, tipsOn = false;
+    let input = coarse.matches ? 'touch' : 'mouse', dragId = null, tipsOn = false;
     for (let i = 0; i < 110; i++) stars.push({ a: rand(0, TAU), d: rand(0, 520), v: rand(0.6, 1.3) });
 
     function resetPlayer() { Object.assign(P, { x: AW / 2 - 6, y: AH - 90, tx: AW / 2 - 6, ty: AH - 90, hp: HP_MAX, inv: 1.2, clean: 0, shotCd: 0, lean: 0, duck: 0, knock: 0, cheer: 0, press: 0, fall: 0 }); }
@@ -1062,15 +735,14 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       def.init();
     }
 
-    /* ------------------------------------------------------------ layout: the largest arena that fits, never under MIN_SCALE */
-    // The window's body is the room. A wide one gets the 3:2 stage whole in its middle, the task panes beside the arena;
-    // any other fills with the portrait stage, its strips across the full width and the thumb's pad under the arena.
-    let S = 1, K = 1, DPR = Math.min(window.devicePixelRatio || 1, 2), lay = 'portrait', tooSmall = false;
+    /* ------------------------------------------------------------ layout: the largest screen that fits, never under MIN_SCALE */
+    // The device's body is the room: the screen is the HUD's row over the arena at 3:4, as large as the body allows, in
+    // the middle of it
+    let S = 1, K = 1, DPR = Math.min(window.devicePixelRatio || 1, 2), tooSmall = false;
     function layout() {
       const vw = host.clientWidth, vh = host.clientHeight;
       if (!vw || !vh) return;
-      const land = vw >= vh * 1.2;
-      const sc = land ? Math.min(vw / (AW * 2), vh / AH) : Math.min(vw / AW, (vh - TOP_H - BAR_H) / AH);
+      const sc = Math.min(vw / AW, (vh - HUD_H) / AH);
       if (sc < MIN_SCALE) {
         if (!tooSmall && (G.mode === 'fight' || G.mode === 'intro')) { G.paused = true; sfx.musicHold(true); }
         tooSmall = true; stage.hidden = true; showSmall();
@@ -1079,52 +751,21 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       const wasSmall = tooSmall;
       tooSmall = false; stage.hidden = false; smallEl.hidden = true;
       S = Math.floor(sc * 1000) / 1000;
-      const sw = land ? Math.floor(AW * 2 * S) : vw, sh = land ? Math.floor(AH * S) : vh;
-      lay = land ? 'landscape' : 'portrait';
-      stage.classList.toggle('portrait', !land);
-      stage.classList.toggle('landscape', land);
-      stage.style.width = `${sw}px`;
-      stage.style.height = `${sh}px`;
-      stage.classList.toggle('nopad', !land && sh - TOP_H - BAR_H - AH * S < PAD_MIN);
       stage.style.setProperty('--aw', `${AW * S}px`);
       stage.style.setProperty('--ah', `${AH * S}px`);
-      stage.style.setProperty('--pane', `${(AW / 2) * S}px`);
       DPR = Math.min(window.devicePixelRatio || 1, 2);
       const cw = Math.round(AW * S * DPR), ch = Math.round(AH * S * DPR);
       if (cv.width !== cw || cv.height !== ch || !sprites) { cv.width = cw; cv.height = ch; K = cw / AW; buildSprites(); }
-      place();
-      fitPane();
+      barDots = 0;
       practiceTop();
       if (wasSmall && G.paused && !G.dlg) pause(true);
     }
-    // the clock keeps to the taskbar's own blue beside the tray, where white reads; in the panes, pause and sound sit with
-    // the run, which leaves them in view in a short window
-    function place() {
-      if (lay === 'portrait') {
-        topEl.append(hud.boss);
-        tray.append(hud.pause, hud.snd);
-        barEl.append(hud.sd, hud.hp, spacer, hud.clock, tray);
-      } else {
-        panels.boss.pb.append(hud.boss);
-        panels.run.pb.append(hud.clock, hud.stats, hud.pause, hud.snd);
-        panels.cursor.pb.append(hud.hp);
-        panels.sd.pb.append(hud.sd);
-        panels.keys.pb.append(hud.keys);
-        paneL.append(panels.boss, panels.run);
-        paneR.append(panels.cursor, panels.sd, panels.keys);
-      }
-    }
     // a phone on its side can't hold the arena, and one upright can have too short a screen; anywhere else the window is
     // too small, and can be made bigger
-    // the right pane never scrolls: when the legend doesn't fit it loses its last line
-    function fitPane() {
-      stage.classList.remove('short');
-      if (lay === 'landscape' && paneR.scrollHeight > paneR.clientHeight) stage.classList.add('short');
-    }
     function showSmall() {
       const text = coarse.matches && host.clientWidth > host.clientHeight ? s.rotate : smallScreen.matches ? s.tooShort : s.tooSmall;
       smallEl.hidden = false;
-      smallEl.innerHTML = `<div class="mini" role="alertdialog" aria-labelledby="smT"><div class="title"><span class="t-ico">${ico('exclamation-triangle', 16)}</span><span class="t-text" id="smT">Screen Saver XP</span></div><div class="dlg"><div class="dlg-row">${ico('exclamation-triangle', 32)}<div><p>${esc(text)}</p></div></div></div></div>`;
+      smallEl.innerHTML = `<p role="alert">${esc(text)}</p>`;
     }
 
     /* ------------------------------------------------------------ sprites: each bullet drawn once, at the screen's own density */
@@ -1179,7 +820,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     function bullet(o) {
       const b = pool.pop() || {};
       b.x = o.x; b.y = o.y; b.dx = o.dx; b.dy = o.dy; b.sp = o.sp; b.acc = o.acc || 0; b.vmax = o.vmax || o.sp;
-      b.kind = o.kind; b.r = o.r; b.len = o.len || 0; b.dist = 0; b.grow = 0.85; b.grazed = false; b.mode = null; b.k = 0; b.fade = 1; b.x0 = 0; b.y0 = 0;
+      b.kind = o.kind; b.r = o.r; b.len = o.len || 0; b.dist = 0; b.grow = 0.85; b.mode = null; b.fade = 1;
       bullets.push(b);
       return b;
     }
@@ -1393,7 +1034,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       },
       tipAt() { let top = B.m.quads[0].v[0]; for (const p of B.m.quads[0].v) if (p.y < top.y) top = p; return { x: top.x, y: top.y, below: 14 }; },
       stop() { B.m.burn = null; },
-      onBomb() { B.m.burn = null; B.m.arm = Math.max(B.m.arm, 0.6); },
       draw() {
         const m = B.m;
         if (!m || B.alpha <= 0) return;
@@ -1631,7 +1271,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       },
       tipAt() { const p = B.m.pipes.find((q) => q.alive); if (!p) return { x: AW / 2, y: 20, below: 14 }; const h = headOf(p); return { x: h.x, y: h.y, below: 14 }; },
       stop() { for (const p of B.m.pipes) p.flush = 0; },
-      onBomb() { for (const p of B.m.pipes) p.flush = 0; },
       draw() {
         const m = B.m;
         if (!m || B.alpha <= 0) return;
@@ -1764,15 +1403,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       ctx.beginPath(); ctx.arc(x, y, 8, 0, TAU); ctx.stroke();
       healthRing(x, y, 8, 2, frac);
     }
-    // Show Desktop minimises letters into its button, as it does the bullets
-    function mqMin(ch, x, y, e, a) {
-      const sc = 1 - e * 0.85;
-      ctx.save();
-      ctx.globalAlpha = a * (1 - e * 0.6);
-      ctx.translate(lerp(x, G.sdT.x, e), lerp(y, G.sdT.y, e)); ctx.scale(sc, sc);
-      ctx.fillText(ch, 0, MQ.cap);
-      ctx.restore();
-    }
     const MARQUEE = {
       id: 'marquee', name: 'Marquee.scr', hp: 340, target: 50, bg: 'none',
       init() {
@@ -1791,16 +1421,14 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       move(dt) {
         const m = B.m, live = isLive(), slow = G.mode === 'intro' ? 0.3 : 1;
         for (const ln of m.lines) {
-          if (ln.min) { ln.min.k += dt / SD_TIME; continue; }
           ln.off += ln.dir * ln.sp * dt * slow;
           if (live) ln.y += m.vy * dt;
         }
-        m.lines = m.lines.filter((ln) => (ln.min ? ln.min.k < 1 : ln.y < AH + 8));
+        m.lines = m.lines.filter((ln) => ln.y < AH + 8);
         for (const f of m.falls) {
-          if (f.min) { f.min.k += dt / SD_TIME; continue; }
           f.vy = Math.min(460, f.vy + 700 * dt); f.y += f.vy * dt;
         }
-        m.falls = m.falls.filter((f) => (f.min ? f.min.k < 1 : f.y < AH + 10));
+        m.falls = m.falls.filter((f) => f.y < AH + 10);
         m.shards = m.shards.filter((p) => G.t - p.t0 < 0.7);
       },
       attack(dt) {
@@ -1808,7 +1436,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         if ((m.spawnCd -= dt) <= 0) mqSpawn();
         for (const ln of m.lines) {
           // a line fires only while it is on screen and well above the cursor
-          if (ln.min || ln.y < -MQ.cap / 2 || ln.y + MQ.cap > P.y - 70) continue;
+          if (ln.y < -MQ.cap / 2 || ln.y + MQ.cap > P.y - 70) continue;
           for (const l of ln.letters) {
             if (!l.gun || l.gone) continue;
             const x = mqX(ln, l) + l.g.cx;
@@ -1831,10 +1459,10 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         // a loose letter: an armoured one well above the cursor and near it shakes, then falls; never while the cursor is threading a line
         if ((m.looseCd -= dt) <= 0) {
           m.looseCd = 0.5;
-          if (!m.lines.some((ln) => !ln.min && P.y > ln.y - 40 && P.y < ln.y + MQ.cap + 40)) {
+          if (!m.lines.some((ln) => P.y > ln.y - 40 && P.y < ln.y + MQ.cap + 40)) {
             let best = null, bd = 90;
             for (const ln of m.lines) {
-              if (ln.min || ln.y < 0 || ln.y + MQ.cap > P.y - 150) continue;
+              if (ln.y < 0 || ln.y + MQ.cap > P.y - 150) continue;
               for (const l of ln.letters) {
                 if (l.gone || l.ring || l.shake > 0) continue;
                 const x = mqX(ln, l);
@@ -1848,7 +1476,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         }
         for (let i = m.shaking.length - 1; i >= 0; i--) {
           const l = m.shaking[i];
-          if (l.gone || l.ln.min) { l.shake = 0; m.shaking.splice(i, 1); continue; }
+          if (l.gone) { l.shake = 0; m.shaking.splice(i, 1); continue; }
           if ((l.shake -= dt) > 0) continue;
           m.shaking.splice(i, 1);
           l.gone = 2;
@@ -1860,7 +1488,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         const m = B.m;
         // the screen clears: every letter on it breaks, and the first new line waits above until the fight picks up again
         for (const ln of m.lines) for (const l of ln.letters) {
-          if (l.gone || ln.min) continue;
+          if (l.gone) continue;
           const x = mqX(ln, l);
           if (x < AW && x + l.g.adv > 0 && ln.y < AH && ln.y + MQ.cap > 0) mqShatter(l, x, ln.y, ln.ci);
           l.gone = 1;
@@ -1871,7 +1499,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       hitShot(o) {
         const y = o.y - 4;
         for (const ln of B.m.lines) {
-          if (ln.min || y < ln.y - 2 || y > ln.y + MQ.cap + MQ.desc) continue;
+          if (y < ln.y - 2 || y > ln.y + MQ.cap + MQ.desc) continue;
           for (const l of ln.letters) {
             if (l.gone) continue;
             const x = mqX(ln, l);
@@ -1892,7 +1520,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         const m = B.m;
         let d = Infinity;
         for (const ln of m.lines) {
-          if (ln.min || py < ln.y - MQ_PAD || py > ln.y + MQ.cap + MQ.desc + MQ_PAD) continue;
+          if (py < ln.y - MQ_PAD || py > ln.y + MQ.cap + MQ.desc + MQ_PAD) continue;
           for (const l of ln.letters) {
             if (l.gone) continue;
             const x = mqX(ln, l);
@@ -1915,33 +1543,25 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         m.shaking = [];
         for (const ln of m.lines) { ln.blink = 0; for (const l of ln.letters) l.flash = 0; }
       },
-      onBomb() {
-        const m = B.m;
-        // Show Desktop minimises the text on screen too; a line still above the screen stays on its way
-        for (const ln of m.lines) if (!ln.min && ln.y + MQ.cap > 0) ln.min = { k: 0 };
-        for (const f of m.falls) if (!f.min) f.min = { k: 0 };
-        if (!m.lines.some((ln) => !ln.min)) m.spawnCd = Math.min(m.spawnCd, 1);
-      },
       draw() {
         const m = B.m;
         if (!m || B.alpha <= 0) return;
         const a = B.alpha, k = B.dying ? B.dieK : 0, cap = MQ.cap, blinkOn = Math.floor(G.t * 16) % 2 === 0;
         ctx.font = MQ.font; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
         for (const ln of m.lines) {
-          if (!ln.min && ln.y + cap + MQ.desc < 0) {
+          if (ln.y + cap + MQ.desc < 0) {
             if (B.dying) continue;
             ctx.globalAlpha = a * (0.45 + Math.sin(G.t * 10) * 0.25);
             ctx.setLineDash([4, 6]); ctx.strokeStyle = MQCOL[ln.ci]; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(0, 1.5); ctx.lineTo(AW, 1.5); ctx.stroke(); ctx.setLineDash([]);
             continue;
           }
-          const e = ln.min ? Math.min(1, ln.min.k) ** 2 : 0, col = MQCOL[ln.ci];
+          const col = MQCOL[ln.ci];
           for (const l of ln.letters) {
             if (l.gone) continue;
             let x = mqX(ln, l), y = ln.y;
             if (x > AW || x + l.g.adv < 0) continue;
             ctx.fillStyle = (l.flash > 0 || ln.blink > 0) && blinkOn ? '#ffffff' : G.t - l.hitAt < 0.06 ? MQLIT[ln.ci] : col;
-            if (e) { mqMin(l.g.ch, x, y, e, a); continue; }
             if (l.shake > 0) x += Math.sin(G.t * 70) * 1.8;
             // beaten, the sign falls apart
             if (k) y += k * k * (110 + (l.x % 9) * 16);
@@ -1952,7 +1572,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         }
         for (const f of m.falls) {
           ctx.fillStyle = MQCOL[f.ci];
-          if (f.min) { mqMin(f.g.ch, f.x, f.y, Math.min(1, f.min.k) ** 2, a); continue; }
           ctx.globalAlpha = a * 0.3; ctx.fillText(f.g.ch, f.x, f.y + cap - f.vy * 0.05);
           ctx.globalAlpha = a; ctx.fillText(f.g.ch, f.x, f.y + cap);
         }
@@ -2238,12 +1857,12 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         ctx.globalAlpha = 1;
       },
     };
-    /* ------------------------------------------------------------ practice: five short lessons in XP Setup's look
-       As in Boss Rush XP: one lesson at a time, each finished by one thing done in the game, shown in Setup's band at
-       the top of the arena with a Skip button (Enter at a desk). The sparring partner is the little monitor from
-       Display Properties' Screen Saver tab, playing a preview; it never goes down, and nothing costs health here. */
-    const LESSONS = ['move', 'aim', 'dodge', 'graze', 'bomb'];
-    const MOVE_NEED = 700, DODGE_NEED = 8, GRAZE_NEED = 10;
+    /* ------------------------------------------------------------ practice: three short lessons on XP Setup's blue
+       As in Boss Rush XP: one lesson at a time, each finished by one thing done in the game, shown in a box at the top
+       of the arena with a Skip key (Enter at a desk). The sparring partner is a little monitor playing a preview; it
+       never goes down, and nothing costs health here. */
+    const LESSONS = ['move', 'aim', 'dodge'];
+    const MOVE_NEED = 700, DODGE_NEED = 8;
     function rrect(x, y, w, h, r) {
       ctx.beginPath(); ctx.moveTo(x + r, y);
       ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
@@ -2257,7 +1876,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         m.t += dt;
         for (const st of m.stars) { st.d += (4 + st.d * 1.2) * st.v * dt; if (st.d > 30) { st.d = rand(0, 4); st.a = rand(0, TAU); } }
         if (!pr) return;
-        // it holds still for the first lesson, then drifts from side to side under the band
+        // it holds still for the first lesson, then drifts from side to side under the lesson's box
         const id = LESSONS[Math.min(pr.step, LESSONS.length - 1)];
         B.x = damp(B.x, id === 'move' ? AW / 2 : AW / 2 + Math.sin(m.t * 0.8) * 100, 2, dt);
         B.y = damp(B.y, pr.top + 64, 4, dt);
@@ -2267,8 +1886,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         if (!pr || pr.good > 0 || (m.cd -= dt) > 0) return;
         const id = LESSONS[pr.step], x = B.x, y = B.y + 8;
         if (id === 'dodge') { m.cd = 0.9; const a = Math.atan2(P.y - y, P.x - x); for (let k = -1; k <= 1; k++) shoot(x, y, a + k * 0.22, 'q3', 90, 80, 170, 3.6); }
-        else if (id === 'graze') { m.cd = 0.8; m.rot += 0.3; for (let k = 0; k < 10; k++) shoot(x, y, m.rot + (k * TAU) / 10, 'q0', 60, 40, 120, 3.6); }
-        else if (id === 'bomb') { m.cd = 0.45; m.rot += 0.2; for (let k = 0; k < 16; k++) shoot(x, y, m.rot + (k * TAU) / 16, 'q3', 70, 60, 150, 3.6); }
         else m.cd = 0.3;
       },
       phase2() {},
@@ -2313,11 +1930,10 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       stepStars(dt);
       G.warp = damp(G.warp, B.on && B.def === STARFIELD && B.phase === 2 && !B.dying ? 1 : 0, 2.5, dt);
       if (G.shake > 0) G.shake = Math.max(0, G.shake - dt * 24);
-      if (G.zoom && (G.zoom.t += dt) > 0.4) G.zoom = null;
       stepPlayer(dt);
       stepBoss(dt);
       stepBullets(dt);
-      stepHazard(dt);
+      stepHazard();
       stepShots(dt);
       stepSparks(dt);
       for (let i = tele.length - 1; i >= 0; i--) if ((tele[i].t -= dt) <= 0) tele.splice(i, 1);
@@ -2325,6 +1941,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       else if (G.mode === 'fight') { if (G.practice) stepPractice(dt); else G.fightTime += dt; }
       else if (G.mode === 'won') { if ((G.endT -= dt) <= 0) { if (G.bossIdx < BOSSES.length - 1) { G.bossIdx += 1; beginBoss(false); } else runOver(); } }
       else if (G.mode === 'dead') { if ((G.endT -= dt) <= 0) showDead(); }
+      else if (G.mode === 'demo') stepDemo(dt);
     }
     function stepStars(dt) {
       const w = G.warp;
@@ -2379,14 +1996,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
         if (!b) continue;
-        if (b.mode === 'min') {
-          // Show Desktop: minimised into its button
-          b.k += dt / SD_TIME;
-          const e = Math.min(1, b.k) ** 2;
-          b.x = lerp(b.x0, G.sdT.x, e); b.y = lerp(b.y0, G.sdT.y, e);
-          if (b.k >= 1) drop(i);
-          continue;
-        }
         if (b.mode === 'debris') {
           b.sp += 700 * dt; b.x += b.dx * b.sp * dt; b.y += b.dy * b.sp * dt; b.fade -= dt * 1.6;
           if (b.fade <= 0 || out(b)) drop(i);
@@ -2399,18 +2008,13 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         if (out(b)) { drop(i); continue; }
         if (!live) continue;
         const dist = b.kind === 'streak' ? segDist(P.x, P.y, b) : Math.hypot(b.x - P.x, b.y - P.y);
-        if (dist < b.r + HIT_R) { if (P.inv <= 0) hurt(); }
-        else if (!b.grazed && P.inv <= 0 && dist < b.r + GRAZE_R) { b.grazed = true; graze(b.x, b.y, GRAZE_FILL); }
+        if (dist < b.r + HIT_R && P.inv <= 0) hurt();
       }
     }
-    // what the boss is made of (lasers, pipes, letters, the No signal box): a touch hurts, and passing close grazes, a
-    // tick at most every 0.3 s
-    function stepHazard(dt) {
-      if (laserCd > 0) laserCd -= dt;
+    // what the boss is made of (lasers, pipes, letters, the No signal box): a touch hurts
+    function stepHazard() {
       if (G.mode !== 'fight' || !B.on || B.dying) return;
-      const d = B.def.hazard(P.x, P.y);
-      if (d < LASER_R + HIT_R) { if (P.inv <= 0) hurt(); }
-      else if (d < GRAZE_R && P.inv <= 0 && laserCd <= 0) { laserCd = 0.3; graze(P.x, P.y - 4, LASER_FILL); }
+      if (B.def.hazard(P.x, P.y) < LASER_R + HIT_R && P.inv <= 0) hurt();
     }
     function stepShots(dt) {
       for (let i = shots.length - 1; i >= 0; i--) {
@@ -2460,17 +2064,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (blk) { blk.classList.remove('lost'); void blk.offsetWidth; blk.classList.add('lost'); }
       if (P.hp <= 0) lose();
     }
-    function graze(x, y, fill) {
-      G.grazes += 1; P.duck = 0.18;
-      sfx.graze();
-      spark(lerp(x, P.x, 0.4), lerp(y, P.y, 0.4), '#fbc761', 3);
-      const was = G.meter;
-      G.meter = Math.min(100, G.meter + fill);
-      if (was < 100 && G.meter >= 100 && !G.practice) { chip(s.ready, 'low', 1.3); sfx.ready(); }
-      const pr = G.practice;
-      if (pr && LESSONS[pr.step] === 'graze' && !pr.good && (pr.count += 1) >= GRAZE_NEED) lessonDone();
-    }
-    function debrisAll() { for (const b of bullets) if (b.mode !== 'min') { b.mode = 'debris'; b.fade = 0.8; } }
+    function debrisAll() { for (const b of bullets) { b.mode = 'debris'; b.fade = 0.8; } }
     function damage(n) {
       if (!B.on || B.dying || B.inv > 0) return;
       // the practice monitor never goes down: its ring only counts the aiming lesson
@@ -2502,28 +2096,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (B.def.stop) B.def.stop();
       sfx.down(); sfx.music(null);
     }
-    // where the Show Desktop button sits, in arena units (below the arena in portrait, beside it in landscape)
-    function sdTarget() {
-      const r = sdBtn.getBoundingClientRect(), c = cv.getBoundingClientRect();
-      if (!r.width || !c.width) return { x: 22, y: AH + 20 };
-      return { x: (r.left + r.width / 2 - c.left) / S, y: (r.top + r.height / 2 - c.top) / S };
-    }
-    function bomb() {
-      if (G.mode !== 'fight' || G.paused || G.meter < 100) return;
-      G.meter = 0; G.bombs += 1;
-      P.inv = Math.max(P.inv, 1); P.press = 0.3;
-      G.sdT = sdTarget();
-      for (const b of bullets) if (!b.mode) { b.mode = 'min'; b.x0 = b.x; b.y0 = b.y; b.k = 0; }
-      tele.length = 0;
-      if (B.def.stop) B.def.stop();
-      if (B.def.onBomb) B.def.onBomb();
-      B.pause = Math.max(B.pause, 0.8);
-      damage(SD_DMG);
-      G.zoom = { t: 0, x: G.sdT.x, y: G.sdT.y };
-      sfx.bomb(); sfx.duck(0.4, 0.6);
-      if (G.practice && LESSONS[G.practice.step] === 'bomb') lessonDone();
-    }
-
     /* ------------------------------------------------------------ drawing */
     function render() {
       if (!sprites || tooSmall) return;
@@ -2534,9 +2106,8 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (!B.on || B.def.bg === 'stars') drawStars();
       drawTele();
       if (B.on) B.def.draw();
-      drawBullets(); drawShots(); drawSparks(); drawZoom(); drawPlayer();
+      drawBullets(); drawShots(); drawSparks(); drawPlayer();
       if (G.debug) { ctx.setTransform(K, 0, 0, K, 0, 0); drawDebug(); }
-      if (G.mode === 'demo' && !front.hidden) drawMonitor();
     }
     // the screensaver itself: dim stars streaming out of the vanishing point, streaks once it warps
     function drawStars() {
@@ -2569,7 +2140,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       for (const b of bullets) {
         if (b.kind === 'streak') { streaks = true; continue; }
         const sp = sprites[b.kind];
-        const g = b.grow * (b.mode === 'min' ? 1 - Math.min(1, b.k) * 0.85 : 1), R = sp.R * g;
+        const R = sp.R * b.grow;
         ctx.globalAlpha = b.mode === 'debris' ? Math.max(0, b.fade) : 1;
         ctx.drawImage(sp.c, b.x - R, b.y - R, R * 2, R * 2);
       }
@@ -2581,8 +2152,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         ctx.beginPath();
         for (const b of bullets) {
           if (b.kind !== 'streak') continue;
-          const L = b.len * (b.mode === 'min' ? 1 - Math.min(1, b.k) : 1);
-          ctx.moveTo(b.x - b.dx * L, b.y - b.dy * L); ctx.lineTo(b.x, b.y);
+          ctx.moveTo(b.x - b.dx * b.len, b.y - b.dy * b.len); ctx.lineTo(b.x, b.y);
         }
         ctx.stroke();
       }
@@ -2594,19 +2164,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     function drawSparks() {
       for (const p of sparks) { ctx.globalAlpha = Math.min(1, p.life / 0.4); ctx.fillStyle = p.c; ctx.fillRect(p.x - p.z / 2, p.y - p.z / 2, p.z, p.z); }
       ctx.globalAlpha = 1;
-    }
-    // XP's zoom rectangle, run the minimise way: from the whole arena down to the Show Desktop button
-    function drawZoom() {
-      const z = G.zoom;
-      if (!z) return;
-      const steps = 9, cur = Math.min(steps, Math.floor(z.t / 0.035));
-      ctx.save();
-      ctx.globalCompositeOperation = 'difference'; ctx.strokeStyle = '#808080'; ctx.lineWidth = 2;
-      for (let i = Math.max(0, cur - 2); i <= cur; i++) {
-        const k = i / steps, w = lerp(AW - 4, 22, k), h = lerp(AH - 4, 16, k), cx = lerp(AW / 2, z.x, k), cy = lerp(AH / 2, z.y, k);
-        ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
-      }
-      ctx.restore();
     }
     function drawPlayer() {
       const x = P.x, y = P.y, dark = B.on && B.def === BLANK && !B.dying;
@@ -2691,28 +2248,59 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       ctx.fillText(`${lay}  ${input}  ${B.on ? B.def.id : '-'} ${Math.max(0, B.hp)}/${B.max}  t ${G.fightTime.toFixed(1)}`, 6, 16);
     }
 
-    /* ------------------------------------------------------------ HUD, balloons and callouts */
+    /* ------------------------------------------------------------ HUD, the device's keys, pointers and callouts */
     const last = {};
     function put(key, v, fn) { if (last[key] !== v) { last[key] = v; fn(v); } }
+    // how many dots the boss's bar has room for, measured again whenever the screen or the boss's name changes
+    let barDots = 0;
+    // on a short screen the first fight's two pointers can overlap: then they take turns, the boss's first
+    let tipsTurn = false;
     function hudSync() {
-      put('bname', B.on ? B.def.name : BOSSES[G.startIdx].name, (v) => { bossName.textContent = v; cv.setAttribute('aria-label', s.arena(v)); });
+      put('bname', G.practice ? s.practice : B.on ? B.def.name : BOSSES[G.startIdx].name, (v) => { bossName.textContent = v; cv.setAttribute('aria-label', s.arena(v)); barDots = 0; });
+      put('clen', fmt(Math.floor(G.fightTime)).length, () => { barDots = 0; });
+      if (!barDots) { barDots = Math.max(1, Math.floor(bossBar.clientWidth / 4)); delete last.boss; }
       const pr = G.practice, frac = pr ? lessonProgress() : B.on ? Math.max(0, B.hp) / B.max : 1;
-      put('boss', Math.ceil(frac * 200), (v) => { bossFill.style.width = `${v / 2}%`; bossBar.setAttribute('aria-valuenow', String(Math.round(v / 2))); });
+      put('boss', Math.round(frac * barDots) * 1000 + barDots, () => {
+        bossFill.style.width = `${Math.round(frac * barDots) * 4}px`;
+        bossBar.setAttribute('aria-valuenow', String(Math.round(frac * 100)));
+      });
+      put('phase', pr ? `p:${pr.step}` : B.on ? `${B.def.id}:${B.phase}` : '', () => {
+        bossBar.setAttribute('aria-label', pr ? `${s.practice}, ${s.lesStep(Math.min(pr.step, LESSONS.length - 1) + 1, LESSONS.length)}` : B.on ? `${B.def.name}, ${s.phase(B.phase)}` : '');
+      });
       put('tick', !!pr, (v) => { bossTick.hidden = v; });
-      put('phase', pr ? `p:${pr.step}` : B.on ? `${B.def.id}:${B.phase}` : '', () => { bossPhase.textContent = pr ? s.lesStep(Math.min(pr.step, LESSONS.length - 1) + 1, LESSONS.length) : B.on ? s.phase(B.phase) : ''; });
       const fill = Math.floor((P.clean / REFILL_TIME) * 20);
       put('hp', P.hp * 100 + fill, () => {
         hpBlocks.forEach((blk, i) => { blk.classList.toggle('on', i < P.hp); blk.firstElementChild.style.height = i === P.hp && P.hp < HP_MAX ? `${fill * 5}%` : '0'; });
-        hud.hp.setAttribute('aria-label', `${s.hp}: ${P.hp} / ${HP_MAX}`);
+        hpEl.setAttribute('aria-label', `${s.hp}: ${P.hp} / ${HP_MAX}`);
       });
-      put('meter', Math.floor(G.meter), (v) => { sdMeter.style.width = `${v}%`; });
-      put('ready', G.meter >= 100 && G.mode === 'fight' && !G.paused, (v) => { sdBtn.disabled = !v; sdBtn.classList.toggle('ready', v); });
-      put('mode', G.mode, (v) => { const f = v === 'fight' || v === 'intro'; stage.classList.toggle('fight', f); stage.classList.toggle('demo', v === 'demo'); hud.pause.hidden = !f; });
+      put('mode', G.mode, (v) => { stage.classList.toggle('fight', v === 'fight' || v === 'intro'); stage.classList.toggle('demo', v === 'demo'); });
       put('blank', B.on && B.def === BLANK && !B.dying && (G.mode === 'intro' || G.mode === 'fight' || G.mode === 'dead'), (v) => { stage.classList.toggle('blank', v); });
-      put('clock', Math.floor(G.fightTime), (v) => { clockVal.textContent = fmt(v); });
-      put('hits', G.hits, (v) => { statHits.textContent = String(v); });
-      put('graze', G.grazes, (v) => { statGraze.textContent = String(v); });
-      if (tipsOn) placeTips();
+      put('clock', Math.floor(G.fightTime), (v) => { clockVal.textContent = fmt(v); clockVal.setAttribute('aria-label', `${s.clock} ${fmt(v)}`); });
+      // the practice has no clock: nothing is timed there
+      put('drill', !!G.practice, (v) => { clockVal.hidden = v; });
+      put('keys', `${sfx.muted}:${goState()}`, () => { if (opts.onKeys) opts.onKeys({ muted: sfx.muted, go: goState() }); });
+      if (tipsOn) {
+        placeTips();
+        if (tipsTurn) { const late = G.introT > G.introLen / 2; put('turn', late, () => { tipCore.classList.toggle('on', !late); tipCur.classList.toggle('on', late); }); }
+      }
+    }
+    // what the device's orange key does now, for its name: start from the menu, pause or resume a fight, or take the
+    // default choice of the screen showing
+    function goState() {
+      if (tooSmall) return 'none';
+      const d = G.dlg;
+      if (d && d.kind === 'pause') return 'resume';
+      if (d && !d.front && d.def) return 'ok';
+      if (G.mode === 'demo') return 'start';
+      if ((G.mode === 'fight' || G.mode === 'intro') && !G.paused) return 'pause';
+      return 'none';
+    }
+    function primary() {
+      const g = goState(), d = G.dlg;
+      if (g === 'resume') resume();
+      else if (g === 'ok') d.def.run(layer.querySelector('.menu button.sel'));
+      else if (g === 'start') go(false);
+      else if (g === 'pause') pause();
     }
     // the first meeting with a boss points at what to shoot; the very first also points at the hotspot
     function showTips(on, withCursor) {
@@ -2722,19 +2310,22 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         tipCur.textContent = coarse.matches ? s.tipCursorTouch : s.tipCursor;
         tipCur.hidden = !withCursor;
         placeTips();
+        const a = tipCore.getBoundingClientRect(), c = tipCur.getBoundingClientRect();
+        tipsTurn = withCursor && !(a.bottom + 8 <= c.top || c.bottom + 8 <= a.top || a.right <= c.left || c.right <= a.left);
+        if (tipsTurn) { G.introLen += 1.4; B.pause += 1.4; }
       }
-      tipCore.classList.toggle('on', on); tipCur.classList.toggle('on', on);
+      tipCore.classList.toggle('on', on); tipCur.classList.toggle('on', on && !tipsTurn);
     }
-    // the boss's balloon hangs under what to shoot, stem up; the tip's balloon sits above and to the left, clear of the rider
+    // the boss's box hangs under what to shoot, pointing up; the tip's sits above and to the left, clear of the rider
     function placeTips() {
       const aw = AW * S, at = B.def.tipAt();
-      let w = tipCore.offsetWidth, tx = at.x * S, left = clamp(tx - 28, 6, aw - w - 6);
-      tipCore.style.transform = `translate(${Math.round(left)}px, ${Math.round((at.y + at.below) * S + 10)}px)`;
-      tipCore.style.setProperty('--sx', `${Math.round(clamp(tx - left, 12, w - 12))}px`);
+      let w = tipCore.offsetWidth, tx = at.x * S, left = clamp(tx - 28, 8, aw - w - 8);
+      tipCore.style.transform = `translate(${Math.round(left)}px, ${Math.round((at.y + at.below) * S + 12)}px)`;
+      tipCore.style.setProperty('--sx', `${Math.round(clamp(tx - left, 16, w - 16))}px`);
       if (tipCur.hidden) return;
-      w = tipCur.offsetWidth; tx = P.x * S; left = clamp(tx - w + 18, 6, aw - w - 6);
-      tipCur.style.transform = `translate(${Math.round(left)}px, ${Math.round(P.y * S - tipCur.offsetHeight - 12)}px)`;
-      tipCur.style.setProperty('--sx', `${Math.round(clamp(tx - left, 12, w - 12))}px`);
+      w = tipCur.offsetWidth; tx = P.x * S; left = clamp(tx - w + 24, 8, aw - w - 8);
+      tipCur.style.transform = `translate(${Math.round(left)}px, ${Math.round(P.y * S - tipCur.offsetHeight - 14)}px)`;
+      tipCur.style.setProperty('--sx', `${Math.round(clamp(tx - left, 16, w - 16))}px`);
     }
     function chip(text, size, dur) {
       const c = document.createElement('div');
@@ -2745,83 +2336,101 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     function setTexts() {
       s = STR[lang];
       stage.lang = lang; smallEl.lang = lang;
-      panels.boss.h.textContent = s.bossHead; panels.run.h.textContent = s.run; panels.cursor.h.textContent = s.hp;
-      panels.sd.h.textContent = s.sd; panels.keys.h.textContent = s.controls;
-      hud.clock.querySelector('.lbl').textContent = s.clock;
-      hud.stats.querySelector('[data-k="hits"]').textContent = s.statHits;
-      hud.stats.querySelector('[data-k="graze"]').textContent = s.statGraze;
-      hud.sd.querySelector('.sd-lbl b').textContent = s.sd;
-      hud.sd.querySelector('.sd-lbl kbd').textContent = s.sdKey;
-      // the pane's legend: keycaps at a desk, the two touches on a touch screen
-      hud.keys.innerHTML = (coarse.matches ? s.keysTouchShort.map(([k, v]) => `<p><b>${esc(k)}</b> ${esc(v)}</p>`) : s.keysShort.map(([k, v]) => `<p><kbd>${esc(k)}</kbd> ${esc(v)}</p>`)).join('') + `<p>${esc(s.tipOnly)}</p>`;
-      sdBtn.setAttribute('aria-label', s.sdBtn); sdBtn.title = s.sdBtn;
-      hud.pause.setAttribute('aria-label', s.pauseBtn); hud.pause.title = s.pauseBtn; hud.pause.lastElementChild.textContent = s.pauseBtn;
-      thumbHint.textContent = s.thumb;
-      fitPane();
-      syncSound();
+      lesSkip.textContent = s.skip;
       for (const k of Object.keys(last)) delete last[k];
+      barDots = 0;
     }
-    function syncSound() {
-      const on = !sfx.muted;
-      hud.snd.innerHTML = `${ico(on ? 'sound-on' : 'sound-mute', 16)}<span class="snd-t">${esc(on ? s.soundOn : s.soundOff)}</span>`;
-      hud.snd.setAttribute('aria-pressed', String(on)); hud.snd.setAttribute('aria-label', s.sound); hud.snd.title = on ? s.soundOn : s.soundOff;
+    function toggleSound() { sfx.ensure(); sfx.setMuted(!sfx.muted); }
+    // the game's icons in one colour, as the screen's dot-matrix and its orange marks draw them
+    function icoMono(name, size, color) {
+      const [line, body] = ICONS[name];
+      return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><g fill="${color}">${body}${line}</g></svg>`;
     }
-    function toggleSound() { sfx.ensure(); sfx.setMuted(!sfx.muted); syncSound(); }
+    const focusEl = (el) => { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
+    function focusStage() { focusEl(stage); }
 
-    /* ------------------------------------------------------------ dialogs */
-    // kind names the dialog for whatever updates it in place; acts are its body's own buttons (data-act), onSubmit takes
-    // Enter in its form, and rebuild draws it again as it is (a language switch)
-    function openDlg({ title, icon, body, buttons, wide, onEsc, over, kind = '', acts = {}, onSubmit = null, rebuild = null }) {
-      layer.hidden = false; layer.className = over ? 'layer over' : 'layer';
-      if (over) front.classList.add('inactive');
-      // over the scrolling front door the dialog centres in what the scrollbar leaves, as the windows under it do
-      layer.style.right = over && !front.hidden ? `${front.offsetWidth - front.clientWidth}px` : '';
-      layer.innerHTML = `<div class="mini${wide ? ' wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="dlgT"><div class="title"><span class="t-ico">${ico(icon, 16)}</span><span class="t-text" id="dlgT">${esc(title)}</span></div><div class="dlg">${body}<div class="btns">${buttons.map((b, i) => `<button class="btn${b.def ? ' default' : ''}${b.cls ? ` ${b.cls}` : ''}" type="button" data-i="${i}">${esc(b.label)}</button>`).join('')}</div></div></div>`;
-      G.dlg = { buttons, onEsc, kind, acts, onSubmit, rebuild };
-      const def = layer.querySelector('.btn.default') || layer.querySelector('.btn');
-      if (def) { try { def.focus({ preventScroll: true }); } catch (e) { def.focus(); } }
-      // a dialog is modal: once the focus is in it, the front door, the HUD and the arena behind it take no Tab and no click
+    /* ------------------------------------------------------------ screens
+       Every screen is the device's own: its heading in orange, its text in grey, and its choices as a column of pills,
+       the picked one ringed in orange behind its ▶. The menu before a run and its pages (How to play, Leaderboard,
+       About this game) lie over the demo on the front; a fight's screens (pause, a loss, a win, the practice's end, the
+       name, sharing, the board after a win) lie over everything on the layer. Up and down move between the choices,
+       Enter takes one, Escape goes back.
+       o: title, aside (grey, at the heading's right), body (HTML), buttons [{ label, run, def }], foot (under the
+       choices), mid (the column in the middle), onEsc, kind, acts ({ act: fn } for data-act in the body), onSubmit
+       (Enter in the body's form), rebuild (draws it again as it is: a language switch) */
+    function screenHTML(o, id) {
+      const head = !o.title ? '' : o.mid ? `<p class="scr-h" id="${id}">${esc(o.title)}</p>`
+        : `<p class="row-h"><span class="scr-h" id="${id}">${esc(o.title)}</span>${o.aside ? `<span class="dim">${esc(o.aside)}</span>` : ''}</p>`;
+      const choices = o.buttons.length ? `<div class="menu">${o.buttons.map((b, i) => `<button type="button" data-i="${i}"${b.def ? ' class="sel"' : ''}>${esc(b.label)}</button>`).join('')}</div>` : '';
+      return `<div class="scr${o.mid ? ' mid' : ''}">${head}${o.body}<div class="grow"></div>${choices}${o.foot || ''}</div>`;
+    }
+    // a choice's index stays picked when its screen is drawn again (the board arrives, the language switches)
+    function draw(el, o, id) {
+      const a = root.activeElement, keep = a && el.contains(a) && a.dataset && a.dataset.i !== undefined ? +a.dataset.i : -1;
+      el.innerHTML = screenHTML(o, id);
+      const box = el.firstElementChild;
+      if (o.title) box.setAttribute('aria-labelledby', id); else box.setAttribute('aria-label', 'Screen Saver XP');
+      return el.querySelector(`.menu button[data-i="${keep}"]`) || el.querySelector('.menu .sel') || el.querySelector('.menu button');
+    }
+    // the menu's pages, over the demo
+    function openFront(o) {
+      o.front = true; o.def = o.buttons.find((b) => b.def) || null;
+      front.hidden = false; front.scrollTop = 0;
+      const f = draw(front, o, 'frontT');
+      front.firstElementChild.setAttribute('role', 'region');
+      G.front = o;
+      if (layer.hidden) { G.dlg = o; focusEl(f); }
+    }
+    function openDlg(o) {
+      o.def = o.buttons.find((b) => b.def) || null;
+      layer.hidden = false; layer.scrollTop = 0; stage.classList.add('over'); layer.classList.toggle('solid', !!o.solid);
+      const f = draw(layer, o, 'dlgT');
+      const box = layer.firstElementChild;
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+      G.dlg = o;
+      // a screen here is modal: the menu's page, the HUD and the arena behind it take no Tab and no click
       setBehind(true);
+      focusEl(f);
     }
-    function closeDlg() { layer.hidden = true; layer.className = 'layer'; layer.textContent = ''; G.dlg = null; setBehind(false); }
-    const behind = [topEl, paneL, paneR, $('#arena'), $('#thumb'), barEl, front];
-    function setBehind(on) { for (const el of behind) el.inert = on; }
-    function focusStage() { try { stage.focus({ preventScroll: true }); } catch (e) { stage.focus(); } }
-    // at a desk the controls are keys, drawn as keycaps; on a touch screen they are actions, named in bold over their line
-    function keysList() {
-      const touch = coarse.matches;
-      return `<dl class="keys${touch ? ' stack' : ''}">${(touch ? s.keysTouch : s.keysDesk).map(([k, v]) => `<dt>${touch ? esc(k) : `<kbd>${esc(k)}</kbd>`}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
+    // the layer closes back onto the menu's page under it, if there is one
+    function closeDlg() {
+      layer.hidden = true; layer.textContent = ''; setBehind(false); stage.classList.remove('over');
+      G.dlg = !front.hidden && G.front ? G.front : null;
+      if (G.dlg) focusEl(front.querySelector('.menu .sel') || front.querySelector('.menu button'));
     }
-    function copyBox() { return `<div class="copy" hidden><label for="copyText">${esc(s.copyHand)}</label><textarea id="copyText" rows="4" readonly></textarea></div>`; }
-    const goalLine = () => `<p><b>${esc(s.goalHead)}</b> ${esc(s.goal)}</p>`;
+    function hideFront() { front.hidden = true; front.textContent = ''; G.front = null; if (G.dlg && G.dlg.front) G.dlg = null; }
+    function setBehind(on) { for (const el of [hudEl, $('#arena'), front]) el.inert = on; }
+    // up and down move between the choices of the screen on top
+    function moveSel(dir) {
+      const box = layer.hidden ? front : layer;
+      const bs = [...box.querySelectorAll('.menu button:not(:disabled)')];
+      if (!bs.length) return;
+      const i = bs.indexOf(root.activeElement), cur = i >= 0 ? i : bs.findIndex((b) => b.classList.contains('sel'));
+      focusEl(bs[(cur + dir + bs.length) % bs.length]);
+    }
+    function copyBox() { return `<div class="copy" hidden><label for="copyText" class="dim">${esc(s.copyHand)}</label><textarea id="copyText" rows="4" readonly></textarea></div>`; }
 
-    /* ------------------------------------------------------------ the front door: Display Properties at its Screen Saver tab
-       The drop-down picks what the little monitor shows: the practice, or a screensaver playing live with the stickman
-       on a cursor that dodges on its own. That demo runs in the arena, dimmed behind the front door, and the monitor
-       copies its upper part (under reduced motion it holds still, and only the monitor shows it). Preview always starts
-       the full run from Starfield.scr, or the practice when that is picked (GAME2_BRIEF.md; with ?debug it starts from
-       the picked boss). Blank.scr stays ??? behind the monitor's No signal box until a run has reached it. The
-       Leaderboard beside it is the game's board on the portfolio's server. */
-    const PICKS = [PRACTICE, ...BOSSES];
-    const DEMO_Y = 250, MON_Y = 40, MON_H = 270;   // the demo cursor's line, and the band of the arena the monitor shows
+    /* ------------------------------------------------------------ the menu before a run, over a live demo
+       Behind the menu the screensavers take turns playing, dimmed, with the stickman on a cursor that dodges on its own
+       (under reduced motion it holds still on one frame). Blank.scr joins them once a run has reached it. Start game
+       always starts the full run from Starfield.scr (GAME2_BRIEF.md); the practice starts from How to play. */
+    const DEMO_Y = 250, DEMO_LEN = 16;
     const RUN_GOAL = BOSSES.reduce((t, b) => t + b.target, 0);
     const gradeOf = (score, goal = RUN_GOAL) => (score <= goal * 1.125 ? 'S' : score <= goal * 1.5 ? 'A' : score <= goal * 2 ? 'B' : 'C');
     const blankMet = () => store.get('ssxp-met-blank') === '1';
-    const monCv = document.createElement('canvas'), monCtx = monCv.getContext('2d');
-    monCv.setAttribute('role', 'img');
-    let pickI = 1;
-    const pickName = (d) => (d === PRACTICE ? s.dpPractice : d === BLANK && !blankMet() ? '???' : d.name);
+    let demoI = 0;
     function startDemo() {
-      const d = PICKS[pickI];
+      const list = blankMet() ? BOSSES : BOSSES.slice(0, 4), d = list[demoI % list.length];
       clearField(); resetPlayer();
       Object.assign(P, { inv: 0, x: AW / 2, tx: AW / 2, y: DEMO_Y, ty: DEMO_Y });
-      G.mode = 'demo'; B.on = false;
-      if (d === BLANK && !blankMet()) return;
+      G.mode = 'demo'; G.demoT = 0;
       resetBoss(d);
       Object.assign(B, { inv: 0, pause: 0.6 });
       // under reduced motion the fight is run 2.5 s ahead here, unseen, and then holds still (frame)
       if (reduceMotion) for (let i = 0; i < 300; i++) update(STEP);
     }
+    // each screensaver has its turn, then the next one plays
+    function stepDemo(dt) { if ((G.demoT += dt) >= DEMO_LEN) { demoI += 1; startDemo(); } }
     // the demo's cursor keeps under whatever is to shoot and steps away from the nearest danger
     function demoPilot() {
       const aimX = B.on ? clamp(B.def.tipAt().x - 2, 40, AW - 56) : AW / 2;
@@ -2839,22 +2448,6 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       }
       P.tx = best; P.ty = DEMO_Y + Math.sin(G.t * 1.3) * 10;
     }
-    function drawMonitor() {
-      const w = monCv.width, h = monCv.height;
-      if (!w) return;
-      monCtx.setTransform(1, 0, 0, 1, 0, 0);
-      if (B.on) { monCtx.drawImage(cv, 0, MON_Y * K, AW * K, MON_H * K, 0, 0, w, h); return; }
-      // Blank.scr, not met yet: the monitor's own On-Screen Display, as the portfolio's CRT draws it
-      const k = w / 192, bw = 132 * k, bh = 32 * k, bx = (w - bw) / 2, by = (h - bh) / 2;
-      monCtx.fillStyle = '#000'; monCtx.fillRect(0, 0, w, h);
-      monCtx.shadowColor = 'rgba(9,151,255,.35)'; monCtx.shadowBlur = 10 * k;
-      monCtx.fillStyle = '#00138c'; monCtx.fillRect(bx, by, bw, bh);
-      monCtx.shadowColor = 'transparent'; monCtx.shadowBlur = 0;
-      monCtx.strokeStyle = '#7a96df'; monCtx.lineWidth = k; monCtx.strokeRect(bx + k / 2, by + k / 2, bw - k, bh - k);
-      monCtx.fillStyle = '#ffffff'; monCtx.font = `700 ${Math.round(12 * k)}px "Noto Sans", sans-serif`; monCtx.textAlign = 'center'; monCtx.textBaseline = 'middle';
-      monCtx.fillText(s.noSignal, w / 2, h / 2 + k, bw - 16 * k);
-    }
-    const FRONT_DLG = { buttons: [], onEsc: null, kind: 'front', acts: {}, onSubmit: null };
     function showMenu() {
       closeDlg();
       G.practice = null; lesEl.hidden = true;
@@ -2862,44 +2455,60 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       sfx.quiet = true;
       G.paused = false; keys.clear(); dragId = null; G.lb = null;
       startDemo();
-      showFront();
+      showTitle();
       loadFrontBoard();
     }
-    // the dialog and the board, drawn afresh after the language changes; the demo keeps running under them
-    function showFront() {
-      front.hidden = false; front.classList.remove('inactive');
-      front.innerHTML = `<div class="fd-wrap"><section class="mini fd-dp" role="dialog" aria-labelledby="dpT">`
-        + `<div class="title"><span class="t-ico">${ico('retro-pc', 16)}</span><span class="t-text" id="dpT">${esc(s.dp)}</span><button class="tb" type="button" data-act="settings" aria-label="${esc(s.help)}" title="${esc(s.help)}">?</button></div>`
-        + `<div class="dp-body"><div class="xtabs" role="tablist" aria-label="${esc(s.dp)}"><span class="xtab" role="tab" id="dpTab" aria-selected="true">${esc(s.dpTab)}</span></div>`
-        + `<div class="xpage" role="tabpanel" aria-labelledby="dpTab"><div class="mon"><div class="mon-case" id="monSlot"></div><div class="mon-neck"></div><div class="mon-foot"></div></div>`
-        + `<fieldset class="grp"><legend>${esc(s.dpGroup)}</legend><div class="grp-row"><select id="dpPick" aria-label="${esc(s.dpGroup)}">${PICKS.map((d, i) => `<option value="${i}"${i === pickI ? ' selected' : ''}>${esc(pickName(d))}</option>`).join('')}</select>`
-        + `<button class="btn" type="button" data-act="settings">${esc(s.dpSettings)}</button><button class="btn default" type="button" data-act="preview">${esc(s.dpPreview)}</button></div><p id="dpInfo"></p></fieldset>`
-        + `<fieldset class="grp"><legend>${esc(s.dpRunHead)}</legend><p id="dpRun"></p>${bestLine()}</fieldset></div></div></section>`
-        + `<section class="mini fd-lb" aria-labelledby="lbT"><div class="title"><span class="t-ico">${ico('trophy', 16)}</span><span class="t-text" id="lbT">${esc(s.board)}</span></div><div class="dlg lb" aria-live="polite">${boardHTML()}</div></section></div>`;
-      front.querySelector('#monSlot').append(monCv);
-      monCv.width = Math.round(192 * DPR); monCv.height = Math.round(144 * DPR);
-      frontInfo();
-      front.querySelectorAll('canvas.lb-ava').forEach(paintAvatar);
-      focusPreview();
-    }
-    function focusPreview() {
-      G.dlg = FRONT_DLG;
-      const def = front.querySelector('.btn.default');
-      if (def) { try { def.focus({ preventScroll: true }); } catch (e) { def.focus(); } }
-    }
-    // a child dialog closes back onto the front door, which becomes active again
-    function closeChild() { closeDlg(); front.classList.remove('inactive'); focusPreview(); }
-    function frontInfo() {
-      const d = PICKS[pickI], hidden = d === BLANK && !blankMet(), info = front.querySelector('#dpInfo'), run = front.querySelector('#dpRun');
-      if (info) info.textContent = d === PRACTICE ? s.dpInfo.practice : hidden ? s.dpInfo.hidden : s.dpInfo[d.id];
-      if (run) run.textContent = d === PRACTICE ? s.dpRunPractice : s.dpRun;
-      monCv.setAttribute('aria-label', hidden ? s.noSignalLabel : s.monLabel(pickName(d)));
-    }
-    // the best full run on this device, shown in Display Properties even where the board can't be reached
+    // the best full run on this device, shown even where the board can't be reached
     const best = () => { try { const b = JSON.parse(store.get('ssxp-best') || 'null'); return b && Number.isFinite(b.score) ? b : null; } catch (e) { return null; } };
-    function bestLine() {
-      const b = best();
-      return b ? `<p class="best">${esc(s.dpBest)} <b>${fmt1(b.score)}</b> <span class="gd g${gradeOf(b.score)}">${gradeOf(b.score)}</span></p>` : `<p class="best">${esc(s.dpNoBest)}</p>`;
+    // the game's moon in dots, its name, the best run in big dot-matrix figures with its place on the board, and the
+    // four ways on
+    function showTitle() {
+      const b = best(), d = lbFront.st === 'ok' ? lbFront.data : null, me = d && d.me;
+      const place = b && me ? ` · <span class="acc">${esc(s.rankOf(me.rank, d.total))}</span>` : '';
+      openFront({
+        kind: 'title', mid: true, rebuild: showTitle,
+        body: `<span class="dots3 big" aria-hidden="true">${icoMono('moon', 72, 'currentColor')}</span><p class="hi">Screen Saver <span class="acc">XP</span></p>`
+          + `<div class="best">${b ? `<span class="dots4 big" aria-hidden="true">${fmt1(b.score)}</span>` : ''}<p class="dim">${b ? `${esc(s.yourBest)}<span class="sr"> ${fmt1(b.score)}</span>${place}` : esc(s.noBest)}</p></div>`,
+        buttons: [{ label: s.menuStart, def: true, run: () => go(false) }, { label: s.menuHow, run: showHow }, { label: s.menuBoard, run: showBoard }, { label: s.menuAbout, run: showAbout }],
+        foot: `<p class="dim" aria-hidden="true">${esc(s.pressPre)}<span class="acc">▶</span>${esc(s.pressPost)}</p>`,
+      });
+    }
+    // how to play: the goal, the moves (a touch screen's or a desk's), what a run is, and the practice
+    function showHow() {
+      const list = coarse.matches ? s.keysTouch : s.keysDesk;
+      openFront({
+        kind: 'how', title: s.menuHow, rebuild: showHow, onEsc: showTitle,
+        body: `<p>${esc(s.goal)}</p><dl class="list">${list.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl><p class="dim">${esc(s.howRun)}</p><p class="dim">${esc(s.practiceInfo)}</p>`,
+        buttons: [{ label: s.tryPractice, def: true, run: () => go(true) }, { label: s.back, run: showTitle }],
+      });
+    }
+    // the leaderboard as the front last heard it; the player's name, and the way to change it, under it
+    function showBoard() {
+      const v = lbFront.st, d = v === 'ok' ? lbFront.data : null, who = playerName();
+      let body;
+      const buttons = [{ label: s.back, def: true, run: showTitle }];
+      if (v === 'load') body = `<p class="dim">${esc(s.lbLoading)}</p>`;
+      else if (v === 'off') { body = `<p>${esc(s.lbOff)}</p>`; buttons.unshift({ label: s.retry, run: () => { loadFrontBoard(); showBoard(); } }); }
+      else if (!d || !d.total) body = `<p>${esc(s.lbEmptyHead)}</p><p class="dim">${esc(s.lbEmptyText)}</p>`;
+      else body = boardTable(d) + `<p class="dim">${esc(s.lbHow)}</p>`;
+      if (who) { body += `<p class="dim">${esc(s.nameNow)} <span class="hi">${esc(who)}</span></p>`; buttons.push({ label: s.nameChange, run: () => askName(() => { closeDlg(); showBoard(); }, true) }); }
+      openFront({ kind: 'board', title: s.board, aside: d && d.total ? s.lbCount(d.total) : '', rebuild: showBoard, onEsc: showTitle, body, buttons });
+    }
+    function showAbout() {
+      const a1 = '<a href="https://pixeliconlibrary.com" target="_blank" rel="noopener">Pixel Icon Library</a>';
+      const a2 = '<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>';
+      openFront({
+        kind: 'about', title: s.menuAbout, rebuild: showAbout, onEsc: showTitle,
+        body: `<p class="hi">Screen Saver XP <span class="dim">· ${esc(s.aboutVer)}</span></p><p>${esc(s.premise)}</p>`
+          + `<ul class="credits dim"><li>${esc(s.aboutMusic)}</li><li>${s.aboutIcons(a1, a2)}</li><li>${esc(s.aboutFont)}</li></ul>`,
+        buttons: [{ label: s.back, def: true, run: showTitle }],
+      });
+    }
+    // a run, or the practice; the first play asks for the player's name
+    function go(practice) {
+      if (!playerName()) { askName(() => { closeDlg(); go(practice); }); return; }
+      hideFront();
+      if (practice) startPractice(); else startGame(0);
     }
 
     /* ------------------------------------------------------------ the leaderboard: worker/index.js with ?game=ssxp
@@ -2939,187 +2548,83 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         return r.ok && j && !j.error ? j : { error: (j && j.error) || 'net' };
       } catch (e) { return { error: 'net' }; } finally { clearTimeout(timer); }
     }
-    // New player: asked over Display Properties before the first play. go runs once a valid name is in; change: opened
-    // from Settings to change the name, and back to Settings after
-    function askName(go, change) {
+    // New player: asked before the first play, over the menu. then runs once a valid name is in; change: from the
+    // leaderboard, to change the name
+    function askName(then, change) {
       const draft = nameDraft !== null ? nameDraft : playerName() || tidyName(store.get('brxp-name'));
-      const leave = (then) => { nameDraft = null; nameErr = false; then(); };
-      const back = () => leave(change ? showSettings : closeChild);
+      const leave = (fn) => { nameDraft = null; nameErr = false; fn(); };
+      const back = () => leave(closeDlg);
       const submit = () => {
         const f = layer.querySelector('#pName'), typed = f ? f.value : draft, n = tidyName(typed);
-        if (!nameOk(n)) { nameDraft = typed; nameErr = true; askName(go, change); return; }
+        if (!nameOk(n)) { nameDraft = typed; nameErr = true; askName(then, change); return; }
         setName(n);
-        leave(go);
+        leave(then);
       };
       openDlg({
-        title: change ? s.nameChange : s.nameTitle, icon: 'user', over: true, kind: 'name', rebuild: () => askName(go, change),
+        title: change ? s.nameChange : s.nameTitle, kind: 'name', rebuild: () => askName(then, change),
         body: `<form class="name-form" novalidate><p>${esc(change ? s.nameChangeText : s.nameText)}</p>`
-          + `<div class="field"><label for="pName">${esc(s.nameLabel)}</label><input id="pName" maxlength="${NAME_MAX}" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="go" value="${esc(draft)}" aria-describedby="pNameNote"${nameErr ? ' aria-invalid="true"' : ''}></div>`
-          + (nameErr ? `<p class="note err" id="pNameNote">${ico('exclamation-triangle', 16)}<span>${esc(s.lbErr.format)}</span></p>` : `<p class="note" id="pNameNote">${esc(s.nameRule)}</p>`) + '</form>',
+          + `<label class="field"><span class="dim">${esc(s.nameLabel)}</span><input id="pName" maxlength="${NAME_MAX}" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="go" value="${esc(draft)}" aria-describedby="pNameNote"${nameErr ? ' aria-invalid="true"' : ''}></label>`
+          + (nameErr ? `<p class="err" id="pNameNote">${esc(s.lbErr.format)}</p>` : `<p class="dim" id="pNameNote">${esc(s.nameRule)}</p>`) + '</form>',
         buttons: [{ label: change ? s.save : s.namePlay, def: true, run: submit }, { label: s.cancel, run: back }],
         onEsc: back, onSubmit: submit,
       });
       const f = layer.querySelector('#pName');
       f.addEventListener('input', () => { nameDraft = f.value; });
-      try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); }
+      focusEl(f);
       // a name already there (this game's, or Boss Rush XP's) is selected: Enter keeps it, typing replaces it
       if (nameErr || f.value) f.select();
     }
-    // the front door's board: 'load', then 'ok' with the server's answer or 'off'
-    let lbFront = { st: 'load', data: null }, boardAll = null;
+    // the front's board: 'load', then 'ok' with the server's answer or 'off'; the title and the leaderboard page show it
+    let lbFront = { st: 'load', data: null };
     function loadFrontBoard() {
       const v = lbFront = { st: 'load', data: null };
-      renderFrontBoard();
       boardCall(`pid=${playerId()}`).then((j) => {
         if (lbFront !== v) return;
         Object.assign(v, j.error ? { st: 'off' } : { st: 'ok', data: j });
-        renderFrontBoard();
+        if (G.front && (G.front.kind === 'title' || G.front.kind === 'board')) G.front.rebuild();
       });
-    }
-    function renderFrontBoard() {
-      const box = !front.hidden && front.querySelector('.fd-lb .lb');
-      if (!box) return;
-      box.innerHTML = boardHTML();
-      box.querySelectorAll('canvas.lb-ava').forEach(paintAvatar);
     }
     const scoreOf = (r) => r.time + r.hits * 10;
-    function boardHTML() {
-      const v = lbFront.st;
-      if (v === 'load') return `<p class="lb-note">${esc(s.lbLoading)}</p><div class="lb-bar" aria-hidden="true"><i></i></div>`;
-      if (v === 'off') {
-        const b = best();
-        return `<div class="lb-empty">${ico('exclamation-triangle', 32)}<p>${esc(s.lbOff)}</p>${b ? `<p class="lb-note">${esc(s.dpBest)} <b>${fmt1(b.score)}</b></p>` : ''}<button class="btn" type="button" data-act="retry">${esc(s.retry)}</button></div>`;
-      }
-      const d = v === 'ok' ? lbFront.data : null;
-      const open = (n) => `<li class="lb-place p${n} open"><span class="lb-q">?</span><span class="lb-step">${n}</span></li>`;
-      if (!d || !d.total) {
-        return `<div class="lb-empty"><ol class="lb-podium" aria-hidden="true">${[1, 2, 3].map(open).join('')}</ol>`
-          + `<h3>${esc(s.lbEmptyHead)}</h3><p>${esc(s.lbEmptyText)}</p><div class="lb-cta"><button class="btn" type="button" data-act="run">${esc(s.lbStart)}</button><button class="btn" type="button" data-act="practice">${esc(s.lbPractice)}</button></div></div>`;
-      }
-      const you = (r) => (r.me ? ` <small>${esc(s.lbYou)}</small>` : '');
-      const chip = (r) => { const g = gradeOf(scoreOf(r)); return `<span class="gd g${g}" title="${esc(s.lbCols[5])}">${g}</span>`; };
-      const place = (r, n) => (r ? `<li class="lb-place p${n}${r.me ? ' me' : ''}"><canvas class="lb-ava" aria-hidden="true"></canvas><span class="lb-name">${esc(r.name)}${you(r)}</span><span class="lb-time">${fmt1(scoreOf(r))} ${chip(r)}</span><span class="lb-step" aria-hidden="true">${n}</span></li>` : open(n));
-      const row = (r) => `<li value="${r.rank}"${r.me ? ' class="me"' : ''}><span class="n" aria-hidden="true">${r.rank}</span><span class="nm">${esc(r.name)}${you(r)}</span><span class="t">${fmt1(scoreOf(r))}</span>${chip(r)}</li>`;
-      // the player's own row under the top ten when it is further down
-      const mine = d.me && !d.top.some((r) => r.me) ? `<li class="gap" aria-hidden="true">⋯</li>${row({ ...d.me, me: true })}` : '';
-      const rest = d.top.slice(3).map(row).join('') + mine;
-      return `<ol class="lb-podium">${[1, 2, 3].map((n) => place(d.top[n - 1], n)).join('')}</ol>`
-        + (rest ? `<ol class="lb-ranks" start="4">${rest}</ol>` : '')
-        + `<div class="lb-foot"><span>${esc(s.lbCount(d.total))}</span><button class="lb-link" type="button" data-act="all">${esc(s.lbAll)}</button></div>`;
+    // the top ten, and the player's own row under them when it is further down; the time and the hits show where the
+    // screen is wide enough
+    function boardTable(d) {
+      const row = (r) => `<tr${r.me ? ' class="me"' : ''}><td>${r.rank}</td><td>${esc(r.name)}${r.me ? ` (${esc(s.lbYou)})` : ''}</td><td class="t w">${fmt1(r.time)}</td><td class="h w">${r.hits}</td><td class="t">${fmt1(scoreOf(r))}</td><td><span class="gd">${gradeOf(scoreOf(r))}</span></td></tr>`;
+      const mine = d.me && !d.top.some((r) => r.me) ? `<tr class="gap" aria-hidden="true"><td colspan="6">…</td></tr>${row({ ...d.me, me: true })}` : '';
+      return `<table class="lb"><thead class="sr"><tr>${s.lbCols.map((c) => `<th scope="col">${esc(c)}</th>`).join('')}</tr></thead><tbody>${d.top.map(row).join('')}${mine}</tbody></table>`;
     }
-    // an account picture: the stickman's head and shoulders on a pale sky, as Boss Rush XP's board draws it
-    function paintAvatar(c) {
-      const n = Math.round(28 * Math.min(2, window.devicePixelRatio || 1)), x = c.getContext('2d');
-      c.width = c.height = n;
-      x.setTransform(n / 38, 0, 0, n / 38, 0, 0);
-      const g = x.createLinearGradient(0, 0, 0, 38);
-      g.addColorStop(0, '#c6d3f7'); g.addColorStop(1, '#f3f6fd');
-      x.fillStyle = g; x.fillRect(0, 0, 38, 38);
-      x.strokeStyle = '#111'; x.lineCap = 'round'; x.lineJoin = 'round'; x.lineWidth = 3.4;
-      x.beginPath(); x.moveTo(19, 24); x.lineTo(19, 40); x.moveTo(19, 30); x.lineTo(7, 40); x.moveTo(19, 30); x.lineTo(31, 40); x.stroke();
-      x.fillStyle = '#111'; x.beginPath(); x.arc(19, 16, 8.5, 0, TAU); x.fill();
-      x.strokeStyle = '#e0301e'; x.lineWidth = 2.6;
-      x.beginPath(); x.moveTo(10.5, 14); x.lineTo(27.5, 14); x.stroke();
-      x.beginPath(); x.moveTo(27, 14.5); x.lineTo(32, 12); x.lineTo(35, 15.5); x.stroke();
-      x.fillStyle = '#fff'; x.beginPath(); x.ellipse(22.8, 16.8, 1.3, 1.9, 0, 0, TAU); x.fill();
-    }
-    // the board as a table: the top ten with their times and hits, and the player's own row under them when it is further
-    // down. From the front door it shows what the board already holds; from the win screen it asks again (back: where OK
-    // returns to)
-    function showBoardAll(back = closeChild) {
-      const have = lbFront.st === 'ok' && back === closeChild;
-      const bv = boardAll = { st: have ? 'ok' : 'load', data: have ? lbFront.data : null, back };
-      renderBoardAll();
-      if (bv.st !== 'load') return;
+    // the board after a win, asked afresh, on the layer; Back returns to the win
+    function showBoardWin() {
+      const bv = { st: 'load', data: null };
+      const paint = () => {
+        const d = bv.data;
+        const body = bv.st === 'load' ? `<p class="dim">${esc(s.lbLoading)}</p>` : bv.st === 'off' ? `<p>${esc(s.lbOff)}</p>`
+          : !d.total ? `<p>${esc(s.lbEmptyHead)}</p>` : boardTable(d) + `<p class="dim">${esc(s.lbHow)}</p>`;
+        openDlg({ kind: 'board', title: s.board, aside: d && d.total ? s.lbCount(d.total) : '', solid: true, rebuild: paint, onEsc: renderWin, body, buttons: [{ label: s.back, def: true, run: renderWin }] });
+      };
+      paint();
       boardCall(`pid=${playerId()}`).then((j) => {
-        if (boardAll !== bv) return;
         Object.assign(bv, j.error ? { st: 'off' } : { st: 'ok', data: j });
-        if (G.dlg && G.dlg.kind === 'board') renderBoardAll();
+        if (G.dlg && G.dlg.kind === 'board' && G.dlg.rebuild === paint) paint();
       });
     }
-    function renderBoardAll() {
-      const bv = boardAll, d = bv.data;
-      const COLS = ['c-rank num', 'c-name', 'c-time num', 'c-hits num', 'c-score num', 'c-grade'];
-      const cell = (r) => `<tr${r.me ? ' class="me"' : ''}><td class="${COLS[0]}">${r.rank}</td><td class="${COLS[1]}">${esc(r.name)}${r.me ? ` <small>${esc(s.lbYou)}</small>` : ''}</td><td class="${COLS[2]}">${fmt1(r.time)}</td><td class="${COLS[3]}">${r.hits}</td><td class="${COLS[4]}">${fmt1(scoreOf(r))}</td><td class="${COLS[5]}"><span class="gd g${gradeOf(scoreOf(r))}">${gradeOf(scoreOf(r))}</span></td></tr>`;
-      let body;
-      if (bv.st === 'load') body = `<p class="lb-note">${esc(s.lbLoading)}</p><div class="lb-bar" aria-hidden="true"><i></i></div>`;
-      else if (bv.st === 'off') body = `<p>${esc(s.lbOff)}</p><div><button class="btn" type="button" data-act="retry">${esc(s.retry)}</button></div>`;
-      else if (!d.total) body = `<p>${esc(s.lbEmptyHead)}. ${esc(s.lbEmptyText)}</p>`;
-      else {
-        const mine = d.me && !d.top.some((r) => r.me) ? `<tr><td colspan="6" class="num" aria-hidden="true">⋯</td></tr>${cell({ ...d.me, me: true })}` : '';
-        body = `<table class="lb-table"><thead><tr>${s.lbCols.map((c, i) => `<th class="${COLS[i]}" scope="col">${esc(c)}</th>`).join('')}</tr></thead><tbody>${d.top.map(cell).join('')}${mine}</tbody></table>`
-          + `<p class="note">${esc(s.lbCount(d.total))}. ${esc(s.lbHow)}</p>`;
-      }
-      openDlg({
-        title: s.board, icon: 'trophy', wide: true, over: !front.hidden, kind: 'board', rebuild: renderBoardAll,
-        body: `<div class="lb-all" aria-live="polite">${body}</div>`,
-        buttons: [{ label: s.ok, def: true, run: bv.back }], onEsc: bv.back,
-        acts: { retry: () => showBoardAll(bv.back) },
-      });
-    }
-    // Settings: how to play, the sound, the pointer trails once they are won (a phone has no menu bar to switch them in),
-    // and the player's name, as the screensaver's own settings dialog
-    function showSettings() {
-      const who = playerName(), tr = opts.trails ? opts.trails.on() : null;
-      openDlg({
-        title: s.settings, icon: 'retro-pc', wide: true, over: true, kind: 'settings', rebuild: showSettings,
-        body: `${goalLine()}<p>${esc(s.premise)}</p>${keysList()}<label class="chk"><input type="checkbox" id="optSound"${sfx.muted ? '' : ' checked'}> ${esc(s.soundOpt)}</label>`
-          + (tr === null ? '' : `<label class="chk"><input type="checkbox" id="optTrails"${tr ? ' checked' : ''}> ${esc(s.trailsOpt)}</label>`)
-          + (who ? `<div class="name-now"><p class="note">${esc(s.nameNow)} <b>${esc(who)}</b></p><button class="btn" type="button" data-act="name">${esc(s.nameChange)}</button></div>` : ''),
-        buttons: [{ label: s.ok, def: true, run: closeChild }],
-        onEsc: closeChild,
-        acts: { name: () => askName(showSettings, true) },
-      });
-      layer.querySelector('#optSound').addEventListener('change', (e) => { sfx.ensure(); sfx.setMuted(!e.target.checked); syncSound(); });
-      const t = layer.querySelector('#optTrails');
-      if (t) t.addEventListener('change', (e) => opts.trails.set(e.target.checked));
-    }
-    function frontAct(act) {
-      if (act === 'settings') showSettings();
-      else if (act === 'preview') go(PICKS[pickI] === PRACTICE);
-      else if (act === 'run') go(false);
-      else if (act === 'practice') go(true);
-      else if (act === 'all') showBoardAll();
-      else if (act === 'retry') loadFrontBoard();
-    }
-    function hideFront() { front.hidden = true; front.classList.remove('inactive'); front.textContent = '';
-    }
-    // Preview: the monitor's picture grows into the arena along XP's zoom rectangle as the run, or the practice, begins.
-    // The first play asks for the player's name
-    function go(practice) {
-      if (!playerName()) { askName(() => { closeChild(); go(practice); }); return; }
-      const from = monCv.getBoundingClientRect();
-      hideFront();
-      if (practice) startPractice(); else startGame(DEBUG ? Math.max(0, pickI - 1) : 0);
-      zoomRect(from, cv.getBoundingClientRect());
-    }
-    function zoomRect(a, b) {
-      if (reduceMotion || !a.width || !b.width || !stage.animate) return;
-      const st = stage.getBoundingClientRect(), box = (r) => ({ left: `${r.left - st.left}px`, top: `${r.top - st.top}px`, width: `${r.width}px`, height: `${r.height}px` });
-      for (let i = 0; i < 3; i++) {
-        const z = document.createElement('div');
-        z.className = 'zoomr'; stage.append(z);
-        z.animate([box(a), box(b)], { duration: 320, delay: i * 40, easing: 'steps(8, end)', fill: 'both' }).onfinish = () => z.remove();
-        // a hidden tab holds animations back; the rectangle goes anyway
-        setTimeout(() => z.remove(), 900);
-      }
-    }
+
+    /* ------------------------------------------------------------ a run */
     function newRun() {
-      Object.assign(G, { fightTime: 0, hits: 0, grazes: 0, bombs: 0, deaths: 0, meter: 0, splits: [] });
+      Object.assign(G, { fightTime: 0, hits: 0, deaths: 0, splits: [] });
     }
     function clearField() {
       for (let i = bullets.length - 1; i >= 0; i--) drop(i);
-      shots.length = 0; sparks.length = 0; tele.length = 0; G.zoom = null; G.shake = 0;
+      shots.length = 0; sparks.length = 0; tele.length = 0; G.shake = 0;
       chipsEl.textContent = '';
       if (tipsOn) showTips(false);
     }
     // how far a full run gets, told to the portfolio's day counts (onRun): its start, each later boss, Blank, the win,
     // and the practice begun and finished; a retry and a ?debug run from a later boss tell nothing
     const tell = (d) => { if (opts.onRun) opts.onRun(d); };
-    // a boss begins with full health; a retry keeps the run's time and hits, and the meter it began with
+    // a boss begins with full health; a retry keeps the run's time and hits
     function beginBoss(retrying) {
       clearField(); resetBoss(BOSSES[G.bossIdx]); resetPlayer();
-      if (!retrying) { G.bossT0 = G.fightTime; G.bossH0 = G.hits; G.meterAtStart = G.meter; }
+      if (!retrying) { G.bossT0 = G.fightTime; G.bossH0 = G.hits; }
       if (!retrying && G.startIdx === 0) tell(G.bossIdx === 0 ? 'start' : G.bossIdx === BOSSES.length - 1 ? 'final' : `boss${G.bossIdx + 1}`);
       G.mode = 'intro'; G.introT = 0; G.paused = false;
       // the first meeting with each boss points at what to shoot before anything fires; later ones only name it
@@ -3136,24 +2641,23 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       tell('practice');
       hideFront(); sfx.quiet = false; sfx.ensure(); sfx.start(); sfx.music('practice'); closeDlg(); newRun();
       clearField(); resetBoss(PRACTICE); resetPlayer();
-      G.practice = { step: 0, good: 0, moved: 0, clean: 0, count: 0, lx: P.x, ly: P.y, top: 90 };
-      Object.assign(G, { mode: 'fight', paused: false, meter: 0 });
+      G.practice = { step: 0, good: 0, moved: 0, clean: 0, lx: P.x, ly: P.y, top: 90 };
+      Object.assign(G, { mode: 'fight', paused: false });
       Object.assign(B, { inv: 0, pause: 0.6 });
       lesEl.hidden = false;
       lessonStart();
       focusStage();
     }
-    // the band's height in arena units, so the monitor and the cursor keep under it
-    function practiceTop() { if (G.practice && !lesEl.hidden) G.practice.top = lesEl.offsetHeight / S + 2; }
+    // the lesson's box, in arena units, so the sparring partner and the cursor keep under it
+    function practiceTop() { if (G.practice && !lesEl.hidden) G.practice.top = (lesEl.offsetTop + lesEl.offsetHeight) / S + 2; }
     function lessonStart() {
       const pr = G.practice, id = LESSONS[pr.step], [name, how] = s.les[id];
-      Object.assign(pr, { good: 0, moved: 0, clean: 0, count: 0, lx: P.x, ly: P.y });
+      Object.assign(pr, { good: 0, moved: 0, clean: 0, lx: P.x, ly: P.y });
       debrisAll();
       if (id === 'aim') B.hp = B.max;
-      if (id === 'bomb') G.meter = 100;
       lesName.textContent = name;
+      lesStep.textContent = s.lesStep(pr.step + 1, LESSONS.length);
       lesHow.textContent = typeof how === 'string' ? how : how[coarse.matches ? 0 : 1];
-      lesEta.textContent = s.practiceEta(LESSONS.length - pr.step);
       lesSkip.textContent = s.skip;
       if (coarse.matches) { lesSkip.removeAttribute('title'); lesSkip.removeAttribute('aria-keyshortcuts'); } else { lesSkip.title = 'Enter'; lesSkip.setAttribute('aria-keyshortcuts', 'Enter'); }
       practiceTop();
@@ -3163,13 +2667,12 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (pr.good > 0) { if ((pr.good -= dt) <= 0) nextLesson(); return; }
       if (id === 'move') { pr.moved += Math.hypot(P.x - pr.lx, P.y - pr.ly); if (pr.moved >= MOVE_NEED) lessonDone(); }
       else if (id === 'dodge' && P.inv <= 0 && (pr.clean += dt) >= DODGE_NEED) lessonDone();
-      else if (id === 'bomb') G.meter = 100;
       pr.lx = P.x; pr.ly = P.y;
     }
     function lessonProgress() {
       const pr = G.practice, id = LESSONS[Math.min(pr.step, LESSONS.length - 1)];
       if (pr.good > 0 || pr.step >= LESSONS.length) return 1;
-      return clamp(id === 'move' ? pr.moved / MOVE_NEED : id === 'aim' ? 1 - B.hp / B.max : id === 'dodge' ? pr.clean / DODGE_NEED : id === 'graze' ? pr.count / GRAZE_NEED : 0, 0, 1);
+      return clamp(id === 'move' ? pr.moved / MOVE_NEED : id === 'aim' ? 1 - B.hp / B.max : id === 'dodge' ? pr.clean / DODGE_NEED : 0, 0, 1);
     }
     function lessonDone() {
       const pr = G.practice;
@@ -3183,14 +2686,13 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (pr.step >= LESSONS.length) practiceDone(); else lessonStart();
     }
     function skipLesson() { const pr = G.practice; if (pr && !pr.good && G.mode === 'fight' && !G.paused) nextLesson(); }
-    // a hit costs nothing in practice; the dodging and grazing lessons say what went wrong
+    // a hit costs nothing in practice; the dodging lesson says what went wrong
     function practiceHit() {
       const pr = G.practice, id = LESSONS[pr.step];
       P.inv = INV_TIME; P.knock = 1;
       sfx.hit(); spark(P.x, P.y, '#ff3b30', 6);
       for (const b of bullets) if (!b.mode && Math.hypot(b.x - P.x, b.y - P.y) < CANCEL_R) { b.mode = 'debris'; b.fade = 0.25; }
       if (id === 'dodge') { pr.clean = 0; chip(s.lesDodgeHit, 'low', 2.2); }
-      else if (id === 'graze') chip(s.lesGrazeHit, 'low', 2.2);
     }
     function practiceDone() {
       tell('practice-done');
@@ -3201,26 +2703,27 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     }
     function practiceDlg() {
       openDlg({
-        title: s.practice, icon: 'star', kind: 'drill', rebuild: practiceDlg, onEsc: showMenu,
-        body: `<div class="dlg-row">${ico('star', 32)}<div><p class="lead">${esc(s.drillDone)}</p><p>${esc(s.drillText)}</p></div></div>`,
-        buttons: [{ label: s.menu, run: showMenu }, { label: s.drillAgain, run: () => startPractice() }, { label: s.drillFight, def: true, run: () => startGame(0) }],
+        title: s.drillDone, kind: 'drill', mid: true, solid: true, rebuild: practiceDlg, onEsc: showMenu,
+        body: `<p>${esc(s.drillText)}</p>`,
+        buttons: [{ label: s.drillFight, def: true, run: () => startGame(0) }, { label: s.drillAgain, run: () => startPractice() }, { label: s.menu, run: showMenu }],
       });
     }
-    function retry() { closeDlg(); G.meter = G.meterAtStart; beginBoss(true); }
+    function retry() { closeDlg(); beginBoss(true); }
+    const statLine = () => (G.practice ? s.lesStep(Math.min(G.practice.step, LESSONS.length - 1) + 1, LESSONS.length) : `${B.def.name} · ${s.hitsN(G.hits)}`);
     function pause(force) {
       if (G.mode !== 'fight' && G.mode !== 'intro') return;
       if (G.dlg && !force) return;
       G.paused = true; keys.clear(); dragId = null; sfx.musicHold(true);
       openDlg({
-        title: s.paused, icon: 'pause', wide: true, rebuild: () => pause(true),
-        body: `<p>${esc(s.pausedText)}</p>${goalLine()}${keysList()}`,
-        buttons: [{ label: s.menu, run: showMenu }, { label: s.restart, run: () => (G.practice ? startPractice() : startGame(G.startIdx)) }, { label: s.resume, def: true, run: resume }],
+        title: s.paused, kind: 'pause', mid: true, rebuild: () => pause(true),
+        body: `<span class="dots4 big" aria-hidden="true">${fmt(G.fightTime)}</span><p class="dim"><span class="sr">${s.clock} ${fmt(G.fightTime)} · </span>${esc(statLine())}</p><p>${esc(s.goal)}</p>`,
+        buttons: [{ label: s.resume, def: true, run: resume }, { label: s.restart, run: () => (G.practice ? startPractice() : startGame(G.startIdx)) }, { label: s.menu, run: showMenu }],
         onEsc: resume,
       });
     }
     function resume() { closeDlg(); G.paused = false; sfx.musicHold(false); focusStage(); }
     const runBosses = () => BOSSES.slice(G.startIdx);
-    // the last boss down. Past Blank.scr the tube is back on and the PC starts again: the portfolio plays its Welcome
+    // the last boss down. Past Blank.scr the tube is back on and the PC starts again: the portfolio plays its loading
     // screen (onReboot), and the result comes after it
     function runOver() {
       if (B.def !== BLANK || !opts.onReboot) { showWin(); return; }
@@ -3237,24 +2740,26 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       // the first full win puts the pointer trails on the desktop: the portfolio answers 'new' then (onWin)
       const gift = full && opts.onWin ? opts.onWin() === 'new' : false;
       if (full) tell('win');
-      G.win = { list, goal, score, rank, full, gift, time: G.fightTime, hits: G.hits, seen: false };
+      G.win = { list, goal, score, rank, full, gift, time: G.fightTime, hits: G.hits, deaths: G.deaths, seen: false };
       // only a run from the first boss to the last goes on the board (a ?debug run from a later one doesn't)
       G.lb = full ? { st: 'load', name: playerName(), auto: false, err: null, time: G.fightTime, hits: G.hits } : null;
       renderWin();
       if (G.lb) lbCheck();
     }
-    // the win screen, drawn again as it was whenever the share dialog or the board closes back onto it
+    // the win screen, drawn again as it was whenever sharing or the board closes back onto it: the grade stamped in dots
+    // beside the run's time, the run in a line, and what to do next
     function renderWin() {
-      const w = G.win, row = (k, v) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`;
-      const splits = G.splits.map((sp) => row(BOSSES.find((b) => b.id === sp.id).name, fmt1(sp.time))).join('');
+      const w = G.win;
+      const line = [s.hitsN(w.hits), s.scoreIs(fmt1(w.score)), ...(w.deaths ? [s.lossesN(w.deaths)] : [])].join(' · ');
       openDlg({
-        title: 'Screen Saver XP', icon: 'star', wide: true, kind: 'win', rebuild: renderWin, onEsc: showMenu,
-        body: `<div class="dlg-row"><div class="rank${w.seen ? ' still' : ''}" data-rank="${w.rank}"><small>${esc(s.rank)}</small><b>${w.rank}</b></div><div><p class="lead">${esc(s.runDone(w.list.length))}</p><p>${esc(s.flavor)}</p><p class="note">${esc(s.target(fmt(w.goal)))}</p>${w.gift ? `<p class="gift">${ico('star', 16)}${esc(s.gift)}</p>` : ''}</div></div>`
-          + `<dl class="stats">${row(s.time, fmt1(w.time))}${splits}${row(s.hits, w.hits)}${row(s.score, fmt1(w.score))}${row(s.grazes, G.grazes)}${row(s.bombs, G.bombs)}${row(s.losses, G.deaths)}</dl>`
+        title: s.runDone(w.list.length), kind: 'win', mid: true, solid: true, rebuild: renderWin, onEsc: showMenu,
+        body: `<div class="res"><span class="grade${w.seen ? ' still' : ''}" role="img" aria-label="${esc(s.rank)} ${w.rank}"><span class="dots4" aria-hidden="true">${w.rank}</span></span><span class="dots4 big" aria-hidden="true">${fmt1(w.time)}</span></div>`
+          + `<p class="dim"><span class="sr">${s.clock} ${fmt1(w.time)} · </span>${esc(line)}</p><p>${esc(s.flavor)}</p><p class="dim">${esc(s.target(fmt(w.goal)))}</p>`
+          + (w.gift ? `<p class="gift">${icoMono('star', 16, 'var(--acc)')}<span>${esc(s.gift)}</span></p>` : '')
           + `<div class="lb-run" aria-live="polite">${lbRunHTML()}</div>`
-          + (opts.onContact ? `<div class="cta"><p>${esc(s.cta)}</p><button class="btn" type="button" data-act="contact">${esc(s.contact)}</button></div>` : ''),
-        buttons: [{ label: s.menu, run: showMenu }, { label: s.shareOpen, run: showShare }, { label: s.again, def: true, run: () => startGame(G.startIdx) }],
-        acts: { contact: () => opts.onContact(), board: () => showBoardAll(renderWin), retry: lbCheck },
+          + (opts.onContact ? `<p class="dim">${esc(s.cta)}</p>` : ''),
+        buttons: [{ label: s.again, def: true, run: () => startGame(G.startIdx) }, { label: s.shareOpen, run: showShare }, ...(G.lb ? [{ label: s.board, run: showBoardWin }] : []), ...(opts.onContact ? [{ label: s.contact, run: () => opts.onContact() }] : []), { label: s.menu, run: showMenu }],
+        acts: { retry: lbCheck },
         onSubmit: () => lbSave(),
       });
       w.seen = true;
@@ -3296,31 +2801,30 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       });
     }
     function lbRunHTML() {
-      const lb = G.lb, w = G.win;
+      const lb = G.lb;
       if (!lb) return '';
-      const view = `<button class="btn" type="button" data-act="board">${ico('bullet-list', 16)}${esc(s.lbView)}</button>`;
-      if (lb.st === 'load') return `<p>${esc(s.lbLoading)}</p>`;
-      if (lb.st === 'off') return `<p>${esc(s.lbOff)}</p><button class="btn" type="button" data-act="retry">${esc(s.retry)}</button>`;
-      if (lb.st === 'saved') return `<p><b>${esc(s.lbSaved(lb.me.name, lb.me.rank, lb.total))}</b></p>${view}`;
-      if (lb.st === 'kept') return `<p>${esc(s.lbKept(lb.me.rank, lb.total, fmt1(scoreOf(lb.me))))}</p>${view}`;
-      if (lb.st === 'none') return view;
+      if (lb.st === 'load') return `<p class="dim">${esc(s.lbLoading)}</p>`;
+      if (lb.st === 'off') return `<p class="dim">${esc(s.lbOff)}</p><button class="pill" type="button" data-act="retry">${esc(s.retry)}</button>`;
+      if (lb.st === 'saved') return `<p class="acc">${esc(s.lbSaved(lb.me.name, lb.me.rank, lb.total))}</p>`;
+      if (lb.st === 'kept') return `<p class="dim">${esc(s.lbKept(lb.me.rank, lb.total, fmt1(scoreOf(lb.me))))}</p>`;
+      if (lb.st === 'none') return '';
       const busy = lb.st === 'saving' ? ' disabled' : '';
-      return `<form class="name-form" novalidate><p><b>${esc(s.lbAsk(lb.rank, lb.total))}</b></p>`
-        + `<div class="name-row"><div class="field"><label for="lbName">${esc(s.nameLabel)}</label><input id="lbName" maxlength="${NAME_MAX}" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="done" value="${esc(lb.name)}"${busy}${lb.err ? ' aria-describedby="lbErr" aria-invalid="true"' : ''}></div>`
-        + `<button class="btn" type="submit"${busy}>${esc(lb.st === 'saving' ? s.saving : s.save)}</button></div>`
-        + (lb.err ? `<p class="err" id="lbErr">${ico('exclamation-triangle', 16)}<span>${esc(s.lbErr[lb.err])}</span></p>` : '') + '</form>';
+      return `<form class="name-form" novalidate><p class="acc">${esc(s.lbAsk(lb.rank, lb.total))}</p>`
+        + `<div class="name-row"><label class="field"><span class="dim">${esc(s.nameLabel)}</span><input id="lbName" maxlength="${NAME_MAX}" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="done" value="${esc(lb.name)}"${busy}${lb.err ? ' aria-describedby="lbErr" aria-invalid="true"' : ''}></label>`
+        + `<button class="pill" type="submit"${busy}>${esc(lb.st === 'saving' ? s.saving : s.save)}</button></div>`
+        + (lb.err ? `<p class="err" id="lbErr">${esc(s.lbErr[lb.err])}</p>` : '') + '</form>';
     }
     // redraws the win screen's board part in place; arrived: an answer just came, so the name field (or the button that
     // replaced it) takes the focus, unless the player has already moved it somewhere else
     function renderLb(arrived) {
       const box = G.dlg && G.dlg.kind === 'win' && layer.querySelector('.lb-run');
       if (!box) return;
-      // the focus as the stage's shadow root sees it: null when it is somewhere else on the page
-      const a = root.activeElement, untouched = !a || box.contains(a) || (layer.contains(a) && a.classList.contains('default'));
+      // the focus as the screen's shadow root sees it: null when it is somewhere else on the page
+      const a = root.activeElement, untouched = !a || box.contains(a) || (layer.contains(a) && a.classList.contains('sel'));
       box.innerHTML = lbRunHTML();
       if (!arrived || !untouched) return;
-      const f = box.querySelector('input:not(:disabled)') || (!a || box.contains(a) ? box.querySelector('.btn') : null);
-      if (f) { try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); } if (f.tagName === 'INPUT' && G.lb.err) f.select(); }
+      const f = box.querySelector('input:not(:disabled)') || (!a || box.contains(a) ? box.querySelector('.pill') : null);
+      if (f) { focusEl(f); if (f.tagName === 'INPUT' && G.lb.err) f.select(); }
     }
 
     /* ---- sharing: the result card, and the text with the link to the game ---- */
@@ -3331,7 +2835,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     function cardData() {
       const now = new Date();
       return {
-        grade: G.win.rank, time: G.win.time, hits: G.win.hits, name: playerName(), pos: boardPos(), owner: OWNER,
+        grade: G.win.rank, time: G.win.time, hits: G.win.hits, name: playerName(), pos: boardPos(), owner: OWNER, bosses: G.win.list.length,
         link: gameUrl().replace(/^https?:\/\//, ''), clock: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
       };
     }
@@ -3352,15 +2856,13 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     }
     function showShare() {
       const lb = G.lb, canCopy = !!(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write);
-      const btn = (act, label, def) => `<button class="btn${def ? ' default' : ''}" type="button" data-act="${act}">${esc(label)}</button>`;
+      const ways = [canCopy && [s.copyImg, copyImage], [s.saveImg, saveImage], canShareFiles() && [s.shareTo, shareTo], [s.copyText, copyShare]].filter(Boolean);
       openDlg({
-        title: s.shareTitle, icon: 'image', wide: true, kind: 'share', rebuild: showShare,
-        body: `<div class="card-frame"><p>${esc(s.cardMaking)}</p></div><p>${esc(s.shareHint)}</p>`
-          + (lb && (lb.st === 'ask' || lb.st === 'saving') ? `<p class="tipbox">${esc(s.cardNoRank)}</p>` : '')
-          + `<div class="share-row">${canCopy ? btn('copyImg', s.copyImg, true) : ''}${btn('saveImg', s.saveImg, !canCopy)}${canShareFiles() ? btn('shareTo', s.shareTo) : ''}${btn('copyText', s.copyText)}</div>`
+        title: s.shareTitle, kind: 'share', solid: true, rebuild: showShare, onEsc: renderWin,
+        body: `<div class="card-frame"><p class="dim">${esc(s.cardMaking)}</p></div><p class="dim">${esc(s.shareHint)}</p>`
+          + (lb && (lb.st === 'ask' || lb.st === 'saving') ? `<p class="acc">${esc(s.cardNoRank)}</p>` : '')
           + `<p class="share-msg" aria-live="polite"></p>${copyBox()}`,
-        buttons: [{ label: s.ok, run: renderWin }], onEsc: renderWin,
-        acts: { copyImg: copyImage, saveImg: saveImage, shareTo, copyText: copyShare },
+        buttons: [...ways.map(([label, run], i) => ({ label, run, def: i === 0 })), { label: s.back, run: renderWin }],
       });
       const w = G.win, alt = s.cardAlt(w.rank, fmt1(w.time), w.hits, boardPos());
       card().then((m) => {
@@ -3372,9 +2874,9 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       });
     }
     function shareMsg(text) { const m = G.dlg && G.dlg.kind === 'share' && layer.querySelector('.share-msg'); if (m) m.textContent = text; }
-    // a button says what just happened for a moment, then goes back to its own label
+    // a choice says what just happened for a moment, then goes back to its own label
     function flash(b, text) {
-      if (!b.isConnected) return;
+      if (!b || !b.isConnected) return;
       const label = b.dataset.label || (b.dataset.label = b.textContent);
       b.textContent = text; clearTimeout(b.flashT);
       b.flashT = setTimeout(() => { b.textContent = label; }, 1800);
@@ -3417,7 +2919,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
         document.body.appendChild(ta); ta.select();
         let ok = false;
         try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-        ta.remove(); b.focus({ preventScroll: true });
+        ta.remove(); if (b) b.focus({ preventScroll: true });
         return ok;
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => done(true), () => done(fallback()));
@@ -3426,13 +2928,13 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
 
     /* ------------------------------------------------------------ the result card
        A picture of a win to post anywhere, at the size link previews use (1200 × 630: drawn at half that and doubled).
-       It is the front door once the run is won: Display Properties on the desktop, its monitor showing the result on the
-       starfield it stopped, the five screensavers ticked off beside it and where to play under it; next to it the stickman
-       cheers on his cursor. Boss Rush XP's card is its Start menu; this one keeps the same desktop and taskbar.
-       d: grade, time, hits, name, pos ({ rank, total } or null), owner, link, clock */
+       It is the game's device on the desktop, its screen showing the win as the win screen does (the grade stamped in
+       dots beside the run's time, the player and the place, and where to play); next to it the stickman cheers on his
+       cursor. Boss Rush XP's card is its Start menu; this one keeps the same desktop and taskbar.
+       d: grade, time, hits, name, pos ({ rank, total } or null), owner, bosses, link, clock */
     const CARD = { w: 600, h: 315, k: 2, bar: 30 };
-    const GRADE_INK = { S: ['#f7c948', '#000'], A: ['#11703a', '#fff'], B: ['#0046d5', '#fff'], C: ['#5b5f6b', '#fff'] };
-    const CARD_FONT = '"Noto Sans", sans-serif';
+    const CARD_FONT = '"Noto Sans", sans-serif', PX_FONT = '"SSXP Pixel", monospace';
+    const CARD_INK = { lcd: '#d3cfc9', hi: '#f1eee9', dim: '#8a8580', acc: '#e0683f', print: '#211e1b' };
     // the text's size shrinks, down to min, until it fits in maxW; the font is left set on c
     function fitFont(c, text, style, size, min, maxW) {
       let n = size;
@@ -3443,16 +2945,31 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       const b = top ? 0 : r;
       c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, b); c.arcTo(x, y + h, x, y, b); c.arcTo(x, y, x + w, y, r); c.closePath();
     }
-    const cardHash = (n) => { const v = Math.sin(n * 127.1) * 43758.5453; return v - Math.floor(v); };
-    // a title bar button: the blue one with a sign, or the red Close with its cross
-    function capBtn(c, x, y, n, close) {
-      const g = c.createLinearGradient(0, y, 0, y + n);
-      if (close) { g.addColorStop(0, '#f0906c'); g.addColorStop(0.5, '#d9542c'); g.addColorStop(1, '#bd3a12'); } else { g.addColorStop(0, '#4f8af0'); g.addColorStop(0.5, '#2663e0'); g.addColorStop(1, '#1b50c8'); }
-      c.fillStyle = g; rrPath(c, x, y, n, n, 3); c.fill();
-      c.strokeStyle = '#fff'; c.lineWidth = 1; rrPath(c, x + 0.5, y + 0.5, n - 1, n - 1, 3); c.stroke();
-      c.strokeStyle = '#fff'; c.lineWidth = 2; c.lineCap = 'square';
-      if (close) { c.beginPath(); c.moveTo(x + 6, y + 6); c.lineTo(x + n - 6, y + n - 6); c.moveTo(x + n - 6, y + 6); c.lineTo(x + 6, y + n - 6); c.stroke(); }
-      else { c.fillStyle = '#fff'; c.font = `bold 12px ${CARD_FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('?', x + n / 2, y + n / 2 + 1); c.textAlign = 'left'; c.textBaseline = 'alphabetic'; }
+    // the screen's pixel letters on the card: plain at one card unit a pixel, centred on x
+    function pxText(c, text, x, y, color) {
+      c.font = `8px ${PX_FONT}`; c.textAlign = 'left'; c.textBaseline = 'alphabetic'; c.fillStyle = color;
+      const w = Math.round(c.measureText(text).width);
+      c.fillText(text, Math.round(x - w / 2), y);
+      return w;
+    }
+    // and its big figures in dots: the text is set at one pixel a font pixel on a scratch canvas, and each lit pixel
+    // becomes a round dot `cell` units wide; y is the baseline, x the left edge
+    function dotText(c, text, x, y, cell, color) {
+      const t = document.createElement('canvas').getContext('2d');
+      t.font = `8px ${PX_FONT}`;
+      const w = Math.ceil(t.measureText(text).width), h = 10;
+      t.canvas.width = w; t.canvas.height = h;
+      t.font = `8px ${PX_FONT}`; t.textBaseline = 'alphabetic'; t.fillStyle = '#000';
+      t.fillText(text, 0, 8);
+      const px = t.getImageData(0, 0, w, h).data, r = cell * 0.36;
+      c.fillStyle = color; c.beginPath();
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+        if (px[(j * w + i) * 4 + 3] < 128) continue;
+        const cx = x + (i + 0.5) * cell, cy = y + (j - 8 + 0.5) * cell;
+        c.moveTo(cx + r, cy); c.arc(cx, cy, r, 0, TAU);
+      }
+      c.fill();
+      return w * cell;
     }
     function drawCard(c, d) {
       const CW = CARD.w, CH = CARD.h, bar = CARD.bar, floor = CH - bar;
@@ -3465,7 +2982,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       const light = c.createRadialGradient(640, -100, 10, 640, -100, 240);
       light.addColorStop(0, 'rgba(255,255,255,.26)'); light.addColorStop(1, 'rgba(255,255,255,0)');
       c.fillStyle = light; c.fillRect(0, 0, CW, floor);
-      const tx = 382, room = CW - tx - 16;
+      const tx = 390, room = CW - tx - 16;
       fitFont(c, 'Screen Saver XP', 'bold ', 24, 16, room);
       c.save(); c.shadowColor = 'rgba(0,20,70,.5)'; c.shadowBlur = 6; c.shadowOffsetY = 2;
       c.fillStyle = '#fff'; c.fillText('Screen Saver XP', tx, 52);
@@ -3476,7 +2993,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (d.owner) { const o = s.cardOwner(d.owner); c.fillStyle = '#fff'; fitFont(c, o, '', 11, 9, room); c.fillText(o, tx + 1, 78); }
 
       // the stickman cheering on his cursor, a zoomed-in pointer with its soft shadow, and the hotspot at its tip
-      const ax = 452, ay = 174, k = 3.8;
+      const ax = 460, ay = 174, k = 3.8;
       c.save(); c.translate(ax, ay); c.scale(k, k);
       c.save(); c.shadowColor = 'rgba(0,10,50,.35)'; c.shadowBlur = 5; c.shadowOffsetX = 1.2; c.shadowOffsetY = 1.2; drawArrow(0, 0, false, c); c.restore();
       drawRider(0, 0, c, true);
@@ -3506,96 +3023,74 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       c.textAlign = 'right'; c.fillStyle = '#fff'; c.font = `11px ${CARD_FONT}`; c.fillText(d.clock, CW - 12, floor + bar / 2 + 0.5);
       c.textAlign = 'left'; c.textBaseline = 'alphabetic';
 
-      // Display Properties: its Luna frame and title bar
-      const wx = 14, wy = 14, ww = 352, wh = 262, cap = 26;
-      c.save(); c.shadowColor = 'rgba(0,0,40,.45)'; c.shadowBlur = 10; c.shadowOffsetX = 3; c.shadowOffsetY = 3;
-      c.fillStyle = '#0831d9'; rrPath(c, wx, wy, ww, wh, 8, true); c.fill();
+      // the device: warm grey plastic lit from above, the screen on the left and the panel of keys on the right
+      const x = 16, y = 18, w = 356, h = 248;
+      c.save(); c.shadowColor = 'rgba(0,0,40,.45)'; c.shadowBlur = 12; c.shadowOffsetX = 3; c.shadowOffsetY = 4;
+      const body = c.createLinearGradient(0, y, 0, y + h);
+      body.addColorStop(0, '#928c88'); body.addColorStop(0.7, '#88827e'); body.addColorStop(1, '#6a6663');
+      c.fillStyle = body; rrPath(c, x, y, w, h, 18); c.fill();
       c.restore();
-      c.fillStyle = '#166aee'; c.fillRect(wx + 1, wy + cap, ww - 2, wh - cap - 1);
-      const cg = c.createLinearGradient(0, wy, 0, wy + cap);
-      [[0, '#0997ff'], [0.08, '#0053ee'], [0.4, '#0050ee'], [0.88, '#0066ff'], [0.93, '#0066ff'], [0.95, '#005bff'], [0.96, '#003dd7'], [1, '#003dd7']].forEach(([at, col]) => cg.addColorStop(at, col));
-      c.fillStyle = cg; rrPath(c, wx, wy, ww, cap, 8, true); c.fill();
-      c.fillStyle = '#ece9d8'; c.fillRect(wx + 3, wy + cap, ww - 6, wh - cap - 3);
-      icoDraw(c, 'retro-pc', wx + 7, wy + 5, 16);
-      c.font = `bold 12px ${CARD_FONT}`;
-      c.fillStyle = '#0f1089'; c.fillText(s.dp, wx + 30, wy + 18);
-      c.fillStyle = '#fff'; c.fillText(s.dp, wx + 29, wy + 17);
-      capBtn(c, wx + ww - 50, wy + 3, 21, false);
-      capBtn(c, wx + ww - 26, wy + 3, 21, true);
+      c.strokeStyle = 'rgba(255,255,255,.22)'; c.lineWidth = 1; c.beginPath(); c.moveTo(x + 18, y + 0.5); c.lineTo(x + w - 18, y + 0.5); c.stroke();
+      const sx = x + 10, sy = y + 10, sw = 234, sh = h - 20, px0 = sx + sw + 10;
+      // the seams across the panel, a dark groove over a lit edge
+      for (const gy of [y + 76, y + h - 64]) { c.fillStyle = '#57534f'; c.fillRect(px0, gy, x + w - px0, 1); c.fillStyle = '#a39f9b'; c.fillRect(px0, gy + 1, x + w - px0, 1); }
+      icoDraw(c, 'moon', px0 + 12, y + 14, 16, CARD_INK.print);
+      c.fillStyle = CARD_INK.acc; c.fillRect(px0 + 30, y + 14, 2, 6); c.fillRect(px0 + 28, y + 16, 6, 2);
+      // the window's keys in their dark well
+      c.fillStyle = '#1e1b19'; rrPath(c, x + w - 58, y + 12, 46, 18, 9); c.fill();
+      for (let i = 0; i < 3; i++) { c.fillStyle = '#b0aca8'; c.beginPath(); c.arc(x + w - 49 + i * 14, y + 21, 5, 0, TAU); c.fill(); }
+      // sound, a light grey pill, and start/pause, the orange round key with its dotted ring
+      const kx = px0 + (x + w - px0) / 2;
+      const pill = c.createLinearGradient(0, y + 98, 0, y + 124);
+      pill.addColorStop(0, '#cfcbc7'); pill.addColorStop(1, '#98948f');
+      c.fillStyle = '#45403c'; rrPath(c, kx - 22, y + 100, 44, 26, 13); c.fill();
+      c.fillStyle = pill; rrPath(c, kx - 22, y + 98, 44, 26, 13); c.fill();
+      c.strokeStyle = '#3c3734'; c.lineWidth = 1; rrPath(c, kx - 21.5, y + 98.5, 43, 25, 12.5); c.stroke();
+      icoDraw(c, 'sound-on', kx - 8, y + 103, 16, '#2a2622');
+      const oy = y + 150, orange = c.createRadialGradient(kx - 5, oy - 6, 2, kx, oy, 22);
+      orange.addColorStop(0, '#de7348'); orange.addColorStop(0.55, '#c4552e'); orange.addColorStop(1, '#8c391b');
+      c.fillStyle = '#5c2814'; c.beginPath(); c.arc(kx, oy + 2, 21, 0, TAU); c.fill();
+      c.fillStyle = orange; c.beginPath(); c.arc(kx, oy, 21, 0, TAU); c.fill();
+      c.save(); c.setLineDash([1, 2]); c.strokeStyle = 'rgba(40,14,4,.55)'; c.beginPath(); c.arc(kx, oy, 17, 0, TAU); c.stroke(); c.restore();
+      c.fillStyle = '#24130c';
+      c.beginPath(); c.moveTo(kx - 9, oy - 6); c.lineTo(kx - 2, oy); c.lineTo(kx - 9, oy + 6); c.closePath(); c.fill();
+      c.fillRect(kx + 1, oy - 6, 3, 12); c.fillRect(kx + 6, oy - 6, 3, 12);
+      c.fillStyle = CARD_INK.print; c.font = `bold 10px ${CARD_FONT}`; c.textAlign = 'right'; c.fillText('Screen Saver XP', x + w - 12, y + h - 14); c.textAlign = 'left';
 
-      // its one tab, joined to its page
-      const px = wx + 11, pw = ww - 22, ty = wy + cap + 8, th = 21, py = ty + th - 1, ph = 172;
-      c.font = `12px ${CARD_FONT}`;
-      const tw = Math.ceil(c.measureText(s.dpTab).width) + 24;
-      c.fillStyle = '#fcfcfe'; c.fillRect(px, py, pw, ph);
-      c.strokeStyle = '#919b9c'; c.lineWidth = 1; c.strokeRect(px + 0.5, py + 0.5, pw - 1, ph - 1);
-      c.fillStyle = '#fcfcfe'; rrPath(c, px + 4, ty, tw, th + 1, 3, true); c.fill();
-      c.beginPath(); c.moveTo(px + 4.5, py + 1); c.lineTo(px + 4.5, ty + 3); c.arcTo(px + 4.5, ty + 0.5, px + 7, ty + 0.5, 3); c.lineTo(px + 1.5 + tw, ty + 0.5); c.arcTo(px + 3.5 + tw, ty + 0.5, px + 3.5 + tw, ty + 3, 3); c.lineTo(px + 3.5 + tw, py + 1); c.stroke();
-      c.fillStyle = '#e8943a'; c.fillRect(px + 6, ty + 1, tw - 4, 3);
-      c.fillStyle = '#ffc83c'; c.fillRect(px + 6, ty + 1, tw - 4, 1);
-      c.fillStyle = '#000'; c.fillText(s.dpTab, px + 16, ty + 15);
-
-      // the monitor on its stand, the result on its screen over the starfield it stopped
-      const mx = px + 12, my = py + 12, mw = 186, mh = 128, cx = mx + mw / 2;
-      const face = c.createLinearGradient(0, my, 0, my + mh);
-      face.addColorStop(0, '#fff'); face.addColorStop(0.16, '#ece9d8'); face.addColorStop(1, '#d8d2bd');
-      c.fillStyle = face; rrPath(c, mx, my, mw, mh, 8); c.fill();
-      c.strokeStyle = '#aca899'; rrPath(c, mx + 0.5, my + 0.5, mw - 1, mh - 1, 8); c.stroke();
-      c.fillStyle = '#4cda50'; c.beginPath(); c.arc(mx + mw - 13, my + mh - 8, 2, 0, TAU); c.fill();
-      const neck = c.createLinearGradient(cx - 16, 0, cx + 16, 0);
-      neck.addColorStop(0, '#d8d2bd'); neck.addColorStop(0.5, '#ece9d8'); neck.addColorStop(1, '#d8d2bd');
-      c.fillStyle = neck; c.fillRect(cx - 16, my + mh, 32, 10);
-      c.fillStyle = '#aca899'; c.fillRect(cx - 16, my + mh, 1, 10); c.fillRect(cx + 15, my + mh, 1, 10);
-      c.fillStyle = '#e2ddcb'; rrPath(c, cx - 48, my + mh + 10, 96, 8, 4); c.fill();
-      c.strokeStyle = '#aca899'; rrPath(c, cx - 47.5, my + mh + 10.5, 95, 7, 4); c.stroke();
-      const sx = mx + 11, sy = my + 11, sw = mw - 22, sh = mh - 26;
-      c.fillStyle = '#1b1d22'; rrPath(c, sx - 2, sy - 2, sw + 4, sh + 4, 4); c.fill();
-      c.save(); rrPath(c, sx, sy, sw, sh, 3); c.clip();
-      c.fillStyle = '#000'; c.fillRect(sx, sy, sw, sh);
-      for (let i = 0; i < 46; i++) {
-        c.fillStyle = `rgba(255,255,255,${(0.2 + cardHash(i + 3) * 0.55).toFixed(2)})`;
-        c.beginPath(); c.arc(sx + cardHash(i + 0.37) * sw, sy + cardHash(i + 9.1) * sh, 0.4 + cardHash(i + 5.7) * 0.8, 0, TAU); c.fill();
+      // the screen: the win as the win screen shows it
+      c.fillStyle = '#2c2926'; rrPath(c, sx - 1, sy - 1, sw + 2, sh + 2, 10); c.fill();
+      c.fillStyle = '#000'; rrPath(c, sx, sy, sw, sh, 9); c.fill();
+      const cx = sx + sw / 2;
+      pxText(c, s.runDone(d.bosses), cx, sy + 26, CARD_INK.acc);
+      // the grade stamped in dots in its orange frame, beside the run's time in big dots
+      const tw = Math.ceil(fitW(fmt1(d.time)) * 4), gw = 40, all = gw + 12 + tw, gx = Math.round(cx - all / 2), gy = sy + 40;
+      c.strokeStyle = CARD_INK.acc; c.lineWidth = 2; rrPath(c, gx + 1, gy + 1, gw - 2, gw - 2, 7); c.stroke();
+      dotText(c, d.grade, gx + (gw - fitW(d.grade) * 4) / 2, gy + 34, 4, CARD_INK.acc);
+      dotText(c, fmt1(d.time), gx + gw + 12, gy + 34, 4, CARD_INK.hi);
+      const who = d.name || '', place = d.pos ? s.cardPos(d.pos.rank, d.pos.total) : '';
+      if (who || place) {
+        const wW = who ? pxW(c, who) : 0, sep = who && place ? pxW(c, ' · ') : 0, pW = place ? pxW(c, place) : 0;
+        let lx = Math.round(cx - (wW + sep + pW) / 2);
+        c.font = `8px ${PX_FONT}`;
+        if (who) { c.fillStyle = CARD_INK.hi; c.fillText(who, lx, sy + 108); lx += wW; }
+        if (sep) { c.fillStyle = CARD_INK.dim; c.fillText(' · ', lx, sy + 108); lx += sep; }
+        if (place) { c.fillStyle = CARD_INK.acc; c.fillText(place, lx, sy + 108); }
       }
-      if (d.name) { c.fillStyle = '#fff'; fitFont(c, d.name, 'bold ', 12, 9, sw - 20); c.fillText(d.name, sx + 10, sy + 19); }
-      const [bg, ink] = GRADE_INK[d.grade] || GRADE_INK.C, gx = sx + 10, gy = sy + 27;
-      c.fillStyle = bg; rrPath(c, gx, gy, 40, 40, 3); c.fill();
-      c.fillStyle = 'rgba(255,255,255,.28)'; c.fillRect(gx + 3, gy + 1.5, 34, 1.5);
-      c.fillStyle = ink; c.textAlign = 'center'; c.font = `bold 30px ${CARD_FONT}`; c.fillText(d.grade, gx + 20, gy + 31);
-      c.textAlign = 'left'; c.fillStyle = '#fff'; fitFont(c, fmt1(d.time), 'bold ', 24, 14, sw - 70); c.fillText(fmt1(d.time), gx + 50, gy + 25);
-      c.fillStyle = '#a6c4f7'; fitFont(c, s.clock, '', 11, 8, sw - 70); c.fillText(s.clock, gx + 51, gy + 39);
-      c.fillStyle = '#fff'; c.font = `11px ${CARD_FONT}`; c.fillText(`${s.statHits} ${d.hits}`, sx + 10, sy + sh - 10);
-      if (d.pos) { c.textAlign = 'right'; c.font = `bold 11px ${CARD_FONT}`; c.fillText(s.cardPos(d.pos.rank, d.pos.total), sx + sw - 10, sy + sh - 10); c.textAlign = 'left'; }
-      c.restore();
-
-      // beside it the five screensavers, each ticked off, in an etched group box
-      const gx0 = mx + mw + 12, gw = px + pw - 10 - gx0, gy0 = my + 4, gh = mh + 14;
-      c.strokeStyle = '#d8d2bd'; rrPath(c, gx0 + 0.5, gy0 + 0.5, gw - 1, gh - 1, 3); c.stroke();
-      c.strokeStyle = '#fff'; rrPath(c, gx0 + 1.5, gy0 + 1.5, gw - 3, gh - 3, 3); c.stroke();
-      c.font = `12px ${CARD_FONT}`;
-      const lw = c.measureText(s.cardDone).width;
-      c.fillStyle = '#fcfcfe'; c.fillRect(gx0 + 6, gy0 - 2, lw + 8, 6);
-      c.fillStyle = '#0046d5'; c.fillText(s.cardDone, gx0 + 10, gy0 + 4);
-      BOSSES.forEach((b, i) => {
-        const y = gy0 + 26 + i * 24, bx = gx0 + 16;
-        c.fillStyle = '#3c8f33'; c.beginPath(); c.arc(bx, y - 4, 6, 0, TAU); c.fill();
-        c.strokeStyle = '#fff'; c.lineWidth = 1.6; c.lineCap = 'round'; c.lineJoin = 'round';
-        c.beginPath(); c.moveTo(bx - 2.8, y - 3.8); c.lineTo(bx - 0.7, y - 1.7); c.lineTo(bx + 2.8, y - 6.2); c.stroke();
-        c.lineWidth = 1; c.fillStyle = '#000'; fitFont(c, b.name, 'bold ', 11, 8, gw - 34); c.fillText(b.name, bx + 12, y);
-      });
-
-      // under the page, the challenge and where to take it up
-      const fy = py + ph + 22;
-      c.fillStyle = '#000'; c.font = `bold 12px ${CARD_FONT}`; c.fillText(s.cardAsk, px, fy);
-      const askW = c.measureText(s.cardAsk).width;
-      c.fillStyle = '#0b5bd3'; fitFont(c, d.link, '', 12, 9, pw - askW - 16);
-      c.textAlign = 'right'; c.fillText(d.link, px + pw, fy);
-      const lkW = c.measureText(d.link).width; c.fillRect(px + pw - lkW, fy + 2, lkW, 1);
-      c.textAlign = 'left';
+      pxText(c, s.hitsN(d.hits), cx, sy + 124, CARD_INK.dim);
+      // a dotted rule, then the challenge and where to take it up
+      c.fillStyle = '#45413d';
+      for (let i = sx + 16; i < sx + sw - 16; i += 4) { c.beginPath(); c.arc(i + 2, sy + 146, 0.9, 0, TAU); c.fill(); }
+      pxText(c, s.cardAsk, cx, sy + 172, CARD_INK.lcd);
+      pxText(c, d.link, cx, sy + 190, CARD_INK.acc);
     }
-    // the fonts are the page's own; Noto Sans may still be on its way when the first card is drawn
+    // a pixel line's width in card units, set at one unit a pixel
+    function pxW(c, text) { c.font = `8px ${PX_FONT}`; return Math.round(c.measureText(text).width); }
+    function fitW(text) { const t = document.createElement('canvas').getContext('2d'); t.font = `8px ${PX_FONT}`; return Math.ceil(t.measureText(text).width); }
+    // the fonts are the page's own and the game's pixel letters; either may still be on its way when the first card is
+    // drawn
     async function makeCard(d) {
       if (document.fonts && document.fonts.load) {
-        try { await Promise.race([Promise.all([document.fonts.load(`bold 24px "Noto Sans"`), document.fonts.load(`12px "Noto Sans"`), document.fonts.load(`italic bold 15px "Noto Sans"`)]), new Promise((r) => setTimeout(r, 1500))]); } catch (e) { /* its fallback will do */ }
+        try { await Promise.race([Promise.all([document.fonts.load(`bold 24px "Noto Sans"`), document.fonts.load(`12px "Noto Sans"`), document.fonts.load(`italic bold 15px "Noto Sans"`), document.fonts.load(`8px ${PX_FONT}`)]), new Promise((r) => setTimeout(r, 1500))]); } catch (e) { /* its fallback will do */ }
       }
       const cv2 = document.createElement('canvas');
       cv2.width = CARD.w * CARD.k; cv2.height = CARD.h * CARD.k;
@@ -3606,64 +3101,63 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       if (!blob) throw new Error('the card could not be encoded');
       return blob;
     }
-    // a result dialog (this, the practice's and the win screen) takes Escape as Menu, as XP took Esc as Cancel
+    // a result screen (this, the practice's and the win) takes Escape as Menu
     function showDead() {
       G.mode = 'result';
       openDlg({
-        title: 'Screen Saver XP', icon: 'exclamation-triangle', kind: 'dead', rebuild: showDead, onEsc: showMenu,
-        body: `<div class="dlg-row">${ico('exclamation-triangle', 32)}<div><p class="lead">${esc(s.dead)}</p><p>${esc(s.deadText(B.def.name))}</p></div></div>`,
-        buttons: [{ label: s.menu, run: showMenu }, { label: s.retry, def: true, run: retry }],
+        title: s.deadHead, kind: 'dead', mid: true, rebuild: showDead, onEsc: showMenu,
+        body: `<p>${esc(s.dead)}</p><p class="dim">${esc(s.deadText(B.def.name))}</p>`,
+        buttons: [{ label: s.retry, def: true, run: retry }, { label: s.menu, run: showMenu }],
       });
     }
-    front.addEventListener('click', (e) => {
+    // a choice on either the menu's page or the layer runs its own action; a body's own buttons (data-act) run the
+    // screen's acts, and a form in it takes Enter
+    function onChoice(e, box) {
+      const d = box === front ? G.front : G.dlg;
+      if (!d) return;
       const a = e.target.closest('[data-act]');
-      if (a && !front.classList.contains('inactive')) frontAct(a.dataset.act);
-    });
-    layer.addEventListener('click', (e) => {
-      if (!G.dlg) return;
-      const a = e.target.closest('[data-act]');
-      if (a && G.dlg.acts[a.dataset.act]) { G.dlg.acts[a.dataset.act](a); return; }
-      const b = e.target.closest('.btn[data-i]');
-      const d = b && G.dlg.buttons[+b.dataset.i];
-      if (d) d.run(b);
-    });
+      if (a && d.acts && d.acts[a.dataset.act]) { d.acts[a.dataset.act](a); return; }
+      const b = e.target.closest('.menu button[data-i]');
+      const it = b && d.buttons[+b.dataset.i];
+      if (it) it.run(b);
+    }
+    front.addEventListener('click', (e) => onChoice(e, front));
+    layer.addEventListener('click', (e) => onChoice(e, layer));
     layer.addEventListener('submit', (e) => { e.preventDefault(); if (G.dlg && G.dlg.onSubmit) G.dlg.onSubmit(); });
-    // Tab goes round the dialog and never out of it, as a modal dialog's does
+    // Tab goes round the layer's screen and never out of it, as a modal dialog's does
     layer.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab' || !G.dlg) return;
-      const f = [...layer.querySelectorAll('button, input, select, textarea, [href]')].filter((x) => !x.disabled && x.getClientRects().length);
+      const f = [...layer.querySelectorAll('button, input, textarea, [href]')].filter((x) => !x.disabled && x.getClientRects().length);
       if (!f.length) return;
       const i = f.indexOf(root.activeElement);
       if (e.shiftKey ? i <= 0 : i === f.length - 1) { e.preventDefault(); f[e.shiftKey ? f.length - 1 : 0].focus(); }
     });
 
-    front.addEventListener('change', (e) => {
-      if (e.target.id !== 'dpPick') return;
-      pickI = +e.target.value;
-      startDemo(); frontInfo();
-    });
-
     /* ------------------------------------------------------------ input */
-    // a finger steers from wherever it lands: the cursor moves by the finger's movement, not to the finger
+    // a finger steers from wherever it lands, on the screen or anywhere on the device's body (touchArea) that isn't a key:
+    // the cursor moves by the finger's movement, not to the finger
     let lastX = 0, lastY = 0;
-    stage.addEventListener('pointerdown', (e) => {
+    const dragFrom = opts.touchArea || stage;
+    const onDown = (e) => {
       if (e.pointerType === 'mouse' || dragId !== null) return;
-      if (e.target.closest('button, select, .layer, .front')) return;
+      const t = e.composedPath()[0];
+      if (t && t.closest && t.closest('button, input, textarea, a, .layer, .front, [data-wact], [data-drag]')) return;
       dragId = e.pointerId; lastX = e.clientX; lastY = e.clientY; input = 'touch';
-      thumbHint.hidden = true;
-      try { stage.setPointerCapture(e.pointerId); } catch (err) { /* capture unavailable */ }
+      try { dragFrom.setPointerCapture(e.pointerId); } catch (err) { /* capture unavailable */ }
       e.preventDefault();
-    });
-    stage.addEventListener('pointermove', (e) => {
+    };
+    const onDrag = (e) => {
       if (e.pointerId !== dragId) return;
       const g = TOUCH_GAIN / S;
       P.tx = clamp(P.tx + (e.clientX - lastX) * g, X_MIN, X_MAX);
       P.ty = clamp(P.ty + (e.clientY - lastY) * g, yTop(), Y_MAX);
       lastX = e.clientX; lastY = e.clientY;
-    });
+    };
     const endDrag = (e) => { if (e.pointerId === dragId) dragId = null; };
-    stage.addEventListener('pointerup', endDrag);
-    stage.addEventListener('pointercancel', endDrag);
+    dragFrom.addEventListener('pointerdown', onDown);
+    dragFrom.addEventListener('pointermove', onDrag);
+    dragFrom.addEventListener('pointerup', endDrag);
+    dragFrom.addEventListener('pointercancel', endDrag);
     // the mouse points where the cursor should go, anywhere on the page
     const onMouse = (e) => {
       if (e.pointerType !== 'mouse') return;
@@ -3675,18 +3169,20 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     };
     addEventListener('pointermove', onMouse);
     stage.addEventListener('contextmenu', (e) => e.preventDefault());
-    sdBtn.addEventListener('click', () => { bomb(); focusStage(); });
-    hud.snd.addEventListener('click', () => { toggleSound(); focusStage(); });
-    hud.pause.addEventListener('click', () => pause());
     lesSkip.addEventListener('click', () => { skipLesson(); focusStage(); });
-    // keys reach the game only while its stage (or something in it) has the focus, so typing elsewhere on the page never
+    // keys reach the game only while its screen (or something in it) has the focus, so typing elsewhere on the page never
     // moves the cursor
     stage.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (G.dlg) { if (e.key === 'Escape' && G.dlg.onEsc) { e.preventDefault(); G.dlg.onEsc(); } return; }
+      const typing = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      if (G.dlg) {
+        if (e.key === 'Escape' && G.dlg.onEsc) { e.preventDefault(); G.dlg.onEsc(); return; }
+        if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !typing) { e.preventDefault(); moveSel(e.key === 'ArrowDown' ? 1 : -1); return; }
+        if (e.code === 'KeyM' && !typing) toggleSound();
+        return;
+      }
       if (e.key === 'Escape' || e.code === 'KeyP') { e.preventDefault(); pause(); return; }
       if (e.key === 'Enter' && G.practice) { e.preventDefault(); skipLesson(); return; }
-      if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) bomb(); return; }
       if (e.code === 'KeyM') { toggleSound(); return; }
       if (e.code === 'Backquote' && DEBUG) { G.debug = !G.debug; return; }
       if (MOVE[e.code]) { e.preventDefault(); keys.add(e.code); input = 'keys'; }
@@ -3702,14 +3198,17 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     const onVis = () => { if (document.hidden) pause(); if (G.mode === 'demo') sfx.musicHold(document.hidden); };
     addEventListener('blur', away);
     document.addEventListener('visibilitychange', onVis);
-    root.addEventListener('focusout', (e) => { if (!e.relatedTarget || !root.contains(e.relatedTarget)) away(); });
-    // the window's body changes size when it is maximised, restored, resized or turned
+    // (the device's own keys are part of the game: a finger or a Tab onto them doesn't pause it)
+    const ours = (el) => !!el && (root.contains(el) || !!(opts.touchArea && opts.touchArea.contains(el)));
+    root.addEventListener('focusout', (e) => { if (!ours(e.relatedTarget)) away(); });
+    // the device's body changes size when the window is maximised, restored or turned
     let relayoutRaf = 0;
     const relayout = () => { cancelAnimationFrame(relayoutRaf); relayoutRaf = requestAnimationFrame(layout); };
     const ro = new ResizeObserver(relayout);
     ro.observe(host);
-    // a touch screen and a mouse get their own legend and balloon, so the texts are set again when that changes
-    const onCoarse = () => { setTexts(); relayout(); };
+    // a touch screen and a mouse get their own moves in How to play and their own pointer, so the texts are set again when
+    // that changes
+    const onCoarse = () => { setTexts(); if (G.front && G.front.rebuild) G.front.rebuild(); relayout(); };
     if (coarse.addEventListener) coarse.addEventListener('change', onCoarse);
 
     /* ------------------------------------------------------------ loop: fixed 1/120 s steps, drawn once a frame */
@@ -3729,18 +3228,14 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       }
       render();
       hudSync();
-      tellWhere();
     }
-    // what the portfolio's status bar says: the screen the game is on
-    const where = () => (G.mode === 'demo' ? s.dp : G.practice ? s.practice : ['intro', 'fight', 'won', 'dead'].includes(G.mode) && B.def ? B.def.name : 'Screen Saver XP');
-    let whereNow = '';
-    function tellWhere() { const w = where(); if (w !== whereNow) { whereNow = w; if (opts.onStatus) opts.onStatus(w); } }
 
     /* ------------------------------------------------------------ the game as the portfolio's window holds it */
+    // the focus goes to the choice picked on the screen on top, or to the screen itself in a fight
     function focusGame() {
-      const d = G.dlg && G.dlg !== FRONT_DLG && layer.querySelector('.btn.default');
-      if (d) { try { d.focus({ preventScroll: true }); } catch (e) { d.focus(); } return; }
-      if (!front.hidden) focusPreview(); else focusStage();
+      const box = !layer.hidden ? layer : !front.hidden ? front : null;
+      const f = box && (box.querySelector('input:not(:disabled)') || box.querySelector('.menu button:focus') || box.querySelector('.menu .sel') || box.querySelector('.menu button'));
+      if (f) focusEl(f); else focusStage();
     }
     function destroy() {
       gone = true;
@@ -3750,44 +3245,29 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
       removeEventListener('blur', away);
       document.removeEventListener('visibilitychange', onVis);
       if (coarse.removeEventListener) coarse.removeEventListener('change', onCoarse);
+      if (dragFrom !== stage) {
+        dragFrom.removeEventListener('pointerdown', onDown); dragFrom.removeEventListener('pointermove', onDrag);
+        dragFrom.removeEventListener('pointerup', endDrag); dragFrom.removeEventListener('pointercancel', endDrag);
+      }
       if (cardMemo && cardMemo.url) URL.revokeObjectURL(cardMemo.url);
       sfx.close();
       host.remove();
     }
     const api = {
-      // host: the window's body; the stage moves into a new one when the window is drawn again (a language switch)
+      // host: the device's screen slot; the screen moves into a new one when the window is drawn again (a language switch)
       attach(el) { if (host.parentNode !== el) el.appendChild(host); layout(); },
       setLang(l) {
         lang = l === 'id' ? 'id' : 'en';
         setTexts();
-        const child = G.dlg && G.dlg !== FRONT_DLG ? G.dlg : null;
-        if (!front.hidden) showFront();
+        const child = G.dlg && !G.dlg.front ? G.dlg : null;
+        if (G.front && G.front.rebuild) G.front.rebuild();
         if (child && child.rebuild) child.rebuild();
         if (tooSmall) showSmall();
-        whereNow = ''; tellWhere();
       },
-      // the menu's New game: a full run from Starfield.scr, asking a first-time player's name first
-      newGame() { closeDlg(); go(false); },
-      togglePause() { if (G.paused) resume(); else pause(); },
+      primary,
       toggleSound,
       isPaused: () => G.paused,
       isMuted: () => sfx.muted,
-      // How to play: the Settings dialog over Display Properties, or the pause dialog (which says it) in a fight
-      help() { if (!front.hidden && !front.classList.contains('inactive')) showSettings(); else pause(); },
-      board() {
-        if (!front.hidden) { if (!front.classList.contains('inactive')) showBoardAll(); return; }
-        const back = G.dlg && { win: renderWin, dead: showDead, drill: practiceDlg }[G.dlg.kind];
-        if (back) { showBoardAll(back); return; }
-        if (G.mode === 'fight' || G.mode === 'intro') { pause(true); showBoardAll(() => pause(true)); }
-      },
-      // what the portfolio's Game and Help menus can do now; it greys the items that would do nothing
-      can(item) {
-        const fight = G.mode === 'fight' || G.mode === 'intro', door = !front.hidden && !front.classList.contains('inactive');
-        if (item === 'pause') return fight;
-        if (item === 'help') return door || (fight && !G.dlg);
-        if (item === 'board') return door || fight || (!!G.dlg && ['win', 'dead', 'drill'].includes(G.dlg.kind));
-        return true;
-      },
       focus: focusGame,
       destroy,
     };
@@ -3799,6 +3279,7 @@ kbd { display: inline-block; padding: 0 8px; line-height: 16px; border: 1px soli
     try { document.fonts.load(`700 ${MQ_SIZE}px "Noto Sans"`).catch(() => {}); } catch (e) { /* no font loading API */ }
     if (DEBUG) window.__ssxp = { B, G, P, MQ, sfx, bullets, shots, start: (i) => startGame(i), step: (sec) => { for (let k = 0; k < Math.round(sec * 120); k++) update(STEP); render(); hudSync(); }, run: (sec, fn) => { for (let k = 0; k < Math.round(sec * 120); k++) { if (fn() === false) break; update(STEP); } render(); hudSync(); } };
     return api;
+
   }
 
   /* ------------------------------------------------------------ the idle screensaver: XP's Starfield over the whole page

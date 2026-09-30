@@ -1,6 +1,7 @@
 /*
   The site's two faces, served from here (owner's request, 2026-09-29): Noto Sans (variable, 300 to 700, upright
-  and italic) and Noto Sans Mono (variable, set at 400 and 700). The loading screen waits for them, so they come from
+  and italic) and Noto Sans Mono (variable, set at 400 and 700). A third file here, ssxp-pixel.woff, is Screen Saver
+  XP's pixel letters, drawn for the game (tools/ssxp-pixel); screensaver.js adds it to the page itself. The loading screen waits for them, so they come from
   the site itself: a network that blocks a font service can no longer keep the portfolio closed.
   Google Fonts' own files and unicode ranges, Latin and Latin Extended only (the site is English and Indonesian):
   a browser fetches a range's file only when the page has a character in it. Licence: SIL Open Font License 1.1

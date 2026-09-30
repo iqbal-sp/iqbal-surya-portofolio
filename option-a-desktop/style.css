@@ -1512,11 +1512,71 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 /* ============================================================
    SCREEN SAVER XP: the second game (the desktop's right-click
    menu → Properties, the screensaver's offer, Boss Rush XP's
-   phone gate, #/screensaver). Its stage draws itself in a shadow
-   root (screensaver.js); the portfolio gives it a window, the
-   desktop's balloons, the idle screensaver and the reward.
+   phone gate, Start > Accessories, #/screensaver). Its screen
+   draws itself in a shadow root (screensaver.js); the portfolio
+   gives it its device, the desktop's balloons, the idle
+   screensaver and the reward.
    ============================================================ */
-.saver-body { position: relative; background: #04163f; box-shadow: var(--well); overflow: hidden; }
+/* the window is a device, after the owner's reference (2026-09-30): warm grey matte plastic lit from above, the screen
+   on the left and a panel on the right, parted by seams, with the window's keys, the game's mark, the two keys (sound
+   and start/pause, each with its printed name and key) and the game's name at its foot. In a narrow window (a phone, a
+   tablet held upright) the keys go into a strip under the screen */
+.win[data-id="screensaver"] { container: saver / size; }
+.dev { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 176px; grid-template-areas: "scr panel"; column-gap: 12px; padding: 12px 0 12px 12px; border-radius: 24px; color: #211e1b; font: 12px/1.3 var(--ui); -webkit-font-smoothing: antialiased;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #928c88 0%, #88827e 70%, #6a6663 100%);
+  box-shadow: inset 0 2px rgba(255, 255, 255, .22), inset 0 -3px 6px rgba(0, 0, 0, .28), 0 24px 44px -18px rgba(0, 0, 0, .75), 0 2px 6px rgba(0, 0, 0, .3); }
+.win.max .dev { border-radius: 0; }
+.dev-scr { grid-area: scr; position: relative; min-width: 0; min-height: 0; }
+.dev-scr .gm-note { color: #f1eee9; }
+.dev-panel { grid-area: panel; display: grid; grid-template-rows: 112px minmax(0, 1fr) 112px; margin: -12px 0; }
+/* a seam between two parts of the plastic: a dark groove over a lit edge */
+.dev-keys, .dev-bot { box-shadow: inset 0 1px #57534f, inset 0 2px #a39f9b; }
+.dev-top { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 16px 0 20px; touch-action: none; user-select: none; -webkit-user-select: none; }
+.dev-mark { display: flex; align-items: flex-start; gap: 2px; }
+.dev-mark .px { --ic-line: #211e1b; --ic-fill: #211e1b; }
+.dev-mark i { width: 6px; height: 6px; background: linear-gradient(#c4552e, #c4552e) center / 2px 6px no-repeat, linear-gradient(#c4552e, #c4552e) center / 6px 2px no-repeat; }
+.dev-caps { display: flex; gap: 4px; padding: 4px; border-radius: 16px; background: #1e1b19; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .7), 0 1px rgba(255, 255, 255, .25); }
+.dev-cb { position: relative; width: 24px; height: 24px; padding: 0; border-radius: 50%; border: 1px solid #3c3734; display: grid; place-items: center; color: #2a2622; background: radial-gradient(circle at 36% 30%, #e4e0dc 0, #b0aca8 55%, #98948f 100%); box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .25); }
+.dev-cb svg { fill: currentColor; }
+.dev-cb:hover { background: radial-gradient(circle at 36% 30%, #fff 0, #c9c5c1 55%, #a39f9b 100%); }
+.dev-cb:active { box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4); }
+.dev-caps :focus-visible { outline: 1px dotted #fff; outline-offset: 2px; }
+.dev-keys { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.dev-kg { display: grid; justify-items: center; gap: 8px; }
+/* the keys' printed names in black, which holds 4.5:1 on the plastic where they sit */
+.dev-kg small { font: 700 12px/16px var(--ui); color: #000; white-space: nowrap; }
+.dev-kg small span { font-weight: 400; }
+.dev-k, .dev-go { position: relative; display: grid; place-items: center; padding: 0; cursor: pointer; transition: transform .06s ease; }
+.dev-k { width: 64px; height: 44px; border-radius: 22px; border: 1px solid #3c3734; color: #2a2622; background: linear-gradient(180deg, #cfcbc7, #b0aca8 55%, #98948f); box-shadow: inset 0 1px rgba(255, 255, 255, .6), 0 3px 0 #45403c, 0 6px 8px rgba(0, 0, 0, .35); }
+.dev-go { width: 64px; height: 64px; margin-top: 12px; border-radius: 50%; border: 1px solid #3a2419; color: #24130c; background: radial-gradient(circle at 40% 32%, #de7348, #c4552e 55%, #8c391b); box-shadow: 0 3px 0 #5c2814, 0 7px 10px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .25); }
+.dev-go::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1px dotted rgba(40, 14, 4, .55); }
+.dev-k:hover { background: linear-gradient(180deg, #dcd8d4, #bdb9b5 55%, #a39f9b); }
+.dev-go:hover { background: radial-gradient(circle at 40% 32%, #e8805a, #cf6038 55%, #973f1e); }
+.dev-k:active { transform: translateY(2px); box-shadow: inset 0 1px rgba(255, 255, 255, .6), 0 1px 0 #45403c, 0 3px 5px rgba(0, 0, 0, .35); }
+.dev-go:active { transform: translateY(2px); box-shadow: 0 1px 0 #5c2814, 0 4px 6px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .25); }
+.dev-k:focus-visible, .dev-go:focus-visible { outline: 2px solid #f1eee9; outline-offset: 3px; }
+.dev-bot { display: flex; align-items: flex-end; justify-content: flex-end; padding: 0 20px 20px; }
+.dev-print { font: 700 14px/1 var(--ui); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .dev-k, .dev-go { transition: none; } }
+@media (pointer: coarse) {
+  .dev-caps { gap: 12px; border-radius: 20px; }
+  .dev-cb { width: 32px; height: 32px; }
+  .dev-cb::after { content: ""; position: absolute; inset: -6px; }
+}
+/* in a narrow window (a phone, a tablet held upright) the screen is larger with the keys in a 64px strip under it: the
+   window's keys on the left, sound and start/pause on the right, without their printed names. The device at a desk is
+   near square, so the turn comes a little under square */
+@container saver (aspect-ratio < 9 / 10) {
+  .dev { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; grid-template-areas: "scr" "panel"; column-gap: 0; row-gap: 8px; padding: 8px 8px 0; }
+  .dev-panel { grid-template-rows: none; grid-template-columns: auto minmax(0, 1fr); margin: 0 -8px; min-height: 64px; box-shadow: inset 0 1px #57534f, inset 0 2px #a39f9b; }
+  .dev-top { align-items: center; padding: 0 12px; }
+  .dev-mark, .dev-bot, .dev-kg small { display: none; }
+  .dev-keys { flex-direction: row; justify-content: flex-end; padding: 0 12px; box-shadow: none; }
+  .dev-k { width: 56px; }
+  .dev-go { width: 52px; height: 52px; margin: 0; }
+}
 .px-moon { --ic-fill: var(--ic-blue); }
 /* a tray balloon whose body is one button beside its close box: the Recycle Bin hint and the screensaver's offer */
 .tray-note .note-go { display: grid; gap: 4px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
@@ -1556,8 +1616,9 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   .desk-icons { right: 8px; bottom: auto; grid-auto-flow: row; grid-template-rows: none; grid-template-columns: repeat(4, 1fr); justify-items: center; }
   .win, .win.skinned { left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; }
   .win .tb.max, .win .resize { display: none; }
-  /* on a phone the game's own pause button and dialogs stand in for the menu bar, and the status bar's key hints go */
-  .win[data-id="screensaver"] > .menubar, .win[data-id="screensaver"] > .statusbar { display: none; }
+  /* on a phone the device fills the screen over the taskbar: square at the top, round at its foot, and no maximise */
+  .dev { border-radius: 0 0 24px 24px; }
+  .dev-caps [data-wact="max"] { display: none; }
   .win.dialog { left: 8px !important; right: 8px; top: 20% !important; width: calc(100% - 16px) !important; height: auto !important; }
   /* Boss Rush XP's gate, taller with its board and Screen Saver XP's button, centres between the top and the taskbar
      and scrolls inside itself rather than run under the taskbar */

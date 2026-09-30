@@ -71,7 +71,7 @@
       gameLoading: 'Loading Boss Rush XP…', gameFailed: 'Boss Rush XP couldn’t load. Close the game window and try again.',
       gameKeys: '← → move · ↑ jump · A punch · S kick · W guard · D dash · F special · P pause',
       saverLoading: 'Loading Screen Saver XP…', saverFailed: 'Screen Saver XP couldn’t load. Close its window and try again.',
-      saverKeys: 'Mouse, ← ↑ → ↓ or WASD move · Shift slow · Space Show Desktop · P pause', saverTouch: 'Drag anywhere to move · tap Show Desktop with a full meter', saverTrails: 'Pointer trails',
+      saverSound: 'Sound', saverStart: 'Start game', saverPause: 'Pause', saverResume: 'Resume', saverGo: 'Start/Pause', saverTrails: 'Pointer trails',
       desktop: 'Desktop', properties: 'Properties', gateSaver: 'Play Screen Saver XP', gateSaverText: 'Screen Saver XP plays on a phone, with one finger.',
       binHint: 'Recycle Bin isn’t empty', binHintText: 'Click here to see what’s in it.',
       saverOffer: 'The screensaver fought back', saverOfferText: 'Click here to take it on in Screen Saver XP.',
@@ -132,7 +132,7 @@
       gameLoading: "Memuat Boss Rush XP…", gameFailed: "Boss Rush XP gagal dimuat. Tutup jendela game, lalu coba lagi.",
       gameKeys: '← → gerak · ↑ lompat · A pukul · S tendang · W tangkis · D dash · F spesial · P jeda',
       saverLoading: 'Memuat Screen Saver XP…', saverFailed: 'Screen Saver XP gagal dimuat. Tutup jendelanya, lalu coba lagi.',
-      saverKeys: 'Mouse, ← ↑ → ↓ atau WASD gerak · Shift pelan · Spasi Show Desktop · P jeda', saverTouch: 'Geser di mana saja untuk bergerak · ketuk Show Desktop saat meter penuh', saverTrails: 'Jejak pointer',
+      saverSound: 'Suara', saverStart: 'Mulai main', saverPause: 'Jeda', saverResume: 'Lanjut', saverGo: 'Mulai/Jeda', saverTrails: 'Jejak pointer',
       desktop: 'Desktop', properties: 'Properti', gateSaver: 'Main Screen Saver XP', gateSaverText: 'Screen Saver XP bisa dimainkan di HP, cukup dengan satu jari.',
       binHint: 'Tempat Sampah tidak kosong', binHintText: 'Klik di sini untuk melihat isinya.',
       saverOffer: 'Screensaver-nya melawan', saverOfferText: 'Klik di sini untuk menantangnya di Screen Saver XP.',
@@ -245,10 +245,11 @@
       const w = Math.round(960 * s + 6), h = Math.round(540 * s + 82);
       return { x: left + Math.max(0, Math.round((W - left - w) / 2)), y: Math.max(8, Math.round((H - h) / 2)), w, h };
     }
-    // Screen Saver XP keeps its 3:2 stage whole the same way: the arena and a task pane either side of it
+    // Screen Saver XP's device keeps its screen whole the same way: the arena (0.8 to 1.35) under the HUD's 28px row,
+    // 12px of plastic round it and the 176px panel of keys beside it
     if (id === 'screensaver') {
-      const s = clamp(Math.min((W - left - 42) / 720, (H - 24 - 85) / 480), 0.8, 1.35);
-      const w = Math.round(720 * s + 6), h = Math.round(480 * s + 85);
+      const s = clamp(Math.min((W - left - 24 - 200) / 360, (H - 24 - 52) / 480), 0.8, 1.35);
+      const w = Math.round(360 * s) + 200, h = Math.round(480 * s) + 52;
       return { x: left + Math.max(0, Math.round((W - left - w) / 2)), y: Math.max(8, Math.round((H - h) / 2)), w, h };
     }
     return { x: Math.round(W / 2 - 210), y: Math.round(H / 2 - 130), w: 420, h: 0 };
@@ -283,7 +284,7 @@
     },
     gamegate: { icon: 'warning', title: () => 'Boss Rush XP', build: buildGameGate, after: gateBoardLoad, dialog: true },
     screensaver: {
-      icon: 'moon', title: () => 'Screen Saver XP', build: buildSaver, after: afterSaver, route: () => '#/screensaver',
+      icon: 'moon', title: () => 'Screen Saver XP', build: buildSaver, after: afterSaver, route: () => '#/screensaver', skinned: true,
       onOpen: (w) => { if (w.game) w.game.focus(); },
       onClose: (w) => { if (w.game) w.game.destroy(); w.game = null; trailsNoteNow(); },
       onMin: trailsNoteNow,
@@ -599,20 +600,6 @@
         { label: u('gameExit'), run: () => closeWin(w) },
       ];
       if (key === 'help') return [{ label: u('gameHow'), run: () => gm && gm.help() }, '-', { label: u('aboutPortfolio'), run: () => openWin('credits') }];
-    }
-    if (w.id === 'screensaver') {
-      const gm = w.game;
-      // an item that would do nothing where the game is now (or while it loads) is greyed, as XP greyed it
-      const off = (item) => !gm || (typeof gm.can === 'function' && !gm.can(item));
-      if (key === 'game') return [
-        { label: u('gameNew'), off: !gm, run: () => gm.newGame() },
-        { label: u('gamePause'), checked: !!(gm && gm.isPaused()), off: off('pause'), run: () => gm.togglePause() }, '-',
-        { label: u('gameSound'), checked: !!(gm && !gm.isMuted()), off: !gm, run: () => gm.toggleSound() }, '-',
-        { label: u('gameBoard'), off: off('board'), run: () => gm.board() }, '-',
-        ...(trailsState() ? [{ label: u('saverTrails'), checked: trailsWanted, run: toggleTrails }, '-'] : []),
-        { label: u('gameExit'), run: () => closeWin(w) },
-      ];
-      if (key === 'help') return [{ label: u('gameHow'), off: off('help'), run: () => gm.help() }, '-', { label: u('aboutPortfolio'), run: () => openWin('credits') }];
     }
     if (key === 'help') return [{ label: u('about'), run: () => openWin('about', { pushHistory: true }) }, { label: u('aboutPortfolio'), run: () => openWin('credits') }, { label: u('contact'), run: () => openWin('contact') }];
     if (w.id === 'work') {
@@ -1904,15 +1891,15 @@
   /* ------------------------------------------------------------ Screen Saver XP (the second game) */
   // A bullet hell against XP's own screensavers that plays on a phone as well as at a desk (GAME2_BRIEF.md). Its window
   // opens from the desktop's right-click menu (Properties), from the screensaver's offer once it wakes, from Boss Rush
-  // XP's phone gate, and at #/screensaver. screensaver.js is only fetched on first open, or when the idle screensaver
-  // first runs.
+  // XP's phone gate, from Start > Accessories, and at #/screensaver. screensaver.js is only fetched on first open, or
+  // when the idle screensaver first runs.
   let saverScript = null;
   function loadSaver() {
     if (window.ScreenSaverXP) return Promise.resolve(window.ScreenSaverXP);
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=2';
+        s.src = 'screensaver.js?v=3';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);
@@ -1921,17 +1908,42 @@
     return saverScript;
   }
   function openSaver(from, push = true) { openWin('screensaver', { from, push, pushHistory: push }); }
-  // a touch screen's status bar names the touches, not the keys
-  const coarsePtr = window.matchMedia('(pointer: coarse)');
-  function buildSaver() {
-    return `<div class="menubar" role="menubar">${menuBtn('game', u('gameMenu'))}${menuBtn('help', u('help'))}</div>
-      <div class="win-body saver-body" data-saver></div>
-      <div class="statusbar"><span class="gm-where">Screen Saver XP</span><span>${esc(u(coarsePtr.matches ? 'saverTouch' : 'saverKeys'))}</span></div>`;
+  // The window is a device, drawn after the owner's reference (2026-09-30): warm grey plastic, the screen on the left
+  // (screensaver.js draws it) and a panel on the right with the window's keys, the game's mark, sound and start/pause,
+  // and the game's name printed at its foot. In a narrow window the keys go under the screen (style.css).
+  const SAVER_GLYPH = {
+    sound: '<svg width="20" height="16" viewBox="0 0 20 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 5h3v6H1zM4 4h2v8H4zM6 2h2v12H6zM8 0h2v16H8zM12 5h2v6h-2zM15 2h2v2h-2zM17 4h2v8h-2zM15 12h2v2h-2z" fill="currentColor"/></svg>',
+    mute: '<svg width="20" height="16" viewBox="0 0 20 16" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 5h3v6H1zM4 4h2v8H4zM6 2h2v12H6zM8 0h2v16H8zM12 5h2v2h-2zM16 5h2v2h-2zM14 7h2v2h-2zM12 9h2v2h-2zM16 9h2v2h-2z" fill="currentColor"/></svg>',
+    go: '<svg width="26" height="14" viewBox="0 0 26 14" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 0h2v14H0zM2 1h2v12H2zM4 2h2v10H4zM6 3h2v8H6zM8 4h2v6H8zM10 5h2v4h-2zM16 0h3v14h-3zM22 0h3v14h-3z" fill="currentColor"/></svg>',
+  };
+  function buildSaver(w) {
+    const cap = (wact, glyph, label) => `<button type="button" class="dev-cb" data-wact="${wact}" aria-label="${esc(label)}" title="${esc(label)}">${glyph}</button>`;
+    const key = (act, cls, glyph, label, print, k) => `<span class="dev-kg"><button type="button" class="${cls}" data-act="${act}" aria-label="${esc(label)}" title="${esc(label)}">${glyph}</button><small aria-hidden="true">${esc(print)} <span>${k}</span></small></span>`;
+    return `<div class="dev">
+      <div class="dev-scr" data-saver></div>
+      <div class="dev-panel">
+        <div class="dev-top" data-drag><span class="dev-mark" aria-hidden="true">${I('moon', 24)}<i></i></span><span class="dev-caps">${cap('min', GLYPH.min, u('minimize'))}${cap('max', w.max ? GLYPH.restore : GLYPH.max, u('maximize'))}${cap('close', GLYPH.close, u('close'))}</span></div>
+        <div class="dev-keys">${key('saver-sound', 'dev-k', SAVER_GLYPH.sound, u('saverSound'), u('saverSound'), 'M')}${key('saver-go', 'dev-go', SAVER_GLYPH.go, u('saverStart'), u('saverGo'), 'P')}</div>
+        <div class="dev-bot"><span class="dev-print" aria-hidden="true">Screen Saver XP</span></div>
+      </div>
+    </div>`;
+  }
+  // the keys show what the game says they do now: the sound on or off, and what start/pause will do
+  function saverKeys(w, k) {
+    if (!k) return;
+    const snd = $('.dev-k', w.el), gok = $('.dev-go', w.el);
+    if (snd) { snd.innerHTML = k.muted ? SAVER_GLYPH.mute : SAVER_GLYPH.sound; snd.setAttribute('aria-pressed', String(!k.muted)); }
+    if (gok) {
+      const label = k.go === 'pause' ? u('saverPause') : k.go === 'resume' ? u('saverResume') : k.go === 'ok' && k.label ? k.label : u('saverStart');
+      gok.setAttribute('aria-label', label); gok.title = label;
+    }
   }
   // the game outlives re-renders (a language switch rebuilds the window body): its stage moves into the new body
   function afterSaver(w) {
     const host = $('[data-saver]', w.el);
-    if (w.game) { w.game.attach(host); w.game.setLang(lang); return; }
+    // a key pressed with the mouse or a finger leaves the focus in the game, so a fight doesn't pause for it
+    $('.dev-keys', w.el).addEventListener('pointerdown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+    if (w.game) { w.game.attach(host); w.game.setLang(lang); saverKeys(w, w.keysNow); return; }
     // a tall screen that isn't a phone's (a tablet held upright) plays the portrait stage in a maximised window
     if (!w.max && !isMobile() && desktopEl.clientHeight > desktopEl.clientWidth) toggleMax(w);
     host.innerHTML = `<p class="gm-note">${esc(u('saverLoading'))}</p>`;
@@ -1943,17 +1955,17 @@
         lang, owner: PF.owner.fullName, onContact: () => openWin('contact'), onWin: trailsWon,
         // Blank.scr beaten: the PC starts again, and the result waits until the Welcome screen has gone
         onReboot: (done) => { bootScreen.replay(); bootScreen.home(null); afterBoot(done); },
-        onStatus: (text) => { const st = $('.gm-where', w.el); if (st) st.textContent = text; },
         onRun: (d) => track('run', `ss:${d}`),
-        // the pointer trails' switch in the game's Settings, where a phone has it: null until they are won
-        trails: { on: () => (trailsState() ? trailsWanted : null), set: (on) => { if (on !== trailsWanted) toggleTrails(); } },
+        onKeys: (k) => { w.keysNow = k; saverKeys(w, k); },
+        // a finger may start its drag anywhere on the device, not only on the screen
+        touchArea: w.el,
       });
       w.game.attach(h);
       if (activeId === w.id) w.game.focus();
     }).catch(() => { const h = $('[data-saver]', w.el); if (h) h.innerHTML = `<p class="gm-note">${esc(u('saverFailed'))}</p>`; });
   }
 
-  /* ---- the desktop's own right-click menu: Properties opens Display Properties, the game's front door ---- */
+  /* ---- the desktop's own right-click menu: Properties opens Screen Saver XP; Pointer trails, once won, switches them ---- */
   // Only the bare desktop opens it (not a window, an icon or the taskbar): a right-click, a long press on a touch
   // screen, or Shift+F10 or the Menu key while nothing else has the focus
   let deskMenu = null, pressT = 0, pressAt = null;
@@ -1962,12 +1974,23 @@
     closeMenu(); closeStart(); closeDeskMenu();
     const m = deskMenu = document.createElement('div');
     m.className = 'menu'; m.setAttribute('role', 'menu'); m.setAttribute('aria-label', u('desktop'));
-    m.innerHTML = `<button role="menuitem"><span class="mk"></span><span>${esc(u('properties'))}</span></button>`;
+    m.innerHTML = `<button role="menuitem" data-dm="props"><span class="mk"></span><span>${esc(u('properties'))}</span></button>`
+      + (trailsState() ? `<div class="hr" role="separator"></div><button role="menuitemcheckbox" aria-checked="${trailsWanted}" data-dm="trails"><span class="mk">${trailsWanted ? GLYPH.bullet : ''}</span><span>${esc(u('saverTrails'))}</span></button>` : '');
     document.body.appendChild(m);
     m.style.left = clamp(x, 2, innerWidth - m.offsetWidth - 2) + 'px';
     m.style.top = clamp(y, 2, innerHeight - m.offsetHeight - 2) + 'px';
-    m.addEventListener('click', (e) => { if (!e.target.closest('button')) return; const r = rectOf(m); closeDeskMenu(); track('door', 'ss:display'); openSaver(r); });
-    m.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeDeskMenu(); } });
+    m.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const r = rectOf(m);
+      closeDeskMenu();
+      if (b.dataset.dm === 'trails') toggleTrails(); else { track('door', 'ss:display'); openSaver(r); }
+    });
+    m.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeDeskMenu(); return; }
+      const bs = $$('button', m), i = bs.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); }
+    });
     $('button', m).focus({ preventScroll: true });
     document.addEventListener('pointerdown', deskMenuOutside, true);
   }
@@ -2106,7 +2129,7 @@
     if (!trailsScript) {
       trailsScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'trails.js?v=2';
+        s.src = 'trails.js?v=3';
         s.onload = () => resolve(window.PointerTrails);
         s.onerror = () => { trailsScript = null; s.remove(); reject(new Error('trails.js did not load')); };
         document.head.appendChild(s);
@@ -2149,6 +2172,8 @@
   const ACTIONS = {
     'open-work': (a) => openWin('work', { from: rectOf(a), pushHistory: true }),
     'gate-saver': (a, w) => { const r = rectOf(a); if (w) closeWin(w); track('door', 'ss:gate'); openSaver(r); },
+    'saver-sound': (a, w) => { if (w && w.game) { w.game.toggleSound(); w.game.focus(); } },
+    'saver-go': (a, w) => { if (w && w.game) { w.game.primary(); w.game.focus(); } },
     'open-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-start': (a, w) => {

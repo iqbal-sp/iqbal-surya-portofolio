@@ -31,6 +31,8 @@ asset/**/*.json
 anti-slop
 # game prototypes: tested as private artifacts, never served from the site
 prototype
+# the source of Screen Saver XP's pixel letters (the site serves asset/fonts/ssxp-pixel.woff)
+tools
 
 # the lossless PNG copies of the service pictures; the site shows their WebP copies in service/webp/
 asset/Home/service/png

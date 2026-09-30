@@ -1,5 +1,5 @@
 /* Pointer trails: the reward for beating Screen Saver XP, as Mouse Properties' "Display pointer trails" drew them in XP.
-   app.js loads this file only once they have been earned (or switched back on from the game's menu or its Settings)
+   app.js loads this file only once they have been earned (or switched back on from the desktop's right-click menu)
    and calls PointerTrails.create({ lang, fresh }). A few copies of the arrow follow the pointer and catch up with it
    when it stops. A touch screen has no pointer, so there they follow a finger moving over the desktop. They are
    drawn on one canvas over the page that takes no input, and it rests while nothing moves. Not over Screen Saver XP's
@@ -13,13 +13,13 @@
   const STR = {
     en: {
       installed: 'Pointer trails installed', close: 'Close',
-      installedText: 'Your reward is on the desktop: the pointer leaves a trail. Switch it off in Screen Saver XP’s Settings.',
-      installedTouch: 'Your reward is on the desktop: a trail of arrows follows your finger. Switch it off in Screen Saver XP’s Settings.',
+      installedText: 'Your reward is on the desktop: the pointer leaves a trail. To switch it off, right-click the desktop and pick Pointer trails.',
+      installedTouch: 'Your reward is on the desktop: a trail of arrows follows your finger. To switch it off, hold a finger on the desktop and pick Pointer trails.',
     },
     id: {
       installed: 'Jejak pointer terpasang', close: 'Tutup',
-      installedText: 'Hadiahmu sudah ada di desktop: pointer meninggalkan jejak. Matikan lewat Pengaturan di Screen Saver XP.',
-      installedTouch: 'Hadiahmu sudah ada di desktop: jejak panah mengikuti jarimu. Matikan lewat Pengaturan di Screen Saver XP.',
+      installedText: 'Hadiahmu sudah ada di desktop: pointer meninggalkan jejak. Untuk mematikannya, klik kanan desktop lalu pilih Jejak pointer.',
+      installedTouch: 'Hadiahmu sudah ada di desktop: jejak panah mengikuti jarimu. Untuk mematikannya, tahan jari di desktop lalu pilih Jejak pointer.',
     },
   };
   // how many arrows follow, and how much of the pointer's past (ms) lies between two of them
