@@ -26,22 +26,22 @@
       photoAlt: 'Portrait of Iqbal Surya',
       openPortfolio: 'View selected work', downloadCV: 'Download resume', contactMe: 'Contact me',
       history: 'Career history',
-      to: 'To', worklog: 'Experience', worklogLead: 'My experience across agencies, product teams, and freelance work.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Design experiments and personal projects.', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Outside work, I enjoy traveling, trying different food, and taking a break with coffee or a book.', myPictures: 'My Pictures', build: 'Have a project in mind?', buildLead: 'Have a website or app to design? Select what you need help with and send me a short brief.', need: 'What can I help with?', sendMsg: 'Write a project brief', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
+      to: 'To', worklog: 'Experience', worklogLead: 'My experience across agencies, product teams, and freelance work.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Things I have made and explored outside client work.', visitProject: 'Visit project', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Outside work, I enjoy traveling, trying different food, and taking a break with coffee or a book.', myPictures: 'My Pictures', build: 'Have a project in mind?', buildLead: 'Have a website or app to design? Select what you need help with and send me a short brief.', need: 'What can I help with?', sendMsg: 'Write a project brief', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
       footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsIcons: 'Icons: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0. Recoloured here as two-tone icons.',
       file: 'File', view: 'View', help: 'Help', play: 'Play', up: 'Up',
       address: 'Address', myDocs: 'My Documents', thumbnails: 'Thumbnails', details: 'Details', open: 'Open',
       arrangeNo: 'Arrange by Number', arrangeName: 'Arrange by Name', aboutPortfolio: 'About this portfolio',
-      objects: (n) => `${n} object(s)`, caseStudies: 'Case studies', caseTasks: 'Case study tasks', otherPlaces: 'Other Places', myComputer: 'My Computer',
-      colNo: 'No.', colName: 'Name', colTags: 'Keywords', typeCase: 'Case study',
-      openCase: 'Open case study', player: 'Case Study Player', chapters: 'Chapters', notYet: 'Not published',
-      askAbout: (x) => `Ask me about ${x}`, askSubject: (x) => `${x} case study`, askBody: (x) => `Hi Iqbal,\n\nI saw ${x} in your portfolio and would like to hear more about it.\n\n`,
+      objects: (n) => `${n} object(s)`, caseStudies: 'Projects', caseTasks: 'Project actions', otherPlaces: 'Other Places', myComputer: 'My Computer',
+      colNo: 'No.', colName: 'Name', colTags: 'Keywords', typeCase: 'Project',
+      openCase: 'Open project', player: 'Project Player', chapters: 'Chapters', notYet: 'Not published',
+      askAbout: (x) => `Ask me about ${x}`, askSubject: (x) => `About ${x}`, askBody: (x) => `Hi Iqbal,\n\nI saw ${x} in your portfolio and would like to hear more about it.\n\n`,
       writeup: 'The full project write-up is not available here yet. Email me if you’d like to discuss the work.',
       lblCase: 'Project', lblLink: 'Link', sizes: ['Small', 'Medium', 'Large'],
       fullCase: 'Project details', picSoon: (x) => `${x} (image not available yet)`, draftRatio: (s) => `Ratio differs from the slot (${s})`,
       overview: 'Overview', nowReading: 'Now reading',
       prevCase: 'Previous case', nextCase: 'Next case', nextSection: 'Next section', stop: 'Back to selected work',
       textSize: 'Text size', readPos: 'Reading position',
-      switchCase: 'Choose a case study', copyLink: 'Copy link to this case', linkCopied: 'Link copied',
+      switchCase: 'Choose a project', copyLink: 'Copy link to this project', linkCopied: 'Link copied',
       coverAlt: (x) => `${x}: cover`,
       sendEmail: 'Send an email', copyEmail: 'Copy address', copyHint: 'Use this address in your email app', copied: 'Copied!',
       availability: 'Availability', openProfile: (n) => `Open ${n} profile`, newTab: 'opens in a new tab',
@@ -87,22 +87,22 @@
       photoAlt: 'Potret Iqbal Surya',
       openPortfolio: "Lihat karya pilihan", downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
       history: 'Riwayat karier',
-      to: 'Untuk', worklog: "Pengalaman", worklogLead: "Pengalaman saya di agensi, tim produk, dan proyek freelance.", present: "Saat ini", ft: 'Full-time', fl: 'Freelance', projects: "Proyek pribadi", projectsLead: "Eksperimen desain dan proyek pribadi.", diskLabel: "Proyek pribadi", offClock: 'Di luar jam kerja', offClockText: "Di luar pekerjaan, saya suka jalan-jalan, mencoba makanan baru, dan bersantai dengan kopi atau buku.", myPictures: "Foto Saya", build: "Punya rencana website atau aplikasi?", buildLead: "Butuh bantuan mendesain website atau aplikasi? Pilih kebutuhan Anda, lalu kirim brief singkat.", need: "Apa yang bisa saya bantu?", sendMsg: "Tulis brief proyek", reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: "Diskusi proyek", mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Tentang proyeknya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
+      to: 'Untuk', worklog: "Pengalaman", worklogLead: "Pengalaman saya di agensi, tim produk, dan proyek freelance.", present: "Saat ini", ft: 'Full-time', fl: 'Freelance', projects: "Proyek pribadi", projectsLead: "Karya dan eksplorasi saya di luar proyek klien.", visitProject: 'Kunjungi proyek', diskLabel: "Proyek pribadi", offClock: 'Di luar jam kerja', offClockText: "Di luar pekerjaan, saya suka jalan-jalan, mencoba makanan baru, dan bersantai dengan kopi atau buku.", myPictures: "Foto Saya", build: "Punya rencana website atau aplikasi?", buildLead: "Butuh bantuan mendesain website atau aplikasi? Pilih kebutuhan Anda, lalu kirim brief singkat.", need: "Apa yang bisa saya bantu?", sendMsg: "Tulis brief proyek", reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: "Diskusi proyek", mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Tentang proyeknya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
       footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsIcons: 'Ikon: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0. Di sini diwarnai ulang menjadi ikon dua warna.',
       file: 'Berkas', view: 'Tampilan', help: 'Bantuan', play: 'Putar', up: 'Naik',
       address: 'Alamat', myDocs: 'Dokumen Saya', thumbnails: 'Gambar mini', details: 'Rincian', open: 'Buka',
       arrangeNo: 'Urutkan menurut Nomor', arrangeName: 'Urutkan menurut Nama', aboutPortfolio: 'Tentang portofolio ini',
-      objects: (n) => `${n} objek`, caseStudies: 'Studi kasus', caseTasks: "Pilihan studi kasus", otherPlaces: 'Tempat Lain', myComputer: 'Komputer Saya',
-      colNo: 'No.', colName: 'Nama', colTags: 'Kata kunci', typeCase: 'Studi kasus',
-      openCase: 'Buka studi kasus', player: 'Pemutar Studi Kasus', chapters: 'Bab', notYet: "Belum diterbitkan",
-      askAbout: (x) => `Tanya saya soal ${x}`, askSubject: (x) => `Studi kasus ${x}`, askBody: (x) => `Halo Iqbal,\n\nSaya melihat ${x} di portofolio Anda dan ingin tahu lebih banyak tentang proyeknya.\n\n`,
+      objects: (n) => `${n} objek`, caseStudies: 'Proyek', caseTasks: "Aksi proyek", otherPlaces: 'Tempat Lain', myComputer: 'Komputer Saya',
+      colNo: 'No.', colName: 'Nama', colTags: 'Kata kunci', typeCase: 'Proyek',
+      openCase: 'Buka proyek', player: 'Pemutar Proyek', chapters: 'Bab', notYet: "Belum diterbitkan",
+      askAbout: (x) => `Tanya saya soal ${x}`, askSubject: (x) => `Tentang ${x}`, askBody: (x) => `Halo Iqbal,\n\nSaya melihat ${x} di portofolio Anda dan ingin tahu lebih banyak tentang proyeknya.\n\n`,
       writeup: "Uraian lengkap proyek ini belum tersedia di sini. Kirim email jika Anda ingin membahas pekerjaannya.",
       lblCase: "Proyek", lblLink: 'Tautan', sizes: ['Kecil', 'Sedang', 'Besar'],
       fullCase: "Detail proyek", picSoon: (x) => `${x} (gambar menyusul)`, draftRatio: (s) => `Rasio beda dengan slot (${s})`,
       overview: 'Ringkasan', nowReading: 'Sedang dibaca',
       prevCase: "Proyek sebelumnya", nextCase: "Proyek berikutnya", nextSection: 'Bagian berikutnya', stop: "Kembali ke karya pilihan",
       textSize: 'Ukuran teks', readPos: 'Posisi baca',
-      switchCase: 'Pilih studi kasus', copyLink: "Salin tautan proyek ini", linkCopied: 'Tautan tersalin',
+      switchCase: 'Pilih proyek', copyLink: "Salin tautan proyek ini", linkCopied: 'Tautan tersalin',
       coverAlt: (x) => `${x}: sampul`,
       sendEmail: 'Kirim email', copyEmail: 'Salin alamat', copyHint: "Gunakan alamat ini di aplikasi email Anda", copied: 'Tersalin!',
       availability: 'Ketersediaan', openProfile: (n) => `Buka profil ${n}`, newTab: "dibuka di tab baru",
@@ -1236,8 +1236,10 @@
       <li class="${j.to ? '' : 'now'}"><span class="wl-date">${esc(j.from)} – ${j.to ? esc(j.to) : `<b>${esc(u('present'))}</b>`}</span>
         <div class="wl-main"><h3>${esc(j.role)}</h3><p>${esc(j.org)}${j.type ? ` · ${esc(u(j.type))}` : ''}</p>${j.place ? `<p class="wl-place">${esc(j.place)}</p>` : ''}</div></li>`).join('');
     const projects = o.sideProjects.map((p, i) => `
-      <li><span class="pj-no">${String(i + 1).padStart(2, '0')}</span>
-        <div><h3>${p.url && p.url !== '#' ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.name)}</a>` : esc(p.name)}</h3><p class="pj-meta">${p.year} · ${esc(t(p.kind))}</p><p>${esc(t(p.desc))}</p></div></li>`).join('');
+      <li><a class="pj-card" href="${esc(t(p.url))}"${p.external === false ? '' : ' target="_blank" rel="noopener noreferrer"'} aria-label="${esc(p.name)} — ${esc(t(p.desc))}${p.external === false ? '' : ` (${esc(u('newTab'))})`}">
+        <span class="pj-image"><img src="${esc(p.image)}" alt="${esc(t(p.imageAlt))}" loading="lazy" decoding="async"></span>
+        <div class="pj-info"><span class="pj-meta">${String(i + 1).padStart(2, '0')} / ${esc(t(p.kind))}</span><h3 class="pj-name">${esc(p.name)}</h3><span class="pj-desc">${esc(t(p.desc))}</span><span class="pj-visit">${esc(p.cta ? t(p.cta) : u('visitProject'))} ${p.external === false ? '→' : '↗'}</span></div>
+      </a></li>`).join('');
     // each photo is a My Pictures thumbnail: its name tag rests on the lower right and opens into an infotip
     const hobbies = o.hobbies.map((h, i) => `<li class="hb"><button type="button" class="hb-pic" data-act="hobby" aria-expanded="false" aria-controls="hb-tip-${i}"><img class="hb-img" src="${esc(h.photo)}-360.webp" srcset="${[360, 480, 720].map((x) => `${esc(h.photo)}-${x}.webp ${x}w`).join(', ')}" sizes="auto, (max-width: 720px) calc(50vw - 60px), 140px" width="360" height="640" alt="" loading="lazy" decoding="async"><span class="hb-tag">${esc(t(h.label))}</span></button>
       <div class="hb-tip" id="hb-tip-${i}"><h3>${esc(t(h.label))}</h3><p>${esc(t(h.note))}</p></div></li>`).join('');
@@ -1270,6 +1272,10 @@
       </div></section>
 
       <div class="sp-row">
+        <section class="panel"><h2>${esc(u('projects'))}</h2><div class="pb">
+          <p class="lead">${esc(u('projectsLead'))}</p>
+          <ul class="pj">${projects}</ul>
+        </div></section>
         <section class="panel"><h2>${esc(u('offClock'))}</h2><div class="pb oc">
           <p class="lead">${esc(u('offClockText'))}</p>
           <div class="cpl">

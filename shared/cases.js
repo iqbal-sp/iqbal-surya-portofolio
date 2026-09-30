@@ -710,9 +710,8 @@
         },
       ],
     },
-    // Figma file "Serenity SPA Webflow" (UzwDb65Mrm4TLzciDlaRTP), page HiFi (2058:34): the owner's personal exploration,
-    // a spa website template for Webflow (design only). Its sample guests, team, prices and lorem ipsum are never quoted
-    // as fact, and a crop takes the top of its node unless its alt says.
+    // Figma file "Serenity SPA Webflow" (UzwDb65Mrm4TLzciDlaRTP), page HiFi (2058:34): an independent design study.
+    // Sample guests, team, prices and testimonials in the mockups are never presented as real-world evidence.
     'serenity-spa': {
       dir: 'asset/Work/serenity-spa',
       hero: crt('01-hero-home', '18414:80', {
@@ -725,15 +724,15 @@
           blocks: [
             {
               type: 'intro',
-              title: { en: 'A spa website template for Webflow', id: "Template website spa untuk Webflow" },
+              title: { en: 'A quieter path to booking', id: "Jalur tenang menuju pemesanan" },
               text: [
                 {
-                  en: 'Serenity SPA is a personal exploration: a website template for a spa, designed for Webflow. It has seven pages (Home, About, Services, a service page, Treatments & Therapies, Blog, and Contact), each in a desktop and a mobile version, plus a style guide page.',
-                  id: "Serenity SPA adalah eksplorasi pribadi: template website spa yang dirancang untuk Webflow. Template ini punya tujuh halaman (Home, About, Services, halaman layanan, Treatments & Therapies, Blog, dan Contact), masing-masing dalam versi desktop dan mobile, ditambah halaman panduan gaya.",
+                  en: 'Serenity SPA explores how someone could browse treatments at an easy pace, understand what each one offers, and find a clear next step when ready to book.',
+                  id: "Serenity SPA mengeksplorasi cara agar orang bisa melihat pilihan perawatan tanpa terburu-buru, memahami tiap layanan, lalu menemukan langkah untuk memesan saat sudah siap.",
                 },
                 {
-                  en: 'I designed the whole template: greyscale wireframes for the seven pages first, then the final desktop pages, the style guide, and the mobile layouts.',
-                  id: "Saya merancang seluruh template ini: wireframe abu-abu untuk ketujuh halaman terlebih dahulu, lalu halaman desktop final, panduan gaya, dan tampilan mobile-nya.",
+                  en: 'The concept spans seven pages in desktop and mobile layouts, with greyscale wireframes and a shared style guide. The people, prices, and testimonials in the mockups are sample content, not claims about a real spa.',
+                  id: "Konsep ini mencakup tujuh halaman dalam tata letak desktop dan mobile, lengkap dengan wireframe abu-abu dan panduan gaya. Orang, harga, dan testimoni dalam mockup adalah contoh konten, bukan klaim tentang spa yang nyata.",
                 },
               ],
             },
@@ -752,16 +751,16 @@
             {
               type: 'quote',
               text: {
-                en: "The design question: how can a spa website feel calm and still keep a booking one step away on every page?",
-                id: "Pertanyaan desainnya: bagaimana website spa terasa tenang, tetapi pemesanan tetap hanya satu langkah dari setiap halaman?",
+                en: "How can a spa website invite unhurried browsing and still make booking easy to find?",
+                id: "Bagaimana website spa bisa terasa santai dijelajahi, tetapi tetap memudahkan orang untuk memesan?",
               },
             },
             {
-              // the home page's Book Now band, the section above the footer on six of the seven pages
+              // The available export is an About-page mockup with Book a Treatment in the navigation.
               type: 'pic',
-              pic: bare('03-book-now-band', '18217:87', {
-                en: 'The Book Now band that closes six of the seven pages: a headline about relaxing and restoring over a photo of a woman resting on a massage table, with Book Now',
-                id: 'Bagian Book Now yang menutup enam dari tujuh halaman: judul tentang relaksasi dan pemulihan di atas foto seorang perempuan yang beristirahat di meja pijat, dengan tombol Book Now',
+              pic: bare('03-about-mockup', null, {
+                en: 'An angled laptop mockup of the About page, with a large spa photograph and Book a Treatment visible in the top navigation',
+                id: 'Mockup laptop miring yang menampilkan halaman About, dengan foto spa besar dan tombol Book a Treatment terlihat di navigasi atas',
               }),
             },
           ],
@@ -771,15 +770,15 @@
           blocks: [
             {
               type: 'intro', under: true,
-              title: { en: "A quiet style, with booking in the same places", id: "Gaya yang tenang, dengan tempat memesan yang tetap" },
+              title: { en: "Calm, with direction", id: "Tenang dan terarah" },
               text: [
                 {
-                  en: "The style guide keeps the palette small: black for headings, a deep green, pale lime for buttons, and an off-white for sections. Headings and text share one serif, Playfair Display, and every page but the blog opens on a large, softly lit photo.",
-                  id: "Panduan gaya menjaga palet tetap sedikit: hitam untuk judul, hijau tua, hijau limau muda untuk tombol, dan putih gading untuk latar bagian. Judul dan teks memakai satu huruf serif, Playfair Display, dan setiap halaman kecuali blog dibuka dengan foto besar bercahaya lembut.",
+                  en: "Large, softly lit photographs set a slower pace. Deep green and off-white give the pages their rhythm; pale lime draws attention to actions. Playfair Display headings bring an editorial feel to the treatment content.",
+                  id: "Foto besar dengan cahaya lembut memberi tempo yang lebih pelan. Hijau tua dan putih gading mengatur ritme halaman; hijau limau muda menandai tombol tindakan. Judul dengan Playfair Display memberi nuansa editorial pada konten perawatan.",
                 },
                 {
-                  en: "Book a Treatment stays in the menu bar on every page, and six of the seven pages close on the same Book Now band. The service page keeps its price list and Book Now beside the description, and the treatment page puts Book a Treatment next to what the treatment includes.",
-                  id: "Tombol Book a Treatment selalu ada di bilah menu, dan enam dari tujuh halaman ditutup dengan bagian Book Now yang sama. Halaman layanan menaruh daftar harga dan tombol Book Now di samping deskripsinya, dan halaman perawatan menaruh Book a Treatment di sebelah isi perawatannya.",
+                  en: "The path to booking stays visible without taking over the page. Book a Treatment remains in the navigation, while a Book Now section closes six of the seven pages. On the service and treatment pages, booking actions sit close to the details people need to make a choice.",
+                  id: "Cara memesan tetap terlihat tanpa mendominasi halaman. Tombol Book a Treatment tersedia di navigasi, sementara bagian Book Now menutup enam dari tujuh halaman. Pada halaman layanan dan perawatan, tombol memesan ditempatkan dekat informasi yang membantu orang memilih.",
                 },
               ],
             },
@@ -789,7 +788,7 @@
                 en: 'The style guide’s headings in Playfair Display, from Heading 1 at 88px down to Heading 6 at 24px, each with its line height',
                 id: 'Judul-judul di style guide dengan Playfair Display, dari Heading 1 berukuran 88px sampai Heading 6 berukuran 24px, masing-masing dengan tinggi barisnya',
               }),
-              pop: pic('dialog', 'Color palette', '05-color-palette', 700, 240, '18335:889', {
+              pop: pic('dialog', 'Color palette', '05-color-palette', 700, 270, '18335:889', {
                 en: 'The colour palette: Heading Color #000000, Primary Color #253828, Btn Color #D8F089 and Section Bg Color #F5F7F4',
                 id: 'Palet warna: Heading Color #000000, Primary Color #253828, Btn Color #D8F089, dan Section Bg Color #F5F7F4',
               }),
@@ -801,18 +800,18 @@
           blocks: [
             {
               type: 'intro', under: true,
-              title: { en: 'Seven pages, each laid out for its content', id: "Tujuh halaman, masing-masing sesuai isinya" },
+              title: { en: 'A page for each question', id: "Satu halaman, satu kebutuhan" },
               text: [{
-                en: 'The menu bar and the footer repeat on every page, and the Book Now band on all but Contact. Between them, each page gets a layout for its own content.',
-                id: "Bilah menu dan footer muncul di setiap halaman, begitu juga bagian Book Now kecuali di Contact. Di antaranya, setiap halaman mendapat tata letak untuk isinya sendiri.",
+                en: 'The Home page introduces the atmosphere and a first look at the services. From there, each page answers a different question: what is available, what a treatment includes, who is behind the spa concept, or how to get in touch.',
+                id: "Beranda memperkenalkan suasana spa dan gambaran awal layanannya. Setelah itu, setiap halaman menjawab pertanyaan yang berbeda: pilihan perawatan, isi layanan, sosok di balik konsep spa, atau cara menghubunginya.",
               }],
             },
             {
               type: 'feature', label: { en: 'Services', id: "Layanan" },
-              title: { en: "Treatment cards", id: "Kartu perawatan" },
+              title: { en: "Explore treatments", id: "Jelajahi perawatan" },
               text: {
-                en: 'The services page sets the five treatments in a staggered grid of cards, each with a photo and a short description.',
-                id: "Halaman layanan menampilkan lima perawatan dalam susunan kartu berselang-seling, masing-masing dengan foto dan deskripsi singkat.",
+                en: 'Five treatments appear as staggered cards. A photo and short description introduce each option before the visitor opens its detail page.',
+                id: "Lima perawatan ditampilkan dalam susunan kartu berselang-seling. Foto dan deskripsi singkat memperkenalkan tiap pilihan sebelum pengunjung membuka halaman detailnya.",
               },
               pic: pic('win', 'Serenity SPA - Services', '06-services', 1440, 1448, '18239:24', {
                 en: 'The services grid: Therapeutic Massages, its photo filling the card behind Learn More, then Facial & Skin Treatments and Aromatherapy & Essential Oils',
@@ -821,10 +820,10 @@
             },
             {
               type: 'feature', label: { en: 'Service page', id: "Halaman layanan" },
-              title: { en: "Service details", id: "Detail layanan" },
+              title: { en: "Details beside price", id: "Detail dan harga" },
               text: {
-                en: 'Each service has its own page: a price list with Book Now sits beside the description, and three other services follow it.',
-                id: "Setiap layanan memiliki halaman tersendiri. Daftar harga dengan tombol Book Now ditempatkan di samping deskripsi, lalu diikuti tiga layanan lainnya.",
+                en: 'The service detail pairs its description with a price list and Book Now, so the offer and the next action can be read together. Related services follow below for anyone still comparing.',
+                id: "Detail layanan menempatkan penjelasan di samping daftar harga dan tombol Book Now, sehingga informasi layanan dan langkah berikutnya bisa dibaca bersama. Layanan terkait muncul di bawah bagi pengunjung yang masih membandingkan.",
               },
               pic: pic('win', 'Serenity SPA - Therapeutic Massages', '07-service-page', 1440, 960, '18261:145', {
                 en: 'A service page: the price list for four massages with Book Now, beside Learn About Services and Why choose our signature massage?',
@@ -833,10 +832,10 @@
             },
             {
               type: 'feature', label: { en: 'Treatment', id: "Perawatan" },
-              title: { en: "Treatments and add-ons", id: "Perawatan dan layanan tambahan" },
+              title: { en: "Inside each treatment", id: "Isi perawatan" },
               text: {
-                en: 'The signature treatment’s page lists what it includes in an accordion beside Book a Treatment, then offers two add-ons with their prices.',
-                id: "Halaman perawatan unggulan menjelaskan isi paket dalam panel yang bisa dibuka-tutup di samping tombol Book a Treatment, lalu menawarkan dua layanan tambahan beserta harganya.",
+                en: 'An accordion breaks down what the signature treatment includes. The booking action sits beside it; two priced add-ons follow after the main treatment is clear.',
+                id: "Panel yang bisa dibuka-tutup merinci isi perawatan unggulan. Tombol memesan berada di sampingnya; dua layanan tambahan beserta harganya menyusul setelah perawatan utamanya dijelaskan.",
               },
               pic: pic('win', 'Serenity SPA - Treatments & Therapies', '08-treatment', 1440, 955, '18300:2793', {
                 en: 'What’s Included in the Treatments?: Full-Body Therapeutic Massage open with its photo, above Luxury Facial & Skin Rejuvenation and Hydrotherapy & Detox Ritual',
@@ -845,34 +844,34 @@
             },
             {
               type: 'feature', label: { en: 'About', id: "Tentang spa" },
-              title: { en: "The spa and its team", id: "Spa dan timnya" },
+              title: { en: "A sense of place", id: "Mengenal suasana" },
               text: {
-                en: 'The about page introduces the spa, its services and why to choose it, then the team: three people, each with a portrait, a name and a role.',
-                id: "Halaman tentang spa memperkenalkan spa, layanan, dan alasan memilihnya, lalu menampilkan tiga anggota tim dengan foto, nama, dan peran masing-masing.",
+                en: 'The About page uses layered portraits and spa photography to make the place feel tangible. A separate sample team section leaves room to introduce practitioners in a real version of the site.',
+                id: "Halaman About memakai foto berlapis dan suasana spa agar tempatnya terasa lebih nyata. Bagian contoh tim memberi ruang untuk memperkenalkan terapis jika website ini dipakai oleh spa sungguhan.",
               },
-              pic: pic('win', 'Serenity SPA - About', '09-about', 1440, 800, '18261:4', {
-                en: 'The about page’s opening: A Sanctuary of Serenity and Wellness over a photo of a bathtub, with a second photo, of a woman in a robe, set into it',
-                id: 'Pembuka halaman tentang: A Sanctuary of Serenity and Wellness di atas foto bak mandi, dengan foto kedua, seorang perempuan berjubah mandi, di tengahnya',
+              pic: pic('win', 'Serenity SPA - About', '09-about', 1440, 960, '18261:4', {
+                en: 'The About page’s layered photographs beneath Rejuvenate Your Body, Refresh Your Mind, Restore Your Spirit',
+                id: 'Foto berlapis di halaman About di bawah judul Rejuvenate Your Body, Refresh Your Mind, Restore Your Spirit',
               }),
             },
             {
               type: 'feature', label: { en: 'Blog', id: 'Blog' },
-              title: { en: "Browse wellness articles", id: "Jelajahi artikel kebugaran" },
+              title: { en: "Beyond the services", id: "Lebih dari layanan" },
               text: {
-                en: 'The blog sorts its posts by category, and each card carries a photo, a title, a short excerpt and the date.',
-                id: "Blog mengelompokkan artikel berdasarkan kategori. Setiap kartu memuat foto, judul, cuplikan singkat, dan tanggal.",
+                en: 'The blog offers another way to explore the spa concept. Category tabs sit above article cards that pair a photograph with a title and date.',
+                id: "Blog memberi jalur lain untuk mengenal konsep spa. Tab kategori berada di atas kartu artikel yang memasangkan foto dengan judul dan tanggal.",
               },
-              pic: pic('win', 'Serenity SPA - Blog', '10-blog', 1440, 880, '18333:73', {
-                en: 'Our Blog: category tabs above a grid of posts, each with a photo, a title, an excerpt and a date',
-                id: 'Our Blog: tab kategori di atas grid artikel, masing-masing dengan foto, judul, kutipan, dan tanggal',
+              pic: pic('win', 'Serenity SPA - Blog', '10-blog', 1440, 960, '18333:73', {
+                en: 'Our Blog: category tabs above a grid of posts, each with a photo, title and date',
+                id: 'Our Blog: tab kategori di atas grid artikel, masing-masing dengan foto, judul, dan tanggal',
               }),
             },
             {
               type: 'feature', label: { en: 'Contact', id: "Kontak" },
-              title: { en: "Contact and common questions", id: "Kontak dan pertanyaan umum" },
+              title: { en: "Room for questions", id: "Ruang untuk bertanya" },
               text: {
-                en: 'The contact page opens with the message form, then answers common questions in an accordion and lists the email addresses and the phone number.',
-                id: "Halaman kontak dibuka dengan formulir pesan, lalu menjawab pertanyaan umum dalam panel yang bisa dibuka-tutup dan mencantumkan alamat email serta nomor telepon.",
+                en: 'The Contact page opens with a message form. An FAQ accordion and contact details below give visitors a way to ask or check details before they commit to a treatment.',
+                id: "Halaman Contact dibuka dengan formulir pesan. Panel FAQ dan informasi kontak di bawahnya memberi pengunjung tempat untuk bertanya atau memeriksa detail sebelum memilih perawatan.",
               },
               pic: pic('win', 'Serenity SPA - Contact', '11-contact', 1440, 800, '18284:243', {
                 en: 'Get in Touch beside the Send us a message form: full name, email address, phone number and message, then Submit Now',
@@ -886,10 +885,10 @@
           blocks: [
             {
               type: 'intro',
-              title: { en: "Layouts for mobile", id: "Tata letak untuk ponsel" },
+              title: { en: "Clear on small screens", id: "Jelas di layar kecil" },
               text: [{
-                en: 'On a phone the menu folds into one button and the sections stack into a single column. The lime buttons grow to the width of their column, and the service page moves its price list under the text.',
-                id: "Di ponsel, menu diringkas menjadi satu tombol dan setiap bagian tersusun dalam satu kolom. Tombol hijau limau melebar selebar kolomnya, dan halaman layanan memindahkan daftar harga ke bawah teks.",
+                en: 'The mobile layouts stack the content into one column and collapse the navigation into a menu button. Treatment cards become a vertical list; on the therapy page, Book a Treatment appears before the accordion.',
+                id: "Di tampilan mobile, konten disusun dalam satu kolom dan navigasi diringkas menjadi tombol menu. Kartu perawatan menjadi daftar vertikal; di halaman terapi, Book a Treatment muncul sebelum panel rincian.",
               }],
             },
             {
@@ -903,27 +902,29 @@
                   en: 'The services on a phone: cards in one column, each with a photo, a description and Learn More',
                   id: 'Layanan di ponsel: kartu dalam satu kolom, masing-masing dengan foto, deskripsi, dan tombol Learn More',
                 }),
-                pic('tool', 'Therapeutic Massages', '14-m-service', 393, 852, '18320:3765', {
-                  en: 'A service page on a phone: the price list under the text, with Book Now',
-                  id: 'Halaman layanan di ponsel: daftar harga di bawah teks, dengan tombol Book Now',
-                }),
-              ],
-            },
-            {
-              type: 'row',
-              pics: [
                 pic('tool', 'Treatments & Therapies', '15-m-treatment', 393, 852, '18320:4023', {
                   en: 'What’s Included in the Treatments? on a phone: Book a Treatment above the accordion',
                   id: 'What’s Included in the Treatments? di ponsel: tombol Book a Treatment di atas akordeon',
                 }),
-                pic('tool', 'Blog', '16-m-blog', 393, 852, '18333:419', {
-                  en: 'The blog on a phone: category tabs, then the posts in one column',
-                  id: 'Blog di ponsel: tab kategori, lalu artikel dalam satu kolom',
-                }),
-                pic('tool', 'Contact', '17-m-contact', 393, 852, '18320:4261', {
-                  en: 'Get in Touch on a phone, with the message form under the headline',
-                  id: 'Get in Touch di ponsel, dengan formulir pesan di bawah judul',
-                }),
+              ],
+            },
+          ],
+        },
+        {
+          id: 'outcome', label: { en: 'The result', id: 'Hasilnya' },
+          blocks: [
+            {
+              type: 'intro',
+              title: { en: 'One connected journey', id: 'Alur yang menyatu' },
+              text: [
+                {
+                  en: 'The design links atmosphere, treatment browsing, service details, and contact through the same navigation and visual cues. Its desktop and mobile layouts show how those priorities shift with the available space.',
+                  id: 'Desain ini menghubungkan suasana spa, pilihan perawatan, detail layanan, dan kontak melalui navigasi dan penanda visual yang sama. Tata letak desktop dan mobile menunjukkan bagaimana prioritasnya berubah mengikuti ruang layar.',
+                },
+                {
+                  en: 'The interface and layouts are shown here. The people, prices, and testimonials are illustrative; a real spa would need its own content. No booking flow was built or measured.',
+                  id: 'Yang ditampilkan di sini adalah desain antarmuka dan tata letaknya. Orang, harga, dan testimoni masih berupa contoh; spa sungguhan perlu memakai kontennya sendiri. Alur pemesanan belum dibangun atau diukur.',
+                },
               ],
             },
           ],
@@ -931,4 +932,14 @@
       ],
     },
   };
+  const serenity = PF.cases['serenity-spa'];
+  const attachSerenityImage = (image) => {
+    if (image) image.src = `../${serenity.dir}/${image.file}.webp`;
+  };
+  attachSerenityImage(serenity.hero);
+  serenity.chapters.forEach((chapter) => chapter.blocks.forEach((block) => {
+    attachSerenityImage(block.pic);
+    attachSerenityImage(block.pop);
+    (block.pics || []).forEach(attachSerenityImage);
+  }));
 })();

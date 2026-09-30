@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tempa 3D — Iqbal Surya</title>
+  <meta name="description" content="Tempa 3D is Iqbal Surya's desktop CAD project for functional parts. An internal build is in development; no public download is available yet.">
+  <link rel="icon" href="../../asset/icon/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../asset/fonts/fonts.css?v=1">
+  <script>
+    try { document.documentElement.lang = localStorage.getItem('pf-lang') === 'id' ? 'id' : 'en'; } catch (e) { /* use English */ }
+  </script>
+  <style>
+    :root { color-scheme: light; font-family: 'Noto Sans', Arial, sans-serif; background: #10203a; color: #182331; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: inherit; }
+    [lang="en"] .id-copy, [lang="id"] .en-copy { display: none; }
+    .site-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px clamp(20px, 5vw, 72px); background: linear-gradient(#326ee0, #1647aa); color: #fff; border-bottom: 3px solid #eeac5d; }
+    .back { font-size: 13px; font-weight: 700; text-decoration: none; }
+    .back:hover, .back:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
+    .language { display: flex; gap: 5px; }
+    .language button { border: 1px solid rgba(255,255,255,.55); border-radius: 3px; padding: 6px 9px; color: #fff; background: transparent; font: 700 12px 'Noto Sans', Arial, sans-serif; cursor: pointer; }
+    .language button[aria-pressed="true"] { color: #153e83; background: #fff; }
+    main { max-width: 1120px; margin: 0 auto; padding: clamp(24px, 5vw, 64px) 20px 80px; }
+    .hero, .detail { background: #fafbf8; border: 1px solid #b8c8d8; box-shadow: 0 12px 28px rgba(0,0,0,.22); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: 24px; align-items: center; overflow: hidden; }
+    .hero-copy { padding: clamp(26px, 4vw, 52px); }
+    .eyebrow { margin: 0 0 16px; color: #2458ae; font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { margin: 0; color: #132d5d; font-size: clamp(42px, 6vw, 76px); line-height: 1.04; letter-spacing: -.045em; }
+    .lead { max-width: 47ch; margin: 20px 0 24px; font-size: clamp(17px, 2vw, 21px); line-height: 1.5; }
+    .status { display: inline-block; margin: 0; padding: 9px 13px; border: 1px solid #a7c0e2; background: #e9f1ff; color: #194b95; font-size: 12px; font-weight: 700; line-height: 1.5; }
+    .request { display: table; margin-top: 20px; padding: 10px 16px; border: 1px solid #163d89; border-radius: 3px; background: linear-gradient(#3d78e5, #1951b8); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; }
+    .request:hover, .request:focus-visible { background: #1749a8; text-decoration: underline; text-underline-offset: 3px; }
+    .hero-art { min-height: 400px; height: 100%; display: flex; align-items: center; background: #15253b; }
+    .hero-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .detail { margin-top: 18px; padding: clamp(24px, 4vw, 44px); }
+    .detail h2 { margin: 0 0 15px; color: #174b9e; font-size: clamp(22px, 3vw, 30px); }
+    .detail p { max-width: 72ch; margin: 0 0 15px; line-height: 1.65; }
+    .detail p:last-child { margin-bottom: 0; }
+    figure { margin: 28px 0 0; }
+    figure img { display: block; width: 100%; height: auto; border: 1px solid #283b52; }
+    figcaption { margin-top: 10px; color: #536171; font-size: 13px; line-height: 1.5; }
+    .foot { margin: 28px 0 0; color: #d9e7fb; font-size: 13px; }
+    .foot a { text-underline-offset: 3px; }
+    @media (max-width: 720px) { .hero { grid-template-columns: 1fr; } .hero-art { min-height: 0; aspect-ratio: 4 / 3; } }
+  </style>
+</head>
+<body>
+  <header class="site-head">
+    <a class="back" href="../../option-a-desktop/#/about"><span class="en-copy">← Back to portfolio</span><span class="id-copy">← Kembali ke portofolio</span></a>
+    <div class="language" role="group" aria-label="Language / Bahasa"><button type="button" data-language="en" aria-pressed="true">EN</button><button type="button" data-language="id" aria-pressed="false">ID</button></div>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="project-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="en-copy">Personal project · desktop application</span><span class="id-copy">Proyek pribadi · aplikasi desktop</span></p>
+        <h1 id="project-title">Tempa 3D</h1>
+        <p class="lead en-copy">A CAD app I’m building for designing functional parts and preparing them for 3D printing.</p>
+        <p class="lead id-copy">Aplikasi CAD yang saya bangun untuk merancang komponen fungsional dan menyiapkannya untuk cetak 3D.</p>
+        <p class="status en-copy">In development · macOS on Apple Silicon · no public download yet</p>
+        <p class="status id-copy">Dalam pengembangan · macOS dengan Apple Silicon · belum tersedia untuk diunduh</p>
+        <a class="request en-copy" href="mailto:hello@iqbalsurya.com?subject=Tempa%203D%20access%20request">Request access ↗</a>
+        <a class="request id-copy" href="mailto:hello@iqbalsurya.com?subject=Permintaan%20akses%20Tempa%203D">Minta akses ↗</a>
+      </div>
+      <div class="hero-art"><img src="../../asset/about/projects/tempa-3d.svg" alt="" width="800" height="600"></div>
+    </section>
+
+    <section class="detail" aria-labelledby="about-title">
+      <h2 id="about-title"><span class="en-copy">About the project</span><span class="id-copy">Tentang proyek ini</span></h2>
+      <p class="en-copy">Tempa brings a 3D viewport, direct modeling tools, and an operation journal into one workspace. I’m working on how people select geometry, change a part on the model, and understand what happened after each edit.</p>
+      <p class="id-copy">Tempa menyatukan viewport 3D, alat pemodelan langsung, dan jurnal operasi dalam satu ruang kerja. Saya sedang mengembangkan cara pengguna memilih geometri, mengubah komponen langsung pada model, dan memahami hasil tiap pengeditan.</p>
+      <p class="en-copy">This is an internal build. I’m still testing its modeling workflows and release readiness, so there is no public app download or repository link. If you would like to see more, send me an access request by email.</p>
+      <p class="id-copy">Ini masih build internal. Saya masih menguji alur pemodelan dan kesiapan rilisnya, jadi belum ada unduhan aplikasi atau tautan repositori publik. Jika ingin melihat lebih lanjut, kirim permintaan akses lewat email.</p>
+      <figure>
+        <img src="../../asset/about/projects/tempa-workspace.png" data-alt-en="Tempa development build showing the 3D viewport, object list, Inspector, and Inside tool" data-alt-id="Build pengembangan Tempa menampilkan viewport 3D, daftar objek, Inspector, dan alat Inside" alt="Tempa development build showing the 3D viewport, object list, Inspector, and Inside tool" width="2880" height="1750" loading="lazy">
+        <figcaption><span class="en-copy">A capture from the internal development build, showing the Inside modeling workflow.</span><span class="id-copy">Cuplikan build internal saat alur pemodelan Inside sedang dikerjakan.</span></figcaption>
+      </figure>
+    </section>
+    <p class="foot"><a href="../../option-a-desktop/#/about"><span class="en-copy">← Back to portfolio</span><span class="id-copy">← Kembali ke portofolio</span></a></p>
+  </main>
+  <script>
+    const buttons = document.querySelectorAll('[data-language]');
+    function setLanguage(language) {
+      document.documentElement.lang = language;
+      buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.language === language)));
+      const screenshot = document.querySelector('[data-alt-en]');
+      screenshot.alt = language === 'id' ? screenshot.dataset.altId : screenshot.dataset.altEn;
+      try { localStorage.setItem('pf-lang', language); } catch (e) { /* storage unavailable */ }
+    }
+    setLanguage(document.documentElement.lang === 'id' ? 'id' : 'en');
+    buttons.forEach((button) => button.addEventListener('click', () => setLanguage(button.dataset.language)));
+  </script>
+</body>
+</html>

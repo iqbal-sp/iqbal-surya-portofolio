@@ -10,7 +10,7 @@ export const CASES = [
   {
     "slug": "serenity-spa",
     "title": "Serenity SPA",
-    "text": "A spa website template designed for Webflow, with seven pages, mobile layouts, and a shared style guide."
+    "text": "A calmer way to explore treatments, compare details, and find the next step to book."
   },
   {
     "slug": "findmentor",

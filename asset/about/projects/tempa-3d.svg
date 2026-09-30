@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Tempa 3D modeling workspace illustration</title>
+  <defs>
+    <linearGradient id="back" x2="1" y2="1"><stop stop-color="#162c48"/><stop offset="1" stop-color="#08131f"/></linearGradient>
+    <linearGradient id="face" x2="1" y2="1"><stop stop-color="#c2d9e4"/><stop offset="1" stop-color="#7294a8"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#000" flood-opacity=".3"/></filter>
+  </defs>
+  <rect width="800" height="600" fill="#15253b"/>
+  <g filter="url(#shadow)">
+    <rect x="38" y="43" width="724" height="515" rx="14" fill="url(#back)" stroke="#59718b" stroke-width="2"/>
+    <path d="M38 58a15 15 0 0 1 15-15h694a15 15 0 0 1 15 15v34H38z" fill="#243a55"/>
+    <circle cx="63" cy="68" r="6" fill="#ff776f"/><circle cx="85" cy="68" r="6" fill="#e5be62"/><circle cx="107" cy="68" r="6" fill="#7dcd9e"/>
+    <text x="149" y="74" fill="#d8e6f2" font-size="19" font-family="Arial,sans-serif" font-weight="700">TEMPA 3D</text>
+    <path d="M38 92h724M94 92v466M624 92v466" stroke="#52677b" stroke-width="2"/>
+    <g fill="#a9c0d2" font-family="Arial,sans-serif" font-size="14">
+      <text x="54" y="126">＋</text><text x="55" y="169">□</text><text x="54" y="211">◌</text><text x="54" y="255">⌁</text><text x="54" y="298">▤</text>
+      <text x="649" y="126" font-size="12" font-weight="700">OBJECTS</text>
+      <text x="649" y="161">▣ Body 01</text><text x="649" y="192">◇ Sketch 01</text><text x="649" y="223">▣ Body 02</text>
+      <text x="649" y="283" font-size="12" font-weight="700">PROPERTIES</text>
+      <text x="649" y="316">Position</text><text x="649" y="345">X  0.00</text><text x="649" y="374">Y  0.00</text><text x="649" y="403">Z  0.00</text>
+    </g>
+    <g stroke="#36516c" stroke-width="1" opacity=".55">
+      <path d="M95 420h528M95 367h528M95 314h528M95 261h528M95 208h528M95 155h528"/>
+      <path d="M150 93v465M203 93v465M256 93v465M309 93v465M362 93v465M415 93v465M468 93v465M521 93v465M574 93v465"/>
+    </g>
+    <path d="M178 400 385 503 578 402M178 400 385 292 578 402" fill="none" stroke="#5b7894" stroke-width="2"/>
+    <path d="M251 247 383 175 516 247 383 318Z" fill="#d9e8ed" stroke="#f2fbfb" stroke-width="4"/>
+    <path d="M251 247 383 318v142L251 389Z" fill="url(#face)" stroke="#c5dfe7" stroke-width="4"/>
+    <path d="M383 318 516 247v142l-133 71Z" fill="#7d9db2" stroke="#c5dfe7" stroke-width="4"/>
+    <ellipse cx="383" cy="247" rx="45" ry="25" fill="#16324b" stroke="#45d6c3" stroke-width="5"/>
+    <path d="M338 247v71c0 14 20 25 45 25s45-11 45-25v-71" fill="#739aac" stroke="#45d6c3" stroke-width="4"/>
+    <ellipse cx="383" cy="318" rx="45" ry="25" fill="#739aac" stroke="#45d6c3" stroke-width="4"/>
+    <path d="M383 172v-43m-9 13 9-13 9 13M520 250l36-18m-14-1 14 1-7 12" fill="none" stroke="#f2b66a" stroke-width="4" stroke-linecap="round"/>
+    <rect x="105" y="507" width="507" height="37" rx="5" fill="#233c55"/>
+    <text x="123" y="531" fill="#c4dae8" font-size="14" font-family="Arial,sans-serif">Sketch 01  /  Extrude  /  Body 01</text>
+  </g>
+</svg>

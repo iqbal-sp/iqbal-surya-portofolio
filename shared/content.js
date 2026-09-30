@@ -2,7 +2,7 @@
   Portfolio content, bilingual (en / id).
   To add before launch: each case study's page (in shared/cases.js, after the owner's Figma; outcomes are
   written in words, the owner's case studies carry no metrics), PF.home.shorts (the owner's UI shots),
-  owner.sideProjects, owner.cv.
+  owner.cv.
 */
 (function () {
   const PF = (window.PF = window.PF || {});
@@ -67,10 +67,41 @@
       { from: '2019/06', to: '2021/03', role: 'Designer', org: 'CV. Kresna Digital Printing', type: 'ft', place: 'Medan, North Sumatra, Indonesia' },
     ],
     sideProjects: [
-      { name: 'Bestrfra.me', year: 2021, kind: { en: 'Website', id: "Website" }, desc: { en: 'A frame-picking tool for photos, built to learn responsive layout.', id: 'Tool memilih bingkai foto, dibuat untuk belajar layout responsif.' }, url: '#' },
-      { name: 'Pixel Kit 98', year: 2024, kind: { en: 'Figma UI kit', id: 'UI kit Figma' }, desc: { en: 'Windows 98 components rebuilt as a modern auto-layout kit.', id: 'Komponen Windows 98 yang dibangun ulang sebagai kit auto-layout modern.' }, url: '#' },
-      { name: 'Kopi Log', year: 2025, kind: { en: 'Mobile app concept', id: 'Konsep aplikasi mobile' }, desc: { en: 'A brew journal for home baristas: beans, grind, and taste notes.', id: 'Jurnal seduh untuk barista rumahan: biji, gilingan, dan catatan rasa.' }, url: '#' },
-      { name: 'Transit Jogja', year: 2023, kind: { en: 'Redesign exploration', id: 'Eksplorasi redesign' }, desc: { en: 'What if city bus info fit on one clear screen?', id: 'Bagaimana jika info bus kota muat di satu layar yang jelas?' }, url: '#' },
+      {
+        name: 'BestFrame', kind: { en: 'Figma components', id: 'Komponen Figma' },
+        desc: {
+          en: 'A growing collection of free Figma components, exploring spacing, hierarchy, and the details of everyday UI. Created with Syamil.',
+          id: 'Kumpulan komponen Figma gratis untuk mengeksplorasi jarak, hierarki, dan detail antarmuka sehari-hari. Dibuat bersama Syamil.',
+        },
+        image: '../asset/about/projects/bestframe-music-player.avif',
+        imageAlt: { en: 'Music player component from BestFrame', id: 'Komponen pemutar musik dari BestFrame' },
+        url: 'https://bestfra.me/',
+      },
+      {
+        name: 'OMI Money', kind: { en: 'Personal finance app', id: 'Aplikasi keuangan pribadi' },
+        desc: {
+          en: 'A personal finance app for setting a budget and keeping income, expenses, and balance in view.',
+          id: 'Aplikasi keuangan pribadi untuk mengatur anggaran serta melihat pemasukan, pengeluaran, dan saldo dalam satu tempat.',
+        },
+        image: '../asset/about/projects/omi-money.svg',
+        imageAlt: { en: 'Illustration of the OMI Money budget dashboard', id: 'Ilustrasi dashboard anggaran OMI Money' },
+        url: 'https://omi-money.vercel.app/',
+      },
+      {
+        name: 'Tempa 3D', kind: { en: '3D CAD · in development', id: 'CAD 3D · dalam pengembangan' },
+        desc: {
+          en: 'A desktop CAD project for shaping functional parts. The app is still in development and the repository is not public. Want to see it? Request access by email.',
+          id: 'Proyek CAD desktop untuk membentuk komponen fungsional. Aplikasinya masih dikembangkan dan repositorinya belum publik. Ingin melihatnya? Minta akses lewat email.',
+        },
+        image: '../asset/about/projects/tempa-3d.svg',
+        imageAlt: { en: 'Illustration of a 3D modeling workspace', id: 'Ilustrasi ruang kerja pemodelan 3D' },
+        url: {
+          en: 'mailto:hello@iqbalsurya.com?subject=Tempa%203D%20access%20request',
+          id: 'mailto:hello@iqbalsurya.com?subject=Permintaan%20akses%20Tempa%203D',
+        },
+        cta: { en: 'Request access', id: 'Minta akses' },
+        external: false,
+      },
     ],
     // Off the clock: the owner's 9:16 photos (asset/about/*.png, 2026-09-25), served as <photo>-360/-480/-720.webp.
     // The label is the photo's name tag; pointing at or tapping the photo opens the note in an infotip.
@@ -192,10 +223,10 @@
           img: { file: 'cover-serenity-spa', src: '../asset/Home/cover-serenity-spa-1280.webp', small: '../asset/Home/cover-serenity-spa-640.webp' },
           ui: { file: 'ui-serenity-spa', src: '../asset/Home/UI/ui-serenity-spa-920.webp', big: '../asset/Home/UI/ui-serenity-spa-1380.webp' },
           sub: {
-            en: "A spa website template designed for Webflow, with seven pages, mobile layouts, and a shared style guide.",
-            id: "Template website spa untuk Webflow, dengan tujuh halaman, tampilan mobile, dan panduan gaya yang konsisten.",
+            en: "A calmer way to explore treatments, compare details, and find the next step to book.",
+            id: "Cara yang lebih tenang untuk menjelajahi perawatan, melihat detailnya, dan menemukan langkah untuk memesan.",
           },
-          tags: ['UI/UX', 'Website', 'SPA', { en: 'Template', id: "Template" }],
+          tags: ['UI/UX', 'Website', 'SPA', { en: 'Concept', id: "Konsep" }],
         },
         {
           title: 'FINDMENTOR',
