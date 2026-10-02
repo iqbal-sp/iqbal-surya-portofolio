@@ -1031,3 +1031,6 @@
 }
 @container home (min-width: 820px) { .pe-about { flex-basis: 444px; } }
 @container home (min-width: 1100px) { .pe-now, .pe-ghost { gap: 120px; } }
+/* the profile names on a whole-pixel line, as the Figma sets them: 16px, 26px at 1360px */
+.cl-links a { line-height: 16px; }
+@container home (min-width: 1360px) { .cl-links a { line-height: 26px; } }
