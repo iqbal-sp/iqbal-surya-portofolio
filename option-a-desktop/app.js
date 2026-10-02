@@ -913,8 +913,18 @@
     if (PF.desk3d) PF.desk3d.go(w.state.ep);
     copy.innerHTML = episodeCopyHTML(w.state.ep);
     $$('.rm-num', w.el).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === w.state.ep)));
-    if (!reduceMotion) { screen.classList.remove('flick'); void screen.offsetWidth; screen.classList.add('flick'); }
+    if (!reduceMotion) {
+      screen.classList.remove('flick'); void screen.offsetWidth; screen.classList.add('flick');
+      // the set's own on-screen display puts the channel number up for a moment (home.css, .pe-osd)
+      screen.insertAdjacentHTML('beforeend', `<span class="pe-osd" aria-hidden="true">${String(w.state.ep + 1).padStart(2, '0')}</span>`);
+    }
     if (focusKey) { const k = $(`.rm-num[data-i="${w.state.ep}"]`, w.el); if (k) k.focus({ preventScroll: true }); }
+  }
+
+  // a key worked from the keyboard goes down on the remote too, as a click would press it
+  function keyHit(k) {
+    if (!k || reduceMotion) return;
+    k.classList.remove('hit'); void k.offsetWidth; k.classList.add('hit');
   }
 
   function servicePaneHTML(i) {
@@ -1068,7 +1078,8 @@
   }
   // the moments that play when their section first scrolls into view, once per visit. Home is re-rendered
   // (language, resize), so the watchers are re-armed after every render; what has played stays played
-  const homeFx = { wall: false, squeeze: false };
+  const homeFx = { wall: false, squeeze: false, risen: new Set() };
+  const HOME_RISE = '#pt-letter-h, #hm-work-h, #pt-ch-h, #hm-words-h, #hm-proc-h, #hm-svc-h, #hm-faq-h, #hm-cta-h';
   // On a touch screen a programme row's UI card comes up while its cover crosses the middle fifth of the window,
   // the touch stand-in for pointing at it (home.css, .peek); under reduced motion it just appears
   function homePeek(w) {
@@ -1094,11 +1105,25 @@
     };
     // the multiviewer locks onto its feeds
     once('wall', $('.mv-wall', w.el), 0.3, (wall) => wall.classList.add('lock'));
+    // each section's heading rises 8px into place as it comes into view, once a visit (home.css, .rise). The headings
+    // are counted in page order, which a re-render keeps, so one that has risen is not hidden again
+    const parts = $$(HOME_RISE, w.el).filter((el, k) => !homeFx.risen.has(k) && (el.dataset.rise = k, el.classList.add('rise'), true));
+    if (!parts.length) return;
+    const io = new IntersectionObserver((es) => {
+      es.filter((x) => x.isIntersecting).forEach((x, n) => {
+        io.unobserve(x.target); homeFx.risen.add(+x.target.dataset.rise);
+        x.target.style.setProperty('--rise-d', `${Math.min(n, 4) * 60}ms`);
+        x.target.classList.add('risen');
+      });
+    }, { root, rootMargin: '0px 0px -8% 0px' });
+    parts.forEach((el) => io.observe(el)); w.fxIO.push(io);
   }
   function homeFaq(w, i) {
     w.state.faq = w.state.faq === i ? -1 : i;
     const main = $('.help-main', w.el); if (!main) return;
     main.innerHTML = faqHTML(w.state);
+    // the picked topic's highlight sweeps in and its answer settles (home.css, .help-main.swap)
+    if (!reduceMotion) main.classList.add('swap');
     const q = $(`#faq-q-${i}`, main); if (q) q.focus({ preventScroll: true });
   }
   function homeTick() {
@@ -1137,7 +1162,13 @@
     const subject = `${u('subjectPrefix')}: ${offers[w.state.subj] || offers[0]}`;
     const field = $('#hm-from', f), from = field.value.trim(), message = $('#hm-msg', f).value.trim();
     const say = (text) => { if (note) note.textContent = text; };
-    btn.disabled = true; say(u('sending')); field.removeAttribute('aria-invalid');
+    // the button itself says it is sending, in full ink, its dots running, at the width it had, so the hint beside it
+    // stays put; a screen reader hears it through the form's live note
+    const label = $('span', btn), was = label.textContent, live = $('#hm-copy-note', f);
+    btn.style.minWidth = `${btn.offsetWidth}px`;
+    label.innerHTML = `${esc(u('sending').replace(/…$/, ''))}<i class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></i>`;
+    btn.disabled = true; btn.classList.add('busy'); btn.setAttribute('aria-busy', 'true'); field.removeAttribute('aria-invalid');
+    if (live) live.textContent = u('sending');
     let res = null;
     try {
       res = await fetch('/api/message', {
@@ -1146,7 +1177,8 @@
         body: JSON.stringify({ from, subject, message, lang, website: f.elements.website.value, sure: w.state.fromAsked === from }),
       });
     } catch (e) { res = null; }
-    btn.disabled = false;
+    btn.disabled = false; btn.classList.remove('busy'); btn.removeAttribute('aria-busy'); label.textContent = was; btn.style.minWidth = '';
+    if (live) live.textContent = '';
     say(u('sendHint'));
     if (res && res.ok) {
       $('#hm-msg', f).value = ''; w.state.msg = '';
@@ -2393,7 +2425,17 @@
     if (!e.target.closest) return;
     const mi = e.target.closest('.mm-item[data-i]'); if (mi) homeService(winOf(mi), +mi.dataset.i);
   });
-  document.addEventListener('animationend', (e) => { if (e.target.classList && e.target.classList.contains('pe-screen')) e.target.classList.remove('flick'); });
+  document.addEventListener('animationend', (e) => {
+    const c = e.target.classList; if (!c) return;
+    if (c.contains('pe-screen')) c.remove('flick');
+    else if (c.contains('pe-osd')) e.target.remove();
+    else c.remove('hit', 'nudge');
+  });
+  // a required field left empty shakes its head as the browser points at it (home.css, .nudge)
+  document.addEventListener('invalid', (e) => {
+    const f = e.target; if (reduceMotion || !f.closest || !f.closest('.hm-mail')) return;
+    f.classList.remove('nudge'); void f.offsetWidth; f.classList.add('nudge');
+  }, true);
   document.addEventListener('submit', (e) => {
     const f = e.target.closest('form[data-form="home-mail"]');
     if (!f) return;
@@ -2430,7 +2472,7 @@
       const d = e.key === 'ArrowRight' ? 1 : -1;
       // the contact skin's tabs: arrows move to the next category, like any tab strip
       if (e.target.closest('.nero-cats')) { const i = CATS.findIndex((c) => c.key === e.target.dataset.cat); if (i > -1) { e.preventDefault(); $(`[data-cat="${CATS[(i + d + CATS.length) % CATS.length].key}"]`, e.target.parentNode).click(); } return; }
-      if (e.target.closest('.pt-remote')) { const w = winOf(e.target); if (w) { e.preventDefault(); homeEpisode(w, w.state.ep + d, true); } return; }
+      if (e.target.closest('.pt-remote')) { const w = winOf(e.target); if (w) { e.preventDefault(); homeEpisode(w, w.state.ep + d, true); const k = $(d < 0 ? '.rm-prev' : '.rm-go', w.el); keyHit(k && k.offsetParent ? k : $('.rm-num[aria-pressed="true"]', w.el)); } return; }
       const vw = winOf(e.target);
       if (vw && vw.id === 'viewer') { e.preventDefault(); viewerGo(vw, vw.state.i + d); return; }
     }
