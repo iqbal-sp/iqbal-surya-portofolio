@@ -695,3 +695,339 @@
   .cl-top { min-height: 44px; }
   .home .ft-start { min-height: 44px; }
 }
+
+/* ============================================================
+   THE OWNER'S FIGMA, 2026-10-02 ("Home · Web" at 375, 640, 760, 820, 1029, 1100, 1172 and 1360): each
+   section carries its own space above and below (no margins between sections), every size a whole pixel,
+   and the layout steps at each of those widths. Rules below override the ones above
+   ============================================================ */
+.home > header, .home > section { margin-top: 0; }
+
+/* 1 · hero */
+.home > .pt-hero { gap: 28px; padding: 52px 20px 62px; }
+.pt-h1 { max-width: none; font-size: 36px; line-height: 46px; letter-spacing: -1px; }
+.pt-intro { margin-top: 12px; font-size: 16px; line-height: 26px; }
+.pt-acts { flex-direction: column; gap: 12px; margin-top: 12px; }
+.pt-acts .page-key { min-width: 240px; min-height: 44px; }
+@container home (min-width: 640px) {
+  .home > .pt-hero { gap: 36px; padding: 56px 40px; }
+  .pt-copy { max-width: 492px; }
+  .pt-h1 { font-size: 52px; line-height: 62px; }
+  .pt-acts { flex-direction: row; margin-top: 24px; }
+}
+@container home (min-width: 760px) { .home > .pt-hero { gap: 32px; } }
+@container home (min-width: 820px) { .home > .pt-hero { padding: 80px 40px 120px; } }
+@container home (min-width: 1029px) {
+  .home > .pt-hero { gap: 48px; }
+  .pt-copy { max-width: 880px; }
+  .pt-h1 { font-size: 64px; line-height: 74px; }
+  .pt-intro { max-width: 520px; }
+}
+@container home (min-width: 1100px) { .home > .pt-hero { gap: 56px; padding: 80px 64px 120px; } }
+@container home (min-width: 1172px) {
+  .home > .pt-hero { padding-top: 100px; }
+  .pt-h1 { font-size: 74px; line-height: 84px; }
+  .pt-intro { font-size: 18px; line-height: 28px; }
+}
+@container home (min-width: 1360px) { .pt-intro { max-width: 758px; } }
+
+/* 3 · a note from the host: one column, the head over the letter, until 1029px puts them side by side, the
+   letter at 430px (500px from 1172px) and the head taking the rest, both on the row's middle */
+.home > .pt-letter { gap: 12px; padding: 56px 20px; }
+.lt-head .pt-h2, .home .lt-head .pt-h2 { max-width: none; font-size: 32px; line-height: 40px; letter-spacing: -1px; }
+.lt-stand { max-width: none; margin-top: 24px; font-size: 16px; line-height: 24px; }
+.lt-body { max-width: none; }
+.lt-body p { margin-bottom: 12px; font-size: 14px; line-height: 24px; }
+.lt-sign { margin-top: 32px !important; }
+@container home (min-width: 640px) {
+  .home > .pt-letter { gap: 32px; padding: 60px 40px; }
+  .home .lt-head .pt-h2 { font-size: 40px; line-height: 48px; }
+  .lt-stand { margin-top: 20px; font-size: 20px; line-height: 30px; }
+  .lt-body p { font-size: 16px; line-height: 27px; }
+}
+@container home (min-width: 760px) {
+  .home > .pt-letter { gap: 40px; }
+  .home .lt-head .pt-h2 { font-size: 44px; line-height: 54px; }
+  .lt-stand { margin-top: 16px; }
+  .lt-body p { line-height: 26px; }
+  .lt-sign { max-width: 576px; }
+}
+@container home (min-width: 820px) {
+  .home > .pt-letter { grid-template-columns: minmax(0, 1fr); }
+}
+@container home (min-width: 1029px) {
+  .home > .pt-letter { grid-template-columns: minmax(0, 1fr) 430px; column-gap: 80px; align-items: center; padding: 120px 40px; }
+  .home .lt-head .pt-h2 { font-size: 40px; line-height: 50px; }
+  .lt-stand { margin-top: 24px; font-size: 16px; line-height: 30px; }
+  .lt-body p { font-size: 14px; line-height: 24px; }
+  .lt-sign { max-width: none; }
+}
+@container home (min-width: 1100px) { .home > .pt-letter { column-gap: 80px; padding: 120px 64px; } }
+@container home (min-width: 1172px) {
+  .home > .pt-letter { grid-template-columns: minmax(0, 1fr) 500px; }
+  .home .lt-head .pt-h2 { font-size: 48px; line-height: 58px; }
+  .lt-stand { font-size: 18px; line-height: 30px; }
+  .lt-body p { font-size: 16px; line-height: 26px; }
+}
+@container home (min-width: 1360px) {
+  .home > .pt-letter { column-gap: 120px; }
+  .lt-stand { font-size: 20px; line-height: 30px; }
+}
+
+/* 4 · tonight's features and 5 · channels: the stage's own padding, and the channels' grid under its lamp */
+.home > .pt-features { margin-top: 0; padding: 60px 20px; }
+.home > .pt-channels { padding: 60px 20px; }
+@container home (min-width: 640px) {
+  .home > .pt-features { padding: 120px 40px 80px; }
+  .ft-air { margin-top: 68px; }
+  .home > .pt-channels { padding: 80px 40px 120px; }
+}
+@container home (min-width: 760px) { .ft-air { margin-top: 80px; } }
+@container home (min-width: 1100px) {
+  .home > .pt-features { padding: 120px 64px 80px; }
+  .home > .pt-channels { padding: 80px 64px 120px; }
+}
+/* the promise's first sentence stands on its own line from 640px */
+@container home (min-width: 640px) { .lt-l1 { display: block; } }
+
+/* 6 · reviews */
+.home > .pt-reviews { padding: 60px 20px 37px; }
+.rv-head { font-size: 24px; line-height: 29px; letter-spacing: -1px; }
+.rv-row { margin-top: 24px; gap: 20px; }
+.rv blockquote p { font-size: 14px; line-height: 22px; }
+@container home (min-width: 640px) {
+  .home > .pt-reviews { padding: 101px 40px 83px; }
+  .rv-head { font-size: 28px; line-height: 34px; }
+  .rv-row { gap: 32px; }
+  .rv blockquote p { font-size: 16px; line-height: 26px; }
+}
+@container home (min-width: 760px) {
+  .home > .pt-reviews { padding: 121px 40px 71px; }
+  .rv-head { font-size: 44px; line-height: 54px; }
+  .rv-row { margin-top: 32px; }
+}
+@container home (min-width: 1029px) { .home > .pt-reviews { padding: 120px 40px; } }
+@container home (min-width: 1100px) { .home > .pt-reviews { --gutter: 40px; } .rv-row { margin-top: 32px; } }
+@container home (min-width: 1172px) { .home > .pt-reviews { --gutter: 64px; padding: 120px 64px; } .rv { width: min(540px, 80cqi); } }
+
+/* the groove sits straight between the reviews and the episode guide; their own padding spaces it */
+.home > .pt-divider { margin: 0 var(--gutter); }
+@container home (min-width: 1100px) { .home > .pt-divider { margin-top: 0; } }
+
+/* 7 · the episode guide: the TV, then the copy (on a phone the number keys come last, without the shell or the
+   arrow keys); from 760px the copy splits into its story and What you get, side by side; from 1360px the copy
+   stands beside the TV */
+.home > .pt-episodes, .home > .pt-divider + .pt-episodes { padding: 60px 20px; }
+.pt-episodes > .pt-h2 { max-width: none; font-size: 28px; line-height: 31px; letter-spacing: -1px; }
+.pe-main { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 36px; margin-top: 24px; }
+.pe-set { flex: none; max-width: none; }
+.pe-copy { flex: none; padding-top: 0; }
+.pe-title { font-size: 20px; line-height: 29px; letter-spacing: 0; }
+.pe-text { margin-top: 12px; font-size: 14px; line-height: 22px; }
+.pe-gets { margin-top: 16px; }
+.pe-get { margin: 0 0 20px; font-size: 14px; line-height: 17px; }
+.pe-items li { font-size: 14px; line-height: 24px; }
+@container home (max-width: 639.98px) {
+  .pe-set { display: contents; }
+  .pe-set .pe-tv { margin: 0; }
+  .pe-copy { order: 1; }
+  .pe-set .pt-remote { order: 2; position: static; left: auto; right: auto; bottom: auto; translate: none; width: auto; max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none; justify-content: flex-start; }
+  .pt-remote .rm-pad { display: none; }
+}
+@container home (min-width: 640px) {
+  .home > .pt-episodes, .home > .pt-divider + .pt-episodes { padding: 60px 40px; }
+  .pt-episodes > .pt-h2 { font-size: 32px; line-height: 35px; }
+  .pe-main { margin-top: 32px; }
+  .pe-title { font-size: 24px; line-height: 34px; letter-spacing: -1px; }
+  .pe-text { margin-top: 16px; font-size: 16px; line-height: 26px; }
+  .pe-gets { margin-top: 27px; }
+  .pe-items li { font-size: 16px; line-height: 22px; }
+}
+@container home (min-width: 760px) {
+  .pt-episodes > .pt-h2 { font-size: 44px; line-height: 54px; }
+  .pe-main { gap: 32px; }
+  .pe-now, .pe-ghost { display: flex; align-items: flex-start; gap: 120px; }
+  .pe-ghost { visibility: hidden; }
+  .pe-about { flex: none; width: 384px; }
+  .pe-title { font-size: 28px; line-height: 34px; }
+  .pe-text { margin-top: 12px; }
+  .pe-gets { flex: none; width: 176px; margin-top: 0; }
+  .pe-get { margin-bottom: 21px; }
+  .pe-items { display: grid; gap: 16px; }
+  .pe-items li { display: flex; align-items: center; gap: 12px; }
+}
+@container home (min-width: 820px) { .pe-about { width: 444px; } .pe-set { max-width: 715px; } }
+@container home (min-width: 1029px) { .pe-set { max-width: 862px; } }
+@container home (min-width: 1100px) {
+  .home > .pt-episodes, .home > .pt-divider + .pt-episodes { padding: 80px 64px; }
+  .pe-main { gap: 56px; }
+  .pe-copy { max-width: none; }
+}
+@container home (min-width: 1360px) {
+  .pt-episodes > .pt-h2 { font-size: 40px; line-height: 44px; }
+  .pe-main { flex-direction: row; align-items: center; }
+  .pe-set { width: 720px; max-width: 720px; }
+  .pe-copy { flex: 1 1 0; }
+  .pe-now, .pe-ghost { display: block; }
+  .pe-ghost { display: block; }
+  .pe-about { width: auto; }
+  .pe-gets { width: auto; margin-top: 32px; }
+  .pe-items { gap: 20px; }
+}
+
+/* 8 · services */
+.home > .pt-services { margin-top: 0; padding: 60px 20px; }
+.home .pt-services .mm-body { margin-top: 24px; row-gap: 29px; }
+.mm-list { gap: 4px; }
+.mm-item { min-height: 0; padding: 11px; font-size: 24px; line-height: 26px; letter-spacing: 0; }
+@container home (min-width: 640px) {
+  .home > .pt-services { padding: 104px 40px 99px; }
+  .home .pt-services .mm-body { margin-top: 32px; row-gap: 33px; }
+  .mm-list { gap: 8px; }
+  .mm-item { padding: 15px; font-size: 32px; line-height: 35px; letter-spacing: -1px; }
+}
+@container home (min-width: 760px) {
+  .home > .pt-services { padding: 100px 40px; }
+  .home .pt-services .mm-body { grid-template-columns: minmax(0, 1fr); margin-top: 36px; row-gap: 36px; }
+  .mm-list { gap: 12px; }
+  .mm-item { font-size: 40px; line-height: 50px; }
+}
+@container home (min-width: 820px) {
+  .home > .pt-services { padding: 104px 40px; }
+  .home .pt-services .mm-body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 48px; margin-top: 32px; }
+  .mm-list { gap: 4px; }
+  .mm-item { font-size: 32px; line-height: 35px; }
+}
+@container home (min-width: 1029px) { .mm-item { font-size: 36px; line-height: 46px; } }
+@container home (min-width: 1100px) { .home .pt-services .mm-body { column-gap: 48px; } .mm-list { gap: 4px; } .mm-item { font-size: 36px; line-height: 46px; } }
+@container home (min-width: 1172px) { .mm-list { gap: 8px; } .mm-item { font-size: 40px; line-height: 56px; } }
+@container home (min-width: 1360px) { .home > .pt-services { padding: 104px 64px; } .mm-list { gap: 16px; } .mm-item { font-size: 48px; line-height: 58px; } }
+
+/* 9 · FAQ: the head over the window at every width, the window one column (a topic's answer opens under it).
+   From 820px both sit in a 680px column on the middle; from 1029px the head is centred over it; from 1100px the
+   window is drawn bigger (zoom), as one picture of a window */
+.home > .pt-faq { display: block; padding: 44px 20px; }
+.pt-faq .pt-h2 { max-width: none; font-size: 28px; line-height: 31px; letter-spacing: -1px; }
+.home .pt-faq .mw { margin-top: 24px; }
+.help-main { grid-template-columns: minmax(0, 1fr); }
+@container home (min-width: 640px) {
+  .home > .pt-faq { padding: 80px 40px; }
+  .pt-faq .pt-h2 { font-size: 32px; line-height: 42px; }
+  .home .pt-faq .mw { margin-top: 32px; }
+}
+@container home (min-width: 760px) {
+  .pt-faq .pt-h2 { font-size: 56px; line-height: 66px; }
+  .home .pt-faq .mw { margin-top: 36px; }
+}
+@container home (min-width: 820px) {
+  .home > .pt-faq { display: block; }
+  .pt-faq .sec-copy, .pt-faq .mw { width: min(100%, 680px); margin-left: auto; margin-right: auto; }
+  .help-main { grid-template-columns: minmax(0, 1fr); }
+  .faq-q { grid-column: auto; grid-row: auto; }
+  .faq-a, .faq-empty { grid-column: auto; grid-row: auto; align-self: auto; padding: 12px 16px 16px 28px; border-left: 0; }
+  .faq-empty:not([hidden]) { display: none; }
+  .faq-a[hidden] { display: none !important; }
+}
+@container home (min-width: 1029px) {
+  .pt-faq .pt-h2 { text-align: center; }
+  .home .pt-faq .mw { margin-top: 56px; }
+}
+@container home (min-width: 1100px) {
+  .home > .pt-faq { padding: 120px 40px; }
+  .home .pt-faq .mw { zoom: 1.5; width: calc(934px / 1.5); max-width: 100%; margin-top: calc(56px / 1.5); }
+}
+@container home (min-width: 1172px) { .home .pt-faq .mw { zoom: 1.88; width: calc(1038px / 1.88); max-width: 100%; margin-top: calc(56px / 1.88); } }
+@container home (min-width: 1360px) { .home > .pt-faq { padding: 120px 64px; } .home .pt-faq .mw { width: calc(1140px / 1.88); } }
+
+/* 10 · the close: one centred column on a phone and up to 1028px (the print left out), the message without its
+   field labels on a phone; from 1029px the head, the lead, the message and the profiles on the left and the
+   print beside them */
+.home > .hm-cta { margin-top: 0; padding: 80px 20px 0; }
+.cl-grid { row-gap: 16px; }
+.cta-h { max-width: none; font-size: 32px; line-height: 42px; letter-spacing: -2px; text-align: center; }
+.cta-h span { display: inline; }
+.cl-lead { max-width: none; font-size: 14px; line-height: 22px; text-align: center; }
+.cl-ask .hm-mail { margin-top: 32px; }
+.home .field { height: 36px; }
+.cl-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 20px; margin-top: 16px; }
+.cl-fine { margin-top: 32px; }
+.cl-print { display: none; }
+@container home (max-width: 639.98px) {
+  .mail-head { grid-template-columns: minmax(0, 1fr); }
+  .mail-head label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .cl-top { display: none; }
+}
+@container home (min-width: 640px) {
+  .home > .hm-cta { padding: 80px 40px 0; }
+  .cta-h { font-size: 44px; line-height: 54px; }
+  .cl-lead { max-width: 453px; margin: 0 auto; font-size: 18px; line-height: 28px; }
+  .cl-links { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@container home (min-width: 760px) {
+  .home > .hm-cta { padding: 80px 64px 0; }
+  .cl-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "ask" "links"; }
+  .cta-h { font-size: 56px; line-height: 66px; }
+  .cta-h span { display: inline; }
+  .cl-print { display: none; }
+}
+@container home (min-width: 1029px) {
+  .cl-grid { grid-template-columns: minmax(0, 1fr) 373px; grid-template-areas: "head print" "ask print" "links ."; column-gap: 80px; align-items: start; }
+  .cta-h { font-size: 44px; line-height: 62px; text-align: left; }
+  .cl-lead { max-width: none; margin: 0; font-size: 16px; line-height: 26px; text-align: left; }
+  .cl-print { display: flex; align-self: start; width: 373px; height: 563px; }
+  .cl-pic { flex: 1 1 0; min-height: 0; aspect-ratio: auto; }
+}
+@container home (min-width: 1100px) {
+  .cl-grid { column-gap: 120px; }
+  .cl-lead { max-width: 453px; font-size: 18px; line-height: 28px; }
+}
+@container home (min-width: 1172px) { .cta-h { font-size: 52px; line-height: 62px; } .cl-links a { font-size: 14px; } }
+@container home (min-width: 1360px) { .cta-h { font-size: 52px; } .cl-links { max-width: 560px; gap: 4px 24px; } .cl-links a { font-size: 16px; line-height: 26px; } }
+
+/* how far the remote hangs under the TV before the copy starts, as each Figma frame has it */
+@container home (min-width: 640px) { .pe-set .pe-tv { margin-bottom: 40px; } }
+@container home (min-width: 820px) { .pe-set .pe-tv { margin-bottom: 25px; } }
+@container home (min-width: 1029px) { .pe-set .pe-tv { margin-bottom: 0; } }
+@container home (min-width: 1360px) { .pe-set .pe-tv { margin-bottom: 31px; } }
+
+/* the Figma's control sizes on every screen, touch included: the message's button and fields, the fine print's
+   two controls and the help topics */
+.home .mail-send .btn { min-height: 36px; }
+.mail-send { gap: 8px 16px; padding: 12px 8px 8px; }
+.home .ft-start { min-height: 24px; }
+.home .cl-top { min-height: 32px; }
+.home .faq-q { min-height: 0; }
+.faq-a p { max-width: none; }
+@container home (min-width: 640px) { .mail-send { padding: 8px; } }
+/* the FAQ head breaks after "Before we" up to 1028px, and runs on one centred line from 1029px */
+.pt-faq .pt-h2 { max-width: 7em; }
+@container home (min-width: 1029px) { .pt-faq .pt-h2 { max-width: none; } }
+/* on a phone the story stands 30px over What you get */
+.pe-gets { margin-top: 30px; }
+.pe-items li { line-height: 22px; }
+@container home (min-width: 640px) { .pe-gets { margin-top: 27px; } }
+@container home (min-width: 760px) { .pe-gets { margin-top: 0; } }
+@container home (min-width: 1360px) { .pe-gets { margin-top: 32px; } }
+.home > .pt-faq { padding-top: 75px; }
+@container home (min-width: 640px) { .home > .pt-faq { padding-top: 80px; } }
+@container home (min-width: 1100px) { .home > .pt-faq { padding-top: 120px; } }
+@container home (min-width: 1360px) { .home .pt-services .mm-body { grid-template-columns: minmax(0, 719fr) minmax(0, 465fr); } }
+.home .mail-body { min-height: 163px; }
+/* the head breaks where the Figma breaks it: greedy, not balanced */
+.home .lt-head .pt-h2 { text-wrap: wrap; }
+/* the help answer at the Figma's size inside the zoomed window */
+@container home (min-width: 1100px) { .home .pt-faq .faq-a p { font-size: calc(20px / 1.5); line-height: calc(30px / 1.5); } }
+@container home (min-width: 1172px) { .home .pt-faq .faq-a p { font-size: calc(24px / 1.88); line-height: calc(34px / 1.88); } }
+@container home (min-width: 1360px) { .home .pt-faq .faq-a p { font-size: calc(26px / 1.88); line-height: calc(36px / 1.88); } }
+/* the browser sets the quote a hair wider than Figma: 20px of padding keeps the Figma's line breaks in a 540px column */
+@container home (min-width: 1172px) { .rv { padding-right: 20px; } }
+/* other episodes have longer What you get labels than the first: the column takes what the row leaves (176px at
+   least) and a label too long for it wraps under its own icon line instead of running past the window */
+@container home (min-width: 760px) {
+  .pe-now, .pe-ghost { gap: min(120px, 8cqi); }
+  .pe-about { flex: 0 1 384px; min-width: 0; }
+  .pe-gets { flex: 1 0 176px; width: auto; min-width: 0; }
+  .pe-items li { white-space: normal; }
+}
+@container home (min-width: 820px) { .pe-about { flex-basis: 444px; } }
+@container home (min-width: 1100px) { .pe-now, .pe-ghost { gap: 120px; } }

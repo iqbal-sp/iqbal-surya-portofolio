@@ -874,10 +874,10 @@
   }
   function episodeCopyHTML(i) {
     const s = PF.home.process.steps[i];
-    return `<h3 class="pe-title">${esc(t(s.title))}</h3>
-      <p class="pe-text">${esc(t(s.text))}</p>
-      <p class="pe-get">${esc(u('youGet'))}</p>
-      <ul class="pe-items">${s.items.map((x) => `<li>${I(x.icon || 'check', 24)}<span>${esc(t(x))}</span></li>`).join('')}</ul>`;
+    return `<div class="pe-about"><h3 class="pe-title">${esc(t(s.title))}</h3>
+      <p class="pe-text">${esc(t(s.text))}</p></div>
+      <div class="pe-gets"><p class="pe-get">${esc(u('youGet'))}</p>
+      <ul class="pe-items">${s.items.map((x) => `<li>${I(x.icon || 'check', 24)}<span>${esc(t(x))}</span></li>`).join('')}</ul></div>`;
   }
   // the remote: a silver 2004 media remote on its side, and every key on it works. The round keys in a dark
   // well step episodes, the rubber keys pick one
@@ -960,7 +960,7 @@
 
       <section class="pt-letter" aria-labelledby="pt-letter-h">
         <div class="lt-head">
-          <h2 class="pt-h2" id="pt-letter-h">${esc(t(H.promise.head).join(' '))}</h2>
+          <h2 class="pt-h2" id="pt-letter-h">${(([first, ...rest]) => `<span class="lt-l1">${esc(first)}</span> ${esc(rest.join(' '))}`)(t(H.promise.head))}</h2>
           <p class="lt-stand">${esc(t(H.promise.text))}</p>
         </div>
         <div class="lt-body">
