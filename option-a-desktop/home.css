@@ -1034,3 +1034,7 @@
 /* the profile names on a whole-pixel line, as the Figma sets them: 16px, 26px at 1360px */
 .cl-links a { line-height: 16px; }
 @container home (min-width: 1360px) { .cl-links a { line-height: 26px; } }
+/* the message's fields pad their text like the message well under them (12px), so the address and the subject
+   don't sit on the field's edge; the select's arrow sits 8px in, with 12px between it and the subject */
+.home .field { padding: 0 12px; }
+.home select.field { padding-right: 37px; background-position: right 8px center; }
