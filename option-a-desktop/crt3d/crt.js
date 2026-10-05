@@ -22,7 +22,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 const HERE = new URL('.', import.meta.url);
-const DRACO = 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/libs/draco/gltf/';
+// the Draco decoder beside the site's own three.js (index.html's import map), from the page's address: the desktop
+// is served at / and from option-a-desktop/, and asset/ is one level up from both
+const DRACO = new URL('../asset/vendor/three-0.186.0/examples/jsm/libs/draco/gltf/', document.baseURI).href;
 
 export const CFG = {
   pixel: 2,          // CSS px per dot, as the wallpaper and desk3d

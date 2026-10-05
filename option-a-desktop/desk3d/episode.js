@@ -26,15 +26,29 @@ const allowed = () => !failed && !wantStatic && !reduceMotion && !mqMobile.match
 
 function mount(screen) {
   if (host === screen || !allowed()) return;
-  unmount();
+  if (host) host.classList.remove('is-3d');
   host = screen;
+  // the page has one desk: one built for an earlier screen moves to this one, at the episode its remote shows
+  if (desk) {
+    const d = desk, ep = remoteEp(screen);
+    d.move(screen);
+    if (d.state().active !== ep) d.go(ep, { instant: true });
+    d.ready.then(() => { if (desk === d && host === screen) screen.classList.add('is-3d'); });
+    return;
+  }
   loading = loading || import('./desk.js');
   loading.then(({ createDesk }) => {
-    if (host !== screen || !screen.isConnected || !allowed()) return;
+    if (host !== screen || !screen.isConnected || !allowed() || desk) return;
     const d = desk = createDesk(screen, { start: remoteEp(screen), onLost: () => { failed = true; unmount(); } });
     // the desk builds in idle time; the still and the snow stay until it has drawn
-    d.ready.then(() => { if (desk === d) screen.classList.add('is-3d'); });
+    d.ready.then(() => { if (desk === d && host === screen) screen.classList.add('is-3d'); });
   }).catch((err) => { failed = true; host = null; console.warn('[desk3d] staying on the stills:', err); });
+}
+// the screen went with its Home (closed, or built again): the desk waits off the page for the next screen
+function park() {
+  if (desk) desk.park();
+  if (host) host.classList.remove('is-3d');
+  host = null;
 }
 function unmount() {
   if (desk) { desk.destroy(); desk = null; }
@@ -43,7 +57,7 @@ function unmount() {
 }
 
 // Home is built and rebuilt by app.js (opening the window, switching language), so the screen is looked up again
-// whenever the page changes, and the desk follows it to the new screen once that screen comes near the viewport
+// whenever the page changes, and the desk moves to the new screen once that screen comes near the viewport
 const near = new IntersectionObserver((entries) => {
   for (const e of entries) if (e.isIntersecting && e.target === watched) mount(e.target);
 }, { rootMargin: '600px 0px' });
@@ -51,7 +65,7 @@ const near = new IntersectionObserver((entries) => {
 let queued = false;
 function check() {
   queued = false;
-  if (host && !host.isConnected) unmount();
+  if (host && !host.isConnected) park();
   const screen = document.querySelector('.home .pe-screen');
   if (screen === watched) return;
   if (watched) near.unobserve(watched);

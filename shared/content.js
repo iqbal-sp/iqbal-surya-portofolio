@@ -41,10 +41,15 @@
       { en: 'English', id: 'Inggris', level: { en: 'Limited working proficiency', id: 'Kemampuan kerja terbatas' } },
     ],
     email: 'hello@iqbalsurya.com',
-    photo: '../asset/iqba-surya.png',
+    // the portfolio's own address, which the CV prints first so a forwarded copy leads back here
+    site: 'https://iqbalsurya.com',
+    // the dithered portrait (asset/iqba-surya.png, 564 × 564) as WebP copies 128 to 384px wide: photo is the one a
+    // single-size picture uses (the Start menu's 42px), and photoSet lets a larger frame pick its own
+    photo: '../asset/iqba-surya-192.webp',
+    photoSet: [128, 192, 256, 384].map((w) => `../asset/iqba-surya-${w}.webp ${w}w`).join(', '),
     // The CV PDF per language, printed from resume/cv.html by `node resume/build.mjs`.
     // Empty = the Resume dialog offers to send it by email instead.
-    cv: { en: '../asset/cv/Iqbal-Surya-Pratama-Resume.pdf?v=2', id: "../asset/cv/Iqbal-Surya-Pratama-CV.pdf?v=2" },
+    cv: { en: '../asset/cv/Iqbal-Surya-Pratama-Resume.pdf?v=3', id: "../asset/cv/Iqbal-Surya-Pratama-CV.pdf?v=3" },
     socials: [
       { key: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/in/iqbal-surya-pratama-29b2811a3/', handle: 'Iqbal Surya Pratama' },
       { key: 'dribbble', label: 'Dribbble', url: 'https://dribbble.com/iqbalsp', handle: '@iqbalsp' },
@@ -138,11 +143,11 @@
         id: "Saya Iqbal, product designer di Indonesia. Saya merancang website, dashboard, dan aplikasi mobile dengan alur yang jelas dan detail UI yang matang. Saya juga membangun website di Webflow dan Framer.",
       },
       // the owner's photo, opened in Paint; the original is photo-hero.jpg (2880 x 2000),
-      // these are web-size copies (AVIF, WebP, and a JPEG fallback) at 1200 and 2000px wide
+      // these are web-size copies (AVIF, WebP, and a JPEG fallback) at 1200, 1600 and 2000px wide
       photo: {
         file: 'iqbal-surya.jpg',
         base: '../asset/Home/photo-hero-',
-        widths: [1200, 2000],
+        widths: [1200, 1600, 2000],
         width: 2880, height: 2000,
         // the detection boxes printed on the photo, in the original's pixels [left, top, right, bottom];
         // pointing at one selects it in Paint

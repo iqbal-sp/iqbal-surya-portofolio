@@ -14,8 +14,9 @@
   document.documentElement.lang = lang;
   document.title = `${o.fullName}, ${t(o.role)}: ${L.title}`;
 
-  // an Upwork address is a long id, so it prints as its label; the others print as their address
-  const contact = [`<li><a href="mailto:${esc(o.email)}">${esc(o.email)}</a></li>`]
+  // the portfolio first, so a forwarded CV leads back to the case studies; an Upwork address is a long id, so it
+  // prints as its label, and the others print as their address
+  const contact = [`<li><a href="${esc(o.site)}">${esc(bare(o.site))}</a></li>`, `<li><a href="mailto:${esc(o.email)}">${esc(o.email)}</a></li>`]
     .concat(o.socials.map((s) => `<li><a href="${esc(s.url)}">${esc(s.key === 'upwork' ? `Upwork: ${t(s.handle)}` : bare(s.url))}</a></li>`)).join('');
 
   const jobs = o.worklog.map((j) => {

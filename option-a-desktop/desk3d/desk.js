@@ -9,6 +9,7 @@
     ready          a promise, settled once the desk is built and has drawn its first frame
     go(i)          glide to station i (0..3); with reduced motion it cuts to the station's still
     freeze(i, t)   show station i at its local time t and stop (screenshots, stills)
+    move(host)     carry the canvas, built, to a new host; park() takes it off the page until then
     play(), pause(), destroy(), state()
   The desk is built in small steps while the browser is idle (the room, each station, every shader compiled for all
   four stations, every texture uploaded), so building it never holds up scrolling and the first glide to a station
@@ -209,6 +210,7 @@ export function createDesk(host, opts = {}) {
   /* ---------- layout ---------- */
   let cssW = 1, cssH = 1;
   function layout() {
+    if (!host) return;
     cssW = Math.max(1, host.clientWidth); cssH = Math.max(1, host.clientHeight);
     const w = Math.max(1, Math.round(cssW / cfg.pixel)), h = Math.max(1, Math.round(cssH / cfg.pixel));
     renderer.setSize(w * cfg.pixel, h * cfg.pixel, false);
@@ -324,15 +326,24 @@ export function createDesk(host, opts = {}) {
     leanAim.set(((e.clientX - r.left) / r.width - 0.5) * 2, -((e.clientY - r.top) / r.height - 0.5) * 2);
   };
   const onLeave = () => leanAim.set(0, 0);
-  host.addEventListener('pointermove', onMove, { passive: true });
-  host.addEventListener('pointerleave', onLeave);
   const onVis = () => (document.hidden ? stop() : play());
   document.addEventListener('visibilitychange', onVis);
   const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; if (onScreen) { if (!frozen) play(); } else stop(); });
-  io.observe(host);
   const ro = new ResizeObserver(() => { layout(); if (ready && !raf) { aim(1); draw(); } });
-  ro.observe(host);
-  canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); stop(); opts.onLost?.(); });
+  // what the desk listens to and watches on its host, taken along when it moves to a new one (move() below)
+  function hook() {
+    host.addEventListener('pointermove', onMove, { passive: true });
+    host.addEventListener('pointerleave', onLeave);
+    io.observe(host); ro.observe(host);
+  }
+  function unhook() {
+    if (!host) return;
+    host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
+    io.unobserve(host); ro.unobserve(host);
+  }
+  hook();
+  const onLost = (e) => { e.preventDefault(); stop(); opts.onLost?.(); };
+  canvas.addEventListener('webglcontextlost', onLost);
 
   /* ---------- building, a step at a time ---------- */
   const idle = () => new Promise((r) => (window.requestIdleCallback ? requestIdleCallback(() => r(), { timeout: 150 }) : setTimeout(r, 30)));
@@ -390,13 +401,42 @@ export function createDesk(host, opts = {}) {
     pause() { paused = true; stop(); },
     setRaw(on) { post.uniforms.uRaw.value = on ? 1 : 0; if (!raf) draw(); },
     redraw() { aim(0); draw(); },
-    state: () => ({ ready, active, time: ready ? +stations[active].time.toFixed(2) : 0, gliding: +gliding.toFixed(2), running: !!raf, size: [canvas.width, canvas.height], render: [post.uniforms.uRes.value.x, post.uniforms.uRes.value.y], programs: renderer.info.programs.length, calls: renderer.info.render.calls, textures: renderer.info.memory.textures }),
+    state: () => ({ ready, active, parked: !host, time: ready ? +stations[active].time.toFixed(2) : 0, gliding: +gliding.toFixed(2), running: !!raf, size: [canvas.width, canvas.height], render: [post.uniforms.uRes.value.x, post.uniforms.uRes.value.y], programs: renderer.info.programs.length, calls: renderer.info.render.calls, textures: renderer.info.memory.textures }),
+    // Home is built again on a language switch and on a reopen: the desk moves to the new screen with all it has
+    // built, so the page keeps one WebGL context however often Home is rebuilt (episode.js)
+    move(to) {
+      if (dead || to === host) return;
+      unhook();
+      host = to;
+      host.prepend(canvas);
+      hook();
+      layout();
+      if (ready && !raf) { aim(1); draw(); }
+    },
+    // the screen went with its Home: the desk stops and leaves the page, keeping nothing of the old Home
+    park() {
+      if (dead || !host) return;
+      stop(); unhook();
+      canvas.remove();
+      host = null; onScreen = false;
+    },
     destroy() {
       dead = true;
-      stop(); io.disconnect(); ro.disconnect();
-      host.removeEventListener('pointermove', onMove); host.removeEventListener('pointerleave', onLeave);
+      stop(); io.disconnect(); ro.disconnect(); unhook();
       document.removeEventListener('visibilitychange', onVis);
-      renderer.dispose(); canvas.remove();
+      // renderer.dispose() alone leaves the context alive: three.js keeps one DFG texture for every renderer on the
+      // page (getDFGLUT), and it holds each renderer that drew with it. So the scene's GPU copies go first, then the
+      // context itself, without telling episode.js the desk was lost
+      canvas.removeEventListener('webglcontextlost', onLost);
+      for (const t of textures(scene)) t.dispose();
+      scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); for (const m of [].concat(o.material || [])) m.dispose(); });
+      scene.background?.dispose?.();
+      scene.environment?.dispose?.();
+      quad.geometry.dispose(); post.dispose(); target.dispose();
+      renderer.dispose();
+      renderer.forceContextLoss();
+      canvas.remove();
+      host = null;
     },
   };
 }

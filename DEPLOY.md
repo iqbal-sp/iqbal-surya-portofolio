@@ -7,6 +7,7 @@ Portofolio ini di-deploy sebagai satu Cloudflare Worker (paket gratis):
 - `/api/scores` dijawab oleh `worker/index.js`, papan peringkat Boss Rush XP, dengan database D1 bernama `brxp-board`.
 - `/api/message` mengirim pesan dari jendela New Message di Home ke inbox lewat Resend, dan `/api/event` menghitung apa yang dilakukan pengunjung. Keduanya memakai database yang sama (lihat bagian di bawah).
 - File yang tidak ikut terunggah (catatan, `.claude/`, `.impeccable/`, kode worker) tercantum di `.assetsignore`.
+- three.js (layar loading, wallpaper hidup, desk 3D di TV Home) dilayani dari situs sendiri di `asset/vendor/three-0.186.0/`, bukan dari jsDelivr. Asal tiap file tercatat di `SOURCE.md` di folder itu. `_headers` di root membuat browser menyimpan folder itu setahun, jadi versi baru masuk ke folder baru, jangan menimpa yang lama.
 
 Semua perintah di bawah dijalankan di Terminal, dari folder proyek ini. `npx` sudah ikut terpasang bersama Node.js.
 
@@ -47,6 +48,9 @@ npx wrangler@latest d1 migrations apply brxp-board --remote
 ## Domain sendiri
 
 Situs tayang di **https://iqbalsurya.com** dan **https://www.iqbalsurya.com**. Keduanya tercantum di `routes` pada `wrangler.jsonc`, jadi ikut terpasang setiap kali `npx wrangler@latest deploy` dijalankan. Alamat `workers.dev` tetap aktif (`"workers_dev": true`).
+
+- Sejak 2026-10-05, `worker/index.js` (`moved()`) mengalihkan `http://` dan `www` ke `https://iqbalsurya.com` dengan path yang sama: 301 untuk membuka halaman, 308 untuk POST supaya isi pesan ikut. Setiap jawaban Worker di alamat ini membawa HSTS selama setahun, jadi browser yang sudah pernah membuka situs langsung memakai HTTPS. HSTS-nya tanpa `includeSubDomains`, karena subdomain email dan Resend bukan bagian situs.
+- File statis yang dibuka langsung lewat `http://` (misalnya gambar) tidak lewat Worker. Untuk menutup celah itu juga, nyalakan **SSL/TLS → Edge Certificates → Always Use HTTPS** di dashboard Cloudflare.
 
 - Domain terdaftar di Hostinger. DNS-nya dikelola Cloudflare sejak 2026-09-25, lewat nameserver `luke.ns.cloudflare.com` dan `yolanda.ns.cloudflare.com`.
 - Email `@iqbalsurya.com` tetap di Hostinger. Data MX, SPF (TXT), DMARC (`_dmarc`), DKIM (`hostingermail-a/b/c._domainkey`), `autodiscover`, dan `autoconfig` ada di DNS Cloudflare. Semua CNAME email harus **DNS only** (awan abu-abu), karena kalau di-proxy, email tidak lolos verifikasi.
@@ -204,6 +208,7 @@ Situs menghitung beberapa kejadian per hari, tanpa cookie dan tanpa data apa pun
 | `hint` | `bin`, `idle`, `offer` | balon petunjuk Tempat Sampah tampil, screensaver saat diam muncul, atau balon tawaran Screen Saver XP tampil |
 | `run` | `ss:start`, `ss:boss2`, `ss:boss3`, `ss:boss4`, `ss:final`, `ss:win` | run penuh Screen Saver XP dimulai, sampai di Mystify, 3D Pipes, Marquee, Blank, lalu menang. Main lagi dan Mulai ulang dihitung sebagai start baru, sedangkan Coba lagi setelah kalah tidak dihitung |
 | `run` | `ss:practice`, `ss:practice-done` | latihan dimulai, atau selesai sampai langkah terakhir |
+| `boot` | `fail:<bagian>`, `skip:<bagian>` | layar loading gagal memuat satu bagian (`fonts`, `content`, `cases`, `icons`, `app`, `wall`, `home`), atau melanjutkan tanpa bagian itu karena tidak akan pernah datang (hanya `fonts`, `wall`, `home`). Dihitung sekali per sesi. Kalau `fail:` naik tiba-tiba setelah deploy, kemungkinan ada file yang tidak ikut terunggah |
 
 ```sql
 -- total 30 hari terakhir
@@ -214,6 +219,8 @@ SELECT day, detail, n FROM events WHERE name = 'case' ORDER BY day DESC, n DESC;
 SELECT detail, SUM(n) AS total FROM events WHERE name = 'run' AND day >= date('now', '-30 day') GROUP BY detail ORDER BY total DESC;
 -- dari mana kedua game dibuka, dan petunjuk yang tampil
 SELECT name, detail, SUM(n) AS total FROM events WHERE name IN ('door', 'hint') AND day >= date('now', '-30 day') GROUP BY name, detail ORDER BY name, total DESC;
+-- bagian layar loading yang gagal atau dilewati, 30 hari terakhir
+SELECT day, detail, n FROM events WHERE name = 'boot' AND day >= date('now', '-30 day') ORDER BY day DESC, n DESC;
 ```
 
 Untuk jumlah pengunjung, halaman yang dibuka, negara dan perangkat, aktifkan **Cloudflare Web Analytics** (gratis, tanpa cookie): Dashboard → **Analytics & Logs → Web Analytics → Add a site** → `iqbalsurya.com`, pilih pemasangan otomatis. Kalau setelah sehari datanya masih kosong, pilih pemasangan manual dan salin token-nya; satu baris script lalu ditambahkan ke `option-a-desktop/index.html`.

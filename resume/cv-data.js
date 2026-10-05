@@ -9,7 +9,7 @@
   const PF = (window.PF = window.PF || {});
 
   PF.cv = {
-    updated: { en: 'September 2026', id: 'September 2026' },
+    updated: { en: 'October 2026', id: 'Oktober 2026' },
 
     // the site's letter and stats notes, plus LinkedIn's "interfaces and animations for web and mobile"
     summary: {

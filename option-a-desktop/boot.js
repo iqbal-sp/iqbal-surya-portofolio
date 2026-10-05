@@ -6,6 +6,11 @@
   There is no skip and no time limit: the screen waits until every part is in (owner's request, 2026-09-29). A part
   that fails is marked FAILED and the page tries again on its own, after 4s, then 8s, 16s and every 30s, and once the
   network is back when it is offline; the foot of the test names F5 (Reload on a phone) as the way to start over.
+  Three parts have a stand-in (the system's sans-serif for the fonts, the desktop's blue for the wallpaper's picture,
+  Home without one of its pictures), and one of them that can never arrive is marked SKIPPED and the test goes on
+  (owner's approval, 2026-10-05): at once when the server answers its file with an error, after one more try when the
+  server sends the file but the browser turned it down, after the third failed load when the server can't be asked.
+  A part that fails, and one passed over, is counted through /api/event, once a session.
   When everything is in, the tube turns XP's welcome blue and the camera flies into the glass (a CSS zoom on the
   still), then the desktop comes up in XP's order. The test is English on both languages, as a BIOS was; the screen
   reader's status follows the page's language.
@@ -34,8 +39,8 @@
   const liveWall = !small.matches && !/[?&]wall=static\b/.test(location.search);
 
   const TXT = {
-    en: { aria: 'Loading the portfolio', failed: 'A part did not load. Trying again.', offline: 'You are offline. Waiting for the network.', ready: 'Welcome in' },
-    id: { aria: 'Memuat portofolio', failed: 'Sebagian gagal dimuat. Mencoba lagi.', offline: 'Kamu sedang offline. Menunggu jaringan.', ready: 'Selamat datang' },
+    en: { aria: 'Loading the portfolio', failed: 'A part did not load. Trying again.', skipped: 'A part did not load. Going on without it.', offline: 'You are offline. Waiting for the network.', ready: 'Welcome in' },
+    id: { aria: 'Memuat portofolio', failed: 'Sebagian gagal dimuat. Mencoba lagi.', skipped: 'Sebagian gagal dimuat. Melanjutkan tanpanya.', offline: 'Kamu sedang offline. Menunggu jaringan.', ready: 'Selamat datang' },
   };
   const t = (k) => (TXT[root.lang === 'id' ? 'id' : 'en'])[k];
 
@@ -50,7 +55,10 @@
   const DONE_HOLD = 0.6;      // s the finished test stays before the tube turns blue
   const FLY = 1500;           // ms into the glass (the 3D); the still's CSS zoom takes the same
   const RETRY = [4, 8, 16, 30];  // s before each new try after a part failed
-  const WELCOMED = 'pf-a-welcomed', TRIES = 'pf-a-boot-tries';
+  const WELCOMED = 'pf-a-welcomed', TRIES = 'pf-a-boot-tries', MISSES = 'pf-a-boot-misses', SAID = 'pf-a-boot-said';
+  // the parts with a stand-in, which can be passed over when they can never arrive (a font blocker, a file gone after
+  // a deploy); a script that never arrives still means a reload, as the desktop can't run without it
+  const CAN_SKIP = new Set(['fonts', 'wall', 'home']);
   // where the glass sits on each still, as fractions of it (tools/poster.mjs): top left, top right, bottom right,
   // bottom left; and each still's size in CSS px (one dot is 2px)
   const STILL = {
@@ -85,13 +93,14 @@
     check();
   });
 
-  // true when the picture decoded, false when it failed
-  const imgReady = (img) => new Promise((res) => {
-    const done = () => (img.decode ? img.decode().then(() => true, () => img.naturalWidth > 0) : Promise.resolve(img.naturalWidth > 0)).then(res);
+  // true when the picture decoded, false when it failed; a failed picture's address goes into miss
+  const imgReady = (img, miss = []) => new Promise((res) => {
+    const no = () => { miss.push(img.currentSrc || img.src); res(false); };
+    const done = () => (img.decode ? img.decode().then(() => true, () => img.naturalWidth > 0) : Promise.resolve(img.naturalWidth > 0)).then((ok) => (ok ? res(true) : no()));
     if (img.complete) done();
-    else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', () => res(false), { once: true }); }
+    else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', no, { once: true }); }
   });
-  const urlReady = (src) => { const img = new Image(); img.src = src; return imgReady(img); };
+  const urlReady = (src, miss) => { const img = new Image(); img.src = src; return imgReady(img, miss); };
   const cssUrls = (value) => Array.from(String(value).matchAll(/url\("?([^")]+)"?\)/g), (m) => m[1]).filter((u) => !u.startsWith('data:'));
   const allOk = (list) => Promise.all(list).then((oks) => oks.every(Boolean));
 
@@ -109,20 +118,52 @@
   }
 
   // Home's first view: every picture and CSS texture inside the window's visible part
-  function firstView(el) {
+  function firstView(el, miss) {
     const view = (el.querySelector('.win-body') || el).getBoundingClientRect();
     const inView = (n) => { const r = n.getBoundingClientRect(); return r.width > 0 && r.bottom > view.top && r.top < view.bottom && r.right > view.left && r.left < view.right; };
     const waits = [], urls = new Set();
     el.querySelectorAll('*').forEach((n) => {
       if (!inView(n)) return;
-      if (n.tagName === 'IMG') waits.push(imgReady(n));
+      if (n.tagName === 'IMG') waits.push(imgReady(n, miss));
       [null, '::before', '::after'].forEach((p) => {
         const cs = getComputedStyle(n, p);
         cssUrls(cs.backgroundImage).concat(cssUrls(cs.maskImage || cs.webkitMaskImage)).forEach((u) => urls.add(u));
       });
     });
-    urls.forEach((u) => waits.push(urlReady(u)));
+    urls.forEach((u) => waits.push(urlReady(u, miss)));
     return allOk(waits);
+  }
+
+  /* ---------- a part that can't arrive ---------- */
+  // what the server says about files the browser did not load: 'gone' when it answers one with an error (a reload
+  // can't bring it back), 'refused' when it sends them all (the browser, or something in it, turned them down), and
+  // 'unknown' when it can't be asked (offline, a network that drops the request, nothing to ask about)
+  function ask(urls) {
+    if (!urls.length) return Promise.resolve('unknown');
+    const answers = Promise.all(urls.map((u) => fetch(u, { method: 'HEAD', cache: 'no-store' })
+      .then((res) => (res.ok ? true : res.status === 405 || res.status === 501 ? null : false), () => null)))
+      .then((oks) => (oks.includes(false) ? 'gone' : oks.includes(null) ? 'unknown' : 'refused'));
+    return Promise.race([answers, pause(5000).then(() => 'unknown')]);
+  }
+  // how many loads this session the part has failed on, this one counted
+  function missed(key) {
+    try {
+      const m = JSON.parse(sessionStorage.getItem(MISSES) || '{}') || {};
+      m[key] = (m[key] || 0) + 1;
+      sessionStorage.setItem(MISSES, JSON.stringify(m));
+      return m[key];
+    } catch (e) { return 1; }
+  }
+  // one count a session for each part that fails or is passed over (worker/index.js, EVENTS.boot), so the owner hears
+  // of a file a deploy left out before a visitor writes about it
+  function tell(d) {
+    try {
+      const said = JSON.parse(sessionStorage.getItem(SAID) || '[]');
+      if (said.includes(d)) return;
+      said.push(d);
+      sessionStorage.setItem(SAID, JSON.stringify(said));
+      navigator.sendBeacon('/api/event', new Blob([JSON.stringify({ e: 'boot', d })], { type: 'application/json' }));
+    } catch (e) { /* counting is optional */ }
   }
 
   /* ---------- the glass: the test's box laid on the picture's four corners ---------- */
@@ -193,7 +234,7 @@
   }
   function start3d() {
     if (small.matches || reduce || !webgl()) return null;
-    return import('./crt3d/crt.js?v=1').then((m) => {
+    return import('./crt3d/crt.js?v=2').then((m) => {
       if (!run) return null;
       crt3d = m.createCrt(scene, { onFrame: (q) => { if (!run || run.zooming) return; layGlass(q); } });
       return crt3d.ready.then(() => {
@@ -215,12 +256,14 @@
     try { welcomed = localStorage.getItem(WELCOMED) === '1'; } catch (e) { /* storage unavailable */ }
     const now = performance.now();
     const r = (run = {
-      ok: new Set(), failed: new Set(), shown: 0, printed: 0, lastPrint: 0, kb: 0, holding: false, leaving: false, zooming: false,
+      ok: new Set(), failed: new Set(), skipped: new Set(), shown: 0, printed: 0, lastPrint: 0, kb: 0, holding: false, leaving: false, zooming: false,
       t0: now, last: now, q: welcomed && !replayed ? 0.6 : 1, replayed: !!replayed,
+      // the files a part was waiting on and did not get: the fonts are the ones the page preloads
+      miss: { fonts: Array.from(document.querySelectorAll('link[rel="preload"][as="font"]'), (l) => l.href), wall: [], home: [] },
     });
     let homeIn;
     r.home = new Promise((res) => (homeIn = res));
-    r.giveHome = (el) => { if (el) firstView(el).then(homeIn); else homeIn(true); };
+    r.giveHome = (el) => { if (el) firstView(el, r.miss.home).then(homeIn); else homeIn(true); };
 
     root.classList.remove('boot-out', 'boot-in');
     root.classList.add('booting');
@@ -251,7 +294,7 @@
       cases: () => scriptIn('cases'),
       icons: () => scriptIn('icons'),
       app: () => scriptIn('app'),
-      wall: () => allOk(cssUrls(getComputedStyle(document.getElementById('desktop')).backgroundImage).map(urlReady)),
+      wall: () => allOk(cssUrls(getComputedStyle(document.getElementById('desktop')).backgroundImage).map((u) => urlReady(u, r.miss.wall))),
       home: () => r.home,
       // once its first frame is up, the live wallpaper waits behind the screen
       wall3d: () => wall3dReady().then((ok) => { if (run === r && PF.wall3d) { PF.wall3d.pause(); r.wallPaused = true; } return ok; }),
@@ -261,12 +304,29 @@
   }
 
   function settle(r, key, ok) {
-    if (run !== r || r.ok.has(key) || r.failed.has(key)) return;
+    if (run !== r || r.ok.has(key) || r.failed.has(key) || r.skipped.has(key)) return;
     // on a replay the page is already up: nothing there is worth a reload, so what answered is taken as in
-    (ok || r.replayed ? r.ok : r.failed).add(key);
-    if (r.failed.size && !r.retrying) retry(r);
+    if (ok || r.replayed) { r.ok.add(key); return; }
+    tell('fail:' + key);
+    if (!CAN_SKIP.has(key)) { fail(r, key); return; }
+    // a part with a stand-in: passed over when no reload can bring it (the server says it's gone, or sends it and the
+    // browser turned it down a second time), or after its third failed load; offline, the screen waits as before
+    const n = missed(key);
+    ask(r.miss[key]).then((said) => {
+      if (run !== r) return;
+      if (navigator.onLine && (said === 'gone' || (said === 'refused' && n >= 2) || n >= 3)) {
+        r.skipped.add(key);
+        say.textContent = t('skipped');
+        tell('skip:' + key);
+      } else fail(r, key);
+    });
   }
-  const got = (r) => PARTS.reduce((s, [k, w]) => s + (r.ok.has(k) ? w : 0), 0) / TOTAL;
+  function fail(r, key) {
+    r.failed.add(key);
+    if (!r.retrying) retry(r);
+  }
+  const done = (r, k) => r.ok.has(k) || r.skipped.has(k);
+  const got = (r) => PARTS.reduce((s, [k, w]) => s + (done(r, k) ? w : 0), 0) / TOTAL;
 
   // a part failed: the page loads again after a pause that grows with each try, and not while offline
   function retry(r) {
@@ -298,10 +358,10 @@
     const rows = lines.children;
     for (let i = 0; i < rows.length; i++) {
       const k = rows[i].dataset.part, row = rows[i];
-      const state = i < r.printed ? (r.ok.has(k) ? 'ok' : 'failed') : r.failed.has(k) && i === r.printed ? 'failed' : i === r.printed ? 'cur' : '';
+      const state = i < r.printed ? (r.ok.has(k) ? 'ok' : r.skipped.has(k) ? 'skipped' : 'failed') : r.failed.has(k) && i === r.printed ? 'failed' : i === r.printed ? 'cur' : '';
       if (row.dataset.state !== state) {
         row.dataset.state = state;
-        row.lastChild.textContent = state === 'ok' ? 'OK' : state === 'failed' ? 'FAILED' : '';
+        row.lastChild.textContent = state === 'ok' ? 'OK' : state === 'failed' ? 'FAILED' : state === 'skipped' ? 'SKIPPED' : '';
       }
     }
     const blocks = cells.children, on = Math.floor(r.shown * blocks.length + 1e-6);
@@ -325,8 +385,8 @@
     const dt = Math.min(0.25, (now - r.last) / 1000);
     r.last = now;
     const k = PARTS[r.printed];
-    if (k && (r.ok.has(k[0])) && (now - r.lastPrint) / 1000 >= TEMPO * r.q) { r.printed++; r.lastPrint = now; }
-    const target = PARTS.slice(0, r.printed).reduce((s, [key, w]) => s + (r.ok.has(key) ? w : 0), 0) / TOTAL;
+    if (k && done(r, k[0]) && (now - r.lastPrint) / 1000 >= TEMPO * r.q) { r.printed++; r.lastPrint = now; }
+    const target = PARTS.slice(0, r.printed).reduce((s, [key, w]) => s + (done(r, key) ? w : 0), 0) / TOTAL;
     r.shown = reduce ? target : r.shown + (target - r.shown) * (1 - Math.exp(-dt / 0.12));
     if (Math.abs(target - r.shown) < 0.002) r.shown = target;
     const kb = loadedKB();
@@ -347,7 +407,7 @@
     tail.textContent = 'Starting iqbalsurya.com';
     say.textContent = t('ready');
     meter.setAttribute('aria-valuenow', 100);
-    try { sessionStorage.removeItem(TRIES); } catch (e) { /* storage unavailable */ }
+    try { sessionStorage.removeItem(TRIES); sessionStorage.removeItem(MISSES); } catch (e) { /* storage unavailable */ }
     setTimeout(() => {
       if (run !== r) return;
       crt.classList.add('blue');

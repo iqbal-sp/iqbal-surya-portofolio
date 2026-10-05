@@ -71,41 +71,64 @@ async function site(request, env, url) {
   return env.ASSETS.fetch(new Request(url.origin + DESK + p + url.search, request));
 }
 
+// The site has one address. A request over plain HTTP, or to www, moves to https://iqbalsurya.com with the same path
+// and query (308 for anything but a read, so a POST keeps its body); the workers.dev address and a local wrangler dev
+// answer as they are. Every answer on the address carries HSTS: for a year the browser goes straight to HTTPS, so a
+// network in between can't read or change the page or a message sent from it. Only this host, not its subdomains
+// (mail, Resend's send.), which never serve the site
+const HOST = 'iqbalsurya.com';
+const HSTS = 'max-age=31536000';
+function moved(request, url) {
+  if (url.hostname !== HOST && url.hostname !== 'www.' + HOST) return null;
+  if (url.protocol === 'https:' && url.hostname === HOST) return null;
+  return Response.redirect(`https://${HOST}${url.pathname}${url.search}`, request.method === 'GET' || request.method === 'HEAD' ? 301 : 308);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (!url.pathname.startsWith('/api/')) return site(request, env, url);
-    if (url.pathname === '/api/message' || url.pathname === '/api/event') {
-      if (request.method !== 'POST') return json({ error: 'method' }, 405, { allow: 'POST' });
-      try { return url.pathname === '/api/message' ? await message(env, request, url) : await count(env.DB, request, url); } catch (e) {
-        console.error(url.pathname, (e && e.stack) || e);
-        return json({ error: 'server' }, 500);
-      }
-    }
-    if (url.pathname === '/api/message/act') {
-      try { return await act(env, request, url); } catch (e) {
-        console.error(url.pathname, (e && e.stack) || e);
-        return ownerPage('Ada yang gagal', 'Coba buka tautannya lagi beberapa menit lagi.', 500);
-      }
-    }
-    if (url.pathname !== '/api/scores') return json({ error: 'not_found' }, 404);
-    const game = gameOf(url.searchParams);
-    if (!game) return json({ error: 'bad' }, 400);
-    try {
-      if (request.method === 'GET') return json(await board(env.DB, game, url.searchParams));
-      if (request.method === 'POST') return await submit(env.DB, game, request, url);
-      return json({ error: 'method' }, 405, { allow: 'GET, POST' });
-    } catch (e) {
-      // D1 down or over its daily quota: the game carries on without the board
-      console.error('scores', (e && e.stack) || e);
-      return json({ error: 'server' }, 500);
-    }
+    const away = moved(request, url);
+    if (away) return away;
+    const res = await answer(request, env, url);
+    if (url.hostname !== HOST) return res;
+    const out = new Response(res.body, res);
+    out.headers.set('strict-transport-security', HSTS);
+    return out;
   },
   // every morning (the cron in wrangler.jsonc): the messages held since the last one, in one email to the owner
   async scheduled(controller, env, ctx) {
     ctx.waitUntil(digest(env).catch((e) => console.error('digest', (e && e.stack) || e)));
   },
 };
+
+async function answer(request, env, url) {
+  if (!url.pathname.startsWith('/api/')) return site(request, env, url);
+  if (url.pathname === '/api/message' || url.pathname === '/api/event') {
+    if (request.method !== 'POST') return json({ error: 'method' }, 405, { allow: 'POST' });
+    try { return url.pathname === '/api/message' ? await message(env, request, url) : await count(env.DB, request, url); } catch (e) {
+      console.error(url.pathname, (e && e.stack) || e);
+      return json({ error: 'server' }, 500);
+    }
+  }
+  if (url.pathname === '/api/message/act') {
+    try { return await act(env, request, url); } catch (e) {
+      console.error(url.pathname, (e && e.stack) || e);
+      return ownerPage('Ada yang gagal', 'Coba buka tautannya lagi beberapa menit lagi.', 500);
+    }
+  }
+  if (url.pathname !== '/api/scores') return json({ error: 'not_found' }, 404);
+  const game = gameOf(url.searchParams);
+  if (!game) return json({ error: 'bad' }, 400);
+  try {
+    if (request.method === 'GET') return json(await board(env.DB, game, url.searchParams));
+    if (request.method === 'POST') return await submit(env.DB, game, request, url);
+    return json({ error: 'method' }, 405, { allow: 'GET, POST' });
+  } catch (e) {
+    // D1 down or over its daily quota: the game carries on without the board
+    console.error('scores', (e && e.stack) || e);
+    return json({ error: 'server' }, 500);
+  }
+}
 
 function json(body, status = 200, headers = {}) {
   return new Response(JSON.stringify(body), {
@@ -292,7 +315,7 @@ async function message(env, request, url) {
   m.id = await env.DB.prepare(`INSERT INTO messages (at, sender, subject, body, lang, held, net, token)
     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) RETURNING id`).bind(now, from, subject, text, m.lang, m.held, net, m.token).first('id');
   if (m.held) return json({ sent: true });
-  if (!(await deliver(env, m, url.origin))) return json({ error: 'mail' }, 502);
+  if (!(await deliver(env, m))) return json({ error: 'mail' }, 502);
   await env.DB.prepare('UPDATE messages SET mailed = 1 WHERE id = ?').bind(m.id).run();
   return json({ sent: true });
 }
@@ -396,13 +419,14 @@ async function resend(env, mail) {
   if (!res.ok) console.error('resend', res.status, await res.text());
   return res.ok;
 }
-// a message as it reaches the inbox: Reply answers the sender, and the foot carries the link that blocks their network
-function deliver(env, m, origin) {
+// a message as it reaches the inbox: Reply answers the sender, and the foot carries the link that blocks their network.
+// The link is on the site's own HTTPS address, as in the digest, whatever address the message came through
+function deliver(env, m) {
   const foot = [
     `Dari: ${m.sender}`,
     `Dikirim dari jendela New Message di iqbalsurya.com (${m.lang === 'id' ? 'Bahasa Indonesia' : 'English'}).`,
     m.held ? `Pesan ini sempat ditahan: ${REASON[m.held]}.` : '',
-    m.net ? `Blokir pengirim ini (${HOLD.block / DAY} hari): ${actLink(origin, m, 'block')}` : '',
+    m.net ? `Blokir pengirim ini (${HOLD.block / DAY} hari): ${actLink(SITE, m, 'block')}` : '',
   ];
   return resend(env, { reply_to: m.sender, subject: `[iqbalsurya.com] ${m.subject}`, text: `${m.body}\n\n---\n${foot.filter(Boolean).join('\n')}` });
 }
@@ -426,7 +450,7 @@ async function act(env, request, url) {
     // claimed before it is sent, so a second press can't send it twice
     const claim = await env.DB.prepare('UPDATE messages SET mailed = 1 WHERE id = ? AND mailed = 0').bind(m.id).run();
     if (!claim.meta.changes) return inbox();
-    const sent = await deliver(env, m, url.origin).catch((e) => { console.error('resend', (e && e.stack) || e); return false; });
+    const sent = await deliver(env, m).catch((e) => { console.error('resend', (e && e.stack) || e); return false; });
     if (!sent) {
       await env.DB.prepare('UPDATE messages SET mailed = 0 WHERE id = ?').bind(m.id).run();
       return ownerPage('Belum terkirim', 'Resend menolak pesannya. Coba lagi beberapa menit lagi.', 502, quote(m) + button('Coba lagi'));
@@ -526,6 +550,8 @@ const EVENTS = {
   // showed, and how far a Screen Saver XP run got
   door: /^(ss:(display|idle|gate|link|menu)|br:(bin|balloon|konami|pet|link|menu))$/, hint: /^(bin|idle|offer)$/,
   run: /^ss:(start|boss[2-4]|final|win|practice|practice-done)$/,
+  // the loading screen (boot.js): a part that failed to load, and one it went on without, once a session each
+  boot: /^(fail|skip):(fonts|content|cases|icons|app|wall|home|wall3d)$/,
 };
 const EVENT_RATE = { limit: 120, window: 600 };
 async function count(db, request, url) {

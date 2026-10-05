@@ -710,11 +710,17 @@
     const W = PF.home.work, no = (k) => String(k).padStart(2, '0');
     const p = PF.projects.find((x) => x.title === f.title);
     const title = p ? `<a class="ft-link" href="#/work/${esc(p.slug)}" data-act="home-case" data-slug="${esc(p.slug)}">${esc(f.title)}</a>` : esc(f.title);
+    // the cover's frame is 441px wide on a wide desktop, about 590 or 660 where the rows narrow or stack, and the
+    // window less its margins on a phone: a 1x screen takes the 640px copy, a 2x or 3x one the 1280px.
+    // While the loading screen is up, the covers and their UI cards wait in data-src (freeHeld() lets them go): the
+    // rows sit far down Home, and the browser would otherwise fetch them beside the pictures the screen waits for
+    const at = document.documentElement.classList.contains('booting') ? 'data-' : '';
+    const set = f.img.small ? ` ${at}srcset="${esc(f.img.small)} 640w, ${esc(f.img.src)} 1280w" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 860px) 660px, (max-width: 1300px) 590px, 441px"` : '';
     const pic = f.img.src
-      ? `<img src="${esc(f.img.src)}" alt="" loading="lazy" decoding="async"${W.dither ? ' data-dither' : ''}${f.img.pos ? ` style="object-position:${f.img.pos}"` : ''}>`
+      ? `<img ${at}src="${esc(f.img.src)}"${set} alt="" loading="lazy" decoding="async"${W.dither ? ' data-dither' : ''}${f.img.pos ? ` style="object-position:${f.img.pos}"` : ''}>`
       : slotHTML(f.img, 'ft-ph');
     const ui = f.ui.src
-      ? `<img class="ft-ui-pic" src="${esc(f.ui.src)}" srcset="${esc(f.ui.src)} 920w, ${esc(f.ui.big)} 1380w" sizes="460px" alt="" loading="lazy" decoding="async">`
+      ? `<img class="ft-ui-pic" ${at}src="${esc(f.ui.src)}" ${at}srcset="${esc(f.ui.src)} 920w, ${esc(f.ui.big)} 1380w" sizes="(max-width: 720px) calc(87.5vw - 120px), 460px" alt="" loading="lazy" decoding="async">`
       : slotHTML(f.ui, 'ft-ui-pic', 'png');
     return `<li class="ft-show">
       <div class="ft-cover" aria-hidden="true">${pic}<span class="ft-ui">${ui}</span></div>
@@ -725,6 +731,18 @@
         <ul class="ft-tags">${f.tags.map((x) => `<li>${esc(t(x))}</li>`).join('')}</ul>
       </div>
     </li>`;
+  }
+  // the pictures Home held while the loading screen was up (featureHTML): with inView only those inside the window's
+  // visible part, which the screen then waits for; without it, all of them
+  function freeHeld(el, inView) {
+    const view = inView ? ($('.win-body', el) || el).getBoundingClientRect() : null;
+    $$('img[data-src]', el).forEach((img) => {
+      const r = view && img.getBoundingClientRect();
+      if (r && !(r.bottom > view.top && r.top < view.bottom)) return;
+      if (img.dataset.srcset) img.srcset = img.dataset.srcset;
+      img.src = img.dataset.src;
+      img.removeAttribute('data-src'); img.removeAttribute('data-srcset');
+    });
   }
   // the covers carry the Figma cover's Dither effect: an ordered 16×16 Bayer pattern at eight levels a
   // channel, in colour. It is worked at the screen's own pixels on a canvas laid over the picture, again
@@ -929,12 +947,14 @@
 
   function servicePaneHTML(i) {
     const s = PF.home.services.list[i];
-    // the pointed-at service shows its picture alone, at the owner's own shape (800 and 1600px WebP copies); a
+    // the pointed-at service shows its picture alone, at the owner's own shape (800, 1100 and 1600px WebP copies); a
     // picture not supplied yet is a grey slot naming the owner's file. Its line stays in the data, not on the page.
-    // Lazy: the menu sits far down Home, so its picture waits until the visitor gets near it
+    // Lazy: the menu sits far down Home, so its picture waits until the visitor gets near it. The frame is about 430px
+    // beside the menu, about 740 where it stacks under it, and the window less its margins on a phone, so a 2x laptop
+    // and a 3x phone both take the 1100px copy
     const v = `?v=${PF.home.services.picVersion || 1}`;
     const pic = s.img.src
-      ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${esc(s.img.src)}-800.webp${v} 800w, ${esc(s.img.src)}-1600.webp${v} 1600w" sizes="(min-width: 1100px) 44vw, (min-width: 760px) 42vw, 92vw" width="800" height="868" alt="" loading="lazy" decoding="async">`
+      ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${[800, 1100, 1600].map((x) => `${esc(s.img.src)}-${x}.webp${v} ${x}w`).join(', ')}" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 990px) 740px, 430px" width="800" height="868" alt="" loading="lazy" decoding="async">`
       : slotHTML(s.img, 'mm-img', 'png', t(s.name));
     return `<figure class="mm-fig">${pic}</figure>`;
   }
@@ -975,7 +995,7 @@
         </div>
         <div class="lt-body">
           ${H.letter.map((p) => `<p>${esc(t(p))}</p>`).join('')}
-          <p class="lt-sign"><span class="lt-ava"><img src="${esc(o.photo)}" alt="${esc(u('photoAlt'))}" width="564" height="564" loading="lazy"></span><span><b>${esc(o.fullName)}</b><small>${esc(t(o.role))}, ${esc(t(o.location))}</small></span></p>
+          <p class="lt-sign"><span class="lt-ava"><img src="${esc(o.photo)}" srcset="${esc(o.photoSet)}" sizes="64px" alt="${esc(u('photoAlt'))}" width="564" height="564" loading="lazy"></span><span><b>${esc(o.fullName)}</b><small>${esc(t(o.role))}, ${esc(t(o.location))}</small></span></p>
         </div>
       </section>
 
@@ -1283,7 +1303,7 @@
     return `<div class="win-body sunk" data-keep="about"><article class="doc">
       <header class="sp-hero">
         <div class="sp-id">
-          <figure class="ad-photo"><img src="${esc(o.photo)}" alt="${esc(u('photoAlt'))}" width="564" height="564"></figure>
+          <figure class="ad-photo"><img src="${esc(o.photo)}" srcset="${esc(o.photoSet)}" sizes="(max-width: 720px) 80px, 120px" alt="${esc(u('photoAlt'))}" width="564" height="564"></figure>
           <div class="sp-name">
             <h2>${esc(o.fullName)}</h2>
             <p class="ad-role">${esc(t(o.role))}</p>
@@ -2382,7 +2402,14 @@
       return;
     }
     const sub = e.target.closest('[data-sub]');
-    if (sub) { const li = sub.closest('li'); li.classList.toggle('open'); return; }
+    if (sub) {
+      const li = sub.closest('li');
+      // pointing at a submenu has already opened it, and a tap is a pointing and a click at once, so a click from a
+      // mouse or a finger opens it and leaves it open; Enter and Space (a click with no pointer) still open and close it
+      if (e.detail) { $$('.has-sub.open', startMenu).forEach((x) => { if (x !== li) x.classList.remove('open'); }); li.classList.add('open'); }
+      else li.classList.toggle('open');
+      return;
+    }
     const menu = e.target.closest('[data-menu]');
     if (menu) {
       const w = winOf(menu);
@@ -2585,10 +2612,13 @@
   function openDefault() {
     const r = parseHash();
     const home = homeAtStartup() || (r && r.id === 'home') ? openWin('home', { push: false }) : null;
+    // a cover Home held for the loading screen and already in the window's view is fetched now, so the screen waits
+    // for it; the rest follow once the screen has gone
+    if (home) freeHeld(home.el, true);
     bootScreen.home(home && home.el);
     if (r && r.id !== 'home') applyRoute(r);
     // the desktop sat out of reach under the welcome screen: the front window takes the focus once it has gone
-    afterBoot(() => { const w = topVisible(); if (w) focusWin(w, true); });
+    afterBoot(() => { freeHeld(layer); const w = topVisible(); if (w) focusWin(w, true); });
   }
   // the bare address is Home
   window.addEventListener('popstate', () => applyRoute(parseHash() || { id: 'home' }));
