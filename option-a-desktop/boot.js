@@ -135,9 +135,8 @@
   }
 
   /* ---------- a part that can't arrive ---------- */
-  // what the server says about files the browser did not load: 'gone' when it answers one with an error (a reload
-  // can't bring it back), 'refused' when it sends them all (the browser, or something in it, turned them down), and
-  // 'unknown' when it can't be asked (offline, a network that drops the request, nothing to ask about)
+  // what the server says about files the browser did not load: 'gone' (it answers an error, a reload can't help),
+  // 'refused' (it sends them, the browser turned them down) or 'unknown' (it can't be asked)
   function ask(urls) {
     if (!urls.length) return Promise.resolve('unknown');
     const answers = Promise.all(urls.map((u) => fetch(u, { method: 'HEAD', cache: 'no-store' })

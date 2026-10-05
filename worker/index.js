@@ -71,11 +71,8 @@ async function site(request, env, url) {
   return env.ASSETS.fetch(new Request(url.origin + DESK + p + url.search, request));
 }
 
-// The site has one address. A request over plain HTTP, or to www, moves to https://iqbalsurya.com with the same path
-// and query (308 for anything but a read, so a POST keeps its body); the workers.dev address and a local wrangler dev
-// answer as they are. Every answer on the address carries HSTS: for a year the browser goes straight to HTTPS, so a
-// network in between can't read or change the page or a message sent from it. Only this host, not its subdomains
-// (mail, Resend's send.), which never serve the site
+// http:// and www move to https://iqbalsurya.com with the same path (308 keeps a POST's body), workers.dev stays.
+// The Worker's answers carry HSTS for a year, this host only: mail and Resend use subdomains that never serve the site
 const HOST = 'iqbalsurya.com';
 const HSTS = 'max-age=31536000';
 function moved(request, url) {

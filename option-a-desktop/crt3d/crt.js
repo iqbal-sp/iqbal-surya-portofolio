@@ -22,8 +22,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 const HERE = new URL('.', import.meta.url);
-// the Draco decoder beside the site's own three.js (index.html's import map), from the page's address: the desktop
-// is served at / and from option-a-desktop/, and asset/ is one level up from both
+// the Draco decoder beside the site's own three.js, found from the page's address: ../asset/ is /asset/ both at /
+// and under option-a-desktop/
 const DRACO = new URL('../asset/vendor/three-0.186.0/examples/jsm/libs/draco/gltf/', document.baseURI).href;
 
 export const CFG = {

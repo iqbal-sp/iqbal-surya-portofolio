@@ -710,10 +710,8 @@
     const W = PF.home.work, no = (k) => String(k).padStart(2, '0');
     const p = PF.projects.find((x) => x.title === f.title);
     const title = p ? `<a class="ft-link" href="#/work/${esc(p.slug)}" data-act="home-case" data-slug="${esc(p.slug)}">${esc(f.title)}</a>` : esc(f.title);
-    // the cover's frame is 441px wide on a wide desktop, about 590 or 660 where the rows narrow or stack, and the
-    // window less its margins on a phone: a 1x screen takes the 640px copy, a 2x or 3x one the 1280px.
-    // While the loading screen is up, the covers and their UI cards wait in data-src (freeHeld() lets them go): the
-    // rows sit far down Home, and the browser would otherwise fetch them beside the pictures the screen waits for
+    // a 1x screen takes the 640px cover, a 2x or 3x one the 1280px (frame: 441px on a wide desktop, up to 660 stacked)
+    // covers and UI cards wait in data-src while the loading screen is up, so they don't slow it (freeHeld())
     const at = document.documentElement.classList.contains('booting') ? 'data-' : '';
     const set = f.img.small ? ` ${at}srcset="${esc(f.img.small)} 640w, ${esc(f.img.src)} 1280w" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 860px) 660px, (max-width: 1300px) 590px, 441px"` : '';
     const pic = f.img.src
@@ -949,9 +947,8 @@
     const s = PF.home.services.list[i];
     // the pointed-at service shows its picture alone, at the owner's own shape (800, 1100 and 1600px WebP copies); a
     // picture not supplied yet is a grey slot naming the owner's file. Its line stays in the data, not on the page.
-    // Lazy: the menu sits far down Home, so its picture waits until the visitor gets near it. The frame is about 430px
-    // beside the menu, about 740 where it stacks under it, and the window less its margins on a phone, so a 2x laptop
-    // and a 3x phone both take the 1100px copy
+    // Lazy: the menu sits far down Home, so its picture waits until the visitor gets near it.
+    // sizes follows the frame, so a 2x laptop or a 3x phone takes the 1100px copy
     const v = `?v=${PF.home.services.picVersion || 1}`;
     const pic = s.img.src
       ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${[800, 1100, 1600].map((x) => `${esc(s.img.src)}-${x}.webp${v} ${x}w`).join(', ')}" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 990px) 740px, 430px" width="800" height="868" alt="" loading="lazy" decoding="async">`

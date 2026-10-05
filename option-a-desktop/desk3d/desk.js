@@ -424,9 +424,8 @@ export function createDesk(host, opts = {}) {
       dead = true;
       stop(); io.disconnect(); ro.disconnect(); unhook();
       document.removeEventListener('visibilitychange', onVis);
-      // renderer.dispose() alone leaves the context alive: three.js keeps one DFG texture for every renderer on the
-      // page (getDFGLUT), and it holds each renderer that drew with it. So the scene's GPU copies go first, then the
-      // context itself, without telling episode.js the desk was lost
+      // dispose() alone keeps the context: three.js's shared DFG texture (getDFGLUT) holds every renderer that used it,
+      // so the GPU copies go, then the context, without telling episode.js the desk was lost
       canvas.removeEventListener('webglcontextlost', onLost);
       for (const t of textures(scene)) t.dispose();
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); for (const m of [].concat(o.material || [])) m.dispose(); });
