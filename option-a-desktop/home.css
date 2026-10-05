@@ -1039,6 +1039,11 @@
 .home .field { padding: 0 12px; }
 .home select.field { padding-right: 37px; background-position: right 8px center; }
 
+/* the services menu's arrow at the owner's Figma size (2026-10-02): 24px at every width, the library's own grid, so
+   it draws one pixel to a pixel; from 760px to 819px the rows pad 16px inside their 1px line, as that frame draws them */
+.mm-item .px { width: 24px; height: 24px; }
+@container home (min-width: 760px) and (max-width: 819px) { .mm-item { padding: 16px; } }
+
 /* ---------------------------------------------------------------- MOTION (owner's request, 2026-10-02)
    Small and quick, in the Luna ease, and none of it under reduced motion (app.js adds the classes only then) */
 /* the remote's keys travel down and back (80ms), and a key worked from the keyboard goes down the same way */

@@ -1017,7 +1017,7 @@
       <section class="pt-services" aria-labelledby="hm-svc-h">
         <h2 class="ft-mark" id="hm-svc-h">${esc(t(H.services.head))}</h2>
         <div class="mm-body">
-          <ul class="mm-list">${H.services.list.map((x, i) => `<li><button class="mm-item" data-act="home-svc" data-i="${i}" aria-pressed="${i === st.svc}" aria-controls="mm-pane"><span class="mm-no" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span class="mm-t">${esc(t(x.name))}</span>${I('right', 16, { mono: true })}</button></li>`).join('')}</ul>
+          <ul class="mm-list">${H.services.list.map((x, i) => `<li><button class="mm-item" data-act="home-svc" data-i="${i}" aria-pressed="${i === st.svc}" aria-controls="mm-pane"><span class="mm-no" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span class="mm-t">${esc(t(x.name))}</span>${I('right', 24, { mono: true })}</button></li>`).join('')}</ul>
           <div class="mm-pane" id="mm-pane" aria-live="polite">${servicePaneHTML(st.svc)}</div>
         </div>
       </section>
