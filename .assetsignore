@@ -15,6 +15,8 @@ wrangler.jsonc
 resume
 # the owner's full-size About photos (up to 43 MB, over Cloudflare's 25 MiB per-file limit); the site uses their WebP copies
 asset/about/*.png
+# the owner's full-size covers of the personal projects; the About window uses their WebP copies
+asset/about/personal work/*.png
 package.json
 package-lock.json
 *.md

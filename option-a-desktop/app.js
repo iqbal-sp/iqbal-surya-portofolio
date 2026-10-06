@@ -1421,10 +1421,10 @@
     const log = o.worklog.map((j) => `
       <li class="${j.to ? '' : 'now'}"><span class="wl-date">${esc(j.from)} – ${j.to ? esc(j.to) : `<b>${esc(u('present'))}</b>`}</span>
         <div class="wl-main"><h3>${esc(j.role)}</h3><p>${esc(j.org)}${j.type ? ` · ${esc(u(j.type))}` : ''}</p>${j.place ? `<p class="wl-place">${esc(j.place)}</p>` : ''}</div></li>`).join('');
-    const projects = o.sideProjects.map((p, i) => `
+    const projects = o.sideProjects.map((p) => `
       <li><a class="pj-card" href="${esc(t(p.url))}"${p.external === false ? '' : ' target="_blank" rel="noopener noreferrer"'} aria-label="${esc(p.name)} — ${esc(t(p.desc))}${p.external === false ? '' : ` (${esc(u('newTab'))})`}">
         <span class="pj-image"><img src="${esc(p.image)}" alt="${esc(t(p.imageAlt))}" loading="lazy" decoding="async"></span>
-        <div class="pj-info"><span class="pj-meta">${String(i + 1).padStart(2, '0')} / ${esc(t(p.kind))}</span><h3 class="pj-name">${esc(p.name)}</h3><span class="pj-desc">${esc(t(p.desc))}</span><span class="pj-visit">${esc(p.cta ? t(p.cta) : u('visitProject'))} ${p.external === false ? '→' : '↗'}</span></div>
+        <div class="pj-info"><h3 class="pj-name">${esc(p.name)}</h3><span class="pj-desc">${esc(t(p.desc))}</span><span class="pj-visit">${esc(p.cta ? t(p.cta) : u('visitProject'))} ${p.external === false ? '→' : '↗'}</span></div>
       </a></li>`).join('');
     // each photo is a My Pictures thumbnail: its name tag rests on the lower right and opens into an infotip
     const hobbies = o.hobbies.map((h, i) => `<li class="hb"><button type="button" class="hb-pic" data-act="hobby" aria-expanded="false" aria-controls="hb-tip-${i}"><img class="hb-img" src="${esc(h.photo)}-360.webp" srcset="${[360, 480, 720].map((x) => `${esc(h.photo)}-${x}.webp ${x}w`).join(', ')}" sizes="auto, (max-width: 720px) calc(50vw - 60px), 140px" width="360" height="640" alt="" loading="lazy" decoding="async"><span class="hb-tag">${esc(t(h.label))}</span></button>

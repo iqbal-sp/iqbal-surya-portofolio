@@ -556,22 +556,26 @@ img { max-width: 100%; }
 .floppy-art .fl-t1 { font: 700 10.5px var(--display); letter-spacing: -0.02em; }
 .floppy-art .fl-t2 { font: 400 10.5px var(--display); }
 .floppy-art .fl-hd { font: 700 6px var(--display); letter-spacing: .02em; fill: #fff; }
-.pj { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
-@container doc (min-width: 700px) { .pj { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.pj li { min-width: 0; }
-.pj-card { position: relative; display: block; min-height: 280px; height: 100%; overflow: hidden; border: 3px solid #fff; border-radius: 4px; color: #fff; background: #182034; box-shadow: 0 0 0 1px var(--paper-line), 0 5px 14px rgba(0, 20, 70, .22); text-decoration: none; }
-.pj-card:focus-visible { outline: 3px solid var(--sel); outline-offset: 3px; }
-.pj-image { position: absolute; inset: 0; display: block; }
+/* the personal projects are a list of rows, like Tonight's features on Home: the cover beside its heading, text and
+   link, rows split by a dashed rule. Nothing sits over a cover. Where the document is narrow the cover goes over its
+   text, and the link rests at the foot of the text so it lines up with the cover's bottom edge */
+.pj { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
+.pj li { min-width: 0; padding: 24px 0; }
+.pj li:first-child { padding-top: 0; }
+.pj li:last-child { padding-bottom: 0; }
+.pj li + li { background: repeating-linear-gradient(90deg, var(--paper-line) 0 4px, transparent 4px 8px) top / 100% 1px no-repeat; }
+.pj-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; color: var(--ink); text-decoration: none; }
+.pj-card:focus-visible { outline: 3px solid var(--sel); outline-offset: 6px; }
+.pj-image { display: block; align-self: start; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid var(--paper-line); border-radius: 4px; background: #182034; box-shadow: 0 5px 14px rgba(0, 20, 70, .12); }
 .pj-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
 .pj-card:hover .pj-image img, .pj-card:focus-visible .pj-image img { transform: scale(1.04); }
-.pj-info { position: absolute; inset: auto 0 0; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; padding: 48px 18px 18px; background: linear-gradient(transparent, rgba(5, 14, 35, .94) 48%); }
-.pj-meta { font: 700 11px/1.3 var(--ui); letter-spacing: .04em; text-transform: uppercase; color: #b6d2ff; }
+.pj-info { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .pj-name { margin: 0; font: 700 22px/1.15 var(--display); }
-.pj-desc { display: block; max-height: 0; overflow: hidden; opacity: 0; font: 13px/1.45 var(--ui); transition: max-height .25s ease, opacity .25s ease; }
-.pj-visit { display: block; font: 700 12px/1.3 var(--ui); text-decoration: underline; text-underline-offset: 3px; }
-.pj-card:hover .pj-desc, .pj-card:focus-visible .pj-desc { max-height: 11em; opacity: 1; }
-@media (hover: none) { .pj-desc { max-height: none; opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .pj-image img, .pj-desc { transition: none; } }
+.pj-card:hover .pj-name, .pj-card:focus-visible .pj-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.pj-desc { display: block; font: 14px/1.5 var(--ui); color: var(--ink-2); }
+.pj-visit { display: block; margin-top: auto; padding-top: 4px; font: 700 13px/1.3 var(--ui); color: var(--link); text-decoration: underline; text-underline-offset: 3px; }
+@container doc (min-width: 560px) { .pj-card { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: 24px; align-items: stretch; } }
+@media (prefers-reduced-motion: reduce) { .pj-image img { transition: none; } }
 .cpl { container: cpl / inline-size; padding: 0 3px 3px; border-radius: 8px 8px 0 0; background: var(--face); box-shadow: var(--frame); font: 12px var(--ui); }
 .cpl-t { display: flex; align-items: center; gap: 5px; height: 26px; margin: 0 -3px; padding: 0 8px; border-radius: 7px 7px 0 0; color: #fff; font-weight: 700; font-size: 12px; text-shadow: 1px 1px var(--cap-shadow); background: var(--cap); }
 .cpl-t .px { width: 16px; height: 16px; }

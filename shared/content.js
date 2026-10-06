@@ -78,8 +78,8 @@
           en: 'A growing collection of free Figma components, exploring spacing, hierarchy, and the details of everyday UI. Created with Syamil.',
           id: 'Kumpulan komponen Figma gratis untuk mengeksplorasi jarak, hierarki, dan detail antarmuka sehari-hari. Dibuat bersama Syamil.',
         },
-        image: '../asset/about/projects/bestframe-music-player.avif',
-        imageAlt: { en: 'Music player component from BestFrame', id: 'Komponen pemutar musik dari BestFrame' },
+        image: '../asset/about/projects/bestframe.webp',
+        imageAlt: { en: 'The BestFrame logo above a phone wallet component with a bank card', id: 'Logo BestFrame di atas komponen dompet di layar ponsel dengan kartu bank' },
         url: 'https://bestfra.me/',
       },
       {
@@ -88,8 +88,8 @@
           en: 'A personal finance app for setting a budget and keeping income, expenses, and balance in view.',
           id: 'Aplikasi keuangan pribadi untuk mengatur anggaran serta melihat pemasukan, pengeluaran, dan saldo dalam satu tempat.',
         },
-        image: '../asset/about/projects/omi-money.svg',
-        imageAlt: { en: 'Illustration of the OMI Money budget dashboard', id: 'Ilustrasi dashboard anggaran OMI Money' },
+        image: '../asset/about/projects/omi-money.webp',
+        imageAlt: { en: 'OMI Money screens: a projected end-of-month balance chart, a list of expenses and an Add transaction form', id: 'Layar OMI Money: grafik proyeksi saldo akhir bulan, daftar pengeluaran, dan formulir tambah transaksi' },
         url: 'https://omi-money.vercel.app/',
       },
       {
@@ -98,8 +98,8 @@
           en: 'A desktop CAD project for shaping functional parts. The app is still in development and the repository is not public. Want to see it? Request access by email.',
           id: 'Proyek CAD desktop untuk membentuk komponen fungsional. Aplikasinya masih dikembangkan dan repositorinya belum publik. Ingin melihatnya? Minta akses lewat email.',
         },
-        image: '../asset/about/projects/tempa-3d.svg',
-        imageAlt: { en: 'Illustration of a 3D modeling workspace', id: 'Ilustrasi ruang kerja pemodelan 3D' },
+        image: '../asset/about/projects/tempa-3d.webp',
+        imageAlt: { en: 'The Tempa logo: a blue hexagonal cube beside the word Tempa on a dark grid', id: 'Logo Tempa: kubus segi enam biru di samping tulisan Tempa pada latar gelap berpetak' },
         url: {
           en: 'mailto:hello@iqbalsurya.com?subject=Tempa%203D%20access%20request',
           id: 'mailto:hello@iqbalsurya.com?subject=Permintaan%20akses%20Tempa%203D',

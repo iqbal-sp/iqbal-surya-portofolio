@@ -24,6 +24,8 @@ asset/Home/close-photo.jpg
 asset/Home/newsprint.jpg
 asset/Home/cover - *.jpg
 asset/Home/UI/ui-*.png
+# the owner's full-size covers of the personal projects (web copies in asset/about/projects/)
+asset/about/personal work/*.png
 # the owner's exports for the case study pages, checked on a local preview before their web copies are made
 asset/Work/*/*.png
 asset/Work/*/*.jpg
