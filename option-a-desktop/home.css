@@ -1056,6 +1056,12 @@
    don't sit on the field's edge; the select's arrow sits 8px in, with 12px between it and the subject */
 .home .field { padding: 0 12px; }
 .home select.field { padding-right: 37px; background-position: right 8px center; }
+/* the message window pads its content 16px from the frame (owner, 2026-10-06): the fields, the text well and the send
+   row stand 16px in, and the text well pads its text 12px over and under, 16px aside. This follows the rule above,
+   which would otherwise strip the well's top and bottom padding (.home .field outranks nothing but comes later) */
+.mail-head { padding: 16px 16px 8px; }
+.home .mail-body { width: calc(100% - 32px); margin: 0 16px; padding: 12px 16px; }
+.mail-send { padding: 16px; }
 
 /* the services menu's arrow at the owner's Figma size (2026-10-02): 24px at every width, the library's own grid, so
    it draws one pixel to a pixel; from 760px to 819px the rows pad 16px inside their 1px line, as that frame draws them */

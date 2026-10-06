@@ -57,12 +57,14 @@
       { key: 'upwork', label: 'Upwork', url: 'https://www.upwork.com/freelancers/~018ed569cba0f751f6', handle: { en: 'Freelancer profile', id: 'Profil freelancer' } },
     ],
 
-    // Work log in the order and with the titles of the owner's LinkedIn profile (export of 2026-09-25).
-    // Type: 'ft' full-time, 'fl' freelance, as the owner confirmed on 2026-09-25 (LinkedIn's export has none).
+    // Work log in the order and with the titles of the owner's LinkedIn profile (export of 2026-10-06).
+    // Type: 'ft' full-time, 'fl' freelance, as the owner confirmed on 2026-09-25 (LinkedIn's export has none);
+    // a row without a type (BCA) prints without one until the owner says which it was.
     // Places LinkedIn leaves out are kept from the owner's earlier list.
     worklog: [
-      { from: '2024/10', to: null, role: 'UI Designer', org: 'Natuno', type: 'ft', place: 'Jakarta, Indonesia' },
-      { from: '2021/08', to: null, role: 'UI Designer', org: 'Upwork', type: 'fl', place: '' },
+      { from: '2024/10', to: '2026/10', role: 'UI Designer', org: 'Natuno', type: 'ft', place: 'Jakarta, Indonesia' },
+      { from: '2021/08', to: '2026/10', role: 'UI Designer', org: 'Upwork', type: 'fl', place: '' },
+      { from: '2025/10', to: '2026/09', role: 'Product Designer', org: 'PT Bank Central Asia Tbk (BCA)', place: 'Central Jakarta, Indonesia' },
       { from: '2022/08', to: '2023/07', role: 'User Interface Designer', org: 'TeamUp Agency', type: 'ft', place: 'Yogyakarta, Special Region of Yogyakarta' },
       { from: '2022/05', to: '2022/08', role: 'User Interface Designer', org: 'TeamUp Agency', type: 'fl', place: 'Yogyakarta, Special Region of Yogyakarta' },
       { from: '2022/08', to: '2023/04', role: 'UI/UX Designer for Scientific Research', org: 'Omic', type: 'fl', place: 'Seattle, Washington, United States' },
@@ -291,13 +293,13 @@
       ],
     },
     // the owner's five services (2026-09-25). Each shows the owner's picture when pointed at (asset/Home/service/,
-    // 4444 x 4823, shown at that shape from 800 and 1600px WebP copies in service/webp/); a service without its
+    // 3051 x 3311, shown at that shape from 800, 1100 and 1600px WebP copies in service/webp/); a service without its
     // picture yet would show a grey slot naming the file. The lines for Brand, Website strategy and Digital product
     // are drafts for the owner to confirm
     services: {
       head: { en: 'What I can help with', id: 'Yang bisa saya bantu' },
       // bump when the owner replaces the pictures, so browsers fetch the new copies
-      picVersion: 3,
+      picVersion: 5,
       list: [
         { name: { en: "Visual direction", id: "Arah visual" }, desc: { en: "Colours, typography, and interface styling that carry your brand into the website or app.", id: "Warna, tipografi, dan gaya antarmuka yang membawa identitas brand Anda ke website atau aplikasi." }, img: { file: 'brand strategy', src: '../asset/Home/service/webp/brand-strategy' } },
         { name: { en: "Website structure", id: "Struktur website" }, desc: { en: "Page layouts and wireframes that organise your content around what visitors need to know and do.", id: "Tata letak halaman dan wireframe yang menyusun konten sesuai informasi dan tindakan yang dibutuhkan pengunjung." }, img: { file: 'Web strategy', src: '../asset/Home/service/webp/website-strategy' } },

@@ -20,6 +20,7 @@
     // the work log's places, shortened for print; keys are the place strings in shared/content.js
     places: {
       'Jakarta, Indonesia': { en: 'Jakarta, Indonesia', id: 'Jakarta, Indonesia' },
+      'Central Jakarta, Indonesia': { en: 'Jakarta, Indonesia', id: 'Jakarta, Indonesia' },
       'Yogyakarta, Special Region of Yogyakarta': { en: 'Yogyakarta, Indonesia', id: 'Yogyakarta, Indonesia' },
       'Seattle, Washington, United States': { en: 'Seattle, United States', id: 'Seattle, Amerika Serikat' },
       'Heerenveen, Friesland': { en: 'Heerenveen, Netherlands', id: 'Heerenveen, Belanda' },
@@ -29,6 +30,9 @@
 
     // what a role involved, keyed "org from" as in the work log: the owner's LinkedIn descriptions, shortened
     duties: {
+      'Natuno 2024/10': [
+        { en: 'UI designer embedded in the design team of BCA, one of Indonesia’s leading banks, across digital products, brand design and visual experiences.', id: 'UI designer yang tergabung di tim desain BCA, salah satu bank terkemuka di Indonesia, untuk produk digital, desain brand, dan pengalaman visual.' },
+      ],
       'TeamUp Agency 2022/08': [
         { en: 'Designed to the brief in cross-functional teams and researched each design problem.', id: "Merancang sesuai brief di tim lintas fungsi dan meriset masalah desain tiap proyek." },
       ],
