@@ -1126,15 +1126,16 @@
   }
   // the picture showing stays until the picked one has decoded, then they crossfade (home.css, .mm-layer), so the
   // column never goes blank on a slow line
-  function homeService(w, i) {
+  // wait: the item lights at once, its picture follows only if the pointer is still on it (a sweep crossfades once)
+  function homeService(w, i, wait = 0) {
     if (!w || w.state.svc === i) return;
     w.state.svc = i;
     $$('.mm-item', w.el).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
     const layers = $$('.mm-layer', w.el), next = layers[i]; if (!next) return;
     const img = $('img', next), show = () => { if (w.state.svc === i) layers.forEach((l) => l.classList.toggle('on', l === next)); };
-    if (!img) { show(); return; }
-    img.loading = 'eager';
-    img.decode().then(show, show);
+    const go = () => { if (w.state.svc !== i) return; if (!img) { show(); return; } img.loading = 'eager'; img.decode().then(show, show); };
+    clearTimeout(w.svcT);
+    if (wait) w.svcT = setTimeout(go, wait); else go();
   }
 
   function faqHTML(st) {
@@ -1360,7 +1361,7 @@
       if (!home.classList.contains('scrolling')) return;
       home.classList.remove('scrolling');
       const mi = $('.mm-item[data-i]:hover', home);
-      if (mi && mi.getAttribute('aria-pressed') !== 'true') homeService(w, +mi.dataset.i);
+      if (mi) homeService(w, +mi.dataset.i);
     };
     let rest = 0;
     body.addEventListener('scroll', () => { home.classList.add('scrolling'); clearTimeout(rest); rest = setTimeout(wake, 300); }, { passive: true });
@@ -2877,7 +2878,7 @@
 
   // pointing at an item previews it: Explorer's hover-select, and Home's Media Center services menu. A cover is selected
   // after XP's hover time (400 ms at rest), so crossing covers on the way to the task pane doesn't retarget its links
-  let fileHover = null, fileHoverT = 0, svcHoverT = 0;
+  let fileHover = null, fileHoverT = 0;
   document.addEventListener('mouseover', (e) => {
     const f = e.target.closest('.files [data-slug]');
     if (f !== fileHover) {
@@ -2885,12 +2886,11 @@
       if (f) fileHoverT = setTimeout(() => { const w = winOf(f); if (w && f.isConnected && f.matches(':hover')) selectFile(w, f.dataset.slug); }, 400);
     }
     if (f) return;
-    // a service is picked after 100 ms of pointing, so a sweep across the list doesn't pick each one on the way, and
-    // never by the page scrolling under a resting pointer
+    // pointing at a service picks it, so hovering looks exactly like the pick; its picture waits for 100 ms of
+    // pointing, so a sweep across the list crossfades once, and the page scrolling under a resting pointer picks nothing
     const mi = e.target.closest('.mm-item[data-i]');
-    clearTimeout(svcHoverT);
     if (mi) {
-      if (!mi.closest('.home.scrolling')) svcHoverT = setTimeout(() => { if (mi.isConnected && mi.matches(':hover')) homeService(winOf(mi), +mi.dataset.i); }, 100);
+      if (!mi.closest('.home.scrolling')) homeService(winOf(mi), +mi.dataset.i, 100);
       return;
     }
     // the reviews row offers a grab hand only while it has more to show than the window holds

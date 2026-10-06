@@ -482,7 +482,7 @@
 .mm-item .px { flex: none; width: 16px; height: 16px; opacity: 0; --ic-line: var(--glow-ink); }
 /* Media Center's focus answers the pointer: a faint glow edge and the arrow drawn in outline under it. Pressed,
    the glow's light fills the item, but not its face: only the picked item wears the face */
-.home:not(.scrolling) .mm-item:hover { border-color: rgba(212, 247, 173, .35); background: rgba(255, 255, 255, .1); color: #fff; }
+.home:not(.scrolling) .mm-item:not([aria-pressed="true"]):hover { border-color: rgba(212, 247, 173, .35); background: rgba(255, 255, 255, .1); color: #fff; }
 .home:not(.scrolling) .mm-item:not([aria-pressed="true"]):hover .px { opacity: .6; --ic-line: var(--glow-edge); }
 .mm-item[aria-pressed="true"] { border-color: var(--glow-edge); background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 0 20px var(--glow-halo); }
 .mm-item:not([aria-pressed="true"]):active { border-color: var(--glow-edge); background: rgba(134, 209, 63, .24); color: #fff; }
