@@ -935,6 +935,13 @@ img { max-width: 100%; }
 /* the inbox's teammate card opens over its window, the way an XP dialog does (under it on a narrow screen) */
 .cs-pop { display: block; width: min(100%, 320px); margin: 16px 0 0 auto; }
 .cs-trio { display: grid; gap: var(--blk); }
+/* where the page stacks, the three windows stand at one width (the column's, up to 520px) so a small card is not
+   left beside two wide ones; their own max-width, set from each export's size, gives way. The exports are 2x, so the
+   smallest card still has pixels to spare */
+@container (max-width: 759px) {
+  .cs-trio { justify-items: center; }
+  .cs-trio .cs-win { width: min(100%, 520px); max-width: none !important; }
+}
 /* a row of screens side by side: a flow of phone screens, or a pair of dialogs; phones pair up on a narrow screen */
 .cs-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 24px; }
 .cs-row > .cs-pic { flex: 1 1 0; }

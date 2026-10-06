@@ -131,8 +131,8 @@
     Home: a client-first landing page told as a 2004 TV-guide ad: now showing, the week's
     listing, a note from the host, tonight's features (the work), channels (logos), reviews,
     the episode guide (process), services, FAQ, and a closing call to action.
-    Tonight's features carries the owner's five case studies (PF.home.work); the Portfolio window and
-    the Case Study Player read the same five. PF.home.words holds the owner's clients' own words.
+    Tonight's features carries the owner's four case studies (PF.home.work); the Portfolio window and
+    the Case Study Player read the same four. PF.home.words holds the owner's clients' own words.
   */
   PF.home = {
     hero: {
@@ -203,7 +203,7 @@
         id: "Saya mengerjakan struktur dan detail visualnya. Mulai dari menyusun halaman atau alur pengguna, merancang antarmuka yang konsisten, hingga memastikan tindakan utama mudah ditemukan. Desainnya perlu terasa sesuai dengan produk Anda dan memberi pengguna titik awal yang jelas.",
       },
     },
-    // the owner's five case studies as the owner set them in Figma (Work area, node 542:1646): a programme
+    // the owner's four case studies as the owner set them in Figma (Work area, node 542:1646): a programme
     // code and number, the title, a logline and tags. The covers are the owner's Figma exports (cover - *.jpg,
     // Dither effect and 10px corners baked in) as 640 and 1280px web copies, so the page does not dither them again
     // ui: the case study's UI card that rises over the cover on hover, 460 × 345 (4:3): the owner's
@@ -242,16 +242,6 @@
             id: "Desain antarmuka mentoring yang menghubungkan pencarian mentor, sesi, tugas, dan progres belajar.",
           },
           tags: ['UI/UX', 'Dashboard', { en: 'Mentorship', id: "Mentoring" }, { en: 'Education', id: "Pendidikan" }],
-        },
-        {
-          title: 'Boxify',
-          img: { file: 'cover-boxify', src: '../asset/Home/cover-boxify-1280.webp', small: '../asset/Home/cover-boxify-640.webp' },
-          ui: { file: 'ui-boxify', src: '../asset/Home/UI/ui-boxify-920.webp', big: '../asset/Home/UI/ui-boxify-1380.webp' },
-          sub: {
-            en: "Website and mobile app design for finding, booking, and managing self-storage units.",
-            id: "Desain website dan aplikasi mobile untuk mencari, memesan, dan mengelola unit penyimpanan barang.",
-          },
-          tags: ['UI/UX', 'Website', { en: 'Mobile App', id: "Aplikasi mobile" }, 'Self-storage'],
         },
         {
           title: 'SENSORSTACK',
@@ -399,7 +389,7 @@
     timeZone: 'Asia/Jakarta',
   };
 
-  // The Portfolio window and the Case Study Player show the same five as Tonight's features. A case's page, after the
+  // The Portfolio window and the Case Study Player show the same four as Tonight's features. A case's page, after the
   // owner's Figma, goes in shared/cases.js under the case's slug.
   PF.projects = PF.home.work.list.map((f, i) => ({
     slug: f.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),

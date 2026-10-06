@@ -1,4 +1,4 @@
-// The five case studies as a link to one shows them (worker/index.js, casePage()): slug, title and the English
+// The four case studies as a link to one shows them (worker/index.js, casePage()): slug, title and the English
 // logline, copied from shared/content.js (PF.projects), and each case's preview image in asset/share/
 // (case-<slug>-1200x630.jpg). A case added or renamed there is added here too, with its image.
 export const CASES = [
@@ -16,11 +16,6 @@ export const CASES = [
     "slug": "findmentor",
     "title": "FINDMENTOR",
     "text": "A mentorship interface connecting mentor discovery with sessions, assignments, and learning progress."
-  },
-  {
-    "slug": "boxify",
-    "title": "Boxify",
-    "text": "Website and mobile app design for finding, booking, and managing self-storage units."
   },
   {
     "slug": "sensorstack",

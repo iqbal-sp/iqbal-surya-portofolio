@@ -31,7 +31,7 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
+          id: 'about', tone: 'tint', label: { en: "Overview", id: "Ringkasan" },
           blocks: [
             {
               type: 'intro',
@@ -76,7 +76,7 @@
           ],
         },
         {
-          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
+          id: 'solution', label: { en: "Approach", id: "Pendekatan" },
           blocks: [
             {
               type: 'intro', under: true,
@@ -172,7 +172,7 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
+          id: 'about', tone: 'tint', label: { en: "Overview", id: "Ringkasan" },
           blocks: [
             {
               type: 'intro',
@@ -218,7 +218,7 @@
           ],
         },
         {
-          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
+          id: 'solution', label: { en: "Approach", id: "Pendekatan" },
           blocks: [
             {
               type: 'intro', under: true,
@@ -368,7 +368,7 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
+          id: 'about', tone: 'tint', label: { en: "Overview", id: "Ringkasan" },
           blocks: [
             {
               type: 'intro',
@@ -413,7 +413,7 @@
           ],
         },
         {
-          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
+          id: 'solution', label: { en: "Approach", id: "Pendekatan" },
           blocks: [
             {
               type: 'intro', under: true,
@@ -511,7 +511,7 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
+          id: 'about', tone: 'tint', label: { en: "Overview", id: "Ringkasan" },
           blocks: [
             {
               type: 'intro',
@@ -720,7 +720,7 @@
       }),
       chapters: [
         {
-          id: 'about', tone: 'tint', label: { en: "Project overview", id: "Ringkasan proyek" },
+          id: 'about', tone: 'tint', label: { en: "Overview", id: "Ringkasan" },
           blocks: [
             {
               type: 'intro',
@@ -766,7 +766,7 @@
           ],
         },
         {
-          id: 'solution', label: { en: "Design approach", id: "Pendekatan desain" },
+          id: 'solution', label: { en: "Approach", id: "Pendekatan" },
           blocks: [
             {
               type: 'intro', under: true,
