@@ -134,6 +134,9 @@ img { max-width: 100%; }
    black on the beige buttons, white on the blue caption keys, the taskbar and the green start button */
 :focus { outline: none; }
 :focus-visible { outline: 1px dotted currentColor; outline-offset: -4px; }
+/* focus the page handed over without a key (a window opening, a click) shows no ring: app.js focusIn() marks it
+   data-quiet; a window's frame and its page never draw one, the active title bar says where the keys are */
+[data-quiet]:focus-visible, .win:focus-visible, .win-body:focus-visible { outline: none; }
 
 /* ---- controls ---- */
 .btn {
@@ -405,6 +408,8 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .menu button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 4px 22px 4px 6px; background: none; border: 0; text-align: left; white-space: nowrap; }
 .menu button .mk { width: 12px; display: inline-flex; justify-content: center; }
 .menu button:hover, .menu button:active, .menu button:focus-visible { background: var(--sel); color: #fff; outline: none; }
+/* once the arrow keys lead (.kb), only the focused item is lit, not the one a resting pointer happens to be over */
+.menu.kb button:hover:not(:focus-visible):not(:active) { background: none; color: inherit; }
 .menu .hr { margin: 3px 1px; box-shadow: none; }
 
 /* toolbar, address bar, status bar */
@@ -527,6 +532,8 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   .sm-list.places .sm-sub { left: auto; right: calc(100% - 2px); }
 }
 .sm-foot .sm-item:hover, .sm-foot .sm-item:active, .sm-foot .sm-item:focus-visible { background: rgba(255, 255, 255, .2); }
+.start-menu.kb .sm-cols .sm-item:hover:not(:focus-visible):not(:active):not(li.open > .sm-item) { background: none; color: inherit; }
+.start-menu.kb .sm-foot .sm-item:hover:not(:focus-visible):not(:active) { background: none; }
 
 /* ============================================================
    ABOUT — a white document with XP task-pane panels
@@ -735,7 +742,7 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .thumb:active .frame { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); }
 .thumb[aria-selected="true"] .frame { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); }
 .thumb[aria-selected="true"] .name { background: var(--sel); color: #fff; text-decoration: none; }
-.files:focus-visible .thumb[aria-selected="true"] .name { outline: 1px dotted #fff; outline-offset: -1px; }
+.files:focus-visible:not([data-quiet]) .thumb[aria-selected="true"] .name { outline: 1px dotted #fff; outline-offset: -1px; }
 .details { width: 100%; border-collapse: collapse; }
 .details th { position: sticky; top: 0; z-index: 1; padding: 0; background: var(--col-head); box-shadow: var(--col-head-edge); font-weight: 400; text-align: left; }
 .details th button { width: 100%; padding: 4px 8px; border: 0; background: none; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 8px; white-space: nowrap; }
@@ -749,7 +756,7 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 .details tbody tr:not([aria-selected="true"]):hover td { color: var(--link); }
 .details tbody tr:not([aria-selected="true"]):hover td.nm span { text-decoration: underline; }
 .details tr[aria-selected="true"] td { background: var(--sel); color: #fff; }
-.files:focus-visible tr[aria-selected="true"] td.nm span { outline: 1px dotted #fff; outline-offset: 1px; }
+.files:focus-visible:not([data-quiet]) tr[aria-selected="true"] td.nm span { outline: 1px dotted #fff; outline-offset: 1px; }
 
 /* ============================================================
    CASE STUDY PLAYER: a skinned window drawn after the Windows
@@ -836,7 +843,7 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   box-shadow: 0 0 0 1px #0c0d10, 0 0 0 3px #8e909a, 0 0 0 4px #f4f5f7, 0 10px 18px rgba(20, 22, 30, .35), inset 0 0 0 1px #000;
 }
 /* keyboard focus on the page lights the screen's ring indigo; a dotted line would vanish into the dark hero */
-.screen:has(> .screen-view:focus-visible) { box-shadow: 0 0 0 1px #0c0d10, 0 0 0 4px #5153b8, 0 0 0 5px #f4f5f7, 0 10px 18px rgba(20, 22, 30, .35), inset 0 0 0 1px #000; }
+.screen:has(> .screen-view:focus-visible:not([data-quiet])) { box-shadow: 0 0 0 1px #0c0d10, 0 0 0 4px #5153b8, 0 0 0 5px #f4f5f7, 0 10px 18px rgba(20, 22, 30, .35), inset 0 0 0 1px #000; }
 .screen-view:focus-visible { outline: none; }
 /* the screen plays the case's page as the owner laid it out in Figma: a dark hero, then its sections on cream and white */
 .screen-view {

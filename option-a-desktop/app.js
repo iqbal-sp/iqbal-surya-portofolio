@@ -205,6 +205,40 @@
   let activeId = null;
 
   const rectOf = (el) => { if (!el) return null; const r = el.getBoundingClientRect(); return r.width ? { x: r.left, y: r.top, w: r.width, h: r.height } : null; };
+
+  /* focus: where the keys go in a window, as in XP the active window's page takes Page Down, Space and the arrows */
+  // the last input was a key: only then does focus handed over by the page show its ring (data-quiet hides it)
+  let keyed = false;
+  addEventListener('keydown', () => { keyed = true; }, true);
+  addEventListener('pointerdown', () => { keyed = false; }, true);
+  function focusIn(el) {
+    if (!el) return;
+    if (!keyed) { el.dataset.quiet = ''; el.addEventListener('blur', () => { delete el.dataset.quiet; }, { once: true }); }
+    el.focus({ preventScroll: true });
+  }
+  const scrollerOf = (w) => $('.screen-view, .files, .win-body:not(.game-body)', w.el);
+  const dlgDefault = (w) => $('.btn.default:not(:disabled)', w.el) || $('.btn:not(:disabled)', w.el);
+  // the focused control as a selector that finds its copy after its window is rebuilt: its id, or what it does
+  const FOCUS_KEYS = ['act', 'd', 'sec', 'slug', 'cat', 'view', 'sort', 'wact', 'i', 'menu', 'to', 'change'];
+  function focusKey(f) {
+    if (f.id) return `#${CSS.escape(f.id)}`;
+    const ks = FOCUS_KEYS.filter((k) => f.dataset[k] !== undefined);
+    if (ks.length) return f.tagName.toLowerCase() + ks.map((k) => `[data-${k}="${CSS.escape(f.dataset[k])}"]`).join('');
+    const c = ['files', 'screen-view', 'seek', 'tsize', 'win-body'].find((x) => f.classList.contains(x));
+    return c ? `.${c}` : null;
+  }
+  // a scroller's place as the first named thing in view and its distance from the top, so a rebuild in the other
+  // language, or a maximised window, keeps the reader on the same line rather than the same pixel
+  function placeOf(n) {
+    const top = n.getBoundingClientRect().top;
+    const a = $$('[id]', n).find((el) => el.getBoundingClientRect().bottom > top + 1);
+    return { id: a ? a.id : null, off: a ? a.getBoundingClientRect().top - top : 0, st: n.scrollTop, sl: n.scrollLeft };
+  }
+  function putPlace(n, p) {
+    n.scrollTop = p.st; n.scrollLeft = p.sl;
+    const a = p.id && n.querySelector(`#${CSS.escape(p.id)}`);
+    if (a) n.scrollTop += a.getBoundingClientRect().top - n.getBoundingClientRect().top - p.off;
+  }
   function zoom(from, to, done) {
     if (reduceMotion || !from || !to) { if (done) done(); return; }
     const steps = 7; let i = 0;
@@ -306,12 +340,20 @@
 
   function renderWin(w, keepScroll) {
     const saved = {};
-    if (keepScroll) $$('[data-keep]', w.el).forEach((n) => { saved[n.dataset.keep] = [n.scrollTop, n.scrollLeft]; });
+    if (keepScroll) $$('[data-keep]', w.el).forEach((n) => { saved[n.dataset.keep] = placeOf(n); });
+    // the control with the focus gets it back in the rebuilt window (Next case, a sort, View > Details, a combo)
+    const f = document.activeElement, fk = f && f !== w.el && w.el.contains(f) ? focusKey(f) : null, fq = fk && 'quiet' in f.dataset;
     const resize = !w.def.dialog && !w.def.skinned ? '<div class="resize" aria-hidden="true"></div>' : '';
     w.el.innerHTML = (w.def.skinned ? '' : titleHTML(w)) + w.def.build(w) + resize;
     if (w.def.skinned) w.el.setAttribute('aria-label', w.def.title(w));
-    if (keepScroll) $$('[data-keep]', w.el).forEach((n) => { const s = saved[n.dataset.keep]; if (s) { n.scrollTop = s[0]; n.scrollLeft = s[1]; } });
+    const sc = !w.def.dialog && scrollerOf(w); if (sc && !sc.hasAttribute('tabindex')) sc.tabIndex = -1;
+    if (keepScroll) $$('[data-keep]', w.el).forEach((n) => { const s = saved[n.dataset.keep]; if (s) putPlace(n, s); });
     if (w.def.after) w.def.after(w);
+    if (fk) {
+      const n = $(fk, w.el) || sc;
+      // focus that showed no ring before the rebuild shows none after it
+      if (n && fq) { const was = keyed; keyed = false; focusIn(n); keyed = was; } else if (n) n.focus({ preventScroll: true });
+    }
   }
 
   function placeWin(w, g) {
@@ -327,7 +369,7 @@
     let w = wins.get(id);
     if (w) {
       if (opts.state) { Object.assign(w.state, opts.state); renderWin(w, false); }
-      if (w.min) restoreWin(w, opts.from); else focusWin(w);
+      if (w.min) restoreWin(w, opts.from); else focusWin(w, true);
       if (opts.push !== false) syncRoute(w, true);
       return w;
     }
@@ -344,7 +386,7 @@
     if (['about', 'work', 'contact', 'resume', 'game', 'recycle', 'gamegate', 'screensaver'].includes(id)) track('window', id);
     const g = geometryFor(id);
     placeWin(w, g);
-    el.style.zIndex = ++zTop;
+    el.style.zIndex = (def.dialog ? DLG_Z : 0) + ++zTop;
     layer.appendChild(el);
     renderWin(w, false);
     if (def.dialog) {
@@ -364,14 +406,32 @@
     return w;
   }
 
+  // dialogs stack above every window while they are open, so one never drops behind the window it came from
+  const DLG_Z = 100000;
+  // fromOpen: the window was opened, restored or switched to, so the keys move into it: to its default button (a
+  // dialog), to what had the focus in it before, or to its page; a click inside it focuses what was clicked instead
   function focusWin(w, fromOpen) {
     if (!w || w.min) return;
-    if (activeId !== w.id) w.el.style.zIndex = ++zTop;
+    if (activeId !== w.id) w.el.style.zIndex = (w.def.dialog ? DLG_Z : 0) + ++zTop;
     activeId = w.id;
     wins.forEach((x) => x.el.classList.toggle('active', x.id === w.id));
     renderTasks();
-    if (fromOpen && !w.el.contains(document.activeElement)) w.el.focus({ preventScroll: true });
+    if (fromOpen && !w.el.contains(document.activeElement)) {
+      const last = w.lastFocus && w.lastFocus.isConnected && w.el.contains(w.lastFocus) && w.lastFocus.offsetParent ? w.lastFocus : null;
+      if (w.game) w.game.focus();
+      else focusIn((w.def.dialog ? dlgDefault(w) : last || scrollerOf(w)) || w.el);
+    }
     syncRoute(w, false);
+  }
+  // XP's answer to a press on a window behind a modal dialog: the dialog's title bar flashes and its default button
+  // takes the focus
+  const openDialog = () => Array.from(wins.values()).find((x) => x.def.dialog && !x.min) || null;
+  function flashWin(w) {
+    focusIn(dlgDefault(w) || w.el);
+    if (reduceMotion) return;
+    clearInterval(w.flashT);
+    let n = 0;
+    w.flashT = setInterval(() => { w.el.classList.toggle('active'); if (++n === 6) { clearInterval(w.flashT); w.el.classList.add('active'); } }, 80);
   }
 
   function topVisible() {
@@ -387,8 +447,9 @@
     wins.delete(w.id);
     if (activeId === w.id) activeId = null;
     const next = topVisible();
-    if (next) focusWin(next); else { renderTasks(); history.replaceState(null, '', location.pathname + location.search); }
-    if (w.opener && w.opener.isConnected) w.opener.focus({ preventScroll: true });
+    if (next) focusWin(next, true); else { renderTasks(); history.replaceState(null, '', location.pathname + location.search); }
+    // a dialog hands the focus back to the control that opened it, if that is still on show (not a closed Start menu)
+    if (w.opener && w.opener.isConnected && w.opener.offsetParent) w.opener.focus({ preventScroll: true });
     zoom(r, null);
   }
 
@@ -401,7 +462,7 @@
     if (activeId === w.id) activeId = null;
     zoom(from, rectOf(btn), () => {});
     const next = topVisible();
-    if (next) focusWin(next); else renderTasks();
+    if (next) focusWin(next, true); else renderTasks();
   }
 
   function restoreWin(w, from) {
@@ -410,14 +471,16 @@
     w.el.hidden = false;
     const to = rectOf(w.el);
     w.el.style.visibility = 'hidden';
-    // a game comes back with the keys on its pause screen, not on the window's frame
-    zoom(from || rectOf(btn), to, () => { w.el.style.visibility = ''; focusWin(w, true); if (w.game) w.game.focus(); });
+    zoom(from || rectOf(btn), to, () => { w.el.style.visibility = ''; focusWin(w, true); });
   }
 
   function toggleMax(w) {
     if (isMobile()) return;
+    // the reader stays on the line they were reading while the page rewraps to the new width
+    const ns = $$('[data-keep]', w.el), ps = ns.map(placeOf);
     w.max = !w.max;
     w.el.classList.toggle('max', w.max);
+    ns.forEach((n, i) => putPlace(n, ps[i]));
     const b = $('[data-wact="max"]', w.el);
     if (b) b.innerHTML = w.max ? GLYPH.restore : GLYPH.max;
   }
@@ -582,8 +645,10 @@
     } else if (e.key === 'ArrowLeft') {
       const li = document.activeElement.closest('.sm-sub');
       if (li) { const p = li.parentElement; p.classList.remove('open'); $('.sm-item', p).focus(); }
-    } else if (e.key === 'Escape') { closeStart(); startBtn.focus(); }
+    } else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeStart(); startBtn.focus(); }
   });
+  // the menu closes when the keys go somewhere else on the page, as every menu here does
+  startMenu.addEventListener('focusout', (e) => { const t = e.relatedTarget; if (t && !startMenu.contains(t) && t !== startBtn) closeStart(); });
 
   /* ------------------------------------------------------------ dropdown menus */
   let menuState = null;
@@ -601,14 +666,29 @@
     m.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (!b || b.disabled) return; const it = items[+b.dataset.i]; closeMenu(); it.run(); });
     m.addEventListener('keydown', (e) => {
       const bs = $$('button:not(:disabled)', m); const i = bs.indexOf(document.activeElement);
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[(i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); }
-      if (e.key === 'Escape') { closeMenu(); anchor.focus(); }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[i < 0 ? (e.key === 'ArrowDown' ? 0 : bs.length - 1) : (i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); }
+      if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeMenu(); anchor.focus(); }
     });
+    m.addEventListener('focusout', (e) => { const t = e.relatedTarget; if (t && !m.contains(t) && t !== anchor) closeMenu(); });
     menuState = { m, anchor };
     const f = $('button:not(:disabled)', m); if (f) f.focus({ preventScroll: true });
   }
+  // one item is current in a menu, as in XP: the mouse carries the focus with it, and once the arrows take over the
+  // item under a resting pointer stops lighting up (.kb), so Enter runs the item that is lit
+  document.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse' || !e.target.closest) return;
+    const it = e.target.closest('.menu button:not(:disabled), .start-menu .sm-item');
+    if (!it) return;
+    it.closest('.menu, .start-menu').classList.remove('kb');
+    if (document.activeElement !== it) it.focus({ preventScroll: true });
+  });
+  document.addEventListener('keydown', (e) => {
+    const m = /^Arrow/.test(e.key) && e.target.closest && e.target.closest('.menu, .start-menu'); if (m) m.classList.add('kb');
+  }, true);
   function closeMenu() {
     if (!menuState) return;
+    // keys that were in the menu go back to its title, not off the page with the menu
+    if (menuState.m.contains(document.activeElement)) menuState.anchor.focus({ preventScroll: true });
     menuState.m.remove();
     menuState.anchor.setAttribute('aria-expanded', 'false');
     menuState = null;
@@ -889,17 +969,21 @@
       </div>
     </div>`;
   }
+  // the next picture; only this window's task button learns its new title, so the taskbar keeps any focus it has
   function viewerGo(w, i) {
     const n = PF.home.shorts.list.length;
     w.state.i = ((i % n) + n) % n;
-    const f = document.activeElement, inBar = f && f.closest && f.closest('.pv-bar') && w.el.contains(f);
-    const key = inBar ? `[data-act="${f.dataset.act}"]${f.dataset.d ? `[data-d="${f.dataset.d}"]` : ''}` : null;
     renderWin(w, false);
-    renderTasks();
-    if (key) { const nb = $(key, w.el); if (nb) nb.focus(); }
+    const tb = $(`[data-task="${w.id}"]`, tasksEl); if (tb) tb.title = w.def.title(w);
+  }
+  // the slideshow waits while its window is on the taskbar or the tab is hidden, and a picture stepped to by hand
+  // gets its full three seconds
+  function viewerTick(w) {
+    clearInterval(w.showTimer);
+    w.showTimer = setInterval(() => { if (!w.min && !document.hidden) viewerGo(w, w.state.i + 1); }, 3000);
   }
   function viewerShow(w) {
-    if (w.showTimer) { clearInterval(w.showTimer); w.showTimer = null; } else w.showTimer = setInterval(() => viewerGo(w, w.state.i + 1), 3000);
+    if (w.showTimer) { clearInterval(w.showTimer); w.showTimer = null; } else viewerTick(w);
     viewerGo(w, w.state.i);
   }
 
@@ -1201,7 +1285,7 @@
   // reply can reach comes back to the form instead
   async function homeSend(w) {
     const f = $('.hm-mail', w.el), note = $('#hm-send-note', w.el), btn = $('button[type="submit"]', f);
-    if (!f || (btn && btn.disabled)) return;
+    if (!f || (btn && btn.getAttribute('aria-disabled') === 'true')) return;
     const offers = homeOffers();
     const subject = `${u('subjectPrefix')}: ${offers[w.state.subj] || offers[0]}`;
     const field = $('#hm-from', f), from = field.value.trim(), message = $('#hm-msg', f).value.trim();
@@ -1211,7 +1295,8 @@
     const label = $('span', btn), was = label.textContent, live = $('#hm-copy-note', f);
     btn.style.minWidth = `${btn.offsetWidth}px`;
     label.innerHTML = `${esc(u('sending').replace(/…$/, ''))}<i class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></i>`;
-    btn.disabled = true; btn.classList.add('busy'); btn.setAttribute('aria-busy', 'true'); field.removeAttribute('aria-invalid');
+    // aria-disabled, not disabled: a disabled button would drop the keyboard focus to the page
+    btn.setAttribute('aria-disabled', 'true'); btn.classList.add('busy'); btn.setAttribute('aria-busy', 'true'); field.removeAttribute('aria-invalid');
     if (live) live.textContent = u('sending');
     let res = null;
     try {
@@ -1221,7 +1306,7 @@
         body: JSON.stringify({ from, subject, message, lang, website: f.elements.website.value, sure: w.state.fromAsked === from }),
       });
     } catch (e) { res = null; }
-    btn.disabled = false; btn.classList.remove('busy'); btn.removeAttribute('aria-busy'); label.textContent = was; btn.style.minWidth = '';
+    btn.removeAttribute('aria-disabled'); btn.classList.remove('busy'); btn.removeAttribute('aria-busy'); label.textContent = was; btn.style.minWidth = '';
     if (live) live.textContent = '';
     say(u('sendHint'));
     if (res && res.ok) {
@@ -1721,6 +1806,13 @@
     }
     if (w.curSec !== id) { const b = $(`.skin-nav button[data-sec="${id}"]`, w.el); if (b) navShow(b); }
     w.curSec = id;
+    // at the last chapter Play goes on to the next case, and is named for it
+    const play = $('[data-act="next-sec"]', w.el);
+    if (play) {
+      const ids = w.secs.map((s) => s.id), k = PF.projects.findIndex((p) => p.slug === w.state.slug);
+      const name = ids.indexOf(id) >= ids.length - 1 ? `${u('nextCase')}: ${PF.projects[(k + 1) % PF.projects.length].title}` : u('nextSection');
+      if (play.getAttribute('aria-label') !== name) { play.setAttribute('aria-label', name); play.title = name; }
+    }
   }
   // the chapter being read comes into view when a short window cuts the tray's list off. Only the list scrolls, never
   // the desktop behind a window that hangs off the screen (a phone lists no chapters)
@@ -1775,7 +1867,7 @@
   }
   function openCase(slug, from, push) {
     const w = wins.get('player');
-    if (w) { if (w.state.slug !== slug) switchCase(w, slug); if (w.min) restoreWin(w, from); else focusWin(w); return; }
+    if (w) { if (w.state.slug !== slug) switchCase(w, slug); if (w.min) restoreWin(w, from); else focusWin(w, true); return; }
     track('case', slug);
     openWin('player', { from, state: { slug }, pushHistory: push !== false });
   }
@@ -2004,7 +2096,7 @@
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=4';
+        s.src = 'screensaver.js?v=5';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);
@@ -2319,7 +2411,15 @@
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(PF.owner.email).then(done, fallback); else fallback();
     },
-    'home-go': (a, w) => { const s = w && $('#' + a.dataset.to, w.el); if (s) s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' }); },
+    'home-go': (a, w) => {
+      const s = w && $('#' + a.dataset.to, w.el); if (!s) return;
+      s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      // the keys follow the jump once it lands, so the next Tab goes on from the heading, not from the key left behind
+      const h = s.matches('h1, h2, h3') ? s : $('h1, h2, h3', s) || s, body = s.closest('.win-body');
+      const land = () => { clearTimeout(t); if (!h.hasAttribute('tabindex')) h.tabIndex = -1; focusIn(h); };
+      const t = setTimeout(land, reduceMotion ? 0 : 1800);
+      if (!reduceMotion && body) body.addEventListener('scrollend', land, { once: true });
+    },
     // a programme row opens its case study; the player zooms out of the row's cover
     'home-case': (a) => { const row = a.closest('.ft-show'); openCase(a.dataset.slug, rectOf(row && $('.ft-cover', row)) || rectOf(a), true); },
     // the remote's keys switch episodes where they are
@@ -2350,7 +2450,7 @@
       location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(u('askSubject', p.title))}&body=${encodeURIComponent(u('askBody', p.title))}`;
     },
     'open-shot': (a) => openWin('viewer', { from: rectOf(a), state: { i: +a.dataset.i } }),
-    'pv-step': (a, w) => viewerGo(w, w.state.i + +a.dataset.d),
+    'pv-step': (a, w) => { if (w.showTimer) viewerTick(w); viewerGo(w, w.state.i + +a.dataset.d); },
     'pv-show': (a, w) => viewerShow(w),
     'next-sec': (a, w) => nextSection(w),
     stop: (a, w) => { const r = rectOf(w.el); closeWin(w); openWin('work', { from: r, pushHistory: true }); },
@@ -2390,11 +2490,35 @@
   };
 
   /* ------------------------------------------------------------ global events */
+  // a dialog is modal: while it is open a press on another window never reaches it, and the dialog flashes instead
+  let swallowClick = false;
+  document.addEventListener('pointerdown', (e) => {
+    const d = openDialog(), winEl = d && e.target.closest && e.target.closest('.win');
+    if (!winEl || winEl === d.el) return;
+    e.preventDefault(); e.stopPropagation();
+    swallowClick = true; setTimeout(() => { swallowClick = false; }, 600);
+    flashWin(d);
+  }, true);
+  document.addEventListener('click', (e) => { if (swallowClick) { swallowClick = false; e.preventDefault(); e.stopPropagation(); } }, true);
+  // where the keys were in each window, to hand them back there; and Tab into a window behind another brings it up
+  document.addEventListener('focusin', (e) => {
+    const w = e.target.closest && winOf(e.target); if (!w) return;
+    w.lastFocus = e.target;
+    if (activeId !== w.id && !w.min) focusWin(w);
+  });
   document.addEventListener('pointerdown', (e) => {
     if (menuState && !menuState.m.contains(e.target) && !e.target.closest('[data-menu]')) closeMenu();
     if (!startMenu.hidden && !startMenu.contains(e.target) && !startBtn.contains(e.target)) closeStart();
     const winEl = e.target.closest('.win');
-    if (!winEl) { $$('.dicon.sel').forEach((n) => n.classList.remove('sel')); return; }
+    if (!winEl) {
+      $$('.dicon.sel').forEach((n) => n.classList.remove('sel'));
+      // a press on the bare desktop leaves no window active, as in XP: the next press on a task button brings its
+      // window up rather than minimising it
+      if (e.target === desktopEl || e.target.id === 'windows' || e.target.matches('canvas.wall3d, .desk-icons')) {
+        activeId = null; wins.forEach((x) => x.el.classList.remove('active')); renderTasks();
+      }
+      return;
+    }
     const w = wins.get(winEl.dataset.id);
     if (!w) return;
     if (activeId !== w.id) focusWin(w);
@@ -2438,7 +2562,7 @@
     const task = e.target.closest('[data-task]');
     if (task) {
       const w = wins.get(task.dataset.task); if (!w) return;
-      if (w.min) restoreWin(w); else if (activeId === w.id) minimizeWin(w); else focusWin(w);
+      if (w.min) restoreWin(w); else if (activeId === w.id) minimizeWin(w); else focusWin(w, true);
       return;
     }
     if (e.target.closest('#startBtn')) { if (startMenu.hidden) openStart(); else closeStart(); return; }
@@ -2478,7 +2602,8 @@
     const file = e.target.closest('.files [data-slug]');
     if (file) { const w = winOf(file); selectFile(w, file.dataset.slug); openCase(file.dataset.slug, rectOf(file), true); return; }
     const sec = e.target.closest('.skin-nav [data-sec]');
-    if (sec) { scrollToSec(winOf(sec), sec.dataset.sec); return; }
+    // a chapter picked from the keyboard hands the keys to the page, so Page Down reads on from there
+    if (sec) { const w = winOf(sec); scrollToSec(w, sec.dataset.sec); if (!e.detail) focusIn($('.screen-view', w.el)); return; }
     const cat = e.target.closest('[data-cat]');
     if (cat) { const w = winOf(cat); w.state.cat = cat.dataset.cat; renderWin(w, false); const b = $(`[data-cat="${w.state.cat}"]`, w.el); if (b) b.focus(); return; }
     if (e.target.id === 'langBtn' || e.target.closest('#langBtn')) { setLang(lang === 'en' ? 'id' : 'en'); }
@@ -2549,6 +2674,15 @@
       const dlg = e.target.closest && e.target.closest('.win.dialog');
       if (dlg) { const w = winOf(dlg); if (w) closeWin(w); }
     }
+    // a dialog keeps the keys: Tab goes round its own controls (a radio group is one stop), Enter presses its default
+    const dg = e.target.closest && e.target.closest('.win.dialog'), dw = dg && winOf(dg);
+    if (dw && e.key === 'Tab') {
+      const fs = $$('button, input, select, textarea, a[href]', dg).filter((n) => !n.disabled && n.offsetParent && (n.type !== 'radio' || n.checked));
+      const i = fs.indexOf(document.activeElement);
+      if (fs.length) { e.preventDefault(); fs[i < 0 ? (e.shiftKey ? fs.length - 1 : 0) : (i + (e.shiftKey ? -1 : 1) + fs.length) % fs.length].focus(); }
+      return;
+    }
+    if (dw && e.key === 'Enter' && !e.target.matches('button, a, textarea, select')) { const b = dlgDefault(dw); if (b) { e.preventDefault(); b.click(); } return; }
     // Home: up and down walk the Media Center services menu
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.target.closest && e.target.closest('.mm-list')) {
       const all = $$('.mm-item', e.target.closest('.mm-list')), nx = all[all.indexOf(e.target.closest('.mm-item')) + (e.key === 'ArrowDown' ? 1 : -1)];
@@ -2661,8 +2795,15 @@
     const s = document.createElement('div');
     s.className = 'shutdown-screen';
     s.innerHTML = `<div>${esc(u('safe'))}<small>${esc(u('clickRestart'))}</small></div>`;
+    // the whole screen is one button: a click, a tap or any key starts again; nothing behind it takes the keys
+    s.setAttribute('role', 'button'); s.tabIndex = 0;
+    const tb = $('#taskbar');
+    desktopEl.inert = true; tb.inert = true;
+    const again = () => { if (!s.isConnected) return; s.remove(); desktopEl.inert = false; tb.inert = false; restart(); };
+    s.addEventListener('click', again);
+    s.addEventListener('keydown', (e) => { if (!['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(e.key)) { e.preventDefault(); again(); } });
     document.body.appendChild(s);
-    s.addEventListener('click', () => { s.remove(); restart(); }, { once: true });
+    s.focus({ preventScroll: true });
   }
   // XP's Restart closes everything: each window's own close runs (a game's loop stops), and the address drops the last
   // window's hash so the fresh desktop opens on Home, not on what was left open

@@ -1073,8 +1073,8 @@
 }
 .home .field.nudge { animation: field-nudge .3s linear; }
 @keyframes field-nudge { 20%, 60% { translate: -2px 0; } 40%, 80% { translate: 2px 0; } }
-.home .mail-send .btn.busy:disabled { color: #000; text-shadow: none; cursor: progress; }
-.mail-send .btn.busy:disabled svg { opacity: 1; filter: none; }
+.home .mail-send .btn.busy[aria-disabled="true"] { color: #000; text-shadow: none; cursor: progress; }
+.mail-send .btn.busy[aria-disabled="true"] svg { opacity: 1; filter: none; }
 .mail-send .dots i { font-style: normal; animation: send-dot 1.2s steps(1, end) infinite; }
 .mail-send .dots i:nth-child(2) { animation-delay: .2s; }
 .mail-send .dots i:nth-child(3) { animation-delay: .4s; }

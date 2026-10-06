@@ -3296,6 +3296,8 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
   function idle(opts = {}) {
     const c = document.createElement('canvas');
     c.className = 'ss-idle'; c.setAttribute('aria-hidden', 'true');
+    // a click that wakes it leaves the keys where they were (a press on the canvas would hand them to the page)
+    c.addEventListener('mousedown', (e) => e.preventDefault());
     document.body.appendChild(c);
     const x = c.getContext('2d');
     let W = 0, H = 0, k = 1;
