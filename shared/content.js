@@ -299,7 +299,7 @@
     services: {
       head: { en: 'What I can help with', id: 'Yang bisa saya bantu' },
       // bump when the owner replaces the pictures, so browsers fetch the new copies
-      picVersion: 5,
+      picVersion: 6,
       list: [
         { name: { en: "Visual direction", id: "Arah visual" }, desc: { en: "Colours, typography, and interface styling that carry your brand into the website or app.", id: "Warna, tipografi, dan gaya antarmuka yang membawa identitas brand Anda ke website atau aplikasi." }, img: { file: 'brand strategy', src: '../asset/Home/service/webp/brand-strategy' } },
         { name: { en: "Website structure", id: "Struktur website" }, desc: { en: "Page layouts and wireframes that organise your content around what visitors need to know and do.", id: "Tata letak halaman dan wireframe yang menyusun konten sesuai informasi dan tindakan yang dibutuhkan pengunjung." }, img: { file: 'Web strategy', src: '../asset/Home/service/webp/website-strategy' } },
