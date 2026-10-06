@@ -30,6 +30,8 @@ asset/Home/newsprint.jpg
 asset/Home/cover - *.jpg
 asset/Home/UI/ui-*.png
 asset/**/*.json
+# Winamp's playlist is the one JSON under asset/ that the site reads
+!asset/music/playlist.json
 anti-slop
 # game prototypes: tested as private artifacts, never served from the site
 prototype
