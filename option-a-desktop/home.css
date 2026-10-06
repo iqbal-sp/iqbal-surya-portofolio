@@ -79,6 +79,9 @@
 }
 .mw-title { flex: none; height: 26px; margin: 0 -3px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 8px; border-radius: 7px 7px 0 0; background: var(--cap); color: #fff; font: 700 12px/1 var(--ui); text-shadow: 1px 1px var(--cap-shadow); white-space: nowrap; overflow: hidden; user-select: none; }
 .mw-title.off { background: var(--cap-off); color: #e3ebfc; text-shadow: none; }
+/* XP drew one window active at a time: Home's mini windows wear the inactive title bar until something in them has
+   the keys, and switch at once, as XP did. .lit is the flash that says where the keys will go (app.js homeFlash) */
+.home .mw:not(:focus-within, .lit) .mw-title { background: var(--cap-off); color: #e3ebfc; text-shadow: none; }
 .mw-title .t-ico { display: flex; }
 .mw-title .px { width: 16px; height: 16px; }
 .mw-title .t-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -131,6 +134,17 @@
 @keyframes crt-lamp { from { filter: brightness(.35) saturate(.5); box-shadow: inset 0 -1px 1px rgba(0, 0, 0, .3); } }
 @keyframes tv-on { 0% { filter: brightness(0); clip-path: inset(49.6% 0 49.6% 0); } 35% { filter: brightness(2.4); clip-path: inset(49.6% 0 49.6% 0); } 70% { filter: brightness(1.35); clip-path: inset(0); } 100% { filter: brightness(1); clip-path: inset(0); } }
 @keyframes tv-lower { from { transform: translateY(100%); opacity: 0; } }
+/* dark until its power-on comes (app.js waits until the set is seen), and once turned off: the lamp out, the tube black */
+.pt-crt:is(.standby, .off) :is(picture, .tv-lower, .pt-sel) { visibility: hidden; }
+.pt-crt:is(.standby, .off) .crt-lamp { background: #3c4636; box-shadow: inset 0 -1px 1px rgba(0, 0, 0, .3); }
+/* the scan after the first power-on: the box draws itself round the face in four steps */
+.pt-sel.scan { animation: tv-scan .24s steps(4, end) both; }
+@keyframes tv-scan { from { clip-path: inset(0 100% 100% 0); } to { clip-path: inset(0); } }
+/* Home's power key is a real button: the same round key, with a finger's 44px round it */
+.pt-crt button.crt-power { position: relative; padding: 0; border: 0; cursor: pointer; }
+.pt-crt button.crt-power::before { content: ""; position: absolute; inset: -14px; }
+.pt-crt button.crt-power:active { background: radial-gradient(circle at 50% 55%, #e8e3d2, #c9c2a8 70%); box-shadow: inset 0 1px 2px rgba(20, 16, 8, .45); }
+.pt-crt button.crt-power:focus-visible { outline: 1px dotted #000; outline-offset: 3px; }
 
 @container home (max-width: 520px) {
   .tv-lower { padding: 40px 16px 12px; }
@@ -199,7 +213,7 @@
 .ft-link { color: inherit; text-decoration: none; }
 .ft-link::after { content: ""; position: absolute; inset: 32px 0; z-index: 3; }
 .ft-show:first-child .ft-link::after { top: 0; }
-.ft-show:has(.ft-link:hover) .ft-link, .ft-link:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.home:not(.scrolling) .ft-show:has(.ft-link:hover) .ft-link, .ft-link:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 /* pressed anywhere on the row, the title takes Glow Edge, as the credits' links do */
 .ft-link:active { color: var(--glow-edge); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 .ft-link:focus-visible { outline: none; }
@@ -217,13 +231,15 @@
 .ft-cover::after { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(4, 22, 63, .6); opacity: 0; transition: opacity .3s; }
 .ft-ui { display: block; position: absolute; left: 50%; top: 50%; z-index: 2; width: min(460px, 87.5cqw - 64px); overflow: hidden; border-radius: 8px;
   box-shadow: 0 28px 48px -18px rgba(0, 0, 0, .7); opacity: 0; transform-origin: 50% 100%; transform: translate(-50%, 25%) rotateX(40deg);
-  transition: transform .55s var(--ease-out), opacity .25s; }
+  transition: transform .55s var(--ease-out), opacity .15s; }
 .ft-cover .ft-ui .ph, .ft-cover .ft-ui img { aspect-ratio: 4 / 3; }
-.ft-show.peek .ft-cover::after, .ft-show:has(.ft-link:focus-visible) .ft-cover::after { opacity: 1; }
-.ft-show.peek .ft-ui, .ft-show:has(.ft-link:focus-visible) .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
+/* a card comes up only once its picture is in (app.js homeCards, .ready), so a slow line never raises an empty one;
+   it goes down in 0.15s when the page moves on, and nothing rises while the page scrolls under a resting pointer */
+.ft-show.peek .ft-cover:has(.ft-ui.ready)::after, .ft-show:has(.ft-link:focus-visible) .ft-cover:has(.ft-ui.ready)::after { opacity: 1; }
+.ft-show.peek .ft-ui.ready, .ft-show:has(.ft-link:focus-visible) .ft-ui.ready { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); transition-duration: .55s, .25s; }
 @media (hover: hover) {
-  .ft-show:has(.ft-link:hover) .ft-cover::after { opacity: 1; }
-  .ft-show:has(.ft-link:hover) .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
+  .home:not(.scrolling) .ft-show:has(.ft-link:hover) .ft-cover:has(.ft-ui.ready)::after { opacity: 1; }
+  .home:not(.scrolling) .ft-show:has(.ft-link:hover) .ft-ui.ready { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); transition-duration: .55s, .25s; }
 }
 /* without motion the card is simply there, upright and in place */
 @media (prefers-reduced-motion: reduce) {
@@ -257,10 +273,10 @@
 .mv-umd span { overflow: hidden; text-overflow: ellipsis; }
 .mv-tally { flex: none; width: 8px; height: 8px; border-radius: 2px; background: #3a3f4a; transition: background .15s, box-shadow .15s; }
 .mv-feed::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 2px transparent; transition: box-shadow .15s; }
-.mv-feed:hover::after, .mv-feed:focus-visible::after { box-shadow: inset 0 0 0 2px var(--rec); }
+.home:not(.scrolling) .mv-feed:hover::after, .mv-feed:focus-visible::after { box-shadow: inset 0 0 0 2px var(--rec); }
 .mv-feed:active::after { box-shadow: inset 0 0 0 4px var(--rec); }
-.mv-feed:hover .mv-tally, .mv-feed:focus-visible .mv-tally { background: var(--rec); box-shadow: 0 0 6px rgba(214, 38, 28, .85); }
-.mv-feed:hover .mv-umd, .mv-feed:focus-visible .mv-umd { color: #fff; }
+.home:not(.scrolling) .mv-feed:hover .mv-tally, .mv-feed:focus-visible .mv-tally { background: var(--rec); box-shadow: 0 0 6px rgba(214, 38, 28, .85); }
+.home:not(.scrolling) .mv-feed:hover .mv-umd, .mv-feed:focus-visible .mv-umd { color: #fff; }
 .mv-feed:focus-visible { outline: none; }
 .mv-off { display: none; }
 .mv-off .mv-pic { display: grid; place-items: center; background: #06070a; }
@@ -305,11 +321,11 @@
 .ch-art { --lg: 48px; height: var(--lg); display: grid; place-items: center; padding: 0 8px; }
 .ch-logo { width: auto; max-width: 100%; height: calc(var(--lg) * var(--k)); object-fit: contain; filter: grayscale(1); opacity: .75; transform: scale(var(--zoom, 1)); transition: filter .2s, opacity .2s; }
 /* at rest each logo sits back at 75%; under the pointer it comes up to full strength in its own colours */
-@media (hover: hover) { .ch-grid li:hover .ch-logo { filter: none; opacity: 1; } }
+@media (hover: hover) { .home:not(.scrolling) .ch-grid li:hover .ch-logo { filter: none; opacity: 1; } }
 /* a file drawn in dark ink for a light ground (found when it loads, see logoInk) is turned light: its black
    goes white, and under the pointer its hues come back while the black stays white */
 .ch-logo.ink { filter: grayscale(1) invert(1); }
-@media (hover: hover) { .ch-grid li:hover .ch-logo.ink { filter: invert(1) hue-rotate(180deg); } }
+@media (hover: hover) { .home:not(.scrolling) .ch-grid li:hover .ch-logo.ink { filter: invert(1) hue-rotate(180deg); } }
 .ch-grid .ch-off { display: none; }
 @container home (max-width: 639.98px) {
   .ch-grid .ch-off.ns-2 { display: block; }
@@ -466,21 +482,22 @@
 .mm-item .px { flex: none; width: 16px; height: 16px; opacity: 0; --ic-line: var(--glow-ink); }
 /* Media Center's focus answers the pointer: a faint glow edge and the arrow drawn in outline under it. Pressed,
    the glow's light fills the item, but not its face: only the picked item wears the face */
-.mm-item:hover { border-color: rgba(212, 247, 173, .35); background: rgba(255, 255, 255, .1); color: #fff; }
-.mm-item:not([aria-pressed="true"]):hover .px { opacity: .6; --ic-line: var(--glow-edge); }
+.home:not(.scrolling) .mm-item:hover { border-color: rgba(212, 247, 173, .35); background: rgba(255, 255, 255, .1); color: #fff; }
+.home:not(.scrolling) .mm-item:not([aria-pressed="true"]):hover .px { opacity: .6; --ic-line: var(--glow-edge); }
 .mm-item[aria-pressed="true"] { border-color: var(--glow-edge); background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 0 20px var(--glow-halo); }
 .mm-item:not([aria-pressed="true"]):active { border-color: var(--glow-edge); background: rgba(134, 209, 63, .24); color: #fff; }
 .mm-item[aria-pressed="true"] .px { opacity: 1; }
 .mm-item:not([aria-pressed="true"]):active .px { opacity: 1; --ic-line: var(--glow-edge); }
 .mm-item:focus-visible { outline: 2px dotted #fff; outline-offset: 2px; }
 .mm-pane { align-self: start; }
-.mm-fig { margin: 0; }
+.mm-fig { margin: 0; display: grid; }
+/* every service's picture lies in the pane, stacked; the picked one crossfades in once it has decoded (app.js) */
+.mm-layer { grid-area: 1 / 1; min-width: 0; opacity: 0; transition: opacity .2s; }
+.mm-layer.on { opacity: 1; }
 /* the owner's pictures keep their own shape (4444 × 4823) and sit flat on the blue, with no line or shadow; a slot
    waiting for one takes the same shape */
 .mm-img { display: block; width: 100%; height: auto; aspect-ratio: 4444 / 4823; object-fit: cover; border-radius: 10px; }
 .mm-img.ph { overflow: hidden; }
-.mm-pane.swap { animation: mce-in .3s var(--ease-out); }
-@keyframes mce-in { from { opacity: 0; transform: scale(1.03); } }
 @container home (min-width: 760px) {
   .mm-body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 48px; }
 }
@@ -830,8 +847,10 @@
 @container home (max-width: 639.98px) {
   .pe-set { display: contents; }
   .pe-set .pe-tv { margin: 0; }
-  .pe-copy { order: 1; }
-  .pe-set .pt-remote { order: 2; position: static; left: auto; right: auto; bottom: auto; translate: none; width: auto; max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none; justify-content: flex-start; }
+  .pe-copy { order: 2; }
+  /* the number keys hang right under the set, as the remote rests on it on a wide page: the snow and the channel
+     number change over the thumb, and the copy changing height below can't move the keys */
+  .pe-set .pt-remote { order: 1; margin-top: -20px; position: static; left: auto; right: auto; bottom: auto; translate: none; width: auto; max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none; justify-content: flex-start; }
   .pt-remote .rm-pad { display: none; }
 }
 @container home (min-width: 640px) {
@@ -955,7 +974,6 @@
 @container home (max-width: 639.98px) {
   .mail-head { grid-template-columns: minmax(0, 1fr); }
   .mail-head label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .cl-top { display: none; }
 }
 @container home (min-width: 640px) {
   .home > .hm-cta { padding: 80px 40px 0; }

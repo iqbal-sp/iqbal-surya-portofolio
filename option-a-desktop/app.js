@@ -53,18 +53,18 @@
       dlQ: 'Open it in a new tab or download a copy.', dlOpen: 'Open PDF', dlSave: 'Download PDF',
       ok: 'OK', cancel: 'Cancel', cvAsk: 'Email me to request my latest resume.', cvAskBtn: 'Request resume', cvSubject: 'Resume request', cvBody: 'Hi Iqbal,\n\nCould you send me your latest resume?\n\n',
       shutTitle: 'Shut Down', shutQ: 'What do you want the computer to do?', shutDown: 'Shut down', restart: 'Restart',
-      safe: "It's now safe to turn off your computer.", clickRestart: 'Click anywhere to start again',
+      safe: "It's now safe to turn off your computer.", clickRestart: 'Click or press a key to start again',
       binFrom: 'Original location', binDeleted: 'Date deleted', binNote: 'Ideas that did not make it',
       binItems: [['portfolio_v7_FINAL_final2.fig', 'C:\\Work', '12/03/2025'], ['logo-option-23.png', 'C:\\Work\\Logos', '02/11/2024'], ['idea-at-3am.txt', 'C:\\Notes', '21/06/2024'], ['lorem-ipsum-forever.doc', 'C:\\Drafts', '09/01/2023']],
       home: 'Home', startProject: 'Start a project', watchWork: 'View the work',
-      nowShowing: 'Now showing', detected: 'Detected',
+      nowShowing: 'Now showing', detected: 'Detected', power: 'Power',
       shotName: (n) => `UI shot ${n}`, openShot: (name) => `Open ${name}`, noSignal: 'No signal',
       viewer: 'Picture Viewer', prevPic: 'Previous picture', nextPic: 'Next picture', slideShow: 'Start slide show', stopShow: 'Stop slide show', openLink: 'Open link', picOf: (i, n) => `${i} of ${n}`,
       youGet: 'What you get:', epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Previous episode', nextEp: 'Next episode',
       remote: 'Episode remote', channel: (n) => `CH ${String(n).padStart(2, '0')}`,
       helpTitle: 'Help Topics', helpTab: 'Contents', helpPick: 'Select a topic to read it.', openAbout: 'Open About Me',
       newMessage: 'Project inquiry', send: 'Send', toLabel: 'To:', subject: 'Subject:', message: 'Message', msgPlaceholder: 'Tell me about your website or app, the help you need, and your deadline.', subjectOther: 'Something else', subjectPrefix: 'Project inquiry', sendMeMsg: 'Send project inquiry', sendHint: 'Use an email address where I can reply.',
-      fromLabel: 'From:', fromPlaceholder: 'you@company.com', sending: 'Sending…', sentTitle: 'Message sent', sentNote: (a) => `Thanks. I’ll reply to ${a}.`,
+      fromLabel: 'From:', fromPlaceholder: 'you@company.com', sending: 'Sending…', sentTitle: 'Message sent', sentNote: (a) => `Thanks. I’ll reply to ${a}.`, sentLine: (time, a) => `Sent at ${time}. I’ll reply to ${a}.`,
       fromFixTitle: (a) => `Did you mean ${a}?`, fromFixNote: (a) => `${a} looks like a typo. If it’s right, send it again.`, fromFixUse: 'Use this address',
       fromBadTitle: 'Check your email address', fromBadNote: (a) => `${a} can’t receive email, so my reply wouldn’t reach you. Check the spelling.`,
       mailAppTitle: 'Send the draft from your email app', mailAppNote: 'The website couldn’t send this message. Send the draft from your email app, or copy my address and email me directly.',
@@ -114,18 +114,18 @@
       dlQ: "Buka di tab baru atau unduh salinannya.", dlOpen: "Buka PDF", dlSave: "Unduh PDF",
       ok: 'OK', cancel: 'Batal', cvAsk: "Kirim email untuk meminta CV terbaru saya.", cvAskBtn: 'Minta CV', cvSubject: 'Permintaan CV', cvBody: 'Halo Iqbal,\n\nBoleh kirimkan CV terbaru Anda?\n\n',
       shutTitle: 'Matikan', shutQ: "Apa yang ingin Anda lakukan dengan komputer ini?", shutDown: 'Matikan', restart: 'Mulai ulang',
-      safe: 'Sekarang aman untuk mematikan komputer Anda.', clickRestart: 'Klik di mana saja untuk memulai lagi',
+      safe: 'Sekarang aman untuk mematikan komputer Anda.', clickRestart: 'Klik atau tekan tombol apa saja untuk memulai lagi',
       binFrom: 'Lokasi asal', binDeleted: 'Tanggal dihapus', binNote: 'Ide yang tidak lolos',
       binItems: [['portofolio_v7_FINAL_final2.fig', 'C:\\Kerja', '12/03/2025'], ['logo-opsi-23.png', 'C:\\Kerja\\Logo', '02/11/2024'], ['ide-jam-3-pagi.txt', 'C:\\Catatan', '21/06/2024'], ['lorem-ipsum-selamanya.doc', 'C:\\Draf', '09/01/2023']],
       home: 'Beranda', startProject: "Mulai proyek", watchWork: "Lihat karyanya",
-      nowShowing: 'Sedang tayang', detected: 'Terdeteksi',
+      nowShowing: 'Sedang tayang', detected: 'Terdeteksi', power: 'Daya',
       shotName: (n) => `Shot UI ${n}`, openShot: (name) => `Buka ${name}`, noSignal: 'Tidak ada sinyal',
       viewer: 'Penampil Gambar', prevPic: 'Gambar sebelumnya', nextPic: 'Gambar berikutnya', slideShow: 'Mulai tayangan slide', stopShow: 'Hentikan tayangan slide', openLink: 'Buka tautan', picOf: (i, n) => `${i} dari ${n}`,
       youGet: "Hasil yang Anda dapat:", epLabel: (n) => `EP ${n}`, epKey: (n) => `Episode ${n}`, prevEp: 'Episode sebelumnya', nextEp: 'Episode berikutnya',
       remote: "Kontrol episode", channel: (n) => `CH ${String(n).padStart(2, '0')}`,
       helpTitle: 'Topik Bantuan', helpTab: 'Isi', helpPick: "Pilih topik yang ingin Anda baca.", openAbout: 'Buka Tentang Saya',
       newMessage: "Diskusi proyek", send: 'Kirim', toLabel: 'Kepada:', subject: 'Subjek:', message: 'Pesan', msgPlaceholder: "Ceritakan website atau aplikasi Anda, bantuan yang dibutuhkan, dan tenggatnya.", subjectOther: 'Hal lain', subjectPrefix: "Diskusi proyek", sendMeMsg: "Kirim brief proyek", sendHint: "Gunakan alamat email yang bisa saya hubungi.",
-      fromLabel: 'Dari:', fromPlaceholder: 'anda@perusahaan.com', sending: 'Mengirim…', sentTitle: 'Pesan terkirim', sentNote: (a) => `Saya akan membalas ke ${a}.`,
+      fromLabel: 'Dari:', fromPlaceholder: 'anda@perusahaan.com', sending: 'Mengirim…', sentTitle: 'Pesan terkirim', sentNote: (a) => `Saya akan membalas ke ${a}.`, sentLine: (time, a) => `Terkirim pukul ${time}. Saya akan membalas ke ${a}.`,
       fromFixTitle: (a) => `Maksudnya ${a}?`, fromFixNote: (a) => `${a} sepertinya salah ketik. Kalau sudah benar, kirim sekali lagi.`, fromFixUse: 'Pakai alamat ini',
       fromBadTitle: 'Periksa alamat email Anda', fromBadNote: (a) => `${a} tidak bisa menerima email, jadi balasan saya tidak akan sampai. Periksa lagi ejaannya.`,
       mailAppTitle: "Kirim draf lewat aplikasi email Anda", mailAppNote: "Website ini belum berhasil mengirim pesan Anda. Kirim drafnya lewat aplikasi email, atau salin alamat saya dan kirim email langsung.",
@@ -305,9 +305,10 @@
   const DEFS = {
     home: {
       icon: 'home', title: () => `${u('home')} - ${PF.owner.fullName}`, task: () => u('home'),
-      build: buildHome, route: () => '', onOpen: homeIntro, after: (w) => { homeArm(w); homePeek(w); homeDither(w); homeLogos(w); },
-      // the services menu opens on the first service whose picture is in
-      initial: () => ({ ep: 0, svc: Math.max(0, PF.home.services.list.findIndex((s) => s.img.src)), faq: 0, subj: 0, msg: '' }),
+      build: buildHome, route: () => '', onOpen: homeIntro, onFocus: homeTVTry,
+      after: (w) => { homeArm(w); homeTVArm(w); homePeek(w); homeScrollMark(w); homeCards(w); homeDither(w); homeLogos(w); },
+      // the services menu opens on the first service whose picture is in; a message begun earlier in the visit is back
+      initial: () => ({ ep: 0, svc: Math.max(0, PF.home.services.list.findIndex((s) => s.img.src)), faq: 0, subj: 0, msg: '', ...mailDraftLoad() }),
     },
     about: { icon: 'computer', title: () => `${u('about')} - ${PF.owner.name}`, task: () => u('about'), build: buildAbout, route: () => '#/about' },
     work: { icon: 'folder', title: () => u('work'), build: buildWork, route: () => '#/work', initial: () => ({ view: 'thumbs', sort: 'no', dir: 1, sel: PF.projects[0].slug }), onOpen: (w) => { const f = $('.files', w.el); if (f && !isMobile()) f.focus({ preventScroll: true }); } },
@@ -440,6 +441,7 @@
       else focusIn((w.def.dialog ? dlgDefault(w) : last || scrollerOf(w)) || w.el);
     }
     syncRoute(w, false);
+    if (w.def.onFocus) w.def.onFocus(w);
   }
   // XP's answer to a press on a window behind a modal dialog: the dialog's title bar flashes and its default button
   // takes the focus
@@ -776,16 +778,20 @@
     const k = Math.max(r.width / W, r.height / H);
     return { r, k, ox: (r.width - W * k) * TV_FOCUS[0], oy: (r.height - H * k) * TV_FOCUS[1] };
   }
-  function tvPoint(img, e) {
+  // reach: a finger gets at least this many CSS px of a box, however small it is printed
+  function tvPoint(img, e, reach = 0) {
     const f = tvFit(img);
     const x = (e.clientX - f.r.left - f.ox) / f.k, y = (e.clientY - f.r.top - f.oy) / f.k;
-    tvSelect(img.closest('.pt-crt'), PF.home.hero.photo.marks.find(({ box: [l, t0, rt, b] }) => x >= l && x <= rt && y >= t0 && y <= b));
+    const out = (a, b) => Math.max(0, (reach / f.k - (b - a)) / 2);
+    tvSelect(img.closest('.pt-crt'), PF.home.hero.photo.marks.find(({ box: [l, t0, rt, b] }) => x >= l - out(l, rt) && x <= rt + out(l, rt) && y >= t0 - out(t0, b) && y <= b + out(t0, b)));
   }
   function tvSelect(tv, m) {
     const sel = tv && $('.pt-sel', tv), img = tv && $('.pt-photo', tv), line = tv && $('.tv-title', tv);
     if (!sel || !img) return;
     sel.hidden = !m;
-    if (line) line.textContent = m ? `${u('detected')}: ${t(m.label)}` : PF.owner.fullName;
+    // a phone's set reads the short label, so the lower third keeps to one line and Now showing doesn't jump
+    const narrow = m && m.short && tv.closest('.home') && tv.closest('.home').clientWidth <= 520;
+    if (line) line.textContent = m ? `${u('detected')}: ${t(narrow ? m.short : m.label)}` : PF.owner.fullName;
     if (!m) return;
     const f = tvFit(img), [l, t0, rt, b] = m.box;
     Object.assign(sel.style, { left: `${f.ox + l * f.k}px`, top: `${f.oy + t0 * f.k}px`, width: `${(rt - l) * f.k}px`, height: `${(b - t0) * f.k}px` });
@@ -799,10 +805,15 @@
   }
   // the monitor is the case pages' CRT (its chin and stand from the player below, its case in style.css), made big;
   // its tube shows the photo under the Media Center lower third
-  function heroCrtHTML() {
+  // Home's set has a power button that works (a case page's CRT keeps a picture of one); the chin's other parts stay
+  // hidden from assistive tech one by one
+  const heroChin = (on) => `<span class="crt-chin"><span class="crt-grille" aria-hidden="true"></span><span class="crt-badge" aria-hidden="true"></span><span class="crt-keys" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="crt-lamp" aria-hidden="true"></span><button type="button" class="crt-power" data-act="home-power" aria-pressed="${on}" aria-label="${esc(u('power'))}"></button></span>`;
+  function heroCrtHTML(st) {
     const P = PF.home.hero.photo, sizes = '(min-width: 1100px) 760px, 86vw';
     const srcset = (f) => P.widths.map((w) => `${esc(P.base)}${w}.${f} ${w}w`).join(', ');
-    return `<figure class="pt-crt cs-crt">
+    // dark until its power-on (homeTVArm), or turned off with its button
+    const dark = st.tvOff ? ' off' : !homeTV.done && !reduceMotion ? ' standby' : '';
+    return `<figure class="pt-crt cs-crt${dark}">
       <div class="crt-case">
         <div class="crt-bezel">
           <div class="crt-glass">
@@ -815,7 +826,7 @@
             </div>
           </div>
         </div>
-        ${CRT_CHIN}
+        ${heroChin(!st.tvOff)}
       </div>
       ${crtStand()}
     </figure>`;
@@ -844,7 +855,7 @@
       ? `<img ${at}src="${esc(f.img.src)}"${set} alt="" loading="lazy" decoding="async"${W.dither ? ' data-dither' : ''}${f.img.pos ? ` style="object-position:${f.img.pos}"` : ''}>`
       : slotHTML(f.img, 'ft-ph');
     const ui = f.ui.src
-      ? `<img class="ft-ui-pic" ${at}src="${esc(f.ui.src)}" ${at}srcset="${esc(f.ui.src)} 920w, ${esc(f.ui.big)} 1380w" sizes="(max-width: 720px) calc(87.5vw - 120px), 460px" alt="" loading="lazy" decoding="async">`
+      ? `<img class="ft-ui-pic" ${at}src="${esc(f.ui.src)}" ${at}srcset="${esc(f.ui.src)} 920w, ${esc(f.ui.big)} 1380w" sizes="(max-width: 720px) calc(87.5vw - 120px), 460px" alt="" loading="lazy" decoding="async" fetchpriority="low">`
       : slotHTML(f.ui, 'ft-ui-pic', 'png');
     return `<li class="ft-show">
       <div class="ft-cover" aria-hidden="true">${pic}<span class="ft-ui">${ui}</span></div>
@@ -1039,11 +1050,30 @@
   }
   // What clients say runs past the window's edge: a mouse drags the row sideways (touch, trackpads and the
   // arrow keys scroll it themselves). Dragging stops the quotes from being selected as text
+  // Let go, the row carries on a little and settles on the nearest column in about 250 ms, as a swipe settles
   function rvDrag(row, e) {
     if (row.scrollWidth <= row.clientWidth) return;
     e.preventDefault();
     const x0 = e.clientX, s0 = row.scrollLeft;
-    follow(e, (ev) => { row.classList.add('drag'); row.scrollLeft = s0 - (ev.clientX - x0); }, () => row.classList.remove('drag'));
+    let vx = 0, lx = e.clientX, lt = performance.now(), moved = false;
+    row.classList.add('drag');
+    follow(e, (ev) => {
+      const now = performance.now();
+      if (now > lt) vx = (ev.clientX - lx) / (now - lt);
+      lx = ev.clientX; lt = now; moved = moved || Math.abs(ev.clientX - x0) > 2;
+      row.scrollLeft = s0 - (ev.clientX - x0);
+    }, () => {
+      row.classList.remove('drag');
+      if (!moved) return;
+      const pad = parseFloat(getComputedStyle(row).scrollPaddingLeft) || 0, rl = row.getBoundingClientRect().left;
+      const max = row.scrollWidth - row.clientWidth, aim = row.scrollLeft - vx * 120;
+      const stops = $$('.rv', row).map((c) => Math.max(0, Math.min(max, row.scrollLeft + c.getBoundingClientRect().left - rl - pad))).concat(max);
+      const to = stops.reduce((a, b) => (Math.abs(b - aim) < Math.abs(a - aim) ? b : a));
+      if (reduceMotion) { row.scrollLeft = to; return; }
+      const from = row.scrollLeft, t0 = performance.now();
+      const step = (now) => { const p = Math.min(1, (now - t0) / 250); row.scrollLeft = from + (to - from) * (1 - (1 - p) ** 3); if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
   }
   function homeEpisode(w, i, focusKey) {
     const n = PF.home.process.steps.length;
@@ -1054,7 +1084,14 @@
     screen.innerHTML = episodeScreenHTML(w.state.ep);
     if (desk) screen.prepend(desk);
     if (PF.desk3d) PF.desk3d.go(w.state.ep);
-    copy.innerHTML = episodeCopyHTML(w.state.ep);
+    // the copy goes with the picture, as one change: it dips out and back in 120 ms, swapped at the bottom of the dip
+    clearTimeout(copy.swapT);
+    if (reduceMotion || !copy.animate) copy.innerHTML = episodeCopyHTML(w.state.ep);
+    else {
+      copy.getAnimations().forEach((a) => a.cancel());
+      copy.animate([{ opacity: 1 }, { opacity: 0, offset: 0.5 }, { opacity: 1 }], { duration: 120 });
+      copy.swapT = setTimeout(() => { copy.innerHTML = episodeCopyHTML(w.state.ep); }, 60);
+    }
     $$('.rm-num', w.el).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === w.state.ep)));
     if (!reduceMotion) {
       screen.classList.remove('flick'); void screen.offsetWidth; screen.classList.add('flick');
@@ -1074,23 +1111,30 @@
     k.classList.remove('hit'); void k.offsetWidth; k.classList.add('hit');
   }
 
-  function servicePaneHTML(i) {
-    const s = PF.home.services.list[i];
-    // the pointed-at service shows its picture alone, at the owner's own shape (800, 1100 and 1600px WebP copies); a
-    // picture not supplied yet is a grey slot naming the owner's file. Its line stays in the data, not on the page.
-    // Lazy: the menu sits far down Home, so its picture waits until the visitor gets near it.
+  function servicePaneHTML(on) {
+    // every service's picture lies in the pane, stacked, at the owner's own shape (800, 1100 and 1600px WebP copies); the
+    // picked one shows (homeService). A picture not supplied yet is a grey slot naming the owner's file. Lazy: the menu
+    // sits far down Home, so the pictures wait until the visitor gets near it, the ones not showing last.
     // sizes follows the frame, so a 2x laptop or a 3x phone takes the 1100px copy
     const v = `?v=${PF.home.services.picVersion || 1}`;
-    const pic = s.img.src
-      ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${[800, 1100, 1600].map((x) => `${esc(s.img.src)}-${x}.webp${v} ${x}w`).join(', ')}" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 990px) 740px, 430px" width="800" height="868" alt="" loading="lazy" decoding="async">`
-      : slotHTML(s.img, 'mm-img', 'png', t(s.name));
-    return `<figure class="mm-fig">${pic}</figure>`;
+    return `<figure class="mm-fig">${PF.home.services.list.map((s, i) => {
+      const pic = s.img.src
+        ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${[800, 1100, 1600].map((x) => `${esc(s.img.src)}-${x}.webp${v} ${x}w`).join(', ')}" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 990px) 740px, 430px" width="800" height="868" alt="" loading="lazy" decoding="async"${i === on ? '' : ' fetchpriority="low"'}>`
+        : slotHTML(s.img, 'mm-img', 'png', t(s.name));
+      return `<div class="mm-layer${i === on ? ' on' : ''}" data-i="${i}">${pic}</div>`;
+    }).join('')}</figure>`;
   }
+  // the picture showing stays until the picked one has decoded, then they crossfade (home.css, .mm-layer), so the
+  // column never goes blank on a slow line
   function homeService(w, i) {
     if (!w || w.state.svc === i) return;
     w.state.svc = i;
     $$('.mm-item', w.el).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === i)));
-    const pane = $('.mm-pane', w.el); if (pane) { pane.innerHTML = servicePaneHTML(i); if (!reduceMotion) { pane.classList.remove('swap'); void pane.offsetWidth; pane.classList.add('swap'); } }
+    const layers = $$('.mm-layer', w.el), next = layers[i]; if (!next) return;
+    const img = $('img', next), show = () => { if (w.state.svc === i) layers.forEach((l) => l.classList.toggle('on', l === next)); };
+    if (!img) { show(); return; }
+    img.loading = 'eager';
+    img.decode().then(show, show);
   }
 
   function faqHTML(st) {
@@ -1113,7 +1157,7 @@
             <button type="button" class="page-key silver" data-act="home-go" data-to="hm-work">${I('play', 16)}<span>${esc(u('watchWork'))}</span></button>
           </div>
         </div>
-        ${heroCrtHTML()}
+        ${heroCrtHTML(st)}
       </header>
 
       <section class="pt-letter" aria-labelledby="pt-letter-h">
@@ -1197,7 +1241,7 @@
               <label class="sr-only" for="hm-msg">${esc(u('message'))}</label>
               <textarea id="hm-msg" class="field mail-body" rows="7" required maxlength="5000" placeholder="${esc(u('msgPlaceholder'))}">${esc(st.msg)}</textarea>
               <span class="mail-trap" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></span>
-              <div class="mail-send"><button type="submit" class="btn lg default">${I('envelope', 16)}<span>${esc(u('sendMeMsg'))}</span></button><small id="hm-send-note">${esc(u('sendHint'))}</small></div>
+              <div class="mail-send"><button type="submit" class="btn lg default">${I('envelope', 16)}<span>${esc(u('sendMeMsg'))}</span></button><small id="hm-send-note">${esc(st.sentShown && st.sent ? u('sentLine', sentTime(st.sent.at), st.sent.to) : u('sendHint'))}</small></div>
               <span class="sr-only" aria-live="polite" id="hm-copy-note"></span>
             </form>
           </div>
@@ -1214,45 +1258,135 @@
     </article></div>
     <div class="statusbar"><span>${I('home', 16)}${esc(u('home'))}</span><span><span class="long">${esc(t(o.statusLong))}</span><span class="short">${esc(t(o.status))}</span></span></div>`;
   }
-  // the CRT powers on once, the first time Home opens: the lamp lights, a bright line opens into the picture, then
-  // the lower third rises. Home may open behind the splash, so it waits until the splash has gone
-  function homeIntro(w) {
-    if (reduceMotion || homeIntro.done) return;
-    homeIntro.done = true;
-    (PF.bootDone || ((fn) => fn()))(() => {
-      const crt = $('.pt-crt', w.el);
-      if (crt) { crt.classList.add('power'); setTimeout(() => crt.classList.remove('power'), 1600); }
+  // The CRT powers on once a visit, where it is seen: Home active and not on the taskbar (a shared link may open it
+  // behind another window), half its glass in the window, the loading screen gone, and the photo decoded. The lamp
+  // lights, a bright line opens into the picture, then the lower third rises, and the set scans the room once. A
+  // photo that hasn't decoded within 2.5s just shows, without the moment
+  const homeTV = { done: false, scanned: false, photo: null };
+  function homeIntro(w) { (PF.bootDone || ((fn) => fn()))(() => homeTVTry(w)); }
+  function homeTVArm(w) {
+    const crt = $('.pt-crt', w.el), img = crt && $('.pt-photo', crt);
+    if (!img) return;
+    if (homeTV.done || reduceMotion || !window.IntersectionObserver) { homeTV.done = true; crt.classList.remove('standby'); return; }
+    const io = new IntersectionObserver((es) => { w.tvSeen = es.some((x) => x.intersectionRatio >= 0.5); homeTVTry(w); }, { root: $('.win-body', w.el), threshold: 0.5 });
+    io.observe($('.crt-glass', crt)); w.fxIO.push(io);
+    homeTV.photo = homeTV.photo || Promise.race([img.decode().then(() => true, () => false), new Promise((res) => setTimeout(() => res(false), 2500))]);
+    homeTV.photo.then((ok) => {
+      if (ok) { w.tvDecoded = true; homeTVTry(w); return; }
+      if (!homeTV.done) { homeTV.done = true; const c = $('.pt-crt', w.el); if (c) c.classList.remove('standby'); }
     });
+  }
+  function homeTVTry(w) {
+    if (homeTV.done || !w.tvSeen || !w.tvDecoded || activeId !== w.id || w.min || document.documentElement.classList.contains('booting')) return;
+    homeTV.done = true;
+    homeTVOn(w);
+  }
+  function homeTVOn(w) {
+    const crt = $('.pt-crt', w.el); if (!crt) return;
+    w.state.tvOff = false;
+    crt.classList.remove('standby', 'off');
+    const key = $('.crt-power', crt); if (key) key.setAttribute('aria-pressed', 'true');
+    if (reduceMotion) return;
+    crt.classList.remove('power'); void crt.offsetWidth; crt.classList.add('power');
+    clearTimeout(crt.powerT);
+    crt.powerT = setTimeout(() => { crt.classList.remove('power'); homeScan(w); }, 1600);
+  }
+  // Home's power button turns the set off the way a CRT went: the picture folds to a bright line, the line to a dot,
+  // the dot fades, the lamp goes out and the lower third drops. On again is the power-on
+  function homeTVOff(w) {
+    const crt = $('.pt-crt', w.el); if (!crt) return;
+    w.state.tvOff = true;
+    clearTimeout(crt.powerT); crt.classList.remove('power');
+    tvSelect(crt, null);
+    const key = $('.crt-power', crt); if (key) key.setAttribute('aria-pressed', 'false');
+    const done = () => { if (w.state.tvOff) crt.classList.add('off'); };
+    const pic = $('picture', crt), low = $('.tv-lower', crt);
+    if (reduceMotion || !pic || !pic.animate) { done(); return; }
+    low.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(100%)', opacity: 0 }], { duration: 180, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' })
+      .finished.then(() => low.getAnimations().forEach((a) => a.cancel()), () => {});
+    pic.animate([
+      { clipPath: 'inset(0)', filter: 'brightness(1)', opacity: 1, easing: 'cubic-bezier(.4, 0, 1, 1)' },
+      { clipPath: 'inset(49.6% 0 49.6% 0)', filter: 'brightness(2.4)', opacity: 1, offset: 0.36, easing: 'cubic-bezier(.4, 0, 1, 1)' },
+      { clipPath: 'inset(49.6% 49.6% 49.6% 49.6%)', filter: 'brightness(2.4)', opacity: 1, offset: 0.6 },
+      { clipPath: 'inset(49.6% 49.6% 49.6% 49.6%)', filter: 'brightness(2.4)', opacity: 0 },
+    ], { duration: 500 }).finished.then(done, done);
+  }
+  // after its first power-on the set scans the room once: the dashed box draws itself round the face and the lower
+  // third reads what it found, then the name comes back (not while the pointer is on the photo, which reads itself)
+  function homeScan(w) {
+    if (homeTV.scanned || reduceMotion) return;
+    homeTV.scanned = true;
+    const crt = $('.pt-crt', w.el), sel = crt && $('.pt-sel', crt), m = PF.home.hero.photo.marks[0];
+    if (!sel || !m || crt.matches(':hover') || w.state.tvOff) return;
+    tvSelect(crt, m);
+    sel.classList.add('scan');
+    setTimeout(() => { sel.classList.remove('scan'); if (!crt.matches(':hover')) tvSelect(crt, null); }, 1440);
   }
   // the moments that play when their section first scrolls into view, once per visit. Home is re-rendered
   // (language, resize), so the watchers are re-armed after every render; what has played stays played
-  const homeFx = { wall: false, squeeze: false, risen: new Set() };
+  const homeFx = { wall: false, squeeze: false, risen: new Set(), peeked: new Set() };
   const HOME_RISE = '#pt-letter-h, #hm-work-h, #pt-ch-h, #hm-words-h, #hm-proc-h, #hm-svc-h, #hm-faq-h, #hm-cta-h';
-  // On a touch screen a programme row's UI card comes up while its cover crosses the middle fifth of the window,
-  // the touch stand-in for pointing at it (home.css, .peek); under reduced motion it just appears
+  // A touch screen has no pointing, so a programme row's UI card comes up when the visitor stops on it: the page at
+  // rest for 600 ms with the cover at least 80% in view, its middle in the middle 40% of the window. It goes down
+  // as soon as the page moves again, and comes up once a row a visit (home.css, .peek)
   function homePeek(w) {
-    if (!window.IntersectionObserver || !matchMedia('(hover: none)').matches) return;
-    const io = new IntersectionObserver((es) => es.forEach((x) => x.target.closest('.ft-show').classList.toggle('peek', x.isIntersecting)),
-      { root: $('.win-body', w.el), rootMargin: '-40% 0px -40% 0px' });
-    $$('.ft-show .ft-cover', w.el).forEach((c) => { if ($('.ft-ui', c)) io.observe(c); });
-    w.fxIO.push(io);
+    const body = $('.win-body', w.el);
+    if (!body || !matchMedia('(hover: none)').matches) return;
+    let rest = 0, quiet = 0;
+    const look = () => {
+      const v = body.getBoundingClientRect(), mid = v.top + v.height / 2;
+      $$('.ft-show', w.el).some((row, k) => {
+        const c = $('.ft-cover', row), r = c.getBoundingClientRect(), seen = Math.min(r.bottom, v.bottom) - Math.max(r.top, v.top);
+        if (homeFx.peeked.has(k) || !$('.ft-ui', c) || seen < r.height * 0.8 || Math.abs(r.top + r.height / 2 - mid) > v.height * 0.2) return false;
+        homeFx.peeked.add(k); row.classList.add('peek');
+        return true;
+      });
+    };
+    const settled = () => { clearTimeout(quiet); clearTimeout(rest); rest = setTimeout(look, 600); };
+    body.addEventListener('scroll', () => {
+      clearTimeout(rest); clearTimeout(quiet);
+      $$('.ft-show.peek', w.el).forEach((row) => row.classList.remove('peek'));
+      quiet = setTimeout(settled, 150);   // where scrollend never comes
+    }, { passive: true });
+    body.addEventListener('scrollend', settled);
+  }
+  // what the page scrolls under a resting pointer doesn't light up or rise (home.css, .scrolling): pointing starts again
+  // only when the mouse itself moves (the browser's own move after a scroll carries no movement)
+  function homeScrollMark(w) {
+    const body = $('.win-body', w.el), home = $('.home', w.el); if (!body || !home) return;
+    body.addEventListener('scroll', () => home.classList.add('scrolling'), { passive: true });
+    body.addEventListener('pointermove', (e) => { if (e.movementX || e.movementY) home.classList.remove('scrolling'); }, { passive: true });
+  }
+  // a UI card rises only once its picture is in, never as an empty white card on a slow line (home.css, .ready)
+  function homeCards(w) {
+    $$('.ft-ui-pic', w.el).forEach((im) => {
+      const ok = () => { if (im.naturalWidth) im.closest('.ft-ui').classList.add('ready'); };
+      if (im.complete) ok(); else im.addEventListener('load', ok, { once: true });
+    });
   }
   function homeArm(w) {
     if (w.fxIO) w.fxIO.forEach((io) => io.disconnect());
     w.fxIO = [];
     if (reduceMotion || !window.IntersectionObserver) return;
-    // measured against the window's own scroller: only what shows inside the window counts as in view
+    // measured against the window's own scroller: only what shows inside the window counts as in view. A moment the
+    // page only passes on a jump (homeGlide) waits, and is looked at again where the jump lands
     const root = $('.win-body', w.el);
     const once = (key, el, threshold, run) => {
       if (homeFx[key] || !el) return;
       const io = new IntersectionObserver((es) => {
         if (!es.some((x) => x.isIntersecting && x.intersectionRatio >= threshold)) return;
+        if (PF.homeJumping) { addEventListener('pf-jumpend', () => { io.unobserve(el); io.observe(el); }, { once: true }); return; }
         io.disconnect(); homeFx[key] = true; run(el);
       }, { root, threshold });
       io.observe(el); w.fxIO.push(io);
     };
-    // the multiviewer locks onto its feeds
-    once('wall', $('.mv-wall', w.el), 0.3, (wall) => wall.classList.add('lock'));
+    // the multiviewer locks onto its feeds once the pictures in view have decoded (1.5s at most), never over black cells
+    once('wall', $('.mv-wall', w.el), 0.3, (wall) => {
+      const v = root.getBoundingClientRect();
+      const shown = $$('img.mv-img', wall).filter((im) => { const r = im.getBoundingClientRect(); return r.bottom > v.top && r.top < v.bottom; });
+      Promise.race([Promise.all(shown.map((im) => im.decode().catch(() => {}))), new Promise((res) => setTimeout(res, 1500))])
+        .then(() => wall.classList.add('lock'));
+    });
     // each section's heading rises 8px into place as it comes into view, once a visit (home.css, .rise). The headings
     // are counted in page order, which a re-render keeps, so one that has risen is not hidden again
     const parts = $$(HOME_RISE, w.el).filter((el, k) => !homeFx.risen.has(k) && (el.dataset.rise = k, el.classList.add('rise'), true));
@@ -1263,7 +1397,7 @@
         x.target.style.setProperty('--rise-d', `${Math.min(n, 4) * 60}ms`);
         x.target.classList.add('risen');
       });
-    }, { root, rootMargin: '0px 0px -8% 0px' });
+    }, { root, rootMargin: '0px 0px 12% 0px' });
     parts.forEach((el) => io.observe(el)); w.fxIO.push(io);
   }
   function homeFaq(w, i) {
@@ -1305,6 +1439,65 @@
     if (kind === 'sent') f.balTimer = setTimeout(() => { b.classList.add('out'); setTimeout(() => b.remove(), 300); }, 8000);
   }
 
+  // after the balloon, the hint beside Send keeps what happened, in the visitor's own clock, until they write again
+  const sentTime = (d) => d.toLocaleTimeString(lang === 'id' ? 'id-ID' : 'en-US', { hour: lang === 'id' ? '2-digit' : 'numeric', minute: '2-digit' });
+  function homeSentLine(w) {
+    const note = w && $('#hm-send-note', w.el); if (!note || !w.state.sent) return;
+    w.state.sentShown = true;
+    note.textContent = u('sentLine', sentTime(w.state.sent.at), w.state.sent.to);
+  }
+  // what the visitor has written is kept for the visit, so closing Home and opening it again loses nothing
+  const MAIL_DRAFT = 'pf-a-draft';
+  function mailDraftSave(st) {
+    try { sessionStorage.setItem(MAIL_DRAFT, JSON.stringify({ from: st.from || '', subj: st.subj || 0, msg: st.msg || '' })); } catch (e) { /* storage unavailable */ }
+  }
+  function mailDraftLoad() {
+    try {
+      const d = JSON.parse(sessionStorage.getItem(MAIL_DRAFT)) || {}, out = {};
+      if (typeof d.from === 'string') out.from = d.from;
+      if (typeof d.msg === 'string') out.msg = d.msg;
+      if (Number.isInteger(d.subj) && d.subj >= 0 && d.subj < homeOffers().length) out.subj = d.subj;
+      return out;
+    } catch (e) { return {}; }
+  }
+  // A long way down Home is a cut, then a short glide in (the last 600px in about 450 ms, slowing as it lands): the page
+  // doesn't stream past for a second and a half, and the glide says where the visitor landed. Nothing the page only
+  // passes wakes for it (PF.homeJumping: the multiviewer, the desk). Without motion it is one cut. A wheel, a touch or
+  // a key stops it where it is. Resolves once the page is at rest
+  function homeGlide(w, el, block) {
+    const body = $('.win-body', w.el); if (!body || !el) return Promise.resolve();
+    const b = body.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const to = Math.max(0, Math.min(body.scrollHeight - body.clientHeight, body.scrollTop + r.top - b.top - (block === 'center' ? Math.max(0, (body.clientHeight - r.height) / 2) : 0)));
+    if (reduceMotion) { body.scrollTop = to; return Promise.resolve(); }
+    const run = Math.min(600, Math.abs(to - body.scrollTop)), from = to - Math.sign(to - body.scrollTop) * run;
+    PF.homeJumping = true;
+    body.scrollTop = from;
+    return new Promise((res) => {
+      const t0 = performance.now();
+      let held = false;
+      const hold = () => { held = true; };
+      const quits = [['wheel', { passive: true }], ['touchstart', { passive: true }], ['keydown', {}]];
+      quits.forEach(([k, o]) => body.addEventListener(k, hold, o));
+      const step = (now) => {
+        const p = held ? 1 : Math.min(1, (now - t0) / 450);
+        if (!held) body.scrollTop = from + (to - from) * (1 - (1 - p) ** 3);
+        if (p < 1) { requestAnimationFrame(step); return; }
+        quits.forEach(([k]) => body.removeEventListener(k, hold));
+        PF.homeJumping = false;
+        dispatchEvent(new Event('pf-jumpend'));
+        res();
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  // a mini window's title bar flashes twice, XP's way of saying the keys will go there (home.css, .mw.lit)
+  function homeFlash(mw) {
+    if (!mw || reduceMotion) return;
+    clearInterval(mw.flashT);
+    let n = 0;
+    mw.flashT = setInterval(() => { mw.classList.toggle('lit'); if (++n === 4) { clearInterval(mw.flashT); mw.classList.remove('lit'); } }, 160);
+  }
+
   // The message goes straight to the owner's inbox through /api/message (worker/index.js). Where that can't
   // send (not set up, offline, a local preview) the visitor's email app opens with the same message; an address no
   // reply can reach comes back to the form instead
@@ -1318,6 +1511,9 @@
     // the button itself says it is sending, in full ink, its dots running, at the width it had, so the hint beside it
     // stays put; a screen reader hears it through the form's live note
     const label = $('span', btn), was = label.textContent, live = $('#hm-copy-note', f);
+    // what is being sent can't change while it goes: the fields hold still until the answer comes
+    const held = [field, $('#hm-msg', f)];
+    held.forEach((x) => { x.readOnly = true; }); f.setAttribute('aria-busy', 'true');
     btn.style.minWidth = `${btn.offsetWidth}px`;
     label.innerHTML = `${esc(u('sending').replace(/…$/, ''))}<i class="dots" aria-hidden="true"><i>.</i><i>.</i><i>.</i></i>`;
     // aria-disabled, not disabled: a disabled button would drop the keyboard focus to the page
@@ -1332,11 +1528,15 @@
       });
     } catch (e) { res = null; }
     btn.removeAttribute('aria-disabled'); btn.classList.remove('busy'); btn.removeAttribute('aria-busy'); label.textContent = was; btn.style.minWidth = '';
+    held.forEach((x) => { x.readOnly = false; }); f.removeAttribute('aria-busy');
     if (live) live.textContent = '';
     say(u('sendHint'));
     if (res && res.ok) {
-      $('#hm-msg', f).value = ''; w.state.msg = '';
+      // the message is emptied only if it is still the one that went
+      const m = $('#hm-msg', f); if (m.value.trim() === message) { m.value = ''; w.state.msg = ''; mailDraftSave(w.state); }
+      w.state.sent = { at: new Date(), to: from };
       mailBalloon(f, 'sent', from); track('send', 'api');
+      clearTimeout(w.sentT); w.sentT = setTimeout(() => homeSentLine(w), 8300);
       return;
     }
     // no reply could reach the address (worker/index.js, message()): the message waits in the form, and the balloon
@@ -2415,17 +2615,29 @@
     'saver-go': (a, w) => { if (w && w.game) { w.game.primary(); w.game.focus(); } },
     'open-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
     'home-about': (a) => openWin('about', { from: rectOf(a), pushHistory: true }),
-    'home-start': (a, w) => {
+    'home-start': (a, w, e) => {
       track('start');
       const f = w && $('.hm-mail', w.el); if (!f) return;
-      f.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
-      const m = $('#hm-msg', f); if (m) m.focus({ preventScroll: true });
+      // the message takes the keys as the page lands, so its ring and its title bar light as it arrives; a touch screen
+      // gets the title bar's flash instead, so its keyboard doesn't jump up over the page
+      homeGlide(w, f, 'center').then(() => {
+        const touch = e && e.pointerType ? e.pointerType !== 'mouse' : matchMedia('(hover: none)').matches;
+        const m = $('#hm-msg', f);
+        if (touch) homeFlash(f); else if (m) m.focus({ preventScroll: true });
+      });
     },
-    'mail-bal-x': (a) => { const b = a.closest('.mail-bal'); if (b) b.remove(); },
+    'mail-bal-x': (a, w) => { const b = a.closest('.mail-bal'); if (!b) return; if (b.dataset.kind === 'sent' && w) { clearTimeout(w.sentT); homeSentLine(w); } b.remove(); },
+    // Home's CRT: its power button turns the set off and on again
+    'home-power': (a, w) => {
+      if (!w) return;
+      const crt = a.closest('.pt-crt');
+      if (crt.classList.contains('off') || crt.classList.contains('standby')) { homeTV.done = true; homeTVOn(w); } else homeTVOff(w);
+    },
     // the balloon's fix for a slip in the address: it takes the field's place, and Send is next
     'home-fix': (a, w) => {
       const f = w && $('.hm-mail', w.el), field = f && $('#hm-from', f); if (!field) return;
       field.value = w.state.from = a.dataset.to;
+      mailDraftSave(w.state);
       field.removeAttribute('aria-invalid');
       a.closest('.mail-bal').remove();
       $('button[type="submit"]', f).focus();
@@ -2451,12 +2663,9 @@
     },
     'home-go': (a, w) => {
       const s = w && $('#' + a.dataset.to, w.el); if (!s) return;
-      s.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
       // the keys follow the jump once it lands, so the next Tab goes on from the heading, not from the key left behind
-      const h = s.matches('h1, h2, h3') ? s : $('h1, h2, h3', s) || s, body = s.closest('.win-body');
-      const land = () => { clearTimeout(t); if (!h.hasAttribute('tabindex')) h.tabIndex = -1; focusIn(h); };
-      const t = setTimeout(land, reduceMotion ? 0 : 1800);
-      if (!reduceMotion && body) body.addEventListener('scrollend', land, { once: true });
+      const h = s.matches('h1, h2, h3') ? s : $('h1, h2, h3', s) || s;
+      homeGlide(w, s, 'start').then(() => { if (!h.hasAttribute('tabindex')) h.tabIndex = -1; focusIn(h); });
     },
     // a programme row opens its case study; the player zooms out of the row's cover
     'home-case': (a) => { const row = a.closest('.ft-show'); openCase(a.dataset.slug, rectOf(row && $('.ft-cover', row)) || rectOf(a), true); },
@@ -2466,7 +2675,15 @@
       homeEpisode(w, +a.dataset.i, true);
     },
     'home-ep-step': (a, w) => { if (w) { homeEpisode(w, w.state.ep + (+a.dataset.d)); a.focus({ preventScroll: true }); } },
-    'home-svc': (a, w) => homeService(w, +a.dataset.i),
+    'home-svc': (a, w) => {
+      homeService(w, +a.dataset.i);
+      // stacked on a narrow page the picture sits under the list: a pick that leaves most of it out of view brings it in
+      const fig = w && $('.mm-fig', w.el), list = w && $('.mm-list', w.el), body = fig && fig.closest('.win-body');
+      if (!fig || !list || !body) return;
+      const r = fig.getBoundingClientRect(), v = body.getBoundingClientRect();
+      const stacked = r.top >= list.getBoundingClientRect().bottom - 1, seen = (Math.min(r.bottom, v.bottom) - Math.max(r.top, v.top)) / r.height;
+      if (stacked && seen < 0.6) fig.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+    },
     'home-faq': (a, w) => homeFaq(w, +a.dataset.i),
     'send-brief': (a, w) => {
       const list = w ? $$('input[name="need"]:checked', w.el).map((c) => c.value).join(', ') : '';
@@ -2651,7 +2868,7 @@
 
   // pointing at an item previews it: Explorer's hover-select, and Home's Media Center services menu. A cover is selected
   // after XP's hover time (400 ms at rest), so crossing covers on the way to the task pane doesn't retarget its links
-  let fileHover = null, fileHoverT = 0;
+  let fileHover = null, fileHoverT = 0, svcHoverT = 0;
   document.addEventListener('mouseover', (e) => {
     const f = e.target.closest('.files [data-slug]');
     if (f !== fileHover) {
@@ -2659,19 +2876,30 @@
       if (f) fileHoverT = setTimeout(() => { const w = winOf(f); if (w && f.isConnected && f.matches(':hover')) selectFile(w, f.dataset.slug); }, 400);
     }
     if (f) return;
+    // a service is picked after 100 ms of pointing, so a sweep across the list doesn't pick each one on the way, and
+    // never by the page scrolling under a resting pointer
     const mi = e.target.closest('.mm-item[data-i]');
-    if (mi) { homeService(winOf(mi), +mi.dataset.i); return; }
+    clearTimeout(svcHoverT);
+    if (mi) {
+      if (!mi.closest('.home.scrolling')) svcHoverT = setTimeout(() => { if (mi.isConnected && mi.matches(':hover')) homeService(winOf(mi), +mi.dataset.i); }, 100);
+      return;
+    }
     // the reviews row offers a grab hand only while it has more to show than the window holds
     const rv = e.target.closest('.rv-row');
     if (rv) rv.classList.toggle('grab', rv.scrollWidth > rv.clientWidth);
   });
-  document.addEventListener('mouseout', (e) => {
-    const img = e.target.closest('.pt-photo');
+  // the hero's photo reads what the mouse points at; a finger taps a box, and gets 44px of it however small it is
+  document.addEventListener('pointerout', (e) => {
+    const img = e.pointerType === 'mouse' && e.target.closest && e.target.closest('.pt-photo');
     if (img) tvSelect(img.closest('.pt-crt'), null);
   });
-  document.addEventListener('mousemove', (e) => {
-    const img = e.target.closest && e.target.closest('.pt-photo'); if (!img) return;
+  document.addEventListener('pointermove', (e) => {
+    const img = e.pointerType === 'mouse' && e.target.closest && e.target.closest('.pt-photo'); if (!img) return;
     tvPoint(img, e);
+  });
+  document.addEventListener('pointerdown', (e) => {
+    const img = e.pointerType !== 'mouse' && e.target.closest && e.target.closest('.pt-photo'); if (!img) return;
+    tvPoint(img, e, 44);
   });
   document.addEventListener('focusin', (e) => {
     if (!e.target.closest) return;
@@ -2727,6 +2955,12 @@
     if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && e.target.closest && e.target.closest('.mm-list')) {
       const all = $$('.mm-item', e.target.closest('.mm-list')), nx = all[all.indexOf(e.target.closest('.mm-item')) + (e.key === 'ArrowDown' ? 1 : -1)];
       if (nx) { e.preventDefault(); nx.focus(); }
+      return;
+    }
+    // Home: the remote's number keys answer the keyboard's digits, pressed down as a click would press them
+    if (/^[1-9]$/.test(e.key) && e.target.closest && e.target.closest('.pt-remote')) {
+      const w = winOf(e.target), k = w && $(`.rm-num[data-i="${+e.key - 1}"]`, w.el);
+      if (k) { e.preventDefault(); homeEpisode(w, +e.key - 1, true); keyHit(k); }
       return;
     }
     // Home: arrows on the remote switch episodes; in the Picture Viewer they step through the pictures
@@ -2785,9 +3019,13 @@
       const v = $('.screen-view', w.el), x = +e.target.value / 1000;
       v.scrollTop = (w.knots ? tlProg(w.knots, x) : x) * (v.scrollHeight - v.clientHeight);
     } else if (e.target.classList.contains('tsize')) setTextSize(w, +e.target.value);
-    else if (e.target.id === 'hm-msg') w.state.msg = e.target.value; // survives a language switch
-    else if (e.target.id === 'hm-from') {
-      w.state.from = e.target.value;
+    else if (e.target.id === 'hm-msg' || e.target.id === 'hm-from') {
+      // kept through a language switch, and for the visit (mailDraftSave)
+      if (e.target.id === 'hm-msg') w.state.msg = e.target.value; else w.state.from = e.target.value;
+      mailDraftSave(w.state);
+      if (w.state.sentShown) { w.state.sentShown = false; w.state.sent = null; const n = $('#hm-send-note', w.el); if (n) n.textContent = u('sendHint'); }
+    }
+    if (e.target.id === 'hm-from') {
       // a new address answers the balloon about the old one
       e.target.removeAttribute('aria-invalid');
       const bal = $('.mail-bal[data-kind="fix"], .mail-bal[data-kind="bad"]', w.el); if (bal) bal.remove();
@@ -2798,7 +3036,7 @@
     const w = winOf(e.target); if (!w) return;
     if (k === 'switch-case') switchCase(w, e.target.value);
     if (k === 'contact-cat') { w.state.cat = e.target.value; renderWin(w, false); }
-    if (k === 'home-subj') w.state.subj = +e.target.value;
+    if (k === 'home-subj') { w.state.subj = +e.target.value; mailDraftSave(w.state); }
     if (k === 'home-startup') { try { if (e.target.checked) localStorage.removeItem(HOME_KEY); else localStorage.setItem(HOME_KEY, '0'); } catch (err) { /* storage unavailable */ } }
   });
 

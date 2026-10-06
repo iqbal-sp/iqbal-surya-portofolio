@@ -29,7 +29,9 @@ export const CFG = {
   scanlines: 0.06,
   exposure: 1.15,
   fps: 30,
-  glide: 1.4,           // s for the camera to travel between stations
+  glide: 0.9,           // s for the camera to travel to the next station
+  glideStep: 0.25,      // s more for each station further along the desk
+  runs: 2,              // times through a station's loop before it holds on its still, until the remote is used again
   glitch: [180, 320],   // ms of the burst when the channel changes
   cutGlitch: 110,       // ms of the burst a station asks for at a cut
   parallax: [0.10, 0.06], // units the camera leans with the pointer over the screen
@@ -90,6 +92,7 @@ export function createDesk(host, opts = {}) {
     s.mood = { key: 1, rim: 1, fill: 1, ...s.mood };
     s.cuts = s.cuts || [];
     s.time = 0;
+    s.runs = 0;            // times through its loop since the camera came
     s.finishing = false;   // left while mid-loop: runs on to the loop's end, then rests at pose(0)
     s.update(0);
     scene.add(s.group);
@@ -103,7 +106,7 @@ export function createDesk(host, opts = {}) {
   const from = { pos: new THREE.Vector3(), target: new THREE.Vector3(), fov: 30, lx: 0 };
   const lean = new THREE.Vector2(), leanAim = new THREE.Vector2();
   const right = new THREE.Vector3(), up = new THREE.Vector3(), fwd = new THREE.Vector3();
-  let active = opts.start ?? 0, gliding = 0;      // gliding: seconds left in the move to the active station
+  let active = opts.start ?? 0, gliding = 0, glideFor = cfg.glide;   // gliding: seconds left of the glideFor-long move
   let lightX = 0;
   const mood = { key: 1, rim: 1, fill: 1 };
   let ready = false, dead = false, wanted = active;   // wanted: the station asked for while still building
@@ -119,7 +122,7 @@ export function createDesk(host, opts = {}) {
     const s = stations[active];
     stationShot(s, s.time, shot);
     if (gliding > 0) {
-      const e = k.easeInOut(1 - gliding / cfg.glide);
+      const e = k.easeInOut(1 - gliding / glideFor);
       pose.pos.lerpVectors(from.pos, shot.pos, e);
       pose.pos.y += Math.sin(Math.PI * e) * 0.35;          // a small crane up over the desk on the way
       pose.pos.z += Math.sin(Math.PI * e) * 0.6;           // and back a little, so the move reads as travel
@@ -234,14 +237,18 @@ export function createDesk(host, opts = {}) {
   }
 
   /* ---------- time ---------- */
+  // resting: the active station has been through its loop cfg.runs times and is back at its still (frame() holds there)
+  let resting = false;
   function advance(dt) {
     stations.forEach((s, i) => {
       if (i === active) {
         const was = s.time;
         s.time += dt;
-        if (s.time >= s.period) s.time -= s.period;
-        // a station's own cuts glitch only once the camera has arrived
-        if (gliding <= 0 && !rm()) for (const c of s.cuts) if ((was < c && s.time >= c) || (s.time < was && (c > was || c <= s.time))) glitch(cfg.cutGlitch);
+        const wrapped = s.time >= s.period;
+        if (wrapped) { s.time -= s.period; s.runs++; }
+        // a station's own cuts glitch only on its first time through, once the camera has arrived
+        if (gliding <= 0 && !rm() && s.runs === 0) for (const c of s.cuts) if ((was < c && s.time >= c) || (s.time < was && (c > was || c <= s.time))) glitch(cfg.cutGlitch);
+        if (s.runs >= cfg.runs && s.time >= s.still && (was < s.still || wrapped)) { s.time = s.still; resting = true; }
       } else if (s.finishing) {
         s.time += dt;
         if (s.time >= s.period) { s.time = 0; s.finishing = false; }
@@ -286,6 +293,8 @@ export function createDesk(host, opts = {}) {
     aim(dt);
     glitchTick(now);
     draw();
+    // the still it rests on is the picture the episode's still shows; the loop sleeps until the remote is used
+    if (resting && gliding <= 0) { resting = false; frozen = true; return; }
     wait(last + gap - performance.now() - 4);
   }
   function play() {
@@ -304,10 +313,13 @@ export function createDesk(host, opts = {}) {
     const leaving = stations[active];
     if (leaving !== stations[i] && leaving.time > 0) leaving.finishing = true;
     from.pos.copy(pose.pos); from.target.copy(pose.target); from.fov = pose.fov; from.lx = lightX;
+    // the move takes as long as the way is: 0.9s to the next station, a quarter of a second more for each beyond it
+    glideFor = cfg.glide + cfg.glideStep * Math.max(0, Math.abs(i - active) - 1);
     active = i;
     const s = stations[i];
-    s.finishing = false; s.time = 0; s.update(0);
-    gliding = cfg.glide;
+    s.finishing = false; s.time = 0; s.runs = 0; s.update(0);
+    resting = false;
+    gliding = glideFor;
     glitch(rand(...cfg.glitch));
     if (!raf && !timer) { frozen = false; play(); }
   }
@@ -315,8 +327,8 @@ export function createDesk(host, opts = {}) {
   // show station i at local time t, all at rest, and draw once; resume = keep playing from there
   function freeze(i, t, resume = false) {
     active = i;
-    stations.forEach((s, j) => { s.finishing = false; s.time = j === i ? t : 0; s.update(s.time); });
-    gliding = 0;
+    stations.forEach((s, j) => { s.finishing = false; s.runs = 0; s.time = j === i ? t : 0; s.update(s.time); });
+    gliding = 0; resting = false;
     Object.assign(mood, stations[i].mood);
     post.uniforms.uGlitch.value = 0; glitchUntil = 0;
     lean.set(0, 0);
@@ -331,8 +343,9 @@ export function createDesk(host, opts = {}) {
     from.pos.copy(pose.pos); from.target.copy(pose.target); from.fov = pose.fov; from.lx = lightX;
     active = j;
     const s = stations[j];
-    s.time = e * cfg.glide; s.update(s.time);
-    gliding = cfg.glide * (1 - e);
+    glideFor = cfg.glide;
+    s.time = e * glideFor; s.update(s.time);
+    gliding = glideFor * (1 - e);
     Object.assign(mood, stations[e < 0.5 ? i : j].mood);
     aim(0);
     draw();
@@ -344,7 +357,8 @@ export function createDesk(host, opts = {}) {
     leanAim.set(((e.clientX - r.left) / r.width - 0.5) * 2, -((e.clientY - r.top) / r.height - 0.5) * 2);
   };
   const onLeave = () => leanAim.set(0, 0);
-  const onVis = () => (document.hidden ? stop() : play());
+  // a desk holding on its still stays held when the tab comes back
+  const onVis = () => (document.hidden ? stop() : !frozen && play());
   document.addEventListener('visibilitychange', onVis);
   const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; if (onScreen) { if (!frozen) play(); } else stop(); });
   const ro = new ResizeObserver(() => { layout(); if (ready && !raf && !timer) { aim(1); draw(); } });
@@ -382,15 +396,17 @@ export function createDesk(host, opts = {}) {
     scene.environment = pmrem.fromScene(envScene(), 0.02).texture;
     pmrem.dispose();
     await idle(); if (dead) return;
-    scene.add(buildDesk());
+    const top = buildDesk();
+    scene.add(top);
     for (let i = 0; i < BUILDERS.length; i++) { await idle(); if (dead) return; addStation(BUILDERS[i], i); }
     layout();
     // every shader, for all four stations and their hidden parts, compiled for the render target they draw into,
     // one station at a time; with KHR_parallel_shader_compile the GPU compiles them without holding up the page
     renderer.setRenderTarget(target);
     for (const s of stations) { await idle(); if (dead) return; await renderer.compileAsync(s.group, camera, scene); }
+    // then the desk itself: the stations' shaders are in already, so this step is small
     await idle(); if (dead) return;
-    await renderer.compileAsync(scene, camera);
+    await renderer.compileAsync(top, camera, scene);
     renderer.setRenderTarget(null);
     renderer.compile(postScene, postCam);
     for (const t of textures(scene)) { await idle(); if (dead) return; renderer.initTexture(t); }
@@ -405,8 +421,9 @@ export function createDesk(host, opts = {}) {
     lightX = stations[active].x;
     Object.assign(mood, stations[active].mood);
     ready = true;
+    // its first frame is the episode's still, the picture already on the screen, so the 3D takes over without a seam
     if (rm()) freeze(active, stations[active].still);
-    else { stations[active].update(0); aim(1); draw(); play(); }
+    else { const s = stations[active]; s.time = s.still; s.runs = 0; s.update(s.time); aim(1); draw(); play(); }
   }
   const onReduce = () => { if (!ready) return; if (rm()) { stop(); freeze(active, stations[active].still); } else play(); };
   mqReduce.addEventListener('change', onReduce);

@@ -292,7 +292,11 @@
   }
   const files = 'PerformanceObserver' in window ? new PerformanceObserver((list) => list.getEntries().forEach(() => blink())) : null;
   box.addEventListener('pointerdown', () => blink());
-  addEventListener('keydown', () => blink());
+  // a key pressed during the test is answered as a BIOS answers it, once, on the line under the bar
+  addEventListener('keydown', () => {
+    blink();
+    if (run && !run.holding && !run.retrying && !run.keyed && !tail.textContent) { run.keyed = true; tail.textContent = 'Keyboard OK'; }
+  });
 
   /* ---------- one showing of the screen ---------- */
   let run = null;

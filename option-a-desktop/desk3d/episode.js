@@ -57,10 +57,22 @@ function unmount() {
 }
 
 // Home is built and rebuilt by app.js (opening the window, switching language), so the screen is looked up again
-// whenever the page changes, and the desk moves to the new screen once that screen comes near the viewport
-const near = new IntersectionObserver((entries) => {
-  for (const e of entries) if (e.isIntersecting && e.target === watched) mount(e.target);
-}, { rootMargin: '600px 0px' });
+// whenever the page changes, and the desk moves to the new screen once that screen comes within 600px of the view.
+// Measured against Home's own scroller (the screen scrolls inside the window, so the viewport's margin never reaches
+// it), so the desk is built and drawn before the TV shows. A jump down Home (app.js, PF.homeJumping) only passes the
+// screen: it is looked at again where the jump lands
+let near = null;
+function watch(screen) {
+  if (near) near.disconnect();
+  near = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting || e.target !== watched) continue;
+      if (PF.homeJumping) addEventListener('pf-jumpend', () => { if (watched === screen) watch(screen); }, { once: true });
+      else mount(e.target);
+    }
+  }, { root: screen.closest('.win-body'), rootMargin: '600px 0px' });
+  near.observe(screen);
+}
 
 let queued = false;
 function check() {
@@ -68,15 +80,15 @@ function check() {
   if (host && !host.isConnected) park();
   const screen = document.querySelector('.home .pe-screen');
   if (screen === watched) return;
-  if (watched) near.unobserve(watched);
+  if (near) near.disconnect();
   watched = screen;
-  if (screen) near.observe(screen);
+  if (screen) watch(screen);
 }
 
 if (!wantStatic && !mqReduce.matches && hasWebGL()) {
   // a timer rather than a frame: a tab that is not painting still has to notice the screen
   new MutationObserver(() => { if (!queued) { queued = true; setTimeout(check, 60); } }).observe(document.body, { childList: true, subtree: true });
-  mqMobile.addEventListener('change', () => { if (mqMobile.matches) unmount(); else if (watched) { near.unobserve(watched); near.observe(watched); } });
+  mqMobile.addEventListener('change', () => { if (mqMobile.matches) unmount(); else if (watched) watch(watched); });
   check();
 }
 

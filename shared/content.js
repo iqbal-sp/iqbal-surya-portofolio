@@ -152,7 +152,7 @@
         // the detection boxes printed on the photo, in the original's pixels [left, top, right, bottom];
         // pointing at one selects it in Paint
         marks: [
-          { box: [1275, 412, 1572, 708], label: { en: '1 human, not blurred', id: '1 manusia, tidak buram' } },
+          { box: [1275, 412, 1572, 708], label: { en: '1 human, not blurred', id: '1 manusia, tidak buram' }, short: { en: '1 human', id: '1 manusia' } },
           { box: [1228, 1352, 1385, 1508], label: { en: 'white shoes, #FFFFFF', id: 'sepatu putih, #FFFFFF' } },
         ],
         alt: {
