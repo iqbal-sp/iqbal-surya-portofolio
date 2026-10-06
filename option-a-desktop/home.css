@@ -119,49 +119,68 @@
 .pt-crt { position: relative; z-index: 2; width: min(100%, 880px); margin: 0; }
 .pt-crt picture { display: block; height: 100%; }
 .pt-photo { display: block; width: 100%; height: 100%; object-fit: cover; cursor: crosshair; }
-/* the Media Center info bar across the bottom of the picture */
-.tv-lower { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: flex-start; padding: 56px 20px 16px; background: linear-gradient(180deg, transparent, rgba(3, 18, 60, .8) 42%, var(--bc-scrim)); color: #fff; pointer-events: none; }
-.tv-now { margin-bottom: 12px; padding: 4px 8px; border-radius: 3px; background: var(--glow-face); color: var(--glow-ink); font: 700 12px/1 var(--ui); }
-.tv-title { max-width: 100%; font: 700 20px/1.15 var(--ui); }
-.tv-bar { align-self: stretch; display: block; height: 3px; margin-top: 16px; border-radius: 2px; background: rgba(255, 255, 255, .22); overflow: hidden; }
-.tv-bar i { display: block; height: 100%; background: var(--glow); }
-/* pointing at a detection box printed on the photo */
+/* the Media Center info bar across the bottom of the picture: the NOW SHOWING badge, the owner's name and line of work,
+   then the day's run: the bar fills with how much of the owner's day has gone, up to a playhead, and the owner's
+   clock ends it. On a phone's set the line of work goes and the clock moves up beside the badge, so the bar keeps
+   the picture as clear as it was */
+.tv-lower { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "now ." "title title" "role role" "bar clock"; column-gap: 12px; justify-items: start; align-items: center; padding: 48px 20px 16px; background: linear-gradient(180deg, transparent, rgba(3, 18, 60, .8) 42%, var(--bc-scrim)); color: #fff; pointer-events: none; }
+/* the badge is lit glass: its top edge catches the light, a dark green rim holds it, and it glows */
+.tv-now { grid-area: now; margin-bottom: 12px; padding: 4px 8px; border-radius: 3px; background: var(--glow-face); color: var(--glow-ink); font: 700 12px/1 var(--ui); box-shadow: inset 0 1px rgba(255, 255, 255, .5), 0 0 0 1px rgba(11, 34, 6, .3), 0 0 12px rgba(134, 209, 63, .35); }
+.tv-title { grid-area: title; max-width: 100%; font: 700 20px/1.15 var(--ui); }
+.tv-role { grid-area: role; margin-top: 4px; font: 14px/20px var(--read); color: var(--bc-soft); }
+.tv-bar { grid-area: bar; justify-self: stretch; position: relative; display: block; height: 3px; margin-top: 16px; border-radius: 2px; background: rgba(255, 255, 255, .22); }
+.tv-bar i { position: relative; display: block; height: 100%; border-radius: inherit; background: var(--glow); }
+.tv-bar i::after { content: ""; position: absolute; right: -4px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--glow-face); box-shadow: inset 0 1px var(--glow-edge), 0 0 0 1px rgba(11, 34, 6, .35), 0 0 8px var(--glow-halo); }
+.tv-clock { grid-area: clock; margin-top: 16px; font: 12px/16px var(--ui); font-variant-numeric: tabular-nums; color: var(--bc-soft); }
+/* pointing at a detection box printed on the photo selects it as Paint does: a dashed box with its eight sizing
+   handles, Luna blue squares in a white rim, one at each corner and the middle of each side */
 .pt-sel { position: absolute; border: 1px dashed var(--hi); outline: 1px dashed #000; outline-offset: -2px; pointer-events: none; }
+.pt-sel::before, .pt-sel::after { content: ""; position: absolute; background-repeat: no-repeat; }
+.pt-sel::before { inset: -3px; --h: linear-gradient(#fff, #fff); background-image: var(--h), var(--h), var(--h), var(--h), var(--h), var(--h), var(--h), var(--h); background-size: 5px 5px; background-position: 0 0, 50% 0, 100% 0, 0 50%, 100% 50%, 0 100%, 50% 100%, 100% 100%; }
+.pt-sel::after { inset: -2px; --h: linear-gradient(var(--sel), var(--sel)); background-image: var(--h), var(--h), var(--h), var(--h), var(--h), var(--h), var(--h), var(--h); background-size: 3px 3px; background-position: 0 0, 50% 0, 100% 0, 0 50%, 100% 50%, 0 100%, 50% 100%, 100% 100%; }
 /* power-on, once: the lamp lights, a bright line opens into the picture, then the info bar rises */
 .pt-crt.power picture { animation: tv-on .9s var(--ease-out) both; }
 .pt-crt.power .tv-lower { animation: tv-lower .5s .75s var(--ease-out) both; }
 .pt-crt.power .crt-lamp { animation: crt-lamp .3s steps(1, end) both; }
-@keyframes crt-lamp { from { filter: brightness(.35) saturate(.5); box-shadow: inset 0 -1px 1px rgba(0, 0, 0, .3); } }
+@keyframes crt-lamp { from { filter: brightness(.35) saturate(.5); box-shadow: 0 0 0 1px rgba(20, 16, 8, .3); } }
 @keyframes tv-on { 0% { filter: brightness(0); clip-path: inset(49.6% 0 49.6% 0); } 35% { filter: brightness(2.4); clip-path: inset(49.6% 0 49.6% 0); } 70% { filter: brightness(1.35); clip-path: inset(0); } 100% { filter: brightness(1); clip-path: inset(0); } }
 @keyframes tv-lower { from { transform: translateY(100%); opacity: 0; } }
-/* dark until its power-on comes (app.js waits until the set is seen), and once turned off: the lamp out, the tube black */
+/* dark until its power-on comes (app.js waits until the set is seen), and once turned off: the lamp out behind its lens,
+   the tube its bare dark glass */
 .pt-crt:is(.standby, .off) :is(picture, .tv-lower, .pt-sel) { visibility: hidden; }
-.pt-crt:is(.standby, .off) .crt-lamp { background: #3c4636; box-shadow: inset 0 -1px 1px rgba(0, 0, 0, .3); }
-/* the scan after the first power-on: the box draws itself round the face in four steps */
+.pt-crt:is(.standby, .off) .crt-lamp { background: radial-gradient(circle at 38% 32%, #a9b39f 0 14%, #556050 40%, #2f362b); box-shadow: 0 0 0 1px rgba(20, 16, 8, .3); }
+/* the scan after the first power-on: the box draws itself round the face in four steps, its handles with it */
 .pt-sel.scan { animation: tv-scan .24s steps(4, end) both; }
-@keyframes tv-scan { from { clip-path: inset(0 100% 100% 0); } to { clip-path: inset(0); } }
-/* Home's power key is a real button: the same round key, with a finger's 44px round it */
+@keyframes tv-scan { from { clip-path: inset(-3px 100% 100% -3px); } to { clip-path: inset(-3px); } }
+/* Home's power key is a real button: the same round key, with a finger's 44px round it; pointed at, its face
+   brightens, and pressed it sinks into its collar */
 .pt-crt button.crt-power { position: relative; padding: 0; border: 0; cursor: pointer; }
 .pt-crt button.crt-power::before { content: ""; position: absolute; inset: -14px; }
-.pt-crt button.crt-power:active { background: radial-gradient(circle at 50% 55%, #e8e3d2, #c9c2a8 70%); box-shadow: inset 0 1px 2px rgba(20, 16, 8, .45); }
-.pt-crt button.crt-power:focus-visible { outline: 1px dotted #000; outline-offset: 3px; }
+@media (hover: hover) { .pt-crt button.crt-power:hover { background: var(--glyph), radial-gradient(circle at 40% 35%, #fff, #e4dfcd 70%); } }
+.pt-crt button.crt-power:active { background: var(--glyph), radial-gradient(circle at 50% 55%, #e8e3d2, #c9c2a8 70%); box-shadow: inset 0 1px 2px rgba(20, 16, 8, .45), 0 0 0 3px #e2ddcb, 0 0 0 4px rgba(20, 16, 8, .14); }
+.pt-crt button.crt-power:focus-visible { outline: 1px dotted #000; outline-offset: 5px; }
 
 @container home (max-width: 520px) {
-  .tv-lower { padding: 40px 16px 12px; }
+  .tv-lower { grid-template-areas: "now clock" "title title" "bar bar"; padding: 40px 16px 12px; }
   .tv-now { margin-bottom: 8px; }
+  .tv-clock { margin: 0 0 8px; }
   .tv-title { font-size: 16px; }
+  .tv-role { display: none; }
   .tv-bar { margin-top: 12px; }
 }
 /* at full size the monitor is a size bigger than a case page's, so its chin grows with it: a taller chin, and
-   bigger grille, keys, lamp and power key. The lower third steps up with the tube */
+   bigger grille, keys and their symbols, lamp and power key, the lamp keeping half as far from the key as from the
+   keys. The lower third steps up with the tube */
 @container home (min-width: 1100px) {
   .pt-crt .crt-chin { height: 56px; gap: 12px; }
   .pt-crt .crt-grille { height: 20px; background-size: 6px 6px; }
-  .pt-crt .crt-keys i { width: 16px; height: 8px; }
-  .pt-crt .crt-lamp { width: 8px; height: 8px; }
+  .pt-crt .crt-keys i { width: 20px; height: 12px; }
+  .pt-crt .crt-keys i::after { -webkit-mask-size: 8px 6px; mask-size: 8px 6px; }
+  .pt-crt .crt-lamp { width: 8px; height: 8px; margin-left: 12px; }
   .pt-crt .crt-power { width: 20px; height: 20px; }
-  .pt-crt .tv-lower { padding: 64px 28px 24px; }
+  .pt-crt .tv-lower { padding: 56px 28px 24px; }
   .pt-crt .tv-title { font-size: 24px; }
+  .pt-crt .tv-role { font-size: 16px; line-height: 24px; }
 }
 
 /* ============================================================

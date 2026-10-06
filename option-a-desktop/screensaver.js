@@ -1892,7 +1892,11 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
       hitShot(o) { return Math.abs(o.x - B.x) < 34 && Math.abs(o.y - B.y) < 30; },
       hazard() { return Infinity; },
       tipAt() { return { x: B.x, y: B.y, below: 50 }; },
-      // Setup's blue in the welcome screen's colours, and the monitor drawn like the portfolio's own CRT
+      // Setup's blue in the welcome screen's colours, and the monitor drawn like the portfolio's own CRT (style.css,
+      // .crt-*): one beige plastic lit from the top, the tube in a recess whose walls are shaded at the top and lit at
+      // the foot, dark grey glass with the room's light high on its left and its top edge lit, and on the chin one row
+      // on its middle line: the menu keys in their slot, the power lamp and the power key in its collar. A small
+      // monitor keeps its chin plain, as the portfolio's does: no grille, no badge
       draw() {
         const m = B.m, x = B.x, y = B.y;
         if (!m) return;
@@ -1901,16 +1905,50 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
         const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, AW * 1.1);
         gr.addColorStop(0, 'rgba(166,196,247,.8)'); gr.addColorStop(0.6, 'rgba(166,196,247,0)');
         ctx.fillStyle = gr; ctx.fillRect(0, 0, AW, AH);
-        ctx.fillStyle = '#aca899'; ctx.fillRect(x - 10, y + 27, 20, 7); ctx.fillRect(x - 22, y + 33, 44, 5);
-        ctx.fillStyle = '#ece9d8'; rrect(x - 34, y - 29, 68, 58, 6); ctx.fill();
+        // the stand: a neck widening down from under the case into an oval base, whose front edge shows
+        ctx.fillStyle = '#aca899'; ctx.beginPath(); ctx.ellipse(x, y + 36.5, 22, 3, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#e6e1cf'; ctx.beginPath(); ctx.ellipse(x, y + 35, 22, 3, 0, 0, TAU); ctx.fill();
+        const ng = ctx.createLinearGradient(x - 12, 0, x + 12, 0);
+        ng.addColorStop(0, '#d8d2bd'); ng.addColorStop(0.3, '#f6f4ec'); ng.addColorStop(1, '#c9c2ab');
+        ctx.fillStyle = ng; ctx.beginPath(); ctx.moveTo(x - 9, y + 28); ctx.lineTo(x + 9, y + 28); ctx.lineTo(x + 12, y + 35); ctx.lineTo(x - 12, y + 35); ctx.closePath(); ctx.fill();
+        // the case
+        const cg = ctx.createLinearGradient(0, y - 29, 0, y + 29);
+        cg.addColorStop(0, '#f4f1e7'); cg.addColorStop(0.3, '#ece9d8'); cg.addColorStop(1, '#ddd7c4');
+        ctx.fillStyle = cg; rrect(x - 34, y - 29, 68, 58, 6); ctx.fill();
         ctx.strokeStyle = '#aca899'; ctx.lineWidth = 1; rrect(x - 33.5, y - 28.5, 67, 57, 6); ctx.stroke();
-        ctx.fillStyle = '#1b1d22'; rrect(x - 27, y - 23, 54, 40, 3); ctx.fill();
+        // the recess and its walls
+        const rg = ctx.createLinearGradient(0, y - 26, 0, y + 20);
+        rg.addColorStop(0, '#cbc4ae'); rg.addColorStop(1, '#f6f3ea');
+        ctx.fillStyle = rg; rrect(x - 30, y - 26, 60, 46, 4); ctx.fill();
+        // the tube, a joint line round it
+        const tg = ctx.createRadialGradient(x, y - 6, 0, x, y - 6, 34);
+        tg.addColorStop(0, '#262b2c'); tg.addColorStop(1, '#0c0e0f');
+        ctx.fillStyle = tg; rrect(x - 27, y - 23, 54, 40, 3); ctx.fill();
+        ctx.strokeStyle = 'rgba(20,16,8,.5)'; ctx.lineWidth = 1; rrect(x - 27.5, y - 23.5, 55, 41, 3.5); ctx.stroke();
         // on its screen, a small Starfield preview
         ctx.save(); ctx.beginPath(); ctx.rect(x - 26, y - 22, 52, 38); ctx.clip();
         ctx.fillStyle = '#d6e2f8';
         for (const st of m.stars) { const z = 0.6 + st.d / 30; ctx.globalAlpha = 0.3 + st.d / 40; ctx.fillRect(x + Math.cos(st.a) * st.d - z / 2, y - 3 + Math.sin(st.a) * st.d * 0.8 - z / 2, z, z); }
         ctx.restore();
         ctx.globalAlpha = 1;
+        // the glass over it
+        const lg = ctx.createRadialGradient(x - 14, y - 23, 0, x - 14, y - 23, 32);
+        lg.addColorStop(0, 'rgba(255,255,255,.16)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = lg; rrect(x - 27, y - 23, 54, 40, 3); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.fillRect(x - 24, y - 23, 48, 1);
+        // the chin's row on its middle line (cy), the power key's collar ending as far in from the case's edge as the
+        // recess, and the lamp half as far from the key as from the keys
+        const cy = y + 24.5;
+        ctx.fillStyle = 'rgba(20,16,8,.1)'; rrect(x + 1, cy - 2, 18, 4, 1); ctx.fill();
+        for (let k = 0; k < 4; k++) {
+          ctx.fillStyle = '#aca899'; ctx.fillRect(x + 2 + k * 4.25, cy - 1, 3.5, 2.5);
+          ctx.fillStyle = '#fbfaf6'; ctx.fillRect(x + 2 + k * 4.25, cy - 1, 3.5, 2);
+        }
+        ctx.fillStyle = 'rgba(76,218,80,.35)'; ctx.beginPath(); ctx.arc(x + 22.6, cy, 2, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#4cda50'; ctx.beginPath(); ctx.arc(x + 22.6, cy, 1, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#e2ddcb'; ctx.beginPath(); ctx.arc(x + 27.5, cy, 2.5, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#fbfaf6'; ctx.beginPath(); ctx.arc(x + 27.5, cy, 1.75, 0, TAU); ctx.fill();
+        ctx.strokeStyle = 'rgba(20,16,8,.3)'; ctx.lineWidth = 0.5; ctx.stroke();
         // its ring is what the aiming lesson empties; once that is done it has nothing left to shoot
         if (B.hp > 0) healthRing(x, y, 46, 3);
       },

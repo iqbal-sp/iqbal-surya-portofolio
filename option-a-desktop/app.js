@@ -809,12 +809,24 @@
     const f = tvFit(img), [l, t0, rt, b] = m.box;
     Object.assign(sel.style, { left: `${f.ox + l * f.k}px`, top: `${f.oy + t0 * f.k}px`, width: `${(rt - l) * f.k}px`, height: `${(b - t0) * f.k}px` });
   }
-  // how far the owner's day has run in WIB, for the lower third's progress bar
-  function dayShare() {
+  // the owner's time of day where the owner is (PF.home.timeZone, Asia/Jakarta: WIB), as [hours, minutes]
+  function ownerTime() {
     try {
       const [h, m] = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: PF.home.timeZone }).split(':').map(Number);
-      return ((h * 60 + m) / 1440) * 100;
-    } catch (e) { return 50; }
+      return [h % 24, m];
+    } catch (e) { return null; }
+  }
+  // how far the owner's day has run, for the lower third's progress bar
+  function dayShare() {
+    const hm = ownerTime();
+    return hm ? ((hm[0] * 60 + hm[1]) / 1440) * 100 : 50;
+  }
+  // the clock that ends the bar: the owner's time in the taskbar clock's own format, and its zone
+  const pad2 = (n) => String(n).padStart(2, '0');
+  function ownerClock() {
+    const hm = ownerTime(); if (!hm) return { text: '', stamp: '' };
+    const [h, m] = hm;
+    return { text: `${lang === 'id' ? `${pad2(h)}.${pad2(m)}` : `${h % 12 || 12}:${pad2(m)} ${h >= 12 ? 'PM' : 'AM'}`} WIB`, stamp: `${pad2(h)}:${pad2(m)}` };
   }
   // the monitor is the case pages' CRT (its chin and stand from the player below, its case in style.css), made big;
   // its tube shows the photo under the Media Center lower third
@@ -825,7 +837,7 @@
     const P = PF.home.hero.photo, sizes = '(min-width: 1100px) 760px, 86vw';
     const srcset = (f) => P.widths.map((w) => `${esc(P.base)}${w}.${f} ${w}w`).join(', ');
     // dark until its power-on (homeTVArm), or turned off with its button
-    const dark = st.tvOff ? ' off' : !homeTV.done && !reduceMotion ? ' standby' : '';
+    const dark = st.tvOff ? ' off' : !homeTV.done && !reduceMotion ? ' standby' : '', clock = ownerClock();
     return `<figure class="pt-crt cs-crt${dark}">
       <div class="crt-case">
         <div class="crt-bezel">
@@ -835,7 +847,9 @@
             <div class="tv-lower">
               <b class="tv-now">${esc(titleCase(u('nowShowing')))}</b>
               <span class="tv-title">${esc(PF.owner.fullName)}</span>
+              <span class="tv-role">${esc(t(PF.owner.role))} · ${esc(t(PF.owner.location))}</span>
               <i class="tv-bar" aria-hidden="true"><i class="hm-day" style="width:${dayShare().toFixed(1)}%"></i></i>
+              ${clock.text ? `<time class="tv-clock" datetime="${clock.stamp}">${esc(clock.text)}</time>` : ''}
             </div>
           </div>
         </div>
@@ -1439,6 +1453,8 @@
   function homeTick() {
     const w = wins.get('home'); if (!w) return;
     $$('.hm-day', w.el).forEach((n) => { n.style.width = `${dayShare().toFixed(1)}%`; });
+    const clock = ownerClock();
+    $$('.tv-clock', w.el).forEach((n) => { if (n.textContent !== clock.text) { n.textContent = clock.text; n.dateTime = clock.stamp; } });
   }
   // What became of the message, as XP's notification balloon over the Send button: sent (it goes by itself); handed
   // to the visitor's email app, which a page can't see open, so that one stays with the Copy button until closed; or
@@ -1859,15 +1875,16 @@
   const CRT_CHIN = '<span class="crt-chin" aria-hidden="true"><span class="crt-grille"></span><span class="crt-badge"></span><span class="crt-keys"><i></i><i></i><i></i><i></i></span><span class="crt-lamp"></span><span class="crt-power"></span></span>';
   // the stand is one drawing in the case's plastic and light, so it reads as one moulding: the neck widens down from
   // under the case, shaded where the case overhangs it, and stands in a swivel ring on the base, whose front edge shows
+  // and catches the light along its rim
   let standSeq = 0;
   function crtStand() {
     const k = 'crt' + ++standSeq, neck = 'M116 0h88l16 34H100z';
     return `<svg class="crt-stand" viewBox="0 0 320 56" aria-hidden="true" focusable="false"><defs>
-      <linearGradient id="${k}n"><stop offset="0" stop-color="#d8d2bd"/><stop offset=".2" stop-color="#fff"/><stop offset=".55" stop-color="#ece9d8"/><stop offset=".85" stop-color="#d8d2bd"/><stop offset="1" stop-color="#aca899"/></linearGradient>
+      <linearGradient id="${k}n"><stop offset="0" stop-color="#d8d2bd"/><stop offset=".2" stop-color="#f6f4ec"/><stop offset=".55" stop-color="#ece9d8"/><stop offset=".85" stop-color="#d8d2bd"/><stop offset="1" stop-color="#aca899"/></linearGradient>
       <linearGradient id="${k}o" x2="0" y2="1"><stop offset="0" stop-color="#141414" stop-opacity=".4"/><stop offset=".45" stop-color="#141414" stop-opacity="0"/></linearGradient>
-      <linearGradient id="${k}t" x1=".2" x2=".8" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#ece9d8"/></linearGradient>
+      <linearGradient id="${k}t" x1=".2" x2=".8" y2="1"><stop offset="0" stop-color="#f6f4ec"/><stop offset="1" stop-color="#e6e1cf"/></linearGradient>
       <linearGradient id="${k}s" x2="0" y2="1"><stop offset="0" stop-color="#d8d2bd"/><stop offset="1" stop-color="#aca899"/></linearGradient></defs>
-      <path d="M20 34a140 12 0 0 0 280 0v8a140 12 0 0 1-280 0z" fill="url(#${k}s)"/><ellipse cx="160" cy="34" rx="140" ry="12" fill="url(#${k}t)"/>
+      <path d="M20 34a140 12 0 0 0 280 0v8a140 12 0 0 1-280 0z" fill="url(#${k}s)"/><ellipse cx="160" cy="34" rx="140" ry="12" fill="url(#${k}t)"/><path d="M20 34a140 12 0 0 0 280 0" fill="none" stroke="#fff" stroke-opacity=".75"/>
       <path d="${neck}" fill="url(#${k}n)"/><path d="${neck}" fill="url(#${k}o)"/>
       <ellipse cx="160" cy="36" rx="67" ry="6.5" fill="#d8d2bd"/><ellipse cx="160" cy="34" rx="66" ry="6" fill="url(#${k}t)"/></svg>`;
   }
@@ -2344,7 +2361,7 @@
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=7';
+        s.src = 'screensaver.js?v=8';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);

@@ -873,42 +873,84 @@ img { max-width: 100%; }
    a picture of a window and not one to close */
 .cs-win { display: flex; flex-direction: column; padding: 0 3px 3px; border-radius: 8px 8px 0 0; background: var(--face); box-shadow: var(--frame), 0 20px 30px -10px rgba(0, 20, 70, .08); }
 .cs-win-body { position: relative; display: block; background: #fff; }
-/* a CRT monitor of the XP years around a big screen, drawn front on: a beige case in the Luna face, lit along its
-   top and left and shaded along its right and foot, the tube sunk in a moulded recess, a chin with a speaker grille,
-   a blank badge, four menu keys, the power lamp and key, then its stand */
+/* a CRT monitor of the XP years around a big screen, drawn front on: a case of one beige plastic with a fine matte
+   grain, lit along its top and left and shaded along its right and foot; the tube sunk in a moulded recess whose walls
+   slope in to the glass; a chin with a pierced speaker grille, a blank badge, four menu keys under their printed
+   symbols, the power lamp behind its lens and the power key; then its stand */
 .cs-crt { display: grid; justify-items: center; }
 .crt-case {
+  /* the plastic's grain: fractal noise, grey about the middle, laid on in soft light so it only lifts and sinks the
+     beige by a shade */
+  --crt-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.45 .45 .45 0 -.175 .45 .45 .45 0 -.175 .45 .45 .45 0 -.175 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 180px 180px;
   width: 100%; padding: 4% 4% 0; border-radius: 16px;
-  background: linear-gradient(180deg, #fff, var(--face) 36%, #d8d2bd);
+  background: var(--crt-grain), linear-gradient(180deg, #f4f1e7, var(--face) 30%, #ddd7c4);
+  background-blend-mode: soft-light, normal;
   box-shadow: inset 0 0 0 1px var(--shade), inset 0 2px 1px #fff, inset 4px 0 4px -2px rgba(255, 255, 255, .8), inset -4px 0 6px -2px rgba(20, 16, 8, .18), inset 0 -4px 6px rgba(20, 16, 8, .2), 0 26px 40px -24px rgba(0, 20, 70, .6);
 }
-/* the recess the tube sits in: the face steps in, shaded under its upper lip and lit along its lower one */
-.crt-bezel { display: block; padding: 3.5%; border-radius: 14px; background: linear-gradient(180deg, #d8d2bd, var(--face) 70%, #fff); box-shadow: inset 0 3px 5px rgba(20, 16, 8, .3), inset 0 -1px #fff; }
-.crt-glass { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 12px; background: #000; box-shadow: 0 0 0 6px #1b1d22, 0 0 0 7px rgba(20, 16, 8, .35); }
+/* the recess the tube sits in: the face steps in under a shaded upper lip and a lit lower one, and its four walls slope
+   in to the glass, mitred where they meet. Lit from the top left, the top wall faces away and is the darkest, the
+   left one is in shade, the right one catches the light and the foot faces it, the lightest; each wall darkens a
+   little toward the top. The angles are the corners of the recess as seen from its middle (it is 0.77 as tall as it
+   is wide), and a quarter degree either side of each joint keeps the mitre's line smooth */
+.crt-bezel {
+  display: block; padding: 3.5%; border-radius: 14px;
+  background: var(--crt-grain), linear-gradient(180deg, rgba(20, 16, 8, .05), rgba(20, 16, 8, 0) 45%, rgba(255, 255, 255, .25)),
+    conic-gradient(from -52.5deg, #cbc4ae 0 104.75deg, #e7e2d2 105.25deg 179.75deg, #f6f3ea 180.25deg 284.75deg, #d8d2be 285.25deg 359.75deg, #cbc4ae);
+  background-blend-mode: soft-light, normal, normal;
+  box-shadow: inset 0 3px 5px rgba(20, 16, 8, .3), inset 0 -1px #fff, 0 -1px rgba(20, 16, 8, .08), 0 1px rgba(255, 255, 255, .7);
+}
+/* the tube: dark glass, grey rather than black, showing round the picture; the walls' joint is a dark line round it
+   and they fall into its shadow */
+.crt-glass { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 16px; background: radial-gradient(90% 80% at 50% 40%, #262b2c, #0c0e0f); box-shadow: 0 0 0 1px rgba(20, 16, 8, .5), 0 0 12px 2px rgba(20, 16, 8, .3); }
 .crt-glass > .cs-img { width: 100%; height: 100%; object-fit: cover; }
-/* the tube over whatever it shows: scanlines and the grille's fine columns, then the bulge of the glass catching
-   the light at the top left, a faint band of reflected room and darker corners */
+/* the tube over whatever it shows: scanlines and the grille's fine columns; then the glass: its bare rim, dark round
+   the picture, which softens into it; the curve, darkening the picture toward its corners; the bulge catching the
+   light high on the left, a faint band of reflected room, and the rim's top edge lit */
 .crt-glass::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .08) 0 1px, rgba(0, 0, 0, 0) 1px 3px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 1px, rgba(0, 0, 0, .03) 1px 3px); }
-.crt-glass::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; background: radial-gradient(120% 80% at 22% 6%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 44%), linear-gradient(115deg, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, .06) 61%, rgba(255, 255, 255, 0) 68%); box-shadow: inset 0 0 40px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .06); }
+.crt-glass::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 80% at 22% 6%, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 44%), linear-gradient(115deg, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, .06) 61%, rgba(255, 255, 255, 0) 68%),
+    radial-gradient(75% 75% at 50% 50%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, .3));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .22), inset 0 0 0 5px #141718, inset 0 0 8px 6px rgba(8, 10, 11, .7), inset 0 0 40px rgba(0, 0, 0, .3);
+}
 /* no screen yet: a dark tube and the monitor's own navy On-Screen Display box, naming the file and the size to export */
 .crt-osd { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(80% 70% at 50% 45%, #141414, #000); }
 .osd-box { max-width: calc(100% - 32px); display: grid; gap: 4px; justify-items: center; padding: 12px 20px; border: 1px solid #7a96df; background: #00138c; box-shadow: 0 0 16px rgba(9, 151, 255, .35); color: #fff; font: 12px/16px var(--ui); text-align: center; }
 .osd-box b { font-size: 14px; }
 .osd-box span { overflow-wrap: anywhere; }
 .osd-box small { font-size: 12px; color: #d3e5fa; }
-.crt-chin { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 4%; }
-/* a speaker grille of pierced dots, and a blank badge moulded into the plastic */
-.crt-grille { flex: none; width: 16%; height: 16px; border-radius: 3px; background: radial-gradient(circle, rgba(20, 16, 8, .45) 0 1px, rgba(0, 0, 0, 0) 1.5px) 0 0 / 5px 5px; box-shadow: inset 0 1px 1px rgba(20, 16, 8, .15); }
-.crt-badge { flex: none; width: 12%; height: 8px; margin: 0 auto; border-radius: 4px; background: linear-gradient(180deg, #d8d2bd, #fff); box-shadow: inset 0 1px 1px rgba(20, 16, 8, .3); }
-.crt-keys { flex: none; display: flex; gap: 4px; }
-.crt-keys i { width: 12px; height: 6px; border-radius: 2px; background: linear-gradient(180deg, #fff, #d8d2bd); box-shadow: 0 1px rgba(20, 16, 8, .3), inset 0 0 0 1px rgba(20, 16, 8, .15); }
-.crt-lamp { flex: none; width: 6px; height: 6px; margin-left: 8px; border-radius: 50%; background: #4cda50; box-shadow: 0 0 6px rgba(76, 218, 80, .7), inset 0 -1px 1px rgba(0, 0, 0, .3); }
-.crt-power { flex: none; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fff, #d8d2bd 70%); box-shadow: 0 1px 1px rgba(20, 16, 8, .35), inset 0 0 0 1px rgba(20, 16, 8, .2); }
+/* the chin: the speaker grille at the left, the blank badge on the monitor's middle line (under the stand's neck,
+   whatever stands beside it), and at the right one row on the chin's middle line: the menu keys in their slot, then
+   the power lamp, half as far from the power key as from the keys. The key's collar is drawn outside it, so the key
+   keeps 4px clear either side for it, and the collar ends as far in from the edge as the grille starts */
+.crt-chin { position: relative; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 4%; }
+/* a speaker grille of pierced holes, each dark with the light on its lower rim, and a blank badge: a plate moulded
+   proud of the plastic */
+.crt-grille { flex: none; width: 16%; height: 16px; border-radius: 3px; background: radial-gradient(circle at 50% 42%, rgba(36, 29, 14, .6) 0 1px, rgba(36, 29, 14, 0) 1.4px) 0 0 / 5px 5px, radial-gradient(circle at 50% 66%, rgba(255, 255, 255, .9) 0 1px, rgba(255, 255, 255, 0) 1.4px) 0 0 / 5px 5px; box-shadow: inset 0 1px 1px rgba(20, 16, 8, .15); }
+.crt-badge { position: absolute; left: 50%; top: 50%; width: 12%; height: 8px; border-radius: 4px; transform: translate(-50%, -50%); background: linear-gradient(180deg, #fbfaf6, #e1dcc9); box-shadow: inset 0 1px #fff, 0 0 0 1px rgba(20, 16, 8, .1), 0 1px 2px rgba(20, 16, 8, .3); }
+/* the menu keys stand in a slot in the plastic, each with its symbol printed in the middle of its face: menu, left,
+   right and select */
+.crt-keys { flex: none; display: flex; gap: 4px; margin-left: auto; padding: 2px; border-radius: 4px; background: rgba(20, 16, 8, .1); box-shadow: inset 0 1px 1px rgba(20, 16, 8, .25), 0 1px rgba(255, 255, 255, .8); }
+.crt-keys i { position: relative; width: 16px; height: 10px; border-radius: 3px; background: linear-gradient(180deg, #fff, #d8d2bd); box-shadow: 0 1px rgba(20, 16, 8, .3), inset 0 0 0 1px rgba(20, 16, 8, .15); }
+.crt-keys i::after { content: ""; position: absolute; inset: 0; background: rgba(70, 60, 40, .6); -webkit-mask: var(--sym) 50% 50% / 7px 5px no-repeat; mask: var(--sym) 50% 50% / 7px 5px no-repeat; }
+.crt-keys i:nth-child(1) { --sym: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 6'%3E%3Cpath d='M0 .6h8M0 3h8M0 5.4h8' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E"); }
+.crt-keys i:nth-child(2) { --sym: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 6'%3E%3Cpath d='M6 0v6L1.5 3z'/%3E%3C/svg%3E"); }
+.crt-keys i:nth-child(3) { --sym: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 6'%3E%3Cpath d='M2 0v6l4.5-3z'/%3E%3C/svg%3E"); }
+.crt-keys i:nth-child(4) { --sym: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 6'%3E%3Crect x='1.6' y='.6' width='4.8' height='4.8' fill='none' stroke='%23000' stroke-width='1.2'/%3E%3C/svg%3E"); }
+/* the power lamp: a green LED under a domed lens, set in a hole in the plastic, glowing */
+.crt-lamp { flex: none; width: 6px; height: 6px; margin-left: 8px; border-radius: 50%; background: radial-gradient(circle at 38% 32%, #eaffdf 0 14%, #74f075 34%, #2fbf3b 70%, #1d8a29); box-shadow: 0 0 0 1px rgba(20, 16, 8, .3), 0 0 6px 1px rgba(76, 218, 80, .6); }
+/* the power key: a round key in a 4px collar, the power symbol printed on its face */
+.crt-power {
+  --glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23786d55' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M6 2v3.6M3.4 3.9a3.6 3.6 0 1 0 5.2 0'/%3E%3C/svg%3E") 50% 50% / 60% no-repeat;
+  flex: none; width: 16px; height: 16px; margin: 0 4px; border-radius: 50%;
+  background: var(--glyph), radial-gradient(circle at 40% 35%, #fff, #d8d2bd 70%);
+  box-shadow: 0 1px 1px rgba(20, 16, 8, .35), inset 0 0 0 1px rgba(20, 16, 8, .2), 0 0 0 3px #e2ddcb, 0 0 0 4px rgba(20, 16, 8, .14);
+}
 /* the stand (drawn in app.js) scales with the monitor and casts one soft shadow on the ground */
 .crt-stand { display: block; width: 50%; height: auto; overflow: visible; filter: drop-shadow(0 10px 8px rgba(0, 20, 70, .35)); }
 .cs-pic.pic-crt { width: min(100%, 640px); }
 /* a small monitor keeps its chin plain: grille and badge go under 640px of screen */
-@container (max-width: 639px) { .crt-grille, .crt-badge { display: none; } .crt-keys { margin-left: auto; } }
+@container (max-width: 639px) { .crt-grille, .crt-badge { display: none; } }
 /* a section's tag, a black badge; its heading and text in the content column */
 .cs-intro, .cs-quote, .cs-feat { grid-column: full-start / full-end; display: grid; grid-template-columns: subgrid; row-gap: var(--lead); }
 .cs-intro > *, .cs-quote > *, .cs-feat > * { grid-column: main-start / main-end; min-width: 0; }
