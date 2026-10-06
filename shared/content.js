@@ -269,8 +269,8 @@
       }))(['01', '02', '03', '04', '05', '06', '07', '08', '09']),
     },
     // the owner's clients in their own words (the owner's Figma, 2026-09-25), quoted as written on both languages'
-    // pages. A quote is a list of paragraphs. TCA's reviewer is unnamed ("Name Surname"), so that column comes last
-    // and a named client opens the row (owner's request, 2026-09-25)
+    // pages. A quote is a list of paragraphs. A named client opens the row (owner's request, 2026-09-25); TCA's reviewer,
+    // once unnamed, is AJ Aoas, Creative Director on that project (2026-10-07)
     words: {
       head: { en: 'What clients say', id: 'Kata klien' },
       lead: { en: 'Short notes from people I’ve designed with.', id: 'Catatan singkat dari orang-orang yang pernah bekerja dengan saya.' },
@@ -286,8 +286,13 @@
           quote: ['Iqbal demonstrated honesty and talent, bringing valuable skills to our project. He was willing to take the lead while remaining open to feedback and adjustments.', 'Working with Iqbal was a wonderful experience, and I genuinely look forward to collaborating with him again.'],
         },
         {
-          name: 'Name Surname',
-          role: 'Lead Creative Team - TCA',
+          name: 'Derrice',
+          role: 'Founder - Hilvy',
+          quote: ['Working with Iqbal and his team has been fantastic. The designs are slick and modern, and it really reminds me what it’s like to work with a true designer!'],
+        },
+        {
+          name: 'AJ Aoas',
+          role: 'Creative Director - TCA',
           quote: ['Iqbal is an amazing person to work with. We loved his work because we were looking for something minimal yet functional and he delivered. From jump off, design, development to delivery, he was very concise on how the project should proceed. Aside from the design and development aspect of the project, his project management skills are top notch. He made sure that timelines and deadlines were met, making everything flow smoothly.'],
         },
       ],
