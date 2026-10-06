@@ -426,15 +426,15 @@
             {
               type: 'trio',
               pics: [
-                pic('tool', 'Mentor Profile', '04-mentor-profile', 568, 533, '577:38642', {
+                pic('tool', 'Mentor Profile', '04-mentor-profile', 568, 466, '577:38642', {
                   en: 'A mentor’s profile in FindMentor, with a Send Message button and the history of past sessions to open',
                   id: 'Profil mentor di FindMentor, dengan tombol Send Message dan riwayat sesi yang sudah berlangsung untuk dibuka',
                 }),
-                pic('tool', 'Past Session', '05-past-session', 292, 220, '577:38797', {
+                pic('tool', 'Past Session', '05-past-session', 292, 180, '577:38797', {
                   en: 'A past session, Building a Personal Brand That Stands Out, with Watch Again and Rewrite Summary',
                   id: 'Sesi yang sudah berlangsung, Building a Personal Brand That Stands Out, dengan tombol Watch Again dan Rewrite Summary',
                 }),
-                pic('tool', 'Session Recordings', '06-session-recordings', 469, 333, '577:38751', {
+                pic('tool', 'Session Recordings', '06-session-recordings', 469, 315, '577:38751', {
                   en: 'Session recordings listed with their dates, the first opened to its timestamped topics',
                   id: 'Daftar rekaman sesi beserta tanggalnya, dengan rekaman pertama terbuka menampilkan topik bertanda waktu',
                 }),
@@ -462,7 +462,7 @@
                 en: "The goal view pairs a due date and completion bar with a task list. Assignments connect that goal to a mentor and a deadline.",
                 id: "Tampilan target memasangkan tenggat dan indikator penyelesaian dengan daftar tugas. Tugas-tugas menghubungkan target tersebut dengan mentor dan jadwal pengerjaan.",
               },
-              pic: pic('win', 'FindMentor - Goals', '09-goals', 838, 560, '577:38951', {
+              pic: pic('win', 'FindMentor - Goals', '09-goals', 838, 660, '577:38951', {
                 en: 'A goal in FindMentor, Draft Your Unique Personal Brand Statement, with its due date, completion bar and task list',
                 id: 'Sebuah tujuan di FindMentor, Draft Your Unique Personal Brand Statement, dengan tenggat, bar penyelesaian, dan daftar tugasnya',
               }),
@@ -474,11 +474,11 @@
                 en: "The booking view presents session duration and available times by day, with a clear confirmation action once a time is selected.",
                 id: "Tampilan pemesanan menampilkan durasi sesi dan waktu yang tersedia per hari. Setelah memilih waktu, pengguna bisa mengonfirmasi pemesanan lewat tombol yang jelas.",
               },
-              pic: pic('win', 'FindMentor - Book Session', '10-book-session', 488, 484, '577:38991', {
+              pic: pic('win', 'FindMentor - Book Session', '10-book-session', 488, 389, '577:38991', {
                 en: 'Book Session: pick a duration and one of the open times for today and the next two days, then Book Now',
                 id: 'Book Session: pilih durasi dan salah satu waktu kosong untuk hari ini dan dua hari berikutnya, lalu Book Now',
               }),
-              pop: pic('dialog', 'Mentorship Insights', '11-mentorship-insights', 372, 305, '577:39058', {
+              pop: pic('dialog', 'Mentorship Insights', '11-mentorship-insights', 372, 372, '577:39058', {
                 en: 'Mentorship Insights: each mentee with the assignments they have left and their progress',
                 id: 'Mentorship Insights: setiap mentee dengan sisa tugas dan progresnya',
               }),
@@ -491,7 +491,7 @@
                 id: "Detail tugas menampilkan mentor, tenggat, dan daftar pekerjaan dalam satu kartu. Ringkasan dan rekaman sesi menyediakan tempat terpisah untuk melihat kembali arahan sebelumnya.",
               },
               // the Figma shows the card's top 545 of its 740
-              pic: pic('win', 'FindMentor - Assignment', '12-assignment', 539, 545, '577:39126', {
+              pic: pic('win', 'FindMentor - Assignment', '12-assignment', 539, 429, '577:39126', {
                 en: 'An assignment in FindMentor: its completion, mentor, due date and time, and its task list',
                 id: 'Sebuah tugas di FindMentor: penyelesaian, mentor, tenggat dan waktunya, serta daftar tugasnya',
               }),
@@ -942,4 +942,17 @@
     attachSerenityImage(block.pop);
     (block.pics || []).forEach(attachSerenityImage);
   }));
+  // KROOL, SENSORSTACK and FINDMENTOR: WebP copies of the owner's 2x exports, approved for the site on 2026-10-06 (at
+  // most 2x a slot's width; the exports stay out of git and the upload). FINDMENTOR's 04-06 and 09-12 were exported
+  // on a wider ground, so their slots keep their width and take the export's height
+  ['krool', 'sensorstack', 'findmentor'].forEach((slug) => {
+    const c = PF.cases[slug];
+    const attach = (o) => {
+      if (!o || typeof o !== 'object') return;
+      if (Array.isArray(o)) { o.forEach(attach); return; }
+      if ('file' in o && 'w' in o && 'src' in o) { o.src = `../${c.dir}/${o.file}.webp?v=1`; return; }
+      Object.values(o).forEach(attach);
+    };
+    attach(c);
+  });
 })();
