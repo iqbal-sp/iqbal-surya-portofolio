@@ -788,7 +788,7 @@
                 en: 'The style guide’s headings in Playfair Display, from Heading 1 at 88px down to Heading 6 at 24px, each with its line height',
                 id: 'Judul-judul di style guide dengan Playfair Display, dari Heading 1 berukuran 88px sampai Heading 6 berukuran 24px, masing-masing dengan tinggi barisnya',
               }),
-              pop: pic('dialog', 'Color palette', '05-color-palette', 700, 240, '18335:889', {
+              pop: pic('dialog', 'Color palette', '05-color-palette', 744, 244, '18335:889', {
                 en: 'The colour palette: Heading Color #000000, Primary Color #253828, Btn Color #D8F089 and Section Bg Color #F5F7F4',
                 id: 'Palet warna: Heading Color #000000, Primary Color #253828, Btn Color #D8F089, dan Section Bg Color #F5F7F4',
               }),
@@ -934,7 +934,7 @@
   };
   const serenity = PF.cases['serenity-spa'];
   const attachSerenityImage = (image) => {
-    if (image) image.src = `../${serenity.dir}/${image.file}.webp?v=2`;
+    if (image) image.src = `../${serenity.dir}/${image.file}.webp?v=3`;
   };
   attachSerenityImage(serenity.hero);
   serenity.chapters.forEach((chapter) => chapter.blocks.forEach((block) => {

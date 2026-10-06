@@ -1020,7 +1020,12 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
 @container (max-width: 639px) {
   .cs-row { gap: 12px; }
   .cs-row > .cs-pic { flex: 1 1 100%; }
-  .cs-row.phones > .cs-pic { flex: 0 0 calc(50% - 6px); }
+}
+/* below the wide layout a row of phone screens slides sideways instead of stacking down the page: it runs edge to
+   edge, each phone snaps to the gutter and the next one peeks in. The bottom padding keeps the windows' shadow */
+@container (max-width: 759px) {
+  .cs-row.phones { flex-wrap: nowrap; justify-content: flex-start; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: var(--g); margin-inline: calc(-1 * var(--g)); margin-bottom: -24px; padding: 0 var(--g) 24px; scrollbar-width: thin; }
+  .cs-row.phones > .cs-pic { flex: 0 0 min(72%, 240px); max-width: none; scroll-snap-align: start; }
 }
 @container (min-width: 640px) {
   .cs-title { font-size: 32px; }
@@ -1755,9 +1760,11 @@ html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: h
   background: #f0f4ec;
   border-top: 1px solid #d6dfd2;
 }
-.screen-view[data-case="serenity-spa"] .cs-ch[data-sec="mobile"] .cs-row.phones {
-  justify-content: center;
-  gap: clamp(12px, 3vw, 32px);
+@container (min-width: 760px) {
+  .screen-view[data-case="serenity-spa"] .cs-ch[data-sec="mobile"] .cs-row.phones {
+    justify-content: center;
+    gap: clamp(12px, 3vw, 32px);
+  }
 }
 .screen-view[data-case="serenity-spa"] .cs-ch[data-sec="outcome"] {
   border-top: 8px solid #d8f089;
