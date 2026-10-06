@@ -14,7 +14,10 @@
   // phone mode (style.css, SMALL SCREENS): narrow, or a phone turned sideways
   const mqMobile = window.matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
   const isMobile = () => mqMobile.matches;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // read live: Reduce motion switched on mid-visit stops what is moving now as well as what would move next
+  const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let reduceMotion = mqReduce.matches;
+  mqReduce.addEventListener('change', () => { reduceMotion = mqReduce.matches; reduceChanged(); });
   let lang = PF.getLang();
   const t = (v) => PF.t(v, lang);
   /* ------------------------------------------------------------ strings */
@@ -239,19 +242,28 @@
     const a = p.id && n.querySelector(`#${CSS.escape(p.id)}`);
     if (a) n.scrollTop += a.getBoundingClientRect().top - n.getBoundingClientRect().top - p.off;
   }
+  // XP's zoom outline: seven steps in 160 ms from where a window comes from to where it lands. Each call draws its own
+  // outline (two windows opening together don't share one), and the steps follow the display's frames, each painted
+  const ZOOM_STEPS = 7, ZOOM_MS = 160;
   function zoom(from, to, done) {
     if (reduceMotion || !from || !to) { if (done) done(); return; }
-    const steps = 7; let i = 0;
-    zr.style.display = 'block';
-    const frame = () => {
-      i += 1; const k = i / steps;
-      zr.style.left = from.x + (to.x - from.x) * k + 'px';
-      zr.style.top = from.y + (to.y - from.y) * k + 'px';
-      zr.style.width = from.w + (to.w - from.w) * k + 'px';
-      zr.style.height = from.h + (to.h - from.h) * k + 'px';
-      if (i < steps) setTimeout(frame, 22); else { zr.style.display = 'none'; if (done) done(); }
+    if (PF.wall3d) PF.wall3d.calm();
+    const r = zr.cloneNode(); r.removeAttribute('id'); r.style.display = 'block';
+    document.body.appendChild(r);
+    const put = (k) => {
+      r.style.left = from.x + (to.x - from.x) * k + 'px';
+      r.style.top = from.y + (to.y - from.y) * k + 'px';
+      r.style.width = from.w + (to.w - from.w) * k + 'px';
+      r.style.height = from.h + (to.h - from.h) * k + 'px';
     };
-    frame();
+    const t0 = performance.now(); let i = 1;
+    put(1 / ZOOM_STEPS);
+    const tick = (now) => {
+      const n = Math.min(ZOOM_STEPS, 1 + Math.floor(((now - t0) * ZOOM_STEPS) / ZOOM_MS));
+      if (n !== i) { i = n; put(i / ZOOM_STEPS); }
+      if (now - t0 < ZOOM_MS) requestAnimationFrame(tick); else { r.remove(); if (done) done(); }
+    };
+    requestAnimationFrame(tick);
   }
 
   function geometryFor(id) {
@@ -384,11 +396,15 @@
     if (def.dialog) w.opener = document.activeElement;
     wins.set(id, w);
     if (['about', 'work', 'contact', 'resume', 'game', 'recycle', 'gamegate', 'screensaver'].includes(id)) track('window', id);
-    const g = geometryFor(id);
+    const g = geometryFor(id), from = opts.from || menuFrom;
     placeWin(w, g);
     el.style.zIndex = (def.dialog ? DLG_Z : 0) + ++zTop;
     layer.appendChild(el);
-    renderWin(w, false);
+    // the outline sets off from the click at once; the window's content is built a frame later, under the outline (a
+    // dialog is measured by its content, and the welcome screen waits on Home's, so those are built straight away)
+    const build = () => { if (w.built) return; w.built = true; renderWin(w, false); };
+    const later = !def.dialog && !!from && !reduceMotion && !document.documentElement.classList.contains('booting');
+    if (!later) build();
     if (def.dialog) {
       const W = desktopEl.clientWidth, H = desktopEl.clientHeight;
       el.style.left = Math.round((W - el.offsetWidth) / 2) + 'px';
@@ -397,7 +413,9 @@
     renderTasks();
     const target = rectOf(el);
     el.style.visibility = 'hidden';
-    zoom(opts.from, target, () => {
+    if (later) requestAnimationFrame(() => requestAnimationFrame(build));
+    zoom(from, target, () => {
+      build();
       el.style.visibility = '';
       focusWin(w, true);
       if (def.onOpen) def.onOpen(w);
@@ -477,10 +495,12 @@
   function toggleMax(w) {
     if (isMobile()) return;
     // the reader stays on the line they were reading while the page rewraps to the new width
-    const ns = $$('[data-keep]', w.el), ps = ns.map(placeOf);
+    const ns = $$('[data-keep]', w.el), ps = ns.map(placeOf), a = rectOf(w.el);
     w.max = !w.max;
     w.el.classList.toggle('max', w.max);
     ns.forEach((n, i) => putPlace(n, ps[i]));
+    // XP drew the outline for maximise and restore as well: the window shows at its new size once it lands
+    if (!reduceMotion && a) { w.el.style.visibility = 'hidden'; zoom(a, rectOf(w.el), () => { w.el.style.visibility = ''; }); }
     const b = $('[data-wact="max"]', w.el);
     if (b) b.innerHTML = w.max ? GLYPH.restore : GLYPH.max;
   }
@@ -651,7 +671,7 @@
   startMenu.addEventListener('focusout', (e) => { const t = e.relatedTarget; if (t && !startMenu.contains(t) && t !== startBtn) closeStart(); });
 
   /* ------------------------------------------------------------ dropdown menus */
-  let menuState = null;
+  let menuState = null, menuFrom = null;
   function openMenu(anchor, items) {
     closeMenu();
     const m = document.createElement('div');
@@ -663,7 +683,8 @@
     m.style.left = clamp(r.left, 2, innerWidth - m.offsetWidth - 2) + 'px';
     m.style.top = r.bottom + 'px';
     anchor.setAttribute('aria-expanded', 'true');
-    m.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (!b || b.disabled) return; const it = items[+b.dataset.i]; closeMenu(); it.run(); });
+    // a window an item opens zooms out of the menu's title, as one opened from Start zooms out of its item
+    m.addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (!b || b.disabled) return; const it = items[+b.dataset.i]; menuFrom = rectOf(anchor); closeMenu(); it.run(); menuFrom = null; });
     m.addEventListener('keydown', (e) => {
       const bs = $$('button:not(:disabled)', m); const i = bs.indexOf(document.activeElement);
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); bs[i < 0 ? (e.key === 'ArrowDown' ? 0 : bs.length - 1) : (i + (e.key === 'ArrowDown' ? 1 : -1) + bs.length) % bs.length].focus(); }
@@ -1039,6 +1060,10 @@
       screen.classList.remove('flick'); void screen.offsetWidth; screen.classList.add('flick');
       // the set's own on-screen display puts the channel number up for a moment (home.css, .pe-osd)
       screen.insertAdjacentHTML('beforeend', `<span class="pe-osd" aria-hidden="true">${String(w.state.ep + 1).padStart(2, '0')}</span>`);
+      // both also go on a timer, for when their animation never ends (the 3D desk draws no snow)
+      const osd = screen.lastElementChild;
+      clearTimeout(screen.flickT); screen.flickT = setTimeout(() => screen.classList.remove('flick'), 400);
+      setTimeout(() => osd.remove(), 1500);
     }
     if (focusKey) { const k = $(`.rm-num[data-i="${w.state.ep}"]`, w.el); if (k) k.focus({ preventScroll: true }); }
   }
@@ -1867,7 +1892,7 @@
   }
   function openCase(slug, from, push) {
     const w = wins.get('player');
-    if (w) { if (w.state.slug !== slug) switchCase(w, slug); if (w.min) restoreWin(w, from); else focusWin(w, true); return; }
+    if (w) { if (w.state.slug !== slug) switchCase(w, slug); if (w.min) restoreWin(w, from); else { zoom(from, rectOf(w.el)); focusWin(w, true); } return; }
     track('case', slug);
     openWin('player', { from, state: { slug }, pushHistory: push !== false });
   }
@@ -1976,7 +2001,7 @@
     if (!gameScript) {
       gameScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'game.js?v=35';
+        s.src = 'game.js?v=36';
         s.onload = () => resolve(window.BossRushXP);
         s.onerror = () => { gameScript = null; s.remove(); reject(new Error('game.js did not load')); };
         document.head.appendChild(s);
@@ -2023,7 +2048,7 @@
     if (!petScript) {
       petScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'pet.js?v=6';
+        s.src = 'pet.js?v=7';
         s.onload = () => resolve(window.DesktopPet);
         s.onerror = () => { petScript = null; s.remove(); reject(new Error('pet.js did not load')); };
         document.head.appendChild(s);
@@ -2096,7 +2121,7 @@
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=5';
+        s.src = 'screensaver.js?v=6';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);
@@ -2279,6 +2304,7 @@
     n.innerHTML = `<button type="button" class="pet-x" aria-label="${esc(u('close'))}"></button><button type="button" class="note-go"><b>${I(icon, 16)}${esc(title)}</b><span>${esc(text)}</span></button>`;
     // a tap already on its way to whatever the balloon lands on still reaches it: the balloon takes no input at first
     n.style.pointerEvents = 'none'; setTimeout(() => { n.style.pointerEvents = ''; }, 400);
+    if (PF.wall3d) PF.wall3d.calm(2000);
     document.body.appendChild(n);
     const drop = () => { clearTimeout(n.timer); n.remove(); if (noteNow === n) noteNow = null; };
     n.querySelector('.pet-x').addEventListener('click', drop);
@@ -2351,6 +2377,18 @@
     if (trails) { trails.destroy(); trails = null; }
   }
   function toggleTrails() { if (trailsWanted) hideTrails(); else { setTrailsState('on'); showTrails(false); } }
+  // Reduce motion switched mid-visit. On: a Starfield on screen goes at once (no swirl), the idle wait stops and the
+  // trails go. Off: the wait and the trails come back. The wallpaper, the desk and the stickman follow it themselves
+  function reduceChanged() {
+    if (reduceMotion) {
+      if (saverUp) saverUp.stop();
+      clearInterval(idleTick); idleTick = 0;
+      if (trails) { trails.destroy(); trails = null; }
+    } else {
+      idleArm();
+      if (trailsWanted) showTrails(false);
+    }
+  }
   // the game calls this when a full run is won: the first win installs them ('new'); after that it says how they stand.
   // On a small screen the tray's note would cover the win screen, so it waits until the game's window closes or goes
   // down to the taskbar (trailsNoteNow)
@@ -2516,6 +2554,8 @@
       // window up rather than minimising it
       if (e.target === desktopEl || e.target.id === 'windows' || e.target.matches('canvas.wall3d, .desk-icons')) {
         activeId = null; wins.forEach((x) => x.el.classList.remove('active')); renderTasks();
+        // a mouse drag on the bare desktop paints no browser text selection across the icons and the windows
+        if (e.pointerType === 'mouse' && e.button === 0) e.preventDefault();
       }
       return;
     }

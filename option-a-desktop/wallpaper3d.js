@@ -76,7 +76,8 @@ const PF = (window.PF = window.PF || {});
 const desktop = document.getElementById('desktop');
 // phone mode, as style.css's SMALL SCREENS asks it
 const mqMobile = window.matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// read live, so Reduce motion switched on mid-visit stills the wallpaper at once
+const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 const wantStatic = new URLSearchParams(location.search).get('wall') === 'static';
 
 if (desktop && !wantStatic) {
@@ -220,7 +221,7 @@ function start() {
   const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
   /* ---------- water wake: a tiny flow field, ping-ponged between two float targets ---------- */
-  const flowOn = floatTarget && !reduceMotion;
+  const flowOn = floatTarget && !mqReduce.matches;
   const flowOpts = { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false };
   const flowRT = flowOn ? [new THREE.WebGLRenderTarget(2, 2, flowOpts), new THREE.WebGLRenderTarget(2, 2, flowOpts)] : null;
   const flowMat = new THREE.ShaderMaterial({
@@ -313,11 +314,12 @@ function start() {
   const ptrVel = new THREE.Vector2(), ptrStep = new THREE.Vector2();   // raw cursor velocity (uv/s), for touches
   let ptrAt = 0, pointerMoved = false;
   window.addEventListener('pointermove', (e) => {
-    pointer.set((e.clientX / window.innerWidth - 0.5) * 2, -(e.clientY / window.innerHeight - 0.5) * 2);
     const r = desktop.getBoundingClientRect();
     const u = (e.clientX - r.left) / r.width, v = 1 - (e.clientY - r.top) / r.height;
     const inside = u >= 0 && u <= 1 && v >= 0 && v <= 1 && !(e.target.closest && e.target.closest('.win, .taskbar, .start-menu, .menu'));
     if (!inside) { overWall = false; return; }
+    // the camera leans with the pointer only over the bare wallpaper: windows, menus and the taskbar don't stir it
+    pointer.set((e.clientX / window.innerWidth - 0.5) * 2, -(e.clientY / window.innerHeight - 0.5) * 2);
     const now = performance.now();
     if (!overWall) { cursor.set(u, v); cursorWas.set(u, v); ptrVel.set(0, 0); }   // entering: no streak from the old spot
     else {
@@ -478,24 +480,42 @@ function start() {
     if (!canvas.classList.contains('on')) canvas.classList.add('on');
   }
 
-  // Nothing to show when a maximized window or the shutdown screen covers the desktop.
-  let coveredCheckAt = 0, covered = false;
-  function isCovered(now) {
+  // How much of the desktop shows between the windows, sampled on an 8 x 6 grid twice a second: with nothing showing
+  // (a maximised window, the shutdown screen) it draws nothing; with under 30% showing it runs at 10 fps
+  let coveredCheckAt = 0, shown = 1, covered = false;
+  function visibleShare(now) {
     if (now > coveredCheckAt) {
-      covered = !!document.querySelector('.win.max:not([hidden]), .shutdown-screen');
       coveredCheckAt = now + 500;
+      if (document.querySelector('.win.max:not([hidden]), .shutdown-screen')) shown = 0;
+      else {
+        const d = desktop.getBoundingClientRect(), rs = Array.from(document.querySelectorAll('#windows .win:not([hidden])'), (w) => w.getBoundingClientRect());
+        let n = 0;
+        for (let i = 0; i < 8; i++) for (let j = 0; j < 6; j++) {
+          const x = d.left + ((i + 0.5) * d.width) / 8, y = d.top + ((j + 0.5) * d.height) / 6;
+          if (!rs.some((q) => x >= q.left && x <= q.right && y >= q.top && y <= q.bottom)) n++;
+        }
+        shown = n / 48;
+      }
     }
-    return covered;
+    return shown;
   }
+  // the next glitch comes its usual 3.5 to 9 s after the wallpaper shows again, never the moment it does
+  const reglitch = (now) => { nextGlitch = Math.max(nextGlitch, now + rand(...CFG.glitchEvery)); };
 
-  let raf = 0, last = 0, paused = false;
-  function frame(now) {
-    raf = requestAnimationFrame(frame);
-    const frameMs = 1000 / (wake >= WAKE_MIN || touchLive ? CFG.fpsActive : CFG.fps);
-    if (now - last < frameMs - 1) return;
+  // between draws it sleeps on a timer rather than waking every display frame for nothing
+  let raf = 0, timer = 0, last = 0, paused = false;
+  const wait = (ms) => { timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(frame); }, Math.max(0, ms)); };
+  // timed on the clock the timer keeps (a frame's own timestamp can trail it by most of a frame), so each wake draws
+  function frame() {
+    raf = 0;
+    const now = performance.now(), share = visibleShare(now);
+    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || touchLive ? CFG.fpsActive : CFG.fps);
+    if (now - last < frameMs - 8) { wait(last + frameMs - now - 4); return; }
     const dt = Math.min(0.1, (now - last) / 1000 || 0);
     last = now;
-    if (isCovered(now)) return;
+    if (share === 0) { covered = true; wait(500); return; }
+    if (covered) { covered = false; reglitch(now); }
+    wait(last + frameMs - performance.now() - 4);
     time += dt;
     touchStep(dt);
     animate(time, dt);
@@ -505,11 +525,12 @@ function start() {
     draw();
   }
   function play() {
-    if (raf || paused || reduceMotion || mqMobile.matches || document.hidden) return;
+    if (raf || timer || paused || mqReduce.matches || mqMobile.matches || document.hidden) return;
     last = performance.now();
+    reglitch(last);
     raf = requestAnimationFrame(frame);
   }
-  function stop() { cancelAnimationFrame(raf); raf = 0; }
+  function stop() { cancelAnimationFrame(raf); clearTimeout(timer); raf = 0; timer = 0; }
   function still() { animate(time); draw(); }
 
   layout();
@@ -524,18 +545,21 @@ function start() {
   if (!mqMobile.matches) draw();
   play();
 
-  window.addEventListener('resize', () => { layout(); if (!raf && !mqMobile.matches) still(); });
+  window.addEventListener('resize', () => { layout(); if (!raf && !timer && !mqMobile.matches) still(); });
+  mqReduce.addEventListener('change', () => { if (mqReduce.matches) { stop(); glitchUntil = 0; post.uniforms.uGlitch.value = 0; if (!mqMobile.matches) still(); } else play(); });
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : play()));
   mqMobile.addEventListener('change', () => { if (mqMobile.matches) stop(); else { layout(); still(); play(); } });
   canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); stop(); canvas.remove(); });
 
   PF.wall3d = {
     cfg: CFG,
-    glitch(ms = 400) { const now = performance.now(); glitchUntil = now + ms; reseedAt = 0; if (!raf) { glitchTick(now); still(); } },
+    glitch(ms = 400) { const now = performance.now(); glitchUntil = now + ms; reseedAt = 0; if (!raf && !timer) { glitchTick(now); still(); } },
+    // a quiet spell while the interface moves (a window zooming, a balloon), so a glitch never lands on it
+    calm(ms = 1500) { const t = performance.now() + ms; if (nextGlitch < t) nextGlitch = t; },
     pause() { paused = true; stop(); },
     // where the middle of each ribbon sits on screen (CSS px), for testing touches
     targets: () => { const r = desktop.getBoundingClientRect(); group.updateMatrixWorld(true); return lights.map((L) => { L.strip.pointAt(0.5, vA); L.mesh.localToWorld(vA).project(camera); const st = L.mesh.userData.touch; return { name: L.spec.name, x: Math.round(r.left + ((vA.x + 1) / 2) * r.width), y: Math.round(r.top + ((1 - vA.y) / 2) * r.height), push: +st.off.length().toFixed(3), flutter: +st.flutter.toFixed(3) }; }); },
-    state: () => ({ running: !!raf, covered, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), touching: touchLive, drawn }),
+    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), touching: touchLive, drawn }),
     play() { paused = false; play(); },
     // advance one frame by hand (the browser pauses requestAnimationFrame in hidden tabs)
     step(dt = 1 / 60) { time += dt; touchStep(dt); animate(time, dt); touchTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },

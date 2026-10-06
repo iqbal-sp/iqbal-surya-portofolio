@@ -40,7 +40,9 @@ const BUILDERS = [brief, structure, review, handoff];
 
 export function createDesk(host, opts = {}) {
   const cfg = { ...CFG, ...opts.cfg };
-  const reduceMotion = opts.reduceMotion ?? window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // read live: Reduce motion switched on mid-visit freezes the desk on its station's still (onReduce)
+  const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const rm = () => opts.reduceMotion ?? mqReduce.matches;
 
   const canvas = document.createElement('canvas');
   canvas.className = 'desk3d';
@@ -239,7 +241,7 @@ export function createDesk(host, opts = {}) {
         s.time += dt;
         if (s.time >= s.period) s.time -= s.period;
         // a station's own cuts glitch only once the camera has arrived
-        if (gliding <= 0 && !reduceMotion) for (const c of s.cuts) if ((was < c && s.time >= c) || (s.time < was && (c > was || c <= s.time))) glitch(cfg.cutGlitch);
+        if (gliding <= 0 && !rm()) for (const c of s.cuts) if ((was < c && s.time >= c) || (s.time < was && (c > was || c <= s.time))) glitch(cfg.cutGlitch);
       } else if (s.finishing) {
         s.time += dt;
         if (s.time >= s.period) { s.time = 0; s.finishing = false; }
@@ -259,29 +261,45 @@ export function createDesk(host, opts = {}) {
   }
 
   /* ---------- loop ---------- */
-  let raf = 0, last = 0, paused = !!opts.paused, onScreen = true, frozen = false;
-  function frame(now) {
-    raf = requestAnimationFrame(frame);
-    if (now - last < 1000 / cfg.fps - 1) return;
+  // Between draws it sleeps on a timer instead of waking every display frame, and while something else lies over the
+  // middle of the screen (another window, the Starfield) it holds its frame and only looks again twice a second
+  let raf = 0, timer = 0, last = 0, paused = !!opts.paused, onScreen = true, frozen = false, coverAt = 0, covered = false;
+  const coveredNow = (now) => {
+    if (!host) return true;
+    if (now > coverAt) {
+      coverAt = now + 500;
+      const r = host.getBoundingClientRect(), e = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      covered = !e || !host.contains(e);
+    }
+    return covered;
+  };
+  const wait = (ms) => { timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(frame); }, Math.max(0, ms)); };
+  // timed on the clock the timer keeps (a frame's own timestamp can trail it by most of a frame), so each wake draws
+  function frame() {
+    raf = 0;
+    const now = performance.now(), gap = 1000 / cfg.fps;
+    if (now - last < gap - 8) { wait(last + gap - now - 4); return; }
     const dt = Math.min(0.1, (now - last) / 1000 || 0);
     last = now;
+    if (coveredNow(now)) { wait(500); return; }
     advance(dt);
     aim(dt);
     glitchTick(now);
     draw();
+    wait(last + gap - performance.now() - 4);
   }
   function play() {
     frozen = false;
-    if (!ready || raf || paused || reduceMotion || !onScreen || document.hidden) return;
+    if (!ready || raf || timer || paused || rm() || !onScreen || document.hidden) return;
     last = performance.now();
     raf = requestAnimationFrame(frame);
   }
-  function stop() { cancelAnimationFrame(raf); raf = 0; }
+  function stop() { cancelAnimationFrame(raf); clearTimeout(timer); raf = 0; timer = 0; }
 
   function go(i, { instant = false } = {}) {
     i = ((i % BUILDERS.length) + BUILDERS.length) % BUILDERS.length;
     if (!ready) { wanted = i; return; }
-    if (reduceMotion || instant) return freeze(i, reduceMotion ? stations[i].still : 0, !reduceMotion);
+    if (rm() || instant) return freeze(i, rm() ? stations[i].still : 0, !rm());
     if (i === active && !frozen) return;
     const leaving = stations[active];
     if (leaving !== stations[i] && leaving.time > 0) leaving.finishing = true;
@@ -291,7 +309,7 @@ export function createDesk(host, opts = {}) {
     s.finishing = false; s.time = 0; s.update(0);
     gliding = cfg.glide;
     glitch(rand(...cfg.glitch));
-    if (!raf) { frozen = false; play(); }
+    if (!raf && !timer) { frozen = false; play(); }
   }
 
   // show station i at local time t, all at rest, and draw once; resume = keep playing from there
@@ -329,7 +347,7 @@ export function createDesk(host, opts = {}) {
   const onVis = () => (document.hidden ? stop() : play());
   document.addEventListener('visibilitychange', onVis);
   const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; if (onScreen) { if (!frozen) play(); } else stop(); });
-  const ro = new ResizeObserver(() => { layout(); if (ready && !raf) { aim(1); draw(); } });
+  const ro = new ResizeObserver(() => { layout(); if (ready && !raf && !timer) { aim(1); draw(); } });
   // what the desk listens to and watches on its host, taken along when it moves to a new one (move() below)
   function hook() {
     host.addEventListener('pointermove', onMove, { passive: true });
@@ -387,9 +405,11 @@ export function createDesk(host, opts = {}) {
     lightX = stations[active].x;
     Object.assign(mood, stations[active].mood);
     ready = true;
-    if (reduceMotion) freeze(active, stations[active].still);
+    if (rm()) freeze(active, stations[active].still);
     else { stations[active].update(0); aim(1); draw(); play(); }
   }
+  const onReduce = () => { if (!ready) return; if (rm()) { stop(); freeze(active, stations[active].still); } else play(); };
+  mqReduce.addEventListener('change', onReduce);
   const whenReady = build();
 
   return {
@@ -399,9 +419,9 @@ export function createDesk(host, opts = {}) {
     glitch: (ms = 300) => glitch(ms),
     play() { paused = false; play(); },
     pause() { paused = true; stop(); },
-    setRaw(on) { post.uniforms.uRaw.value = on ? 1 : 0; if (!raf) draw(); },
+    setRaw(on) { post.uniforms.uRaw.value = on ? 1 : 0; if (!raf && !timer) draw(); },
     redraw() { aim(0); draw(); },
-    state: () => ({ ready, active, parked: !host, time: ready ? +stations[active].time.toFixed(2) : 0, gliding: +gliding.toFixed(2), running: !!raf, size: [canvas.width, canvas.height], render: [post.uniforms.uRes.value.x, post.uniforms.uRes.value.y], programs: renderer.info.programs.length, calls: renderer.info.render.calls, textures: renderer.info.memory.textures }),
+    state: () => ({ ready, active, parked: !host, time: ready ? +stations[active].time.toFixed(2) : 0, gliding: +gliding.toFixed(2), running: !!(raf || timer), size: [canvas.width, canvas.height], render: [post.uniforms.uRes.value.x, post.uniforms.uRes.value.y], programs: renderer.info.programs.length, calls: renderer.info.render.calls, textures: renderer.info.memory.textures }),
     // Home is built again on a language switch and on a reopen: the desk moves to the new screen with all it has
     // built, so the page keeps one WebGL context however often Home is rebuilt (episode.js)
     move(to) {
@@ -411,7 +431,7 @@ export function createDesk(host, opts = {}) {
       host.prepend(canvas);
       hook();
       layout();
-      if (ready && !raf) { aim(1); draw(); }
+      if (ready && !raf && !timer) { aim(1); draw(); }
     },
     // the screen went with its Home: the desk stops and leaves the page, keeping nothing of the old Home
     park() {
@@ -424,6 +444,7 @@ export function createDesk(host, opts = {}) {
       dead = true;
       stop(); io.disconnect(); ro.disconnect(); unhook();
       document.removeEventListener('visibilitychange', onVis);
+      mqReduce.removeEventListener('change', onReduce);
       // dispose() alone keeps the context: three.js's shared DFG texture (getDFGLUT) holds every renderer that used it,
       // so the GPU copies go, then the context, without telling episode.js the desk was lost
       canvas.removeEventListener('webglcontextlost', onLost);

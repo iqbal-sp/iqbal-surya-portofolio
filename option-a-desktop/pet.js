@@ -28,7 +28,9 @@
   const LEG = [11, 11], ARM = [8, 8];
   const SPEED = 38, SLEEP_AFTER = 45000;
   const TAU = Math.PI * 2;
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // read live: Reduce motion switched on mid-visit stands him still at once (onReduce)
+  const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let reduceMotion = mqReduce.matches;
   const roomy = window.matchMedia('(min-width: 721px) and (any-pointer: fine)');
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -54,12 +56,12 @@
       ph: 0, up: opts.fresh ? innerHeight : 0, upV: 0, land: 0, dust: 0, near: false, waveCd: 0, lastPoint: performance.now(),
     };
     if (reduceMotion) Object.assign(me, { x: clamp(opts.fresh ? innerWidth / 2 : 180, 40, innerWidth - 40), act: 'idle', up: 0, dur: Infinity });
-    let raf = 0, last = 0, clock = 0, sayT = 0, lastQuip = -1, menu = null, note = null, dirty = true, groundY = innerHeight - 30;
+    let raf = 0, timer = 0, inFrame = false, drawnAt = 0, last = 0, clock = 0, sayT = 0, lastQuip = -1, menu = null, note = null, dirty = true, groundY = innerHeight - 30;
     // the taskbar's top edge on screen, where he stands
     const measure = () => { const tb = document.getElementById('taskbar'); groundY = tb ? tb.getBoundingClientRect().top : innerHeight - 30; };
     measure();
 
-    function go(act, dur, extra) { Object.assign(me, { act, t: 0, dur }, extra || {}); dirty = true; }
+    function go(act, dur, extra) { Object.assign(me, { act, t: 0, dur }, extra || {}); dirty = true; if (!inFrame) start(); }
     // what to do next, mostly walking about
     function next() {
       if (reduceMotion) { go('idle', Infinity); return; }
@@ -174,7 +176,7 @@
       say.style.setProperty('--tail', `${clamp(CW / 2 - left, 10, bw - 10)}px`);
     }
     // an XP balloon tip: his name as its bold title, over what he says
-    function speak(text) { say.innerHTML = `<b>${esc(s.name)}</b>${esc(text)}`; say.hidden = false; sayT = 2.8; placeSay(); }
+    function speak(text) { say.innerHTML = `<b>${esc(s.name)}</b>${esc(text)}`; say.hidden = false; sayT = 2.8; placeSay(); start(); }
     function quip() {
       let i = Math.floor(Math.random() * s.quips.length);
       if (i === lastQuip) i = (i + 1) % s.quips.length;
@@ -182,19 +184,32 @@
     }
     const rect = () => { const r = hit.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; };
 
+    // He draws at 30 fps while he moves and at 10 while he only breathes, and between draws the loop sleeps on a timer
+    // rather than waking every display frame; standing still (Reduce motion) it stops until something changes
+    const moving = () => me.act === 'walk' || me.act === 'wave' || me.act === 'fall' || me.up > 0 || me.upV > 0 || me.land > 0 || me.dust > 0;
     function frame(now) {
-      raf = requestAnimationFrame(frame);
-      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+      raf = 0; inFrame = true;
+      // a sleep between frames counts in full, up to a quarter second, so his timers keep their pace
+      const dt = last ? Math.min(moving() ? 0.05 : 0.25, (now - last) / 1000) : 0;
       last = now;
       update(dt, now);
       el.style.transform = `translate(${Math.round(me.x - CW / 2)}px, ${-Math.round(me.up)}px)`;
       if (!say.hidden) placeSay();
-      if (reduceMotion && !dirty) return;
-      dirty = false;
-      draw();
+      inFrame = false;
+      const busy = moving() || !say.hidden;
+      if (dirty || (!reduceMotion && now - drawnAt >= (busy ? 29 : 96))) { dirty = false; drawnAt = now; draw(); }
+      if (reduceMotion && say.hidden) return;
+      if (busy) raf = requestAnimationFrame(frame);
+      else timer = setTimeout(() => { timer = 0; raf = requestAnimationFrame(frame); }, 90);
     }
-    function start() { if (!raf && !el.hidden) { last = 0; raf = requestAnimationFrame(frame); } }
-    function stop() { cancelAnimationFrame(raf); raf = 0; }
+    function start() { if (!raf && !timer && !el.hidden) { last = 0; raf = requestAnimationFrame(frame); } }
+    function stop() { cancelAnimationFrame(raf); clearTimeout(timer); raf = 0; timer = 0; }
+    const onReduce = () => {
+      reduceMotion = mqReduce.matches;
+      if (reduceMotion) Object.assign(me, { up: 0, upV: 0, land: 0, dust: 0 });
+      if (reduceMotion) go('idle', Infinity); else next();
+    };
+    mqReduce.addEventListener('change', onReduce);
     // desktop-sized screens only
     function fit() { el.hidden = !roomy.matches; if (el.hidden) { stop(); closeMenu(); } else start(); }
 
@@ -259,7 +274,7 @@
       const near = Math.hypot(e.clientX - me.x, e.clientY - (groundY - 40 - me.up)) < 110;
       if (near && me.act !== 'fall') {
         const f = e.clientX < me.x ? -1 : 1;
-        if (f !== me.face && me.act !== 'walk') { me.face = f; dirty = true; }
+        if (f !== me.face && me.act !== 'walk') { me.face = f; dirty = true; start(); }
         if (!me.near && ['walk', 'idle', 'sit', 'sleep'].includes(me.act) && !reduceMotion) {
           me.face = f;
           if (me.waveCd <= 0) { go('wave', 1.4); me.waveCd = 8; } else go('look', Infinity);
@@ -284,6 +299,7 @@
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('resize', onResize);
       roomy.removeEventListener('change', fit);
+      mqReduce.removeEventListener('change', onReduce);
       el.remove();
     }
 

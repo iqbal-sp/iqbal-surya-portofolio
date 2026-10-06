@@ -8,7 +8,7 @@
 const PF = (window.PF = window.PF || {});
 // phone mode, as style.css's SMALL SCREENS and the wallpaper ask it
 const mqMobile = window.matchMedia('(max-width: 720px), (max-height: 500px) and (pointer: coarse)');
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 const wantStatic = new URLSearchParams(location.search).get('desk') === 'static';
 
 let desk = null, host = null, watched = null, loading = null, failed = false;
@@ -22,7 +22,7 @@ function remoteEp(screen) {
 function hasWebGL() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
 }
-const allowed = () => !failed && !wantStatic && !reduceMotion && !mqMobile.matches;
+const allowed = () => !failed && !wantStatic && !mqReduce.matches && !mqMobile.matches;
 
 function mount(screen) {
   if (host === screen || !allowed()) return;
@@ -73,7 +73,7 @@ function check() {
   if (screen) near.observe(screen);
 }
 
-if (!wantStatic && !reduceMotion && hasWebGL()) {
+if (!wantStatic && !mqReduce.matches && hasWebGL()) {
   // a timer rather than a frame: a tab that is not painting still has to notice the screen
   new MutationObserver(() => { if (!queued) { queued = true; setTimeout(check, 60); } }).observe(document.body, { childList: true, subtree: true });
   mqMobile.addEventListener('change', () => { if (mqMobile.matches) unmount(); else if (watched) { near.unobserve(watched); near.observe(watched); } });

@@ -3219,12 +3219,13 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
 
     /* ------------------------------------------------------------ loop: fixed 1/120 s steps, drawn once a frame */
     // it rests while the window is minimised (the host then has no size); a fight pauses first
-    let lastT = 0, acc = 0, fpsE = 60, raf = 0, gone = false;
+    let lastT = 0, acc = 0, fpsE = 60, raf = 0, nap = 0, gone = false;
     function frame(now) {
       raf = requestAnimationFrame(frame);
       const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0;
       lastT = now;
-      if (!host.offsetWidth) { pause(); return; }
+      // minimised, it looks again four times a second instead of every display frame
+      if (!host.offsetWidth) { pause(); cancelAnimationFrame(raf); raf = 0; lastT = 0; nap = setTimeout(() => { nap = 0; if (!gone) raf = requestAnimationFrame(frame); }, 250); return; }
       if (dt > 0) fpsE = lerp(fpsE, 1 / dt, 0.05);
       if (!G.paused && !tooSmall && !(reduceMotion && G.mode === 'demo')) {
         acc += dt;
@@ -3245,7 +3246,7 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
     }
     function destroy() {
       gone = true;
-      cancelAnimationFrame(raf); cancelAnimationFrame(relayoutRaf);
+      cancelAnimationFrame(raf); cancelAnimationFrame(relayoutRaf); clearTimeout(nap);
       ro.disconnect();
       removeEventListener('pointermove', onMouse);
       removeEventListener('blur', away);

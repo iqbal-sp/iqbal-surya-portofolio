@@ -5912,7 +5912,7 @@
     destroy() {
       if (this.gone) return;
       this.gone = true;
-      cancelAnimationFrame(this.raf);
+      cancelAnimationFrame(this.raf); clearTimeout(this.nap);
       this.ro.disconnect();
       window.removeEventListener('resize', this.onResize);
       document.removeEventListener('visibilitychange', this.onVis);
@@ -5932,7 +5932,8 @@
       this.detached = 0;
       const dt = this.last ? Math.min(0.05, (ts - this.last) / 1000) : 0;
       this.last = ts;
-      if (this.canvas.offsetParent === null) { this.pause(); return; }
+      // minimised, it looks again four times a second instead of every display frame
+      if (this.canvas.offsetParent === null) { this.pause(); cancelAnimationFrame(this.raf); this.raf = 0; this.last = 0; this.nap = setTimeout(() => { this.nap = 0; if (!this.gone) this.raf = requestAnimationFrame(this.loop); }, 250); return; }
       const small = tooSmall();
       if (small !== this.small) this.checkSize();
       else if (small && !this.paused && this.canPause()) this.pause();
