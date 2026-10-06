@@ -282,6 +282,8 @@
       const w = clamp(W - left - 30, 480, 1280), h = clamp(H - 20, 360, 900);
       return { x: Math.max(left, Math.round((W - w) / 2) + 36), y: Math.max(8, Math.round((H - h) / 2)), w, h };
     }
+    // Winamp: its 376px skin at the right of the desktop, as tall as its parts
+    if (id === 'winamp') return { x: Math.max(left, W - 376 - 48), y: Math.max(8, Math.round(H * 0.08)), w: 376, h: 0 };
     if (id === 'contact') { const w = Math.min(580, W - 40), h = Math.min(492, H - 40); return { x: Math.round((W - w) / 2) + 70, y: Math.round((H - h) / 2) - 16, w, h }; }
     if (id === 'recycle') return { x: Math.round(W / 2 - 260), y: Math.round(H / 2 - 170), w: 520, h: 300 };
     // the Picture Viewer: a 4:3 picture plus its caption and toolbar, centred a little right of the icons
@@ -341,6 +343,13 @@
       icon: 'image', title: (w) => `${shotFile(PF.home.shorts.list[w.state.i])} - ${u('viewer')}`, task: () => u('viewer'),
       build: buildViewer, initial: () => ({ i: 0 }),
       onClose: (w) => { clearInterval(w.showTimer); w.showTimer = null; },
+    },
+    // Winamp (winamp.js): a skin with its own title bars; the taskbar reads the song playing, as Winamp's did
+    winamp: {
+      icon: 'winamp', title: () => (PF.winamp ? PF.winamp.caption() : 'Winamp'), task: () => (PF.winamp ? PF.winamp.caption() : 'Winamp'), skinned: true,
+      build: () => '<div class="wa-host"></div>',
+      after: (w) => { if (PF.winamp) PF.winamp.mount($('.wa-host', w.el), { changed: (c) => { w.el.setAttribute('aria-label', c); renderTasks(); } }); },
+      onClose: () => { if (PF.winamp) PF.winamp.stop(); },
     },
   };
 
@@ -570,9 +579,12 @@
     { id: 'contact', icon: 'envelope', label: () => u('contact') },
     { id: 'network', icon: 'globe', label: () => u('network') },
     { id: 'recycle', icon: 'recycle', label: () => u('recycle') },
+    { id: 'winamp', icon: 'winamp', label: () => 'Winamp' },
   ];
+  // Winamp shows once its playlist has songs (on localhost always, to try it with your own files)
+  let waOK = false;
   function renderDesk() {
-    $('#deskIcons').innerHTML = DESK.map((d) => `<li><button class="dicon" data-desk="${d.id}">${I(d.icon, 32)}<span class="lbl">${esc(d.label())}</span></button></li>`).join('');
+    $('#deskIcons').innerHTML = DESK.filter((d) => d.id !== 'winamp' || waOK).map((d) => `<li><button class="dicon" data-desk="${d.id}">${I(d.icon, 32)}<span class="lbl">${esc(d.label())}</span></button></li>`).join('');
   }
   function openDesk(id, from) {
     if (id === 'network') openWin('contact', { from, state: { cat: 'linkedin' } });
@@ -604,7 +616,8 @@
           <li role="none" class="has-sub">${item('data-sub aria-haspopup="menu"', 'grid', u('accessories'), 24, true)}
             <ul class="sm-sub" role="menu">
               <li role="none">${item('data-sm="brxp"', 'trophy', 'Boss Rush XP', 16)}</li>
-              <li role="none">${item('data-sm="ssxp"', 'moon', 'Screen Saver XP', 16)}</li>
+              <li role="none">${item('data-sm="ssxp"', 'moon', 'Screen Saver XP', 16)}</li>${waOK ? `
+              <li role="none" class="sm-wa">${item('data-sm="winamp"', 'winamp', 'Winamp', 16)}</li>` : ''}
             </ul></li>
         </ul>
         <ul class="sm-list places" role="none">
@@ -2211,7 +2224,7 @@
     if (!gameScript) {
       gameScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'game.js?v=36';
+        s.src = 'game.js?v=37';
         s.onload = () => resolve(window.BossRushXP);
         s.onerror = () => { gameScript = null; s.remove(); reject(new Error('game.js did not load')); };
         document.head.appendChild(s);
@@ -2331,7 +2344,7 @@
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=6';
+        s.src = 'screensaver.js?v=7';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);
@@ -2487,7 +2500,9 @@
     return document.hidden || !document.hasFocus() || document.documentElement.classList.contains('booting') || !!$('.shutdown-screen')
       || !!(a && a.closest && a.closest('input, textarea, select, [contenteditable]'))
       || !startMenu.hidden || !!menuState || !!deskMenu || !!noteNow || !!$('.pet-note')
-      || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')) || (x.id === 'viewer' && x.showTimer));
+      || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')) || (x.id === 'viewer' && x.showTimer)
+        // Winamp playing in view is its own show, like the slideshow
+        || (x.id === 'winamp' && !x.min && PF.winamp && PF.winamp.playing()));
   }
   function idleWake() {
     saverUp = null; idleLast = performance.now();
@@ -3055,7 +3070,7 @@
     langBtn.textContent = lang.toUpperCase();
     langBtn.setAttribute('aria-label', lang === 'en' ? 'Language: English. Switch to Bahasa Indonesia' : 'Bahasa: Indonesia. Ganti ke English');
     langBtn.title = lang === 'en' ? 'English → Bahasa Indonesia' : 'Bahasa Indonesia → English';
-    $('.tray .speaker').innerHTML = I('sound', 16);
+    if (PF.volume) PF.volume.tray();
     $('#clock').textContent = clockText();
   }
   function setLang(l) {
@@ -3168,6 +3183,7 @@
   renderDesk();
   renderStartBtn();
   updateTray();
+  if (PF.winamp) PF.winamp.available().then((ok) => { if (ok !== waOK) { waOK = ok; renderDesk(); } });
   { const r = parseHash(); if (r && (r.id === 'game' || r.id === 'screensaver')) track('door', r.id === 'game' ? 'br:link' : 'ss:link'); }
   openDefault();
   if (petState() === 'on') showPet(false);

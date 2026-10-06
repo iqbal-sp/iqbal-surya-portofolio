@@ -1,0 +1,212 @@
+/* Option A — the tray's volume and Winamp (winamp.js).
+   The volume flyout is XP's tray volume on the Luna face. Winamp is drawn after Winamp 5's Winamp Modern skin: one
+   silver window with a blue LCD, on the 4px grid. */
+
+/* ============================================================ the tray's speaker and its volume flyout */
+.tray .speaker { position: relative; width: 16px; height: 16px; padding: 0; border: 0; background: none; color: inherit; line-height: 0; cursor: pointer; }
+/* the speaker is drawn 16px, but the pointer finds a 26px key round it */
+.tray .speaker::before { content: ""; position: absolute; inset: -5px; }
+.tray .speaker:focus-visible { outline-offset: 3px; }
+.px-soundMute { --ic-fill: var(--ic-paper); }
+/* Winamp's tile: a deeper Winamp orange, so its white bolt holds 3.4:1 as the brand tiles' glyphs do */
+.px-winamp { --ic-fill: #dd6a10; }
+
+.vol-fly {
+  position: fixed; bottom: calc(var(--tb-h) + 4px); z-index: 9600; width: 72px; padding: 8px 8px 12px;
+  display: grid; justify-items: center; gap: 8px;
+  background: var(--face); border: 1px solid var(--shade); box-shadow: var(--menu-shadow); color: #000; font-size: 12px;
+}
+.vol-h { justify-self: stretch; text-align: center; }
+/* a sunken groove down the middle, the thumb riding it, and the ticks on its right as XP drew them */
+.vol-track { position: relative; width: 40px; height: 112px; }
+.vol-track::before { content: ""; position: absolute; left: 18px; top: 4px; bottom: 4px; width: 4px; border: 1px solid; border-color: #9d9da1 #fff #fff #9d9da1; background: #f4f3ee; }
+.vol-ticks { position: absolute; right: 0; top: 5px; bottom: 5px; width: 4px; background: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px 10.2px); }
+.vol-fly input[type="range"] {
+  position: absolute; inset: 0 8px 0 4px; width: 28px; height: 112px; margin: 0; padding: 0;
+  writing-mode: vertical-lr; direction: rtl; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+}
+.vol-fly input[type="range"]::-webkit-slider-runnable-track { background: transparent; border: 0; }
+.vol-fly input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 21px; height: 11px; border: 1px solid #6f7f9b; border-radius: 2px;
+  background: linear-gradient(#fff, #ecebe6 60%, #d6d5cf); box-shadow: inset 3px 0 #21a121;
+}
+.vol-fly input[type="range"]::-moz-range-track { background: transparent; border: 0; }
+.vol-fly input[type="range"]::-moz-range-thumb { width: 19px; height: 9px; border: 1px solid #6f7f9b; border-radius: 2px; background: linear-gradient(#fff, #ecebe6 60%, #d6d5cf); box-shadow: inset 3px 0 #21a121; }
+/* the thumb's lit edge turns orange under the pointer, as Luna's did */
+.vol-fly input[type="range"]:hover::-webkit-slider-thumb { box-shadow: inset 3px 0 #f8b636; }
+.vol-fly input[type="range"]:hover::-moz-range-thumb { box-shadow: inset 3px 0 #f8b636; }
+.vol-fly input[type="range"]:focus-visible { outline: 1px dotted #000; outline-offset: 0; }
+.vol-fly .chk { min-height: 0; gap: 4px; font-size: 12px; }
+
+/* ============================================================ Winamp (after Winamp 5's Winamp Modern) */
+.win[data-id="winamp"] { min-width: 0; min-height: 0; }
+.wm {
+  width: 376px; display: flex; flex-direction: column; padding-bottom: 8px;
+  border: 1px solid #6e7580; border-radius: 12px;
+  background: linear-gradient(#fcfcfd, #eceef1 30%, #d5d9df);
+  box-shadow: inset 0 1px #fff, inset 0 -1px #aeb4bd, 0 10px 28px -10px rgba(0, 20, 70, .6);
+  font: 12px/1.2 var(--ui); color: #22272f; user-select: none; -webkit-user-select: none;
+}
+.wm button { font: inherit; color: inherit; cursor: pointer; }
+.wm button:disabled { cursor: default; opacity: .5; }
+.wm :focus-visible { outline: 2px solid #4f7fc9; outline-offset: 1px; }
+.wm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.wm [hidden] { display: none !important; }
+
+/* the title bar: the bolt, two etched grooves, the name embossed in the metal, minimize and close */
+.wm-title { height: 28px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; cursor: default; }
+.wm-ico { display: grid; color: #f08a1c; filter: drop-shadow(0 1px #fff); }
+.wm-groove {
+  flex: 1; height: 8px;
+  background: linear-gradient(#aeb4bd, #aeb4bd) 0 1px / 100% 1px no-repeat, linear-gradient(#fff, #fff) 0 2px / 100% 1px no-repeat,
+    linear-gradient(#aeb4bd, #aeb4bd) 0 5px / 100% 1px no-repeat, linear-gradient(#fff, #fff) 0 6px / 100% 1px no-repeat;
+}
+.wm-name { font: italic 700 13px/1 var(--ui); letter-spacing: .14em; color: #59606b; text-shadow: 0 1px #fff; }
+.win:not(.active) .wm-name, .win:not(.active) .wm-groove, .win:not(.active) .wm-ico { opacity: .55; }
+.wm-caps { display: flex; gap: 4px; }
+.wm-cap { width: 20px; height: 18px; padding: 0; display: grid; place-items: center; border: 1px solid #8a919b; border-radius: 4px; background: linear-gradient(#fff, #d6dae0); box-shadow: inset 0 1px #fff; color: #3a414b !important; }
+.wm-cap:hover { background: linear-gradient(#fff, #e3ebf8); }
+.wm-cap:active { background: linear-gradient(#d6dae0, #eceef1); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3); }
+
+.wm-menubar { display: flex; padding: 0 8px; }
+.wm-menubar button { height: 22px; padding: 0 8px; border: 0; border-radius: 3px; background: none; }
+.wm-menubar button:hover, .wm-menubar button[aria-expanded="true"] { background: var(--sel); color: #fff; }
+.wm-menu kbd { margin-left: auto; padding-left: 24px; font: inherit; opacity: .7; }
+
+/* wells: the visualizer, the LCD and the playlist sit in the metal, shaded at the top of their rim and lit at its foot */
+.wm-bezel { padding: 2px; border-radius: 10px; background: linear-gradient(#8a919b, #d6dae0 55%, #fcfcfd); }
+.wm-glass { position: relative; border-radius: 8px; overflow: hidden; }
+.wm-glass::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; }
+.wm-vis { margin: 4px 8px 0; }
+.wm-vis .wm-glass { height: clamp(120px, calc(100vh - 420px), 200px); background: #000; }
+.wm-vis .wm-glass::after { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .55), inset 0 2px 6px rgba(0, 0, 0, .35); background: linear-gradient(rgba(255, 255, 255, .12), rgba(255, 255, 255, 0) 32%); }
+.wm-vis canvas { display: block; width: 100%; height: 100%; }
+/* a YouTube song: YouTube's own player in the visualizer's place, at YouTube's 200px at least, with no gloss over it */
+.wm-yt { position: absolute; inset: 0; z-index: 3; display: none; background: #000; }
+.wm-yt iframe { display: block; width: 100%; height: 100%; border: 0; }
+.wm.video .wm-yt { display: block; }
+.wm.video .wm-vis .wm-glass { height: 200px; }
+.wm.video .wm-vis .wm-glass::after { display: none; }
+
+/* the visual's name between its two steps, as one capsule, and Random with its lamp */
+.wm-visbar { display: flex; align-items: center; gap: 8px; padding: 8px 8px 0; }
+.wm-seg { display: inline-flex; height: 24px; border: 1px solid #8a919b; border-radius: 12px; overflow: hidden; background: linear-gradient(#fff, #d6dae0); box-shadow: inset 0 1px #fff; }
+.wm-seg-b { width: 32px; padding: 0; display: grid; place-items: center; border: 0; background: none; color: #3a414b !important; }
+.wm-seg-b:hover { background: linear-gradient(#fff, #e3ebf8); }
+.wm-seg-b:active { background: linear-gradient(#d6dae0, #eceef1); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25); }
+.wm-seg-b:focus-visible { outline-offset: -2px; }
+.wm-seg-name { min-width: 120px; padding: 0 12px; display: grid; place-items: center; border-inline: 1px solid #aeb4bd; box-shadow: inset 1px 0 #fff, inset -1px 0 #fff; background: linear-gradient(#eceef1, #fcfcfd); color: #22272f; font-weight: 700; }
+.wm-pill {
+  height: 24px; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid #8a919b; border-radius: 12px; background: linear-gradient(#fff, #d6dae0); box-shadow: inset 0 1px #fff; color: #22272f !important;
+}
+.wm-pill:hover:not(:disabled) { background: linear-gradient(#fff, #e3ebf8); }
+.wm-pill:active:not(:disabled) { background: linear-gradient(#d6dae0, #eceef1); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25); }
+.wm-pill svg { color: #3a414b; }
+.wm-rnd { margin-left: auto; }
+/* a lamp: grey while off, Deck Blue and glowing while on */
+.wm-led { width: 8px; height: 8px; flex: none; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #eceef1, #aeb4bd 70%); box-shadow: inset 0 0 0 1px #8a919b; }
+[aria-pressed="true"] > .wm-led { background: radial-gradient(circle at 35% 30%, #fff, #a9cbf8 30%, #4f7fc9 75%); box-shadow: inset 0 0 0 1px #2d5fb5, 0 0 4px #4f7fc9; }
+
+/* the LCD: Winamp's lit pixels on blue glass, a fine line texture in it and a soft gloss over it */
+.wm-lcd { margin: 8px 8px 0; }
+.wm-lcd .wm-glass { height: 70px; background: linear-gradient(#6f97d6, #3a66b2 40%, #244d96 62%, #1c3f80); }
+.wm-lcd .wm-glass::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(255, 255, 255, .035) 0 1px, rgba(255, 255, 255, 0) 1px 3px); pointer-events: none; }
+.wm-lcd .wm-glass::after {
+  box-shadow: inset 0 0 0 1px #1d3768, inset 0 2px 6px rgba(0, 10, 40, .5), inset 0 -1px rgba(169, 203, 248, .35);
+  background: radial-gradient(130% 85% at 50% -38%, rgba(255, 255, 255, .28), rgba(255, 255, 255, .08) 58%, rgba(255, 255, 255, 0) 74%);
+}
+.wm-lcd canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wm-lcd-lit { z-index: 1; filter: drop-shadow(0 0 2px rgba(169, 203, 248, .85)); }
+.wm-hit { position: absolute; z-index: 3; left: 6px; top: 4px; width: 108px; height: 34px; padding: 0; border: 0; border-radius: 6px; background: none; }
+.wm-hit:hover { background: rgba(255, 255, 255, .06); }
+.wm-hit:focus-visible { outline: 1px dotted #eaf2ff; outline-offset: -1px; }
+
+/* sliders: a sunken groove that fills Deck Blue up to the thumb */
+.wm input[type="range"] { -webkit-appearance: none; appearance: none; margin: 0; padding: 0; height: 16px; background: transparent; cursor: pointer; }
+.wm input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 3px; border: 0;
+  background: linear-gradient(rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 60%), linear-gradient(to right, #4f7fc9 var(--wm-fill, 0%), #aeb4bd var(--wm-fill, 0%));
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35), 0 1px #fff;
+}
+.wm input[type="range"]::-moz-range-track { height: 6px; border-radius: 3px; border: 0; background: #aeb4bd; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .35), 0 1px #fff; }
+.wm input[type="range"]::-moz-range-progress { height: 6px; border-radius: 3px; background: #4f7fc9; }
+/* the thumb: a capsule with three grip ridges */
+.wm input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 26px; height: 14px; margin-top: -4px; border: 1px solid #6e7580; border-radius: 8px;
+  background: linear-gradient(90deg, transparent 8px, #8a919b 8px 9px, transparent 9px 11px, #8a919b 11px 12px, transparent 12px 14px, #8a919b 14px 15px, transparent 15px) 0 50% / 100% 6px no-repeat, linear-gradient(#fff, #d6dae0);
+  box-shadow: inset 0 1px #fff, 0 1px 2px rgba(0, 0, 0, .25);
+}
+.wm input[type="range"]::-moz-range-thumb {
+  width: 24px; height: 12px; border: 1px solid #6e7580; border-radius: 8px;
+  background: linear-gradient(90deg, transparent 7px, #8a919b 7px 8px, transparent 8px 10px, #8a919b 10px 11px, transparent 11px 13px, #8a919b 13px 14px, transparent 14px) 0 50% / 100% 6px no-repeat, linear-gradient(#fff, #d6dae0);
+}
+.wm input[type="range"]:hover::-webkit-slider-thumb { background-color: #e3ebf8; }
+.wm input[type="range"]:disabled { cursor: default; }
+.wm input[type="range"]:disabled::-webkit-slider-thumb { visibility: hidden; }
+.wm input[type="range"]:disabled::-moz-range-thumb { visibility: hidden; }
+.wm input.wm-seek { margin: 8px 12px 0; }
+
+/* the deck: the transport keys in their tray, the volume, Eject and PL */
+.wm-deck { display: flex; align-items: center; gap: 8px; padding: 8px 8px 0; }
+.wm-transport { display: flex; align-items: center; gap: 4px; padding: 3px; border-radius: 24px; background: linear-gradient(#aeb4bd, #d6dae0 60%, #eceef1); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25), 0 1px #fff; }
+.wm-round {
+  width: 30px; height: 30px; padding: 0; display: grid; place-items: center;
+  border: 1px solid #6e7580; border-radius: 50%; color: #3a414b !important;
+  background: radial-gradient(circle at 50% 30%, #fff, #eceef1 55%, #d6dae0); box-shadow: inset 0 1px #fff, inset 0 -1px #aeb4bd;
+}
+.wm-round:hover { background: radial-gradient(circle at 50% 30%, #fff, #e3ebf8 55%, #b9d1f7); }
+.wm-round:active { background: radial-gradient(circle at 50% 70%, #fff, #d6dae0 55%, #aeb4bd); box-shadow: inset 0 1px 3px rgba(0, 0, 0, .3); }
+.wm-round:active > svg { translate: 0 1px; }
+/* Play is the size of the others: its blue rim and glyph mark it, and it lights blue while playing */
+.wm-play { border-color: #2d5fb5; color: #2d5fb5 !important; }
+.wm-play.on { color: #fff !important; background: radial-gradient(circle at 50% 30%, #a9cbf8, #4b84db 60%, #2d5fb5); box-shadow: inset 0 1px rgba(255, 255, 255, .6); }
+.wm-play[data-shows="play"] svg { translate: 1px 0; }
+/* the volume in the window's bottom-right corner, whichever row is last */
+.wm-vol { margin-left: auto; width: 84px; display: flex; align-items: center; gap: 4px; }
+.wm-pl-foot .wm-vol { width: 128px; }
+.wm-vol input { flex: 1; min-width: 0; }
+.wm-vol input::-webkit-slider-thumb { width: 14px !important; border-radius: 50% !important; background: radial-gradient(circle, #8a919b 0 1.5px, transparent 2px), linear-gradient(#fff, #d6dae0) !important; }
+.wm-vol input::-moz-range-thumb { width: 12px !important; border-radius: 50% !important; background: radial-gradient(circle, #8a919b 0 1.5px, transparent 2px), linear-gradient(#fff, #d6dae0) !important; }
+.wm-mute { width: 24px; height: 24px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 4px; background: none; color: #3a414b !important; }
+.wm-mute:hover { background: #e3ebf8; }
+/* the speaker's waves follow the level; muted, they give way to a cross */
+.wm-spk :is(.w1, .w2, .w3, .x) { opacity: 0; }
+.wm-mute[data-level="1"] .w1, .wm-mute[data-level="2"] :is(.w1, .w2), .wm-mute[data-level="3"] :is(.w1, .w2, .w3) { opacity: 1; }
+.wm-mute[aria-pressed="true"] :is(.w1, .w2, .w3) { opacity: 0; }
+.wm-mute[aria-pressed="true"] .x { opacity: 1; }
+.wm-side { display: flex; gap: 4px; }
+.wm-key { height: 24px; min-width: 32px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid #8a919b; border-radius: 12px; background: linear-gradient(#fff, #d6dae0); box-shadow: inset 0 1px #fff; color: #3a414b !important; font-weight: 700 !important; }
+.wm-key:hover { background: linear-gradient(#fff, #e3ebf8); }
+.wm-key:active { background: linear-gradient(#d6dae0, #eceef1); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25); }
+
+/* the playlist, folding out under the deck: a head with the count, the rows in their well, and its keys */
+.wm-pl { margin: 8px 8px 0; display: flex; flex-direction: column; gap: 4px; }
+.wm-pl-head { height: 20px; padding: 0 4px; display: flex; align-items: center; gap: 8px; }
+.wm-pl-title { font-weight: 700; color: #3a414b; }
+.wm-total { margin-left: auto; color: #4a515c; font-variant-numeric: tabular-nums; }
+.wm-list {
+  height: 148px; margin: 0; padding: 4px; list-style: none; overflow-y: auto; border-radius: 8px;
+  background: #10244a; box-shadow: inset 0 0 0 1px #1d3768, inset 0 2px 6px rgba(0, 10, 40, .5);
+  color: #cfe0ff; font: 12px/20px var(--ui); scrollbar-width: thin; scrollbar-color: #a3bbe6 #10244a; cursor: default;
+}
+.wm-list li { height: 20px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 8px; border-radius: 4px; white-space: nowrap; }
+.wm-list li:nth-child(even) { background: rgba(255, 255, 255, .03); }
+.wm-list li:hover { background: rgba(255, 255, 255, .08); }
+.wm-list li .n { width: 20px; flex: none; display: inline-flex; justify-content: flex-end; color: #a3bbe6; font-variant-numeric: tabular-nums; }
+.wm-list li .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.wm-list li .d { color: #a3bbe6; font-variant-numeric: tabular-nums; }
+.wm-list li.cur .t { color: #fff; font-weight: 700; }
+.wm-list li.cur .n { color: #eaf2ff; }
+.wm-list li[aria-selected="true"] { background: #3a6fd8; }
+.wm-list li[aria-selected="true"] :is(.n, .d) { color: #eaf2ff; }
+/* a video that won't play here: dimmed and struck through, skipped by the keys */
+.wm-list li.bad .t { opacity: .5; text-decoration: line-through; }
+.wm-list li.wm-empty { height: 100%; padding: 16px; display: flex; flex-direction: column; justify-content: center; gap: 8px; color: #a3bbe6; text-align: center; white-space: normal; background: none; }
+.wm-list:focus-visible { outline: 2px solid #4f7fc9; outline-offset: 1px; }
+.wm-pl-foot { display: flex; align-items: center; gap: 4px; padding-top: 4px; }
+
+/* Start's Winamp and its desktop icon are for a desk: on a phone the speaker and the player stay away */
+@media (max-width: 720px), (max-height: 500px) and (pointer: coarse) {
+  .desk-icons li:has(> [data-desk="winamp"]), .sm-wa { display: none; }
+}

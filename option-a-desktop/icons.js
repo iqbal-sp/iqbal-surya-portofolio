@@ -47,6 +47,7 @@
     "clock": "clock",
     "eye": "eye",
     "sound": "sound-on",
+    "soundMute": "sound-mute",
     "up": "arrow-up",
     "top": "arrow-circle-up",
     "left": "angle-left",
@@ -80,6 +81,7 @@
 
   // library icons: [regular, solid]
   const LIB = {
+    "sound-mute": ["<polygon points=\"22 8 22 10 21 10 21 11 20 11 20 13 21 13 21 14 22 14 22 16 20 16 20 15 19 15 19 14 18 14 18 15 17 15 17 16 15 16 15 14 16 14 16 13 17 13 17 11 16 11 16 10 15 10 15 8 17 8 17 9 18 9 18 10 19 10 19 9 20 9 20 8 22 8\"/><path d=\"m11,2v1h-1v1h-1v1h-1v1h-1v1h-1v1H1v8h5v1h1v1h1v1h1v1h1v1h1v1h3V2h-3ZM3,10h4v-1h1v-1h1v-1h1v-1h1v-1h1v14h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1H3v-4Z\"/>", "<polygon points=\"14 2 14 22 11 22 11 21 10 21 10 20 9 20 9 19 8 19 8 18 7 18 7 17 6 17 6 16 1 16 1 8 6 8 6 7 7 7 7 6 8 6 8 5 9 5 9 4 10 4 10 3 11 3 11 2 14 2\"/><polygon points=\"22 8 22 10 21 10 21 11 20 11 20 13 21 13 21 14 22 14 22 16 20 16 20 15 19 15 19 14 18 14 18 15 17 15 17 16 15 16 15 14 16 14 16 13 17 13 17 11 16 11 16 10 15 10 15 8 17 8 17 9 18 9 18 10 19 10 19 9 20 9 20 8 22 8\"/>"],
     "moon": ["<path d=\"m21,17v1h-2v1h-4v-1h-2v-1h-2v-1h-1v-2h-1v-2h-1v-4h1v-2h1v-2h1v-1h2v-1h2v-1h-5v1h-2v1h-2v1h-1v1h-1v2h-1v2h-1v6h1v2h1v2h1v1h1v1h2v1h2v1h6v-1h2v-1h2v-1h1v-1h1v-2h-1Zm-13,3v-1h-2v-2h-1v-2h-1v-6h1v-2h1v-2h2v1h-1v2h-1v4h1v2h1v2h1v1h1v1h1v1h2v1h2v1h-5v-1h-2Z\"/>", "<polygon points=\"22 17 22 19 21 19 21 20 20 20 20 21 18 21 18 22 16 22 16 23 10 23 10 22 8 22 8 21 6 21 6 20 5 20 5 19 4 19 4 17 3 17 3 15 2 15 2 9 3 9 3 7 4 7 4 5 5 5 5 4 6 4 6 3 8 3 8 2 10 2 10 1 15 1 15 2 13 2 13 3 11 3 11 4 10 4 10 6 9 6 9 8 8 8 8 12 9 12 9 14 10 14 10 16 11 16 11 17 13 17 13 18 15 18 15 19 19 19 19 18 21 18 21 17 22 17\"/>"],
     "window-close": ["<path d=\"m22,2v-1H2v1h-1v20h1v1h20v-1h1V2h-1Zm-1,19H3V3h18v18Z\"/><polygon points=\"15 13 16 13 16 14 17 14 17 15 18 15 18 16 17 16 17 17 16 17 16 18 15 18 15 17 14 17 14 16 13 16 13 15 11 15 11 16 10 16 10 17 9 17 9 18 8 18 8 17 7 17 7 16 6 16 6 15 7 15 7 14 8 14 8 13 9 13 9 11 8 11 8 10 7 10 7 9 6 9 6 8 7 8 7 7 8 7 8 6 9 6 9 7 10 7 10 8 11 8 11 9 13 9 13 8 14 8 14 7 15 7 15 6 16 6 16 7 17 7 17 8 18 8 18 9 17 9 17 10 16 10 16 11 15 11 15 13\"/>", "<path d=\"m22,2v-1H2v1h-1v20h1v1h20v-1h1V2h-1Zm-4,7h-1v1h-1v1h-1v2h1v1h1v1h1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-2v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v-2h-1v-1h-1v-1h-1v-1h1v-1h1v-1h1v1h1v1h1v1h2v-1h1v-1h1v-1h1v1h1v1h1v1Z\"/>"],
     "exclamation-triangle": ["<polygon points=\"14 11 14 14 13 14 13 17 11 17 11 14 10 14 10 11 14 11\"/><rect x=\"11\" y=\"18\" width=\"2\" height=\"2\"/><path d=\"m22,20v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-1h-2v1h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h1v1h20v-1h1v-2h-1Zm-19,1v-1h1v-2h1v-2h1v-2h1v-2h1v-2h1v-2h1v-2h1v-2h2v2h1v2h1v2h1v2h1v2h1v2h1v2h1v2h1v1H3Z\"/>", "<path d=\"m22,20v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-2h-1v-1h-2v1h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h-1v2h1v1h20v-1h1v-2h-1Zm-12-9h4v3h-1v3h-2v-3h-1v-3Zm1,7h2v2h-2v-2Z\"/>"],
@@ -151,6 +153,8 @@
     "dribbble": "M9 5h6v1H9zM7 6h2v1H7zM10 6h1v2H10zM15 6h2v1H15zM6 7h1v2H6zM17 7h1v1H17zM11 8h1v2H11zM16 8h2v1H16zM5 9h1v1H5zM14 9h2v1H14zM18 9h1v4H18zM5 10h3v1H5zM12 10h2v1H12zM5 11h1v4H5zM8 11h5v1H8zM13 12h1v1H13zM11 13h8v1H11zM9 14h2v1H9zM14 14h1v2H14zM18 14h1v1H18zM6 15h1v1H6zM8 15h1v1H8zM17 15h1v2H17zM6 16h2v1H6zM15 16h1v1H15zM7 17h2v1H7zM15 17h2v1H15zM9 18h6v1H9z",
     "behance": "M5 7h5v1H5zM13 7h4v2H13zM5 8h2v3H5zM9 8h2v3H9zM14 10h4v1H14zM5 11h5v1H5zM13 11h2v2H13zM17 11h2v2H17zM5 12h2v4H5zM10 12h2v4H10zM13 13h6v1H13zM13 14h2v2H13zM17 15h2v1H17zM5 16h6v1H5zM14 16h4v1H14z",
     "upwork": "M5 7h2v5H5zM9 7h2v5H9zM12 7h6v1H12zM12 8h2v4H12zM17 8h2v4H17zM6 12h4v1H6zM12 12h6v1H12zM12 13h2v3H12z",
+    // Winamp, drawn for this site: a white bolt on the tile (not Winamp's own logo)
+    "winamp": "M12 5h5v1H12zM12 6h4v1H12zM11 7h5v1H11zM11 8h4v1H11zM10 9h5v1H10zM10 10h4v1H10zM8 11h9v1H8zM8 12h9v1H8zM12 13h4v1H12zM11 14h4v1H11zM11 15h3v1H11zM10 16h3v1H10zM10 17h2v1H10zM9 18h2v1H9zM9 19h1v1H9z",
   };
 
   function svg(name, size = 32, opts = {}) {

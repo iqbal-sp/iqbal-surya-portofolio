@@ -565,7 +565,7 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
         try { actx = new AC(); } catch (e) { actx = null; return; }
-        master = actx.createGain(); master.gain.value = muted ? 0 : VOL; master.connect(actx.destination);
+        master = actx.createGain(); master.gain.value = muted ? 0 : VOL; master.connect(window.PF && PF.volume ? PF.volume.node(actx) : actx.destination); // through the site's volume (winamp.js)
         duckBus = actx.createGain(); duckBus.connect(master);
         noise = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
         const d = noise.getChannelData(0);

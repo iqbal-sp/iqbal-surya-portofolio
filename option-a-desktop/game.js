@@ -564,7 +564,7 @@
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       ctx = new AC();
-      master = ctx.createGain(); master.gain.value = muted ? 0 : 0.26; master.connect(ctx.destination);
+      master = ctx.createGain(); master.gain.value = muted ? 0 : 0.26; master.connect(window.PF && PF.volume ? PF.volume.node(ctx) : ctx.destination); // through the site's volume (winamp.js)
       duckBus = ctx.createGain(); muff = ctx.createBiquadFilter(); muff.type = 'lowpass'; muff.frequency.value = 20000;
       duckBus.connect(muff); muff.connect(master);
       noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
