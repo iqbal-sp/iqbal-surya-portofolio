@@ -170,7 +170,8 @@
     return `${h % 12 || 12}:${mm} ${h >= 12 ? 'PM' : 'AM'}`;
   }
   const words = (s) => String(s).trim().split(/\s+/).length;
-  const fmtTime = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(Math.round(sec % 60)).padStart(2, '0')}`;
+  // rounded before it is split, so 59.6 seconds reads 01:00, never 00:60
+  const fmtTime = (sec) => { const s = Math.round(sec); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
   function toast(msg, anchor) {
     const el = document.createElement('div');
     el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = msg;
@@ -409,7 +410,8 @@
     w.el.hidden = false;
     const to = rectOf(w.el);
     w.el.style.visibility = 'hidden';
-    zoom(from || rectOf(btn), to, () => { w.el.style.visibility = ''; focusWin(w, true); });
+    // a game comes back with the keys on its pause screen, not on the window's frame
+    zoom(from || rectOf(btn), to, () => { w.el.style.visibility = ''; focusWin(w, true); if (w.game) w.game.focus(); });
   }
 
   function toggleMax(w) {
@@ -436,33 +438,42 @@
   }
 
   /* drag + resize */
+  // one pointer, from its press to its release: the pressed element holds the capture, so a drag ends on pointerup,
+  // pointercancel or a lost capture (a touch the browser took back), never left following a pointer that let go
+  function follow(e, move, end) {
+    const el = e.target, id = e.pointerId;
+    try { el.setPointerCapture(id); } catch (err) { /* capture unavailable: the events still come while over el */ }
+    const mv = (ev) => { if (ev.pointerId === id) move(ev); };
+    const stop = (ev) => {
+      if (ev.pointerId !== id) return;
+      el.removeEventListener('pointermove', mv);
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((k) => el.removeEventListener(k, stop));
+      if (end) end();
+    };
+    el.addEventListener('pointermove', mv);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((k) => el.addEventListener(k, stop));
+  }
   function startDrag(w, e) {
     if (isMobile() || w.max) return;
     const r = w.el.getBoundingClientRect();
     const d = desktopEl.getBoundingClientRect();
     const ox = e.clientX - r.left, oy = e.clientY - r.top;
-    const move = (ev) => {
+    follow(e, (ev) => {
       const x = clamp(ev.clientX - d.left - ox, -r.width + 90, d.width - 90);
       const y = clamp(ev.clientY - d.top - oy, 0, d.height - 24);
       w.el.style.left = x + 'px';
       w.el.style.top = y + 'px';
-    };
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    });
   }
   function startResize(w, e) {
     if (isMobile() || w.max) return;
     e.preventDefault();
     const r = w.el.getBoundingClientRect();
     const sx = e.clientX, sy = e.clientY;
-    const move = (ev) => {
+    follow(e, (ev) => {
       w.el.style.width = Math.max(300, r.width + ev.clientX - sx) + 'px';
       w.el.style.height = Math.max(200, r.height + ev.clientY - sy) + 'px';
-    };
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    });
   }
 
   /* ------------------------------------------------------------ desktop icons */
@@ -538,12 +549,26 @@
     startMenu.hidden = true;
     startBtn.setAttribute('aria-expanded', 'false');
   }
-  startMenu.addEventListener('mouseover', (e) => {
-    const li = e.target.closest('.sm-list > li');
-    if (!li) return;
+  // a submenu opens level with its item and goes down, as XP's did, unless that would run into the taskbar
+  function openSub(li) {
     $$('.sm-list > li.open', startMenu).forEach((x) => { if (x !== li) x.classList.remove('open'); });
-    if (li.classList.contains('has-sub')) li.classList.add('open');
+    if (!li.classList.contains('has-sub')) return;
+    li.classList.add('open');
+    const sub = $('.sm-sub', li);
+    sub.classList.remove('up');
+    if (sub.getBoundingClientRect().bottom > $('#taskbar').getBoundingClientRect().top - 2) sub.classList.add('up');
+  }
+  // XP's MenuShowDelay for the mouse: pointing opens or swaps a submenu after 400 ms at rest, and pointing into the open
+  // submenu cancels a pending swap, so a diagonal path to a case keeps it open; clicks, taps and keys stay instant
+  let subT = 0;
+  startMenu.addEventListener('pointerover', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const li = e.target.closest('.sm-list > li');
+    clearTimeout(subT);
+    if (!li || li.classList.contains('open')) return;
+    subT = setTimeout(() => openSub(li), 400);
   });
+  startMenu.addEventListener('pointerleave', () => clearTimeout(subT));
   startMenu.addEventListener('keydown', (e) => {
     const items = $$('.sm-item', startMenu).filter((b) => b.offsetParent !== null);
     const i = items.indexOf(document.activeElement);
@@ -553,7 +578,7 @@
       if (n) n.focus();
     } else if (e.key === 'ArrowRight') {
       const li = document.activeElement.closest('li.has-sub');
-      if (li) { li.classList.add('open'); const f = $('.sm-sub .sm-item', li); if (f) f.focus(); }
+      if (li) { openSub(li); const f = $('.sm-sub .sm-item', li); if (f) f.focus(); }
     } else if (e.key === 'ArrowLeft') {
       const li = document.activeElement.closest('.sm-sub');
       if (li) { const p = li.parentElement; p.classList.remove('open'); $('.sm-item', p).focus(); }
@@ -913,10 +938,7 @@
     if (row.scrollWidth <= row.clientWidth) return;
     e.preventDefault();
     const x0 = e.clientX, s0 = row.scrollLeft;
-    const move = (ev) => { row.classList.add('drag'); row.scrollLeft = s0 - (ev.clientX - x0); };
-    const up = () => { row.classList.remove('drag'); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
+    follow(e, (ev) => { row.classList.add('drag'); row.scrollLeft = s0 - (ev.clientX - x0); }, () => row.classList.remove('drag'));
   }
   function homeEpisode(w, i, focusKey) {
     const n = PF.home.process.steps.length;
@@ -1138,10 +1160,15 @@
   function homeFaq(w, i) {
     w.state.faq = w.state.faq === i ? -1 : i;
     const main = $('.help-main', w.el); if (!main) return;
+    const was = $(`#faq-q-${i}`, main), y0 = was ? was.getBoundingClientRect().top : 0;
     main.innerHTML = faqHTML(w.state);
     // the picked topic's highlight sweeps in and its answer settles (home.css, .help-main.swap)
     if (!reduceMotion) main.classList.add('swap');
-    const q = $(`#faq-q-${i}`, main); if (q) q.focus({ preventScroll: true });
+    const q = $(`#faq-q-${i}`, main);
+    if (!q) return;
+    // the picked topic stays under the pointer when an answer above it closes, before anything is painted
+    const body = q.closest('.win-body'); if (was && body) body.scrollTop += q.getBoundingClientRect().top - y0;
+    q.focus({ preventScroll: true });
   }
   function homeTick() {
     const w = wins.get('home'); if (!w) return;
@@ -1575,7 +1602,8 @@
     const no = (i) => String(i + 1).padStart(2, '0');
     w.all = all;
     w.secs = secs;
-    w.total = secs.reduce((a, s) => a + s.words * 0.3, 0);
+    // the whole case runs as long as its chapters add up in the list, to the second
+    w.total = secs.reduce((a, s) => a + Math.round(s.words * 0.3), 0);
     const cap = (wact, glyph, label) => `<button type="button" class="pl-cb" data-wact="${wact}" aria-label="${esc(label)}" title="${esc(label)}">${glyph}</button>`;
     const key = (act, icon, label, cls = '') => `<button type="button" class="pl-key${cls}" data-act="${act}" aria-label="${esc(label)}" title="${esc(label)}">${icon}</button>`;
     const tool = (act, icon, label, print) => `<span class="pl-tool"><button type="button" class="orb" data-act="${act}" aria-label="${esc(label)}" title="${esc(label)}">${I(icon, 16)}</button><small aria-hidden="true">${esc(print)}</small></span>`;
@@ -1634,7 +1662,8 @@
   // The deck reads the case's real layout. On the timeline a published chapter takes its share of the screen's height
   // and an unpublished one a fixed hatched slot; knots pin each chapter's marker to the scroll that shows its top.
   const TL_OFF = 0.05;
-  const pct = (x) => `${(x * 100).toFixed(3)}%`;
+  // a place on the timeline where the range's 12px thumb centres for that value, so a notch is where a click lands
+  const tlAt = (x) => (x <= 0 ? '0px' : x >= 1 ? '100%' : `calc(6px + (100% - 12px) * ${x.toFixed(5)})`);
   const tlTrack = (k, p) => { for (let i = 0; i < k.length - 1; i++) { const a = k[i], b = k[i + 1]; if (p <= b.p) return b.p > a.p ? a.t + ((p - a.p) / (b.p - a.p)) * (b.t - a.t) : a.t; } return 1; };
   const tlProg = (k, x) => { for (let i = 0; i < k.length - 1; i++) { const a = k[i], b = k[i + 1]; if (x <= b.t) return b.t > a.t ? a.p + ((x - a.t) / (b.t - a.t)) * (b.p - a.p) : a.p; } return 1; };
   function plMeasure(w) {
@@ -1650,8 +1679,8 @@
     const segs = secs.map((x) => { const len = x.el ? (x.el.offsetHeight / hSum) * share : TL_OFF; const g = { ...x, start: at, end: at + len }; at += len; return g; });
     const pAt = (i) => { for (let j = i; j < segs.length; j++) if (segs[j].el) return clamp(topOf(segs[j].el) / max, 0, 1); return 1; };
     w.knots = segs.map((g, i) => ({ t: g.start, p: pAt(i) })).concat({ t: 1, p: 1 });
-    track.innerHTML = segs.map((g) => `<span class="tl-seg${g.el ? '' : ' off'}" style="left:${pct(g.start)};width:calc(${pct(g.end - g.start)} - 2px)"></span>`).join('')
-      + '<span class="tl-fill"></span>' + segs.slice(1).map((g) => `<span class="tl-mark${g.el ? '' : ' off'}" style="left:${pct(g.start)}"></span>`).join('');
+    track.innerHTML = segs.map((g) => `<span class="tl-seg${g.el ? '' : ' off'}" style="left:${tlAt(g.start)};width:calc(${tlAt(g.end)} - ${tlAt(g.start)} - 2px)"></span>`).join('')
+      + '<span class="tl-fill"></span>' + segs.slice(1).map((g) => `<span class="tl-mark${g.el ? '' : ' off'}" style="left:${tlAt(g.start)}"></span>`).join('');
   }
   function afterPlayer(w) {
     if (DRAFTS && !document.hidden) draftScan(w.el);
@@ -1682,8 +1711,14 @@
     $$('.lcd-sec', w.el).forEach((lab) => { if (meta && lab.textContent !== meta.label) lab.textContent = meta.label; });
     $$('.lcd-clock', w.el).forEach((clock) => segSet(clock, fmtTime(prog * w.total)));
     const at = w.knots ? tlTrack(w.knots, prog) : prog;
-    const fill = $('.tl-fill', w.el); if (fill) fill.style.width = pct(at);
-    const seek = $('.seek', w.el); if (seek && document.activeElement !== seek) seek.value = Math.round(at * 1000);
+    const fill = $('.tl-fill', w.el); if (fill) fill.style.width = tlAt(at);
+    const seek = $('.seek', w.el);
+    if (seek) {
+      // the thumb follows the reading except while a pointer holds it; a screen reader hears the chapter and the time
+      if (!w.seekDrag) seek.value = Math.round(at * 1000);
+      const vt = `${meta ? meta.label : ''}, ${fmtTime(prog * w.total)} / ${fmtTime(w.total)}`;
+      if (seek.getAttribute('aria-valuetext') !== vt) seek.setAttribute('aria-valuetext', vt);
+    }
     if (w.curSec !== id) { const b = $(`.skin-nav button[data-sec="${id}"]`, w.el); if (b) navShow(b); }
     w.curSec = id;
   }
@@ -1698,6 +1733,19 @@
     const v = $('.screen-view', w.el);
     const s = v && $(`section[data-sec="${id}"]`, v);
     if (s) v.scrollTo({ top: s.offsetTop, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+  // the timeline's keys move a chapter at a time (arrows) or a tenth of the case (Page Up, Page Down), not a thousandth
+  function seekKey(w, e) {
+    const k = e.key, v = $('.screen-view', w.el);
+    if (!v) return false;
+    const secs = $$('section[data-sec]', v), i = Math.max(0, secs.findIndex((s) => s.dataset.sec === w.curSec));
+    if (k === 'ArrowRight' || k === 'ArrowUp') { if (secs[i + 1]) scrollToSec(w, secs[i + 1].dataset.sec); }
+    // back to the start of the chapter being read, or to the one before it from its start
+    else if (k === 'ArrowLeft' || k === 'ArrowDown') scrollToSec(w, secs[v.scrollTop - secs[i].offsetTop > 24 ? i : Math.max(0, i - 1)].dataset.sec);
+    else if (k === 'PageDown' || k === 'PageUp') v.scrollTop += (k === 'PageDown' ? 0.1 : -0.1) * (v.scrollHeight - v.clientHeight);
+    else return false;
+    e.preventDefault();
+    return true;
   }
   function nextSection(w) {
     const ids = w.secs.map((s) => s.id);
@@ -1836,7 +1884,7 @@
     if (!gameScript) {
       gameScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'game.js?v=34';
+        s.src = 'game.js?v=35';
         s.onload = () => resolve(window.BossRushXP);
         s.onerror = () => { gameScript = null; s.remove(); reject(new Error('game.js did not load')); };
         document.head.appendChild(s);
@@ -1867,6 +1915,8 @@
         onStatus: (text) => { const s = $('.gm-where', w.el); if (s) s.textContent = text; },
       });
       w.game.attach(h);
+      // the keys reach the title at once, however long game.js took to arrive (onOpen ran before it was here)
+      if (activeId === w.id) w.game.focus();
     }).catch(() => { const h = $('[data-game]', w.el); if (h) h.innerHTML = `<p class="gm-note">${esc(u('gameFailed'))}</p>`; });
   }
   /* ------------------------------------------------------------ the stickman on the taskbar */
@@ -1954,7 +2004,7 @@
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=3';
+        s.src = 'screensaver.js?v=4';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);
@@ -2135,6 +2185,8 @@
     const n = noteNow = document.createElement('div');
     n.className = 'pet-note tray-note'; n.setAttribute('role', 'status');
     n.innerHTML = `<button type="button" class="pet-x" aria-label="${esc(u('close'))}"></button><button type="button" class="note-go"><b>${I(icon, 16)}${esc(title)}</b><span>${esc(text)}</span></button>`;
+    // a tap already on its way to whatever the balloon lands on still reaches it: the balloon takes no input at first
+    n.style.pointerEvents = 'none'; setTimeout(() => { n.style.pointerEvents = ''; }, 400);
     document.body.appendChild(n);
     const drop = () => { clearTimeout(n.timer); n.remove(); if (noteNow === n) noteNow = null; };
     n.querySelector('.pet-x').addEventListener('click', drop);
@@ -2156,8 +2208,10 @@
     clearTimeout(hintT);
     if (brxpSeen() || wins.has('game') || wins.has('gamegate')) return;
     if (wins.has('recycle')) { try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* it may show next visit */ } return; }
-    // it waits while anything else is up, and while a game is being played
-    if (noteNow || saverUp || $('.pet-note') || !startMenu.hidden || menuState || deskMenu || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')))) { hintT = setTimeout(hintTry, 5000); return; }
+    // it waits while anything else is up, while a game is being played, and while a case or About is being read: the
+    // balloon would land on the player's own keys
+    const reading = (activeId === 'player' || activeId === 'about') && !wins.get(activeId).min;
+    if (reading || noteNow || saverUp || $('.pet-note') || !startMenu.hidden || menuState || deskMenu || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')))) { hintT = setTimeout(hintTry, 5000); return; }
     if (showNote('bin')) { try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* it may show again next visit */ } }
   }
   function openBinHint(from) {
@@ -2372,6 +2426,8 @@
       return;
     }
     const act = e.target.closest('[data-act]');
+    // a link clicked with a modifier asks for a new tab or window: the browser does that, not the in-page player
+    if (act && act.matches('a[href]') && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
     if (act) {
       const fn = ACTIONS[act.dataset.act];
       if (fn) { e.preventDefault(); fn(act, winOf(act), e); }
@@ -2401,10 +2457,11 @@
     const sub = e.target.closest('[data-sub]');
     if (sub) {
       const li = sub.closest('li');
-      // pointing at a submenu has already opened it, and a tap is a pointing and a click at once, so a click from a
-      // mouse or a finger opens it and leaves it open; Enter and Space (a click with no pointer) still open and close it
-      if (e.detail) { $$('.has-sub.open', startMenu).forEach((x) => { if (x !== li) x.classList.remove('open'); }); li.classList.add('open'); }
-      else li.classList.toggle('open');
+      // a click from a mouse or a finger opens it at once (without waiting out the pointing delay) and leaves it open;
+      // Enter and Space (a click with no pointer) open and close it
+      clearTimeout(subT);
+      if (e.detail || !li.classList.contains('open')) openSub(li);
+      else li.classList.remove('open');
       return;
     }
     const menu = e.target.closest('[data-menu]');
@@ -2427,10 +2484,16 @@
     if (e.target.id === 'langBtn' || e.target.closest('#langBtn')) { setLang(lang === 'en' ? 'id' : 'en'); }
   });
 
-  // pointing at an item previews it: Explorer's hover-select, and Home's Media Center services menu
+  // pointing at an item previews it: Explorer's hover-select, and Home's Media Center services menu. A cover is selected
+  // after XP's hover time (400 ms at rest), so crossing covers on the way to the task pane doesn't retarget its links
+  let fileHover = null, fileHoverT = 0;
   document.addEventListener('mouseover', (e) => {
     const f = e.target.closest('.files [data-slug]');
-    if (f) { const w = winOf(f); if (w) selectFile(w, f.dataset.slug); return; }
+    if (f !== fileHover) {
+      clearTimeout(fileHoverT); fileHover = f;
+      if (f) fileHoverT = setTimeout(() => { const w = winOf(f); if (w && f.isConnected && f.matches(':hover')) selectFile(w, f.dataset.slug); }, 400);
+    }
+    if (f) return;
     const mi = e.target.closest('.mm-item[data-i]');
     if (mi) { homeService(winOf(mi), +mi.dataset.i); return; }
     // the reviews row offers a grab hand only while it has more to show than the window holds
@@ -2479,6 +2542,7 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.target.classList && e.target.classList.contains('files')) { const w = winOf(e.target); if (w) filesKey(w, e); return; }
+    if (e.target.classList && e.target.classList.contains('seek')) { const w = winOf(e.target); if (w && seekKey(w, e)) return; }
     if (e.key === 'Escape') {
       closeMenu(); closeStart();
       // a dialog with the focus answers Escape as Cancel, as XP's did (File Download, Shut Down, credits)
@@ -2520,6 +2584,27 @@
   document.addEventListener('mouseout', hbUnhush);
   document.addEventListener('focusout', hbUnhush);
   document.addEventListener('click', (e) => { if (e.target.closest && !e.target.closest('.hb')) hbClose(); });
+  // the timeline and the text-size wedge give the keys back to the page when the pointer lets go, so the next PageDown
+  // reads on instead of moving a slider; while a pointer holds the timeline, the reading doesn't pull its thumb back
+  document.addEventListener('pointerdown', (e) => {
+    const r = e.target.closest && e.target.closest('.seek, .tsize');
+    const w = r && winOf(r); if (!w) return;
+    if (r.classList.contains('seek')) w.seekDrag = true;
+    const done = () => {
+      removeEventListener('pointerup', done, true); removeEventListener('pointercancel', done, true);
+      w.seekDrag = false;
+      const v = $('.screen-view', w.el);
+      // let go within reach of a chapter's notch (a finger is less exact than a mouse), the timeline lands on that chapter
+      if (v && r.classList.contains('seek') && w.knots) {
+        const x = +r.value / 1000, reach = (e.pointerType === 'mouse' ? 4 : 8) / Math.max(1, r.getBoundingClientRect().width - 12);
+        const k = w.knots.slice(1, -1).find((n) => Math.abs(n.t - x) <= reach);
+        if (k) { r.value = Math.round(k.t * 1000); v.scrollTop = tlProg(w.knots, k.t) * (v.scrollHeight - v.clientHeight); }
+      }
+      if (v && document.activeElement === r) v.focus({ preventScroll: true });
+      updatePlayer(w);
+    };
+    addEventListener('pointerup', done, true); addEventListener('pointercancel', done, true);
+  });
   document.addEventListener('input', (e) => {
     const w = winOf(e.target); if (!w) return;
     if (e.target.classList.contains('seek')) {
@@ -2579,9 +2664,12 @@
     document.body.appendChild(s);
     s.addEventListener('click', () => { s.remove(); restart(); }, { once: true });
   }
+  // XP's Restart closes everything: each window's own close runs (a game's loop stops), and the address drops the last
+  // window's hash so the fresh desktop opens on Home, not on what was left open
   function restart() {
-    Array.from(wins.values()).forEach((w) => { w.el.remove(); });
+    Array.from(wins.values()).forEach((w) => { if (w.def.onClose) w.def.onClose(w); w.el.remove(); });
     wins.clear(); activeId = null; renderTasks();
+    history.replaceState(null, '', location.pathname + location.search);
     bootScreen.replay();
     openDefault();
   }

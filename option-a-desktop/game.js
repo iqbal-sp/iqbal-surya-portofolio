@@ -4491,7 +4491,7 @@
       if (this.gone) return;
       const s = this.g.s, sh = clamp(1 - (FLOOR - (this.y + this.h / 2)) / 420, 0.25, 1);
       ctx.fillStyle = `rgba(0,0,0,${0.28 * sh})`; ctx.beginPath(); ctx.ellipse(this.x, FLOOR - 1, 100 * sh, 8 * sh, 0, 0, TAU); ctx.fill();
-      const x = this.x + this.joltX() + (this.state === 'slam' && this.step === 1 ? rand(-2, 2) : 0) + (this.state === 'crash' || this.dying ? rand(-3, 3) : 0);
+      const x = this.x + this.joltX() + (this.state === 'slam' && this.step === 1 ? rand(-2, 2) : 0) + ((this.state === 'crash' || this.dying) && !reduceMotion ? rand(-3, 3) : 0);
       ctx.save(); ctx.translate(x, this.y); ctx.rotate(this.tilt);
       errorBox(ctx, 0, 0, this.w, this.h, {
         title: this.state === 'freeze' || this.dying ? s.errNotResp : s.names[3], text: s.errMsg[this.msg], bsod: this.arena === 'bsod', ghost: this.ghost, flash: this.flash,
@@ -4524,14 +4524,20 @@
       for (const h of this.glasses) if (h.st === 'fall') hourglass(ctx, h.x, h.y, 1);
       if (this.glitch > 0) this.drawGlitch(ctx);
     }
-    // the crash: bands of blue screen and torn stripes flicker over the desktop
+    // the crash, as two held events, never noise redrawn each frame (that strobed): a band of blue screen rolls down
+    // the stage once, then one strip tears sideways for a quarter second; bluescreen() makes the cut to blue
     drawGlitch(ctx) {
-      const n = 5 + Math.floor(Math.random() * 7);
-      for (let i = 0; i < n; i++) {
-        const y = rand(0, H), h = rand(4, 46), blue = Math.random() < 0.65;
-        ctx.fillStyle = blue ? '#0000aa' : `rgba(255,255,255,${rand(0.3, 0.8)})`;
-        ctx.fillRect(rand(-60, 60), y, W + 120, h);
-        if (blue && h > 16) { ctx.fillStyle = '#fff'; ctx.font = `13px ${MONO}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(STOPS[i % STOPS.length], rand(20, W - 300), y + h / 2); }
+      if (reduceMotion) return;
+      const t = 1.2 - this.glitch;
+      if (t < 0.5) {
+        const bh = H * 0.32, y = -bh + (H + bh) * (t / 0.5);
+        ctx.fillStyle = '#0000aa'; ctx.fillRect(-60, y, W + 120, bh);
+        ctx.fillStyle = '#fff'; ctx.font = `13px ${MONO}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        for (let i = 0; i < 3; i++) ctx.fillText(STOPS[i * 2], 80, y + bh * (0.3 + i * 0.2));
+      } else if (t > 0.6 && t < 0.86) {
+        const c = this.g.canvas, k = this.g.k, y = 300, h = 34;
+        ctx.drawImage(c, 0, Math.round(y * k), c.width, Math.round(h * k), 46, y, W, h);
+        ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.fillRect(-60, y, W + 120, 2); ctx.fillRect(-60, y + h - 2, W + 120, 2);
       }
     }
   }
@@ -4684,7 +4690,12 @@
       this.canvas.setAttribute('aria-label', this.s.canvasLabel);
       this.canvas.addEventListener('keydown', (e) => this.key(e, true));
       this.canvas.addEventListener('keyup', (e) => this.key(e, false));
-      this.canvas.addEventListener('blur', () => { this.input.clear(); this.pause(); });
+      // focus that went to something else on the page (a field in another window) stays there: the game pauses behind it
+      this.canvas.addEventListener('blur', (e) => {
+        this.input.clear();
+        this.keepFocus = !!(e.relatedTarget && !this.root.contains(e.relatedTarget));
+        this.pause(); this.keepFocus = false;
+      });
       this.canvas.addEventListener('pointerdown', () => this.snd.ensure());
       this.ro = new ResizeObserver(() => this.fit());
       this.ro.observe(root);
@@ -5305,7 +5316,7 @@
       this.layer.appendChild(el);
       this.dlg = el; this.dlgKind = o.kind; this.dlgRebuild = o.rebuild;
       this.syncStart();
-      if (!o.live) { const d = el.querySelector('.btn.default:not(:disabled)') || el.querySelector('.btn:not(:disabled)') || (o.menu && el.querySelector('button')); if (d) d.focus({ preventScroll: true }); }
+      if (!o.live && !this.keepFocus) { const d = el.querySelector('.btn.default:not(:disabled)') || el.querySelector('.btn:not(:disabled)') || (o.menu && el.querySelector('button')); if (d) d.focus({ preventScroll: true }); }
       return el;
     }
     closeDialog() { if (this.dlg) this.dlg.remove(); this.dlg = null; this.dlgKind = null; this.dlgRebuild = null; this.syncStart(); }
@@ -5892,9 +5903,10 @@
       if (this.canPause()) { this.pause(); this.showHelp(); return; }
       this.showHelp(this.dlgRebuild);
     }
-    // keyboard focus goes to the open dialog's default button, or to the canvas while playing
+    // keyboard focus goes to the open dialog's default button (the title menu's first entry), or to the canvas while playing
     focus() {
-      const d = this.dlg && !this.dlg.matches('[role="status"]') && (this.dlg.querySelector('.btn.default:not(:disabled)') || this.dlg.querySelector('.btn:not(:disabled)'));
+      const d = this.dlg && !this.dlg.matches('[role="status"]') && (this.dlg.querySelector('.btn.default:not(:disabled)') || this.dlg.querySelector('.btn:not(:disabled)')
+        || (this.dlgKind === 'title' && this.dlg.querySelector('button:not(:disabled)')));
       (d || this.canvas).focus({ preventScroll: true });
     }
     destroy() {

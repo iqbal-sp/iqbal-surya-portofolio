@@ -194,12 +194,12 @@
 .ft-show { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 32px 0; }
 .ft-show:first-child { padding-top: 0; }
 /* each row opens its case study: the title is the link, and its hit area spreads over the row's cover and info
-   (not the space between rows). Pointed at, the title underlines; focused from the keyboard, XP's dotted
+   (not the space between rows, which shows no pointing either). Pointed at, the title underlines; focused from the keyboard, XP's dotted
    rectangle runs round the whole row */
 .ft-link { color: inherit; text-decoration: none; }
 .ft-link::after { content: ""; position: absolute; inset: 32px 0; z-index: 3; }
 .ft-show:first-child .ft-link::after { top: 0; }
-.ft-show:hover .ft-link, .ft-link:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+.ft-show:has(.ft-link:hover) .ft-link, .ft-link:focus-visible { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 /* pressed anywhere on the row, the title takes Glow Edge, as the credits' links do */
 .ft-link:active { color: var(--glow-edge); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 .ft-link:focus-visible { outline: none; }
@@ -222,8 +222,8 @@
 .ft-show.peek .ft-cover::after, .ft-show:has(.ft-link:focus-visible) .ft-cover::after { opacity: 1; }
 .ft-show.peek .ft-ui, .ft-show:has(.ft-link:focus-visible) .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
 @media (hover: hover) {
-  .ft-show:hover .ft-cover::after { opacity: 1; }
-  .ft-show:hover .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
+  .ft-show:has(.ft-link:hover) .ft-cover::after { opacity: 1; }
+  .ft-show:has(.ft-link:hover) .ft-ui { opacity: 1; transform: translate(-50%, -50%) rotateX(0deg); }
 }
 /* without motion the card is simply there, upright and in place */
 @media (prefers-reduced-motion: reduce) {

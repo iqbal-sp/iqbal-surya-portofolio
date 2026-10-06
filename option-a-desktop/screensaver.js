@@ -15,8 +15,8 @@
    onReboot(done): Blank.scr is beaten; the portfolio replays its loading screen, then calls done for the result.
    onRun(step): how far a full run got, for the portfolio's day counts: start, boss2 to boss4, final, win, practice,
    practice-done.
-   onKeys({ muted, go }): what the device's keys show: the sound, and what start/pause does now ('start', 'pause',
-   'resume', 'ok' for a screen's default choice, or 'none').
+   onKeys({ muted, go, label }): what the device's keys show: the sound, and what start/pause does now ('start',
+   'pause', 'resume', 'ok' for a screen's default choice, named by label, or 'none').
    primary(): the orange key: it starts a run from the menu, pauses and resumes a fight, and takes a screen's default.
    touchArea: the device's body, where a finger may also start a drag. */
 (() => {
@@ -2278,7 +2278,9 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
       put('clock', Math.floor(G.fightTime), (v) => { clockVal.textContent = fmt(v); clockVal.setAttribute('aria-label', `${s.clock} ${fmt(v)}`); });
       // the practice has no clock: nothing is timed there
       put('drill', !!G.practice, (v) => { clockVal.hidden = v; });
-      put('keys', `${sfx.muted}:${goState()}`, () => { if (opts.onKeys) opts.onKeys({ muted: sfx.muted, go: goState() }); });
+      // the orange key's name follows what it will do, a screen's default choice by that choice's own name
+      const go = goState(), goLabel = go === 'ok' ? G.dlg.def.label : '';
+      put('keys', `${sfx.muted}:${go}:${goLabel}`, () => { if (opts.onKeys) opts.onKeys({ muted: sfx.muted, go, label: goLabel }); });
       if (tipsOn) {
         placeTips();
         if (tipsTurn) { const late = G.introT > G.introLen / 2; put('turn', late, () => { tipCore.classList.toggle('on', !late); tipCur.classList.toggle('on', late); }); }
@@ -2290,7 +2292,8 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
       if (tooSmall) return 'none';
       const d = G.dlg;
       if (d && d.kind === 'pause') return 'resume';
-      if (d && !d.front && d.def) return 'ok';
+      // a screen, or a page of the menu (How to play's practice), takes its default choice; the menu itself starts a run
+      if (d && d.def && d.kind !== 'title') return 'ok';
       if (G.mode === 'demo') return 'start';
       if ((G.mode === 'fight' || G.mode === 'intro') && !G.paused) return 'pause';
       return 'none';
@@ -2347,6 +2350,8 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
       return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" shape-rendering="crispEdges" aria-hidden="true" focusable="false"><g fill="${color}">${body}${line}</g></svg>`;
     }
     const focusEl = (el) => { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
+    // set while the game pauses because the visitor moved the focus elsewhere: the pause screen then leaves it there
+    let keepFocus = false;
     function focusStage() { focusEl(stage); }
 
     /* ------------------------------------------------------------ screens
@@ -2390,7 +2395,7 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
       G.dlg = o;
       // a screen here is modal: the menu's page, the HUD and the arena behind it take no Tab and no click
       setBehind(true);
-      focusEl(f);
+      if (!keepFocus) focusEl(f);
     }
     // the layer closes back onto the menu's page under it, if there is one
     function closeDlg() {
@@ -3200,7 +3205,8 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
     document.addEventListener('visibilitychange', onVis);
     // (the device's own keys are part of the game: a finger or a Tab onto them doesn't pause it)
     const ours = (el) => !!el && (root.contains(el) || !!(opts.touchArea && opts.touchArea.contains(el)));
-    root.addEventListener('focusout', (e) => { if (!ours(e.relatedTarget)) away(); });
+    // focus that went to something else on the page (a field in another window) stays there: the game pauses behind it
+    root.addEventListener('focusout', (e) => { if (ours(e.relatedTarget)) return; keepFocus = !!e.relatedTarget; away(); keepFocus = false; });
     // the device's body changes size when the window is maximised, restored or turned
     let relayoutRaf = 0;
     const relayout = () => { cancelAnimationFrame(relayoutRaf); relayoutRaf = requestAnimationFrame(layout); };
