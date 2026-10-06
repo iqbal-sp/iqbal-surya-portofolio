@@ -1351,11 +1351,20 @@
     body.addEventListener('scrollend', settled);
   }
   // what the page scrolls under a resting pointer doesn't light up or rise (home.css, .scrolling): pointing starts again
-  // only when the mouse itself moves (the browser's own move after a scroll carries no movement)
+  // when the mouse itself moves (the browser's own move after a scroll carries no movement), or once the page has
+  // rested 300 ms, so the row the pointer stopped on still answers it (a wheel's ticks come closer than that)
   function homeScrollMark(w) {
     const body = $('.win-body', w.el), home = $('.home', w.el); if (!body || !home) return;
-    body.addEventListener('scroll', () => home.classList.add('scrolling'), { passive: true });
-    body.addEventListener('pointermove', (e) => { if (e.movementX || e.movementY) home.classList.remove('scrolling'); }, { passive: true });
+    // a service the pointer came to rest on during the scroll is picked now, as a pointing would have picked it
+    const wake = () => {
+      if (!home.classList.contains('scrolling')) return;
+      home.classList.remove('scrolling');
+      const mi = $('.mm-item[data-i]:hover', home);
+      if (mi && mi.getAttribute('aria-pressed') !== 'true') homeService(w, +mi.dataset.i);
+    };
+    let rest = 0;
+    body.addEventListener('scroll', () => { home.classList.add('scrolling'); clearTimeout(rest); rest = setTimeout(wake, 300); }, { passive: true });
+    body.addEventListener('pointermove', (e) => { if (e.movementX || e.movementY) wake(); }, { passive: true });
   }
   // a UI card rises only once its picture is in, never as an empty white card on a slow line (home.css, .ready)
   function homeCards(w) {
