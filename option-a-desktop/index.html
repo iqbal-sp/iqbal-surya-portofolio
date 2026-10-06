@@ -28,11 +28,107 @@
   <link rel="preload" as="font" type="font/woff2" href="../asset/fonts/noto-sans-latin.woff2?v=1" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="../asset/fonts/noto-sans-mono-latin.woff2?v=1" crossorigin>
   <link rel="stylesheet" href="../asset/fonts/fonts.css?v=1">
-  <link rel="stylesheet" href="style.css?v=158">
-  <!-- the loading screen's still, fetched with the stylesheets: the room shows from the first frames -->
+  <!-- the loading screen's own rules: the stylesheets come after boot.js, at the foot of the page, so on a slow
+       connection the screen draws without waiting for them (the desktop's scripts still do) -->
+  <style>
+    /* until style.css has arrived only the loading screen shows: the desktop's markup waits unseen on Broadcast Deep */
+    html { background: #04163f; }
+    :where(body > :not(#boot)) { visibility: hidden; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    /* ============================================================
+       LOADING SCREEN (boot.js, crt3d/)
+       An old beige PC in a dark room, its CRT running a power-on self test while the portfolio really loads; when
+       everything is in, the tube turns XP's welcome blue and the camera flies into the glass. The room is a still of
+       the 3D (asset/boot/room.webp, a phone's room-phone.webp) until the 3D takes over; the test is HTML laid on the
+       glass with a projective transform (boot.js). The script below shows it (html.booting).
+       ============================================================ */
+    .boot-screen {
+      position: fixed; inset: 0; z-index: 10000;
+      display: none; overflow: hidden; background: #141414;
+      cursor: progress; user-select: none; -webkit-user-select: none;
+    }
+    html.booting .boot-screen { display: block; }
+    .boot-screen.ready { cursor: default; }
+    /* the desktop builds and loads behind the screen but is not painted until the screen starts to leave; then it
+       comes up in XP's order: the wallpaper, the taskbar and icons, and the startup window last (boot.js) */
+    html.booting:not(.boot-out) :is(.desktop, .taskbar) { visibility: hidden; }
+    html.boot-out:not(.boot-in) :is(.desk-icons, #windows, .taskbar) { visibility: hidden; }
+    /* the room: the still (dithered by boot.js) covers the screen the way the 3D frames it, and the 3D's canvas takes
+       over once it has drawn the same picture; both in 2px dots */
+    .boot-scene { position: absolute; inset: 0; }
+    .boot-room, .boot-3d { position: absolute; inset: 0; display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+    .boot-3d { visibility: hidden; }
+    .boot-scene.live .boot-3d { visibility: visible; }
+    .boot-scene.live .boot-room { visibility: hidden; }
+    /* the case's hard-disk lamp on the still, lit a moment as each file arrives (boot.js lays it on the room's dots; the 3D
+       lights its own) */
+    .boot-led { position: absolute; left: 0; top: 0; background: #ccffcc; visibility: hidden; }
+    .boot-led.on { visibility: visible; }
+    .boot-scene.live .boot-led { visibility: hidden; }
+    /* the tube: the test's own 1024 x 768 box, laid on the glass by boot.js (a matrix3d from its top left corner),
+       under the glass the site's CRT draws (.crt-glass): the window's reflection and the tube's dark edge. Not its fine
+       lines: scaled onto the glass they beat against the screen's pixels, and the room's dots carry the texture */
+    .boot-crt {
+      position: absolute; left: 0; top: 0; z-index: 1; width: 1024px; height: 768px; overflow: hidden;
+      transform-origin: 0 0; border-radius: 40px; visibility: hidden;
+      background: radial-gradient(120% 110% at 50% 45%, #0b0c0d, #020202 70%);
+      color: #d8d2bd; font: 400 34px/42px "Noto Sans Mono", monospace;
+      text-shadow: 0 0 6px rgba(216, 210, 189, .35);
+    }
+    /* hidden until boot.js has laid it on the glass (on a slow connection the box would show at the top left first) */
+    .boot-crt.laid { visibility: visible; }
+    .boot-crt::after {
+      content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
+      background: radial-gradient(120% 80% at 22% 6%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 44%), linear-gradient(115deg, rgba(255, 255, 255, 0) 56%, rgba(255, 255, 255, .06) 61%, rgba(255, 255, 255, 0) 68%);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .06);
+    }
+    /* the self test, English on both languages as a BIOS was: the head, the memory count, one line per part (dim
+       until tested, a cursor on the one being tested, then OK or FAILED), XP's green blocks, and a foot line */
+    .bios { position: absolute; inset: 0; padding: 44px 56px; }
+    .bios p { margin: 0; white-space: pre; }
+    .bios-head { color: #fff; font-weight: 700; }
+    .bios :is(.bios-mem, .bios-test, .bios-tail) { margin-top: 20px; }
+    .bios-test p { display: flex; }
+    .bios-test span { flex: none; width: 29ch; overflow: hidden; }
+    .bios-test span::after { content: " ............................"; }
+    .bios-test p:not([data-state]), .bios-test p[data-state=""] { color: #aca899; }
+    .bios-test b { margin-left: 1ch; font-weight: 400; color: #fff; }
+    .bios-test p[data-state="failed"] b { font-weight: 700; }
+    .bios-test p[data-state="cur"] b::after, .bios-tail:not(:empty)::after { content: "_"; animation: bios-cursor 1.06s steps(1) infinite; }
+    @keyframes bios-cursor { 50% { opacity: 0; } }
+    .bios-meter { display: flex; align-items: center; gap: 24px; margin-top: 18px; }
+    .bios-bar { display: flex; gap: 4px; padding: 5px; border: 2px solid #aca899; }
+    .bios-bar i { display: block; width: 14px; height: 26px; background: #2a2d35; }
+    .bios-bar i.on { background: #4cda50; }
+    .bios-pct { min-width: 4ch; color: #fff; font-weight: 700; text-align: right; }
+    .bios-foot { position: absolute; left: 56px; bottom: 24px; color: #aca899; }
+    /* everything is in: XP's welcome with no one logging in yet, the blue between its navy bands and their light rules */
+    .bios-blue { position: absolute; inset: 0; display: grid; grid-template-rows: 48px 1fr 48px; background: #5a7edc; visibility: hidden; }
+    .bios-blue i { position: relative; display: block; }
+    .bios-blue i:first-child, .bios-blue i:last-child { background: #00309c; }
+    .bios-blue i:first-child::after, .bios-blue i:last-child::before { content: ""; position: absolute; left: 0; right: 0; height: 2px; }
+    .bios-blue i:first-child::after { top: 100%; background: linear-gradient(90deg, transparent, #a6c4f7 25%, rgba(166, 196, 247, .5) 60%, transparent); }
+    .bios-blue i:last-child::before { bottom: 100%; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
+    .bios-blue i:nth-child(2) { background: radial-gradient(90% 90% at 0 0, rgba(166, 196, 247, .8), rgba(166, 196, 247, 0) 60%); }
+    .boot-crt.blue .bios-blue { visibility: visible; }
+    .boot-crt.blue .bios { visibility: hidden; }
+    /* a phone shows the whole tube in about 310px: the test half again as large, keeping only the parts and the bar */
+    @media (max-width: 720px), (max-height: 500px) and (pointer: coarse) {
+      .boot-crt { font-size: 44px; line-height: 54px; }
+      .bios { padding: 44px 52px; }
+      .bios-copy, .bios-mem, .bios-foot { display: none; }
+      .boot-screen.failing .bios-foot { display: block; }
+      .bios-test { margin-top: 24px; }
+      .bios-test span { width: 27ch; }
+      .bios-bar i { width: 22px; height: 38px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .bios-test p[data-state="cur"] b::after, .bios-tail:not(:empty)::after { animation: none; }
+    }
+  </style>
+  <!-- the loading screen's still, fetched at once: the room shows from the first frames -->
   <link rel="preload" as="image" href="../asset/boot/room.webp?v=1" media="(min-width: 721px)" fetchpriority="high">
   <link rel="preload" as="image" href="../asset/boot/room-phone.webp?v=1" media="(max-width: 720px), (max-height: 500px) and (pointer: coarse)" fetchpriority="high">
-  <link rel="stylesheet" href="home.css?v=127">
   <!-- three.js for the loading screen, the live wallpaper and the episode TV's desk, served from the site
        (asset/vendor/three-0.186.0/SOURCE.md) so no outside server can hold up the loading screen; here in the head
        because boot.js imports the loading screen's 3D before the rest of the page has been read -->
@@ -102,6 +198,7 @@
       <!-- the still of the 3D's first frame, dithered by boot.js at this window's dots (asset/boot/room.webp, a phone's
            room-phone.webp; prototype/loader-crt/tools/poster.mjs) -->
       <canvas class="boot-room" aria-hidden="true"></canvas>
+      <i class="boot-led" aria-hidden="true"></i>
       <div class="boot-crt" aria-hidden="true">
         <div class="bios">
           <p class="bios-head">PORTFOLIO BIOS v2.6</p>
@@ -138,15 +235,18 @@
   <div class="start-menu" id="startMenu" role="menu" hidden></div>
   <div class="zoom-rect" id="zoomRect" aria-hidden="true"></div>
 
-  <!-- the loading screen first, so it can count everything after it -->
-  <script src="boot.js?v=11"></script>
+  <!-- the loading screen first, so it can count everything after it, and draw before the stylesheets have arrived;
+       the scripts after them wait for them -->
+  <script src="boot.js?v=12" fetchpriority="high"></script>
+  <link rel="stylesheet" href="style.css?v=159">
+  <link rel="stylesheet" href="home.css?v=127">
   <script src="../shared/content.js?v=107"></script>
   <script src="../shared/cases.js?v=22"></script>
   <script src="icons.js?v=57"></script>
   <script src="app.js?v=188"></script>
   <!-- live wallpaper and the episode TV's desk (three.js); the static webp on .desktop and the episode stills stay as
        the fallbacks -->
-  <script type="module" src="wallpaper3d.js?v=17"></script>
+  <script type="module" src="wallpaper3d.js?v=18"></script>
   <script type="module" src="desk3d/episode.js?v=3"></script>
 </body>
 </html>

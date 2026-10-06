@@ -59,7 +59,7 @@ export function createCrt(host, opts = {}) {
   const scene = new THREE.Scene();
   scene.background = roomTexture();
   const camera = new THREE.PerspectiveCamera(30, 1.6, 0.02, 20);
-  let info = null, posterAspect = 1.6, dead = false, raf = 0;
+  let info = null, posterAspect = 1.6, dead = false, raf = 0, hdd = null;
 
   /* ---------- light: a warm key above left, a cool rim from behind, a dim fill, and the tube itself ---------- */
   scene.add(new THREE.HemisphereLight('#8c8a84', '#141414', 0.3));
@@ -179,6 +179,10 @@ export function createCrt(host, opts = {}) {
   /* ---------- build ---------- */
   const idle = () => new Promise((r) => (window.requestIdleCallback ? requestIdleCallback(() => r(), { timeout: 120 }) : setTimeout(r, 16)));
   async function build() {
+    // the model comes down alongside the scene's numbers, not after them
+    const draco = new DRACOLoader().setDecoderPath(DRACO);
+    const model = new GLTFLoader().setDRACOLoader(draco).loadAsync(new URL('crt.glb?v=1', HERE).href).finally(() => draco.dispose());
+    model.catch(() => {});   // a scene.json that fails reports first
     info = opts.scene || await loadScene();
     if (dead) throw new Error('destroyed');
     posterAspect = opts.phone ? info.phoneAspect || 0.4615 : info.posterAspect || 1.6;
@@ -194,9 +198,7 @@ export function createCrt(host, opts = {}) {
     rim.position.set(...L.rim.pos); rim.target.position.set(0, 0.3, 0);
     fill.position.set(...L.fill.pos); fill.target.position.set(0, 0.25, 0.2);
 
-    const draco = new DRACOLoader().setDecoderPath(DRACO);
-    const gltf = await new GLTFLoader().setDRACOLoader(draco).loadAsync(new URL('crt.glb?v=1', HERE).href);
-    draco.dispose();
+    const gltf = await model;
     if (dead) throw new Error('destroyed');
     await idle();
     const pmrem = new THREE.PMREMGenerator(renderer);
@@ -214,6 +216,13 @@ export function createCrt(host, opts = {}) {
       }
     });
     scene.add(gltf.scene);
+    // the case's lower lamp, the hard disk's, is unlit in the model: this one, in the monitor lamp's green, is lit a
+    // moment each time a file arrives (boot.js); compiled lit below, so its first flash costs no shader
+    const lit = gltf.scene.getObjectByName('lamp');
+    hdd = new THREE.Mesh(new THREE.PlaneGeometry(0.007, 0.0035), lit ? lit.material : new THREE.MeshBasicMaterial({ color: '#4cda50' }));
+    hdd.position.set(-0.040, 0.058, 0.1786);
+    hdd.receiveShadow = true;
+    scene.add(hdd);
     layout();
     setPose(opts.phone ? poses.phone : poses.p1);
     aim();
@@ -224,6 +233,7 @@ export function createCrt(host, opts = {}) {
     renderer.compile(postScene, postCam);
     await idle();
     if (dead) throw new Error('destroyed');
+    hdd.visible = false;
     draw();
     return true;
   }
@@ -264,6 +274,8 @@ export function createCrt(host, opts = {}) {
       raf = requestAnimationFrame(step);
     });
   }
+  // the hard disk's lamp, shown with the next frame drawn
+  function led(on) { if (hdd) hdd.visible = !!on; }
   function still(name, raw = false) {
     post.uniforms.uRaw.value = raw ? 1 : 0;
     setPose(poses[name]);
@@ -271,7 +283,7 @@ export function createCrt(host, opts = {}) {
   }
 
   return {
-    ready, canvas, corners, lean, tube, fly, still,
+    ready, canvas, corners, lean, tube, fly, still, led,
     redraw: () => { if (poses) draw(); },
     state: () => ({ programs: renderer.info.programs?.length, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, size: [canvas.width, canvas.height] }),
     destroy() {

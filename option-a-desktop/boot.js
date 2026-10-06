@@ -2,7 +2,8 @@
   Option A: the loading screen. An old beige PC in a dark room, modelled in Blender and drawn by three.js through the
   wallpaper's dither (crt3d/crt.js); a still of the same picture shows from the first paint, and on a phone, or
   with reduced motion, the still is all there is. Its CRT runs a power-on self test in HTML laid on the glass: one
-  line per part of the portfolio, printed when that part has really arrived, and a bar that counts them.
+  line per part of the portfolio, printed when that part has really arrived, and a bar that counts them; the case's
+  hard-disk lamp flickers as each file comes in.
   There is no skip and no time limit: the screen waits until every part is in (owner's request, 2026-09-29). A part
   that fails is marked FAILED and the page tries again on its own, after 4s, then 8s, 16s and every 30s, and once the
   network is back when it is offline; the foot of the test names F5 (Reload on a phone) as the way to start over.
@@ -14,7 +15,8 @@
   When everything is in, the tube turns XP's welcome blue and the camera flies into the glass (a CSS zoom on the
   still), then the desktop comes up in XP's order. The test is English on both languages, as a BIOS was; the screen
   reader's status follows the page's language.
-  index.html's head adds html.booting before the first paint; app.js hands over Home (PF.boot.home) and runs its
+  index.html's head adds html.booting before the first paint and holds this screen's rules, and its stylesheets come
+  after this script, so the screen draws without waiting for them; app.js hands over Home (PF.boot.home) and runs its
   first-view moments through PF.bootDone.
 */
 (() => {
@@ -29,7 +31,7 @@
     return;
   }
   const $ = (s) => box.querySelector(s);
-  const scene = $('.boot-scene'), room = $('.boot-room'), crt = $('.boot-crt'), lines = $('.bios-test');
+  const scene = $('.boot-scene'), room = $('.boot-room'), led = $('.boot-led'), crt = $('.boot-crt'), lines = $('.bios-test');
   const mem = $('.bios-mem'), cells = $('.bios-bar'), pctEl = $('.bios-pct'), tail = $('.bios-tail'), foot = $('.bios-foot');
   const meter = $('#bootMeter'), say = $('#bootSay');
   const themeColor = document.querySelector('meta[name="theme-color"]');
@@ -52,18 +54,20 @@
   ].concat(liveWall ? [['wall3d', 25, 'Preparing the wallpaper']] : []);
   const TOTAL = PARTS.reduce((s, [, w]) => s + w, 0);
   const TEMPO = 0.11;         // s: the least time between two printed lines, so a cached load still reads as a boot
-  const DONE_HOLD = 0.6;      // s the finished test stays before the tube turns blue
-  const FLY = 1500;           // ms into the glass (the 3D); the still's CSS zoom takes the same
+  const DONE_HOLD = 0.4;      // s the finished test stays before the tube turns blue
+  const FLY = 1500;           // ms of the 3D's whole way into the glass; the screen goes on once the glass fills the frame
+  const STILL_FLY = 1200;     // ms of the still's CSS zoom
   const RETRY = [4, 8, 16, 30];  // s before each new try after a part failed
   const WELCOMED = 'pf-a-welcomed', TRIES = 'pf-a-boot-tries', MISSES = 'pf-a-boot-misses', SAID = 'pf-a-boot-said';
   // the parts with a stand-in, which can be passed over when they can never arrive (a font blocker, a file gone after
   // a deploy); a script that never arrives still means a reload, as the desktop can't run without it
   const CAN_SKIP = new Set(['fonts', 'wall', 'home']);
   // where the glass sits on each still, as fractions of it (tools/poster.mjs): top left, top right, bottom right,
-  // bottom left; and each still's size in CSS px (one dot is 2px)
+  // bottom left; where the case's hard-disk lamp is (its middle and its size, from the 3D's first frame drawn with the
+  // lamp off and on); and each still's size in CSS px (one dot is 2px)
   const STILL = {
-    room: { src: '../asset/boot/room.webp?v=1', w: 1920, h: 1200, glass: [[0.36476, 0.15812], [0.6108, 0.14806], [0.60731, 0.43451], [0.36914, 0.45205]] },
-    phone: { src: '../asset/boot/room-phone.webp?v=1', w: 480, h: 1040, glass: [[0.163, 0.32809], [0.82551, 0.32802], [0.81053, 0.54838], [0.17894, 0.55453]] },
+    room: { src: '../asset/boot/room.webp?v=1', w: 1920, h: 1200, glass: [[0.36476, 0.15812], [0.6108, 0.14806], [0.60731, 0.43451], [0.36914, 0.45205]], led: [0.46823, 0.73833, 0.00729, 0.00667] },
+    phone: { src: '../asset/boot/room-phone.webp?v=1', w: 480, h: 1040, glass: [[0.163, 0.32809], [0.82551, 0.32802], [0.81053, 0.54838], [0.17894, 0.55453]], led: [0.41875, 0.78173, 0.02083, 0.00577] },
   };
   const SCREEN = { w: 1024, h: 768 };   // the test's own box in CSS px, before it is laid on the glass
 
@@ -83,6 +87,7 @@
   document.addEventListener('load', onScript, true);
   document.addEventListener('error', onScript, true);
   const pageLoaded = new Promise((res) => (document.readyState === 'complete' ? res() : addEventListener('load', res, { once: true })));
+  const domReady = new Promise((res) => (document.readyState !== 'loading' ? res() : document.addEventListener('DOMContentLoaded', res, { once: true })));
   pageLoaded.then(() => heard.splice(0).forEach((fn) => fn()));
   // true once the script has run; false when it failed or the page finished without it
   const scriptIn = (key) => new Promise((res) => {
@@ -176,15 +181,23 @@
     const m = [a / w, d / w, 0, g / w, b / h, e / h, 0, hh / h, 0, 0, 1, 0, x0, y0, 0, 1];
     return `matrix3d(${m.map((v) => +v.toFixed(8)).join(',')})`;
   }
-  // where the glass is on the still as the page shows it (object-fit: cover, centred)
-  function stillGlass() {
+  // the still as the page shows it (object-fit: cover, centred): its scale, and where a point of it lands
+  function onStill() {
     const s = small.matches ? STILL.phone : STILL.room;
     const vw = box.clientWidth, vh = box.clientHeight, k = Math.max(vw / s.w, vh / s.h);
     const ox = (vw - s.w * k) / 2, oy = (vh - s.h * k) / 2;
-    return s.glass.map(([fx, fy]) => [ox + fx * s.w * k, oy + fy * s.h * k]);
+    return { s, k, at: ([fx, fy]) => [ox + fx * s.w * k, oy + fy * s.h * k] };
   }
+  const stillGlass = () => { const m = onStill(); return m.s.glass.map(m.at); };
   let glassNow = null;
   function layGlass(q) { glassNow = q; crt.style.transform = onto(q); crt.classList.add('laid'); }
+  // the hard-disk lamp over the still, on the room's 2px dots (the 3D draws its own)
+  function layLed() {
+    const { s, k, at } = onStill(), dots = (v) => Math.max(2, Math.round(v / 2) * 2);
+    const w = dots(s.led[2] * s.w * k), h = dots(s.led[3] * s.h * k), [x, y] = at(s.led);
+    led.style.width = `${w}px`; led.style.height = `${h}px`;
+    led.style.transform = `translate(${Math.round((x - w / 2) / 2) * 2}px, ${Math.round((y - h / 2) / 2) * 2}px)`;
+  }
 
   /* ---------- the room's still, dithered here at the page's own dots ---------- */
   // the still is the 3D's first frame before its lines and dither (tools/poster.mjs); it gets them here, at exactly
@@ -203,6 +216,7 @@
     return stills[s.src];
   };
   function paintRoom() {
+    const asked = performance.now();
     return stillImage().then((img) => {
       if (!img || !run) return;
       const w = Math.max(1, Math.round(box.clientWidth / 2)), h = Math.max(1, Math.round(box.clientHeight / 2));
@@ -223,26 +237,62 @@
         }
       }
       ctx.putImageData(px, 0, 0);
+      // a room that arrives after the test is already on the glass comes up as eyes adjust to the dark, not at once
+      if (!reduce && performance.now() - asked > 150) room.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: 'ease-out' });
     });
   }
 
   /* ---------- the 3D, when this screen can have it ---------- */
-  let crt3d = null, crt3dReady = null;
+  let crt3d = null;
   function webgl() {
     try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
   }
   function start3d() {
     if (small.matches || reduce || !webgl()) return null;
-    return import('./crt3d/crt.js?v=2').then((m) => {
-      if (!run) return null;
-      crt3d = m.createCrt(scene, { onFrame: (q) => { if (!run || run.zooming) return; layGlass(q); } });
+    return import('./crt3d/crt.js?v=3').then((m) => {
+      if (!run || run.holding) return null;
+      // the HTML glass follows the 3D only once the 3D shows, so it never slides off the still's bezel
+      crt3d = m.createCrt(scene, { onFrame: (q) => {
+        if (!run || run.zooming || !scene.classList.contains('live')) return;
+        layGlass(q);
+        if (run.flying && covers(q)) run.filled();
+      } });
       return crt3d.ready.then(() => {
-        if (!run) return null;
+        // too late once the test has ended: the still flies then, and the 3D is dropped (ready())
+        if (!run || run.holding) return null;
         scene.classList.add('live');   // the canvas takes over from the still: the same picture
+        run.liveAt = performance.now();
         return crt3d;
       });
-    }).catch((e) => { console.warn('loading screen: staying on the still', e); if (crt3d) { crt3d.destroy(); crt3d = null; } return null; });
+    }).catch((e) => {
+      // a 3D dropped because the test ended first (ready()) is no failure
+      if (run && !run.holding) console.warn('loading screen: staying on the still', e);
+      if (crt3d) { crt3d.destroy(); crt3d = null; }
+      return null;
+    });
   }
+
+  /* ---------- the hard disk's lamp: a flicker as each file arrives, or as a key or a press is heard ---------- */
+  // on 30 to 60 ms, then off 40 to 100 ms, so a burst of files flickers rather than glowing; a burst queues two more at
+  // most. Not under reduced motion
+  let ledBusy = false, ledMore = 0;
+  function setLed(on) {
+    led.classList.toggle('on', on);
+    if (crt3d) { crt3d.led(on); if (run) run.ledDirty = true; }
+  }
+  function blink() {
+    if (!run || run.holding || reduce) return;
+    if (ledBusy) { ledMore = Math.min(ledMore + 1, 2); return; }
+    ledBusy = true;
+    setLed(true);
+    setTimeout(() => {
+      setLed(false);
+      setTimeout(() => { ledBusy = false; if (ledMore) { ledMore--; blink(); } }, 40 + Math.random() * 60);
+    }, 30 + Math.random() * 30);
+  }
+  const files = 'PerformanceObserver' in window ? new PerformanceObserver((list) => list.getEntries().forEach(() => blink())) : null;
+  box.addEventListener('pointerdown', () => blink());
+  addEventListener('keydown', () => blink());
 
   /* ---------- one showing of the screen ---------- */
   let run = null;
@@ -281,9 +331,11 @@
     frozen = Array.from(document.body.children).filter((el) => el !== box && el.tagName !== 'SCRIPT' && !el.inert);
     frozen.forEach((el) => (el.inert = true));
     layGlass(stillGlass());
+    layLed();
     paintRoom();
     draw(r);
-    crt3dReady = start3d();
+    start3d();
+    if (files) { try { files.observe({ type: 'resource' }); } catch (e) { /* no resource timing: the lamp stays dark */ } }
 
     const checks = {
       fonts: () => (document.fonts
@@ -293,7 +345,8 @@
       cases: () => scriptIn('cases'),
       icons: () => scriptIn('icons'),
       app: () => scriptIn('app'),
-      wall: () => allOk(cssUrls(getComputedStyle(document.getElementById('desktop')).backgroundImage).map((u) => urlReady(u, r.miss.wall))),
+      // read once the stylesheets are in (they load after this script; the page's other scripts wait for them)
+      wall: () => domReady.then(() => allOk(cssUrls(getComputedStyle(document.getElementById('desktop')).backgroundImage).map((u) => urlReady(u, r.miss.wall)))),
       home: () => r.home,
       // once its first frame is up, the live wallpaper waits behind the screen
       wall3d: () => wall3dReady().then((ok) => { if (run === r && PF.wall3d) { PF.wall3d.pause(); r.wallPaused = true; } return ok; }),
@@ -381,18 +434,23 @@
   // one frame: lines print in order, never ahead of what arrived and never faster than TEMPO; the bar eases to them
   function tick(r, now) {
     if (run !== r || r.leaving) return;
-    const dt = Math.min(0.25, (now - r.last) / 1000);
-    r.last = now;
+    // a first frame stamped a little before show() would count backwards: time never runs back here
+    const dt = Math.max(0, Math.min(0.25, (now - r.last) / 1000));
+    r.last = Math.max(r.last, now);
     const k = PARTS[r.printed];
     if (k && done(r, k[0]) && (now - r.lastPrint) / 1000 >= TEMPO * r.q) { r.printed++; r.lastPrint = now; }
     const target = PARTS.slice(0, r.printed).reduce((s, [key, w]) => s + (done(r, key) ? w : 0), 0) / TOTAL;
-    r.shown = reduce ? target : r.shown + (target - r.shown) * (1 - Math.exp(-dt / 0.12));
+    // the bar eases to what has arrived, but never slower than 250% a second (faster on a return visit), so it lands
+    // about 150 ms after the last part rather than creeping for half a second over nothing
+    const ease = (target - r.shown) * (1 - Math.exp(-dt / 0.12));
+    r.shown = reduce ? target : r.shown + (target > r.shown ? Math.max(ease, Math.min(target - r.shown, (2.5 * dt) / r.q)) : ease);
     if (Math.abs(target - r.shown) < 0.002) r.shown = target;
-    const kb = loadedKB();
-    r.kb = reduce ? kb : r.kb + (kb - r.kb) * (1 - Math.exp(-dt / 0.2));
+    // the memory test counts the bytes that came, and stops once it has printed OK
+    if (!r.memOk) { const kb = loadedKB(); r.kb = reduce ? kb : r.kb + (kb - r.kb) * (1 - Math.exp(-dt / 0.2)); r.memOk = r.shown >= 0.995; }
     draw(r);
-    // the camera's push while loading, at about 30 frames a second: it moves a few centimetres over seconds
-    if (crt3d && !r.zooming && !r.flying && !reduce && now - (r.leant || 0) > 30) { r.leant = now; crt3d.lean((now - r.t0) / 1000); }
+    // the camera's push while loading, at about 30 frames a second (and at once when the lamp changes), from the moment
+    // the 3D takes over from the still
+    if (crt3d && r.liveAt && !r.zooming && !r.flying && !reduce && (r.ledDirty || now - (r.leant || 0) > 30)) { r.leant = now; r.ledDirty = false; crt3d.lean((now - r.liveAt) / 1000); }
     ready(r);
     requestAnimationFrame((ts) => tick(r, ts));
   }
@@ -410,18 +468,22 @@
     setTimeout(() => {
       if (run !== r) return;
       crt.classList.add('blue');
-      if (crt3d) crt3d.tube('blue');
-      // the flight waits a moment for the 3D if it is still on its way (a replay builds it again); after that the
-      // still flies instead, the same move in CSS
-      const wait = crt3dReady ? Promise.race([crt3dReady, new Promise((res) => setTimeout(() => res(null), 1200))]) : Promise.resolve(null);
-      wait.then((live) => {
-        if (reduce) return pause(450);
-        if (live && crt3d) { r.flying = true; return crt3d.fly(FLY); }
-        return zoomStill(r);
-      }).then(() => leave(r));
+      // decided once, as the test ends: a 3D that shows flies into the glass; one still on its way is dropped and the
+      // still flies, so the screen never stands frozen waiting for it nor changes material in mid-flight
+      const live = !!crt3d && scene.classList.contains('live');
+      if (live) crt3d.tube('blue');
+      else if (crt3d) { crt3d.destroy(); crt3d = null; }
+      (reduce ? pause(450) : live ? fly3d(r) : zoomStill(r)).then(() => leave(r));
     }, DONE_HOLD * 1000 * r.q);
   }
   const pause = (ms) => new Promise((res) => setTimeout(res, ms));
+  // the glass's corners lie round the whole screen: from there on the flight only shows more of the same blue
+  const covers = (q) => { const xs = q.map((p) => p[0]), ys = q.map((p) => p[1]); return Math.min(...xs) <= 0 && Math.min(...ys) <= 0 && Math.max(...xs) >= box.clientWidth && Math.max(...ys) >= box.clientHeight; };
+  // the 3D's flight, over once the glass fills the frame (or at the end of its way); a return visit flies faster
+  function fly3d(r) {
+    r.flying = true;
+    return new Promise((res) => { r.filled = res; crt3d.fly(FLY * r.q).then(res); });
+  }
 
   // the still's flight: the whole picture scales about the glass until only the blue is left (past the welcome's
   // bands, as the 3D's last frame), and the room fades on the way, before its dots grow coarse
@@ -433,8 +495,9 @@
     const k = Math.max(box.clientWidth / (Math.max(...xs) - Math.min(...xs)), box.clientHeight / (Math.max(...ys) - Math.min(...ys))) * 1.2;
     const to = `translate(${box.clientWidth / 2 - gx * k}px, ${box.clientHeight / 2 - gy * k}px) scale(${k})`;
     scene.style.transformOrigin = '0 0';
-    room.animate([{ opacity: 1 }, { opacity: 1, offset: 0.35 }, { opacity: 0 }], { duration: FLY, easing: 'ease-in', fill: 'forwards' });
-    return scene.animate([{ transform: 'none' }, { transform: to }], { duration: FLY, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' }).finished.catch(() => {});
+    const ms = STILL_FLY * r.q;
+    room.animate([{ opacity: 1 }, { opacity: 1, offset: 0.1 }, { opacity: 0, offset: 0.32 }, { opacity: 0 }], { duration: ms, easing: 'linear', fill: 'forwards' });
+    return scene.animate([{ transform: 'none' }, { transform: to }], { duration: ms, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' }).finished.catch(() => {});
   }
 
   function leave(r) {
@@ -447,8 +510,9 @@
     if (reduce) root.classList.add('boot-in');
     const end = () => {
       run = null;
+      if (files) files.disconnect();
+      setLed(false);
       if (crt3d) { crt3d.destroy(); crt3d = null; }
-      crt3dReady = null;
       root.classList.remove('booting', 'boot-out', 'boot-in');
       box.classList.remove('ready', 'failing');
       [box, scene, room].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
@@ -459,10 +523,11 @@
       frozen = [];
       waiters.splice(0).forEach((fn) => { try { fn(); } catch (e) { console.error(e); } });
     };
-    if (reduce) return end();
-    // the blue fades, and the desktop comes up in XP's steps behind it
-    box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500 * q, easing: 'ease-out', fill: 'forwards' }).finished
-      .then(() => enter(q))
+    // without motion the blue still fades (200 ms, nothing moves), rather than cutting from the dark room to the desktop
+    if (reduce) { box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' }).finished.catch(() => {}).then(end); return; }
+    // the blue fades, and the desktop comes up in XP's steps behind it, starting as the blue thins (at 60% of its fade)
+    const fade = box.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500 * q, easing: 'ease-out', fill: 'forwards' });
+    Promise.all([fade.finished, pause(300 * q).then(() => enter(q))])
       .catch(() => { root.classList.add('boot-in'); })
       .then(end);
   }
@@ -501,6 +566,7 @@
   addEventListener('resize', () => {
     if (!run || run.zooming || (crt3d && scene.classList.contains('live'))) return;
     layGlass(stillGlass());
+    layLed();
     clearTimeout(resizing);
     resizing = setTimeout(paintRoom, 120);
   });

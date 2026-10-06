@@ -13,9 +13,10 @@
   Hover only, no clicks. It renders at display rate only while the water or a ribbon is still moving,
   30 fps otherwise.
 
-  A still of this scene (asset/wallpaper-media-center.webp) stays on .desktop underneath and remains the
-  wallpaper whenever this can't run: no WebGL, CDN blocked, phones (windows cover the desktop there), or
-  ?wall=static. With prefers-reduced-motion it renders one still frame and never animates or glitches.
+  A still of this scene at 10s (asset/wallpaper-media-center*.webp, one per window shape, picked by style.css)
+  stays on .desktop underneath and remains the wallpaper whenever this can't run: no WebGL, CDN blocked, phones
+  (windows cover the desktop there), or ?wall=static. With prefers-reduced-motion it renders one still frame and
+  never animates or glitches.
   three.js (about 190 KB) is fetched only where the wallpaper is drawn, so a phone never downloads it; a
   screen that leaves phone mode (a window widened past 720px) fetches it then.
 
@@ -435,7 +436,9 @@ function start() {
     touchLive = live;
   }
 
-  let time = 0;
+  // the clock starts at the moment the still on .desktop was rendered, so the first frame fades in over the same picture
+  const STILL_T = 10;
+  let time = STILL_T;
   function animate(t, dt = 1 / 60) {
     lights.forEach((L, i) => {
       const st = L.mesh.userData.touch;
@@ -541,7 +544,7 @@ function start() {
     renderer.setRenderTarget(null);
     clearFlow();
   }
-  animate(0);
+  animate(time);
   if (!mqMobile.matches) draw();
   play();
 
