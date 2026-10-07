@@ -1287,16 +1287,19 @@
     <div class="statusbar"><span>${I('home', 16)}${esc(u('home'))}</span><span><span class="long">${esc(t(o.statusLong))}</span><span class="short">${esc(t(o.status))}</span></span></div>`;
   }
   // The CRT powers on once a visit, where it is seen: Home active and not on the taskbar (a shared link may open it
-  // behind another window), half its glass in the window, the loading screen gone, and the photo decoded. The lamp
-  // lights, a bright line opens into the picture, then the lower third rises, and the set scans the room once. A
-  // photo that hasn't decoded within 2.5s just shows, without the moment
+  // behind another window), half its glass in the window or a strip of it TV_SEEN_PX tall (a laptop's first view shows
+  // only the top of the glass, and the set must not sit dark there), the loading screen gone, and the photo decoded.
+  // The lamp lights, a bright line opens into the picture, then the lower third rises, and the set scans the room
+  // once. A photo that hasn't decoded within 2.5s just shows, without the moment
   const homeTV = { done: false, scanned: false, photo: null };
+  const TV_SEEN_PX = 48;
   function homeIntro(w) { (PF.bootDone || ((fn) => fn()))(() => homeTVTry(w)); }
   function homeTVArm(w) {
     const crt = $('.pt-crt', w.el), img = crt && $('.pt-photo', crt);
     if (!img) return;
     if (homeTV.done || reduceMotion || !window.IntersectionObserver) { homeTV.done = true; crt.classList.remove('standby'); return; }
-    const io = new IntersectionObserver((es) => { w.tvSeen = es.some((x) => x.intersectionRatio >= 0.5); homeTVTry(w); }, { root: $('.win-body', w.el), threshold: 0.5 });
+    const io = new IntersectionObserver((es) => { w.tvSeen = es.some((x) => x.intersectionRatio >= 0.5 || (x.isIntersecting && x.intersectionRect.height >= TV_SEEN_PX)); homeTVTry(w); },
+      { root: $('.win-body', w.el), threshold: [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5] });
     io.observe($('.crt-glass', crt)); w.fxIO.push(io);
     homeTV.photo = homeTV.photo || Promise.race([img.decode().then(() => true, () => false), new Promise((res) => setTimeout(() => res(false), 2500))]);
     homeTV.photo.then((ok) => {
@@ -3085,7 +3088,8 @@
   const langBtn = $('#langBtn');
   function updateTray() {
     langBtn.textContent = lang.toUpperCase();
-    langBtn.setAttribute('aria-label', lang === 'en' ? 'Language: English. Switch to Bahasa Indonesia' : 'Bahasa: Indonesia. Ganti ke English');
+    // the name starts with the letters the button shows, so a voice user can say what they see (WCAG 2.5.3)
+    langBtn.setAttribute('aria-label', lang === 'en' ? 'EN, English. Switch to Bahasa Indonesia' : 'ID, Bahasa Indonesia. Ganti ke English');
     langBtn.title = lang === 'en' ? 'English → Bahasa Indonesia' : 'Bahasa Indonesia → English';
     if (PF.volume) PF.volume.tray();
     $('#clock').textContent = clockText();

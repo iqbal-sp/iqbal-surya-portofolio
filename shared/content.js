@@ -278,7 +278,7 @@
         {
           name: 'Nina Lombardo',
           role: 'Creative Director - LaunchPoint',
-          quote: ['Iqbal has been an incredible asset to our team. He consistently delivers high-quality, creative work and takes feedback with professionalism and a positive attitude. He not only listens, but also elevates ideas beyond what we imagined. He’s reliable, collaborative, and never fails to impress, always hitting deadlines and solving design challenges with creativity and ease. His work has raised the bar for our brand and made a lasting impact. Working with him has been nothing short of amazing. Truly so greatful for you'],
+          quote: ['Iqbal has been an incredible asset to our team. He consistently delivers high-quality, creative work and takes feedback with professionalism and a positive attitude. He not only listens, but also elevates ideas beyond what we imagined. He’s reliable, collaborative, and never fails to impress, always hitting deadlines and solving design challenges with creativity and ease. His work has raised the bar for our brand and made a lasting impact. Working with him has been nothing short of amazing. Truly so grateful for you'],
         },
         {
           name: 'Leon Hemphill',
