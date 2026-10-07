@@ -276,7 +276,7 @@ img { max-width: 100%; }
 .dicon {
   width: 80px; padding: 3px 2px; background: none; border: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
-  color: #fff; text-align: center; font: 12px/1.25 var(--ui);
+  color: #fff; text-align: center; font: 12px/1.25 var(--ui); cursor: pointer;
 }
 .dicon .px { width: 32px; height: 32px; filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, .35)); }
 .dicon .lbl { padding: 0 3px; border-radius: 1px; text-shadow: 1px 1px 1px #000, 0 0 3px rgba(0, 0, 0, .6); }
