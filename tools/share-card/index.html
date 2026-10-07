@@ -33,9 +33,14 @@
     --bc-deep: #04163f; --bc-soft: #d6e2f8; --glow: #86d13f; --bc-scrim: rgba(3, 18, 60, .92);
     --glow-face: linear-gradient(180deg, #a8e266, #5aa82a); --glow-edge: #d4f7ad; --glow-ink: #0b2206; --glow-halo: rgba(134, 209, 63, .55);
     --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.45 .45 .45 0 -.175 .45 .45 .45 0 -.175 .45 .45 .45 0 -.175 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
+    --grain-n: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.6 0 0 0 .2 .6 0 0 0 .2 .6 0 0 0 .2 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
+    /* the paint's slow unevenness over the whole wall, one sheet so it never repeats */
+    --mottle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'%3E%3Cfilter id='m' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .007' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='.3 0 0 0 .35 .3 0 0 0 .35 .3 0 0 0 .35 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='1200' height='630' filter='url(%23m)'/%3E%3C/svg%3E") 0 0 / 1200px 630px no-repeat;
+    /* the desk's laminate: long faint streaks of grain along it */
+    --streak: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='240'%3E%3Cfilter id='s' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.003 .16' numOctaves='3' seed='5' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.55 0 0 0 .225 .55 0 0 0 .225 .55 0 0 0 .225 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='600' height='240' filter='url(%23s)'/%3E%3C/svg%3E") 0 0 / 600px 240px;
     position: relative; width: 1200px; height: 630px; overflow: hidden; isolation: isolate;
-    background: var(--grain), radial-gradient(58% 80% at 50% 34%, var(--wall-hi), var(--wall) 55%, var(--wall-lo));
-    background-blend-mode: soft-light, normal;
+    background: var(--grain), var(--mottle), radial-gradient(58% 80% at 50% 34%, var(--wall-hi), var(--wall) 55%, var(--wall-lo));
+    background-blend-mode: soft-light, soft-light, normal;
     font-family: "Poster Sans", var(--display);
   }
   .poster.b { --wall-hi: #35563f; --wall: #223c2c; --wall-lo: #11201a; --ink: #d8cf62; }
@@ -43,33 +48,66 @@
   .poster::after { content: ""; position: absolute; inset: 0; z-index: 9; pointer-events: none; background: radial-gradient(85% 95% at 50% 40%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .28)); }
 
   /* ---- the type: the name in tall narrow capitals either side, and a small column between them ---- */
-  .big { position: absolute; top: -2px; z-index: 1; margin: 0; font: 900 168px/1 "Poster Sans"; font-stretch: 62.5%; letter-spacing: -0.01em; color: var(--ink); }
-  .big.l { left: 40px; }
-  .big.r { right: 40px; }
-  .mid { position: absolute; left: 50%; top: 30px; z-index: 1; width: 320px; margin: 0 0 0 -160px; text-align: center; color: var(--ink); }
+  /* painted on the wall: the paint takes the wall's grain, and the light thins out toward the poster's outer edges */
+  .big { position: absolute; top: -2px; z-index: 1; margin: 0; font: 900 168px/1 "Poster Sans"; font-stretch: 62.5%; letter-spacing: -0.01em; color: var(--ink); -webkit-text-fill-color: transparent; }
+  .big.l { left: 40px; background: var(--grain-n), linear-gradient(90deg, rgba(3, 10, 30, .14), rgba(3, 10, 30, 0) 80%), linear-gradient(var(--ink), var(--ink)); }
+  .big.r { right: 40px; background: var(--grain-n), linear-gradient(270deg, rgba(3, 10, 30, .14), rgba(3, 10, 30, 0) 80%), linear-gradient(var(--ink), var(--ink)); }
+  .big.l, .big.r { -webkit-background-clip: text; background-clip: text; background-blend-mode: soft-light, normal, normal; }
+  .mid { position: absolute; left: 50%; top: 38px; z-index: 1; width: 320px; margin: 0 0 0 -160px; text-align: center; color: var(--ink); }
   .mid p { margin: 0; }
-  .mid .paren { font: 500 17px/20px "Poster Sans"; font-stretch: 87.5%; letter-spacing: .01em; }
-  .mid .what { margin-top: 4px; font: 800 28px/32px "Poster Sans"; font-stretch: 75%; letter-spacing: .04em; }
+  .mid .what { font: 800 28px/32px "Poster Sans"; font-stretch: 75%; letter-spacing: .04em; }
   .mid .play { display: block; width: 20px; height: 22px; margin: 16px auto 0; fill: currentColor; }
   .mid .go { margin-top: 8px; font: 800 19px/20px "Poster Sans"; font-stretch: 75%; letter-spacing: .08em; }
 
-  /* ---- the desk: its top seen a little from above, lit toward the front, and its front edge ---- */
-  .desk { position: absolute; left: 0; right: 0; top: 584px; bottom: 0; z-index: 2;
-    background: linear-gradient(180deg, var(--desk-back), var(--desk-top) 70%, var(--desk-lip) 72%, var(--desk-front) 74%, #9d998e); }
-  .desk::before { content: ""; position: absolute; inset: 0; background: var(--grain); mix-blend-mode: soft-light; opacity: .7; }
+  /* ---- the desk: its top recedes from a lit front lip back to the wall (y 520), where the wall darkens above the join;
+     the things on it stand on the top and lay their shadows on it ---- */
+  .desk { position: absolute; left: 0; right: 0; top: 520px; bottom: 0; z-index: 2;
+    background: linear-gradient(180deg, #a19d92 0, #bdb9ae 16px, #d6d3ca 52px, #e8e5dd 84px, #fcfaf5 84px, #f1eee7 87px, #b4b0a5 88px, #9e9a8f 110px); }
+  .desk::before { content: ""; position: absolute; left: 0; right: 0; top: 84px; bottom: 0; background: var(--grain); mix-blend-mode: soft-light; opacity: .6; }
+  .desk::after { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 30px; background: linear-gradient(180deg, rgba(0, 4, 18, 0), rgba(0, 4, 18, .32)); }
+  /* the top, seen from above: the light from the left falls off to the right, the screen throws a cool pool on the desk
+     in front of it, and the laminate's grain and streaks lie on the plane itself, so they shrink as it recedes */
+  .desk-top { position: absolute; left: 0; right: 0; top: 0; height: 84px; overflow: hidden; perspective: 320px; perspective-origin: 50% -170px;
+    background: radial-gradient(26% 80% at 50% 100%, rgba(176, 200, 255, .13), rgba(176, 200, 255, 0)), linear-gradient(90deg, rgba(255, 250, 236, .12), rgba(255, 250, 236, 0) 45%, rgba(10, 14, 36, 0) 60%, rgba(10, 14, 36, .07)),
+      linear-gradient(180deg, #a19d92 0, #bdb9ae 16px, #d6d3ca 52px, #e8e5dd 84px); }
+  .desk-top::before { content: ""; position: absolute; left: -100%; right: -100%; bottom: 0; height: 600px; transform-origin: 50% 100%; transform: rotateX(90deg);
+    background: var(--grain), var(--streak); background-blend-mode: soft-light, normal; mix-blend-mode: soft-light; opacity: .6; }
+  /* the shadows things lay on the desk's top: a dark line where they touch it, a warm core round that, and a softer,
+     cooler one cast back and to the right, away from the light, lit only by the room */
+  .shade { position: absolute; z-index: 3; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(28, 24, 16, .42), rgba(28, 24, 16, 0)); }
+  .shade.touch { background: radial-gradient(50% 50% at 50% 50%, rgba(22, 18, 12, .6), rgba(22, 18, 12, 0)); }
+  .shade.cast { background: radial-gradient(50% 50% at 50% 50%, rgba(10, 16, 40, .24), rgba(10, 16, 40, 0)); filter: blur(3px); }
 
-  /* ---- the monitor: Home's hero CRT at 470px, its shadow on the wall to the right ---- */
-  .poster .pt-crt { position: absolute; left: 365px; top: 166px; z-index: 4; width: 470px; filter: drop-shadow(18px 10px 16px rgba(0, 4, 18, .45)); }
+  /* ---- the monitor: Home's hero CRT at 450px; no shadow on the wall behind it, only the ones at its foot (owner's
+     request, 2026-10-07) ---- */
+  .poster .pt-crt { position: absolute; left: 375px; top: 167px; z-index: 4; width: 450px; }
   .poster .pt-photo { cursor: default; }
+  /* lit here as the room lights it: the case brighter on the left, toward the light, and dimmer on the right; the
+     glass catching the light inside its rim at the top left; the stand's shadow is the desk's own (the shades below) */
+  .poster .crt-case { background: var(--crt-grain), linear-gradient(90deg, rgba(255, 251, 240, .22), rgba(255, 251, 240, 0) 32%, rgba(20, 16, 8, 0) 62%, rgba(20, 16, 8, .08)), linear-gradient(180deg, #f4f1e7, var(--face) 30%, #ddd7c4);
+    background-blend-mode: soft-light, normal, normal; }
+  .poster .crt-glass .glare { position: absolute; inset: 5px; z-index: 3; border-radius: 11px; pointer-events: none;
+    box-shadow: inset 5px 6px 7px -5px rgba(255, 255, 255, .28); background: linear-gradient(122deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, .05) 34%, rgba(255, 255, 255, 0) 46%); }
+  .poster .crt-stand { filter: none; }
 
   /* ---- props, each with its own shadow ---- */
   .prop { position: absolute; margin: 0; }
   /* the stickman (pet.js) sits on the monitor's top edge and waves */
   /* his canvas is pet.js's 64 x 96 at 2.6x; the edge he sits on (y 78) lies on the case's top (166), his hip 473 across */
-  .stick { left: 390px; top: -37px; z-index: 6; width: 166.4px; height: 249.6px; filter: drop-shadow(8px 6px 6px rgba(0, 4, 18, .35)); }
-  /* a receipt for the five services, taped over the monitor's left edge */
-  .receipt { left: 288px; top: 232px; z-index: 6; width: 116px; transform: rotate(-4deg); transform-origin: 50% 0; filter: drop-shadow(6px 8px 8px rgba(0, 4, 18, .4)); }
-  .receipt .slip { display: block; padding: 14px 10px 18px; background: linear-gradient(180deg, #fcfbf7, #f3f1ea); color: #2a2924; font: 400 7.6px/1.5 "Noto Sans Mono", monospace;
+  .stick { left: 390px; top: -37px; z-index: 6; width: 166.4px; height: 249.6px; filter: drop-shadow(8px 7px 8px rgba(0, 4, 18, .28)); }
+  /* a receipt for the five services, taped by its top right corner to the monitor's left edge. Most of it hangs in the
+     air well in front of the wall, so its shadow there is faint and far; where it lies on the case its shadow is close
+     and sharp (.rc-cast, clipped to the case). Thermal paper: a fine tooth, a slight curl across its width, and it
+     dims toward the foot as it curls away */
+  .receipt { left: 288px; top: 232px; z-index: 6; width: 116px; transform: rotate(-4deg); transform-origin: 50% 0; filter: drop-shadow(10px 14px 14px rgba(0, 4, 18, .26)); }
+  .rc-cast { position: absolute; left: 375px; top: 220px; z-index: 5; width: 50px; height: 215px; overflow: hidden; pointer-events: none; }
+  .rc-cast i { position: absolute; left: -85px; top: 15px; width: 116px; transform: rotate(-4deg); transform-origin: 50% 0; background: rgba(10, 12, 28, .34); filter: blur(2px); }
+  .rtape { position: absolute; left: 369px; top: 221px; z-index: 7; width: 40px; height: 16px; transform: rotate(-62deg);
+    background: var(--grain), linear-gradient(180deg, rgba(251, 247, 228, .88), rgba(236, 229, 202, .84)); background-blend-mode: soft-light, normal; box-shadow: inset 0 0 0 .5px rgba(140, 128, 90, .35);
+    clip-path: polygon(0 0, 1.6px 2px, .2px 4px, 1.8px 6px, .4px 8px, 1.5px 10px, 0 12px, 1.7px 14px, .3px 16px, calc(100% - .2px) 16px, calc(100% - 1.6px) 14px, calc(100% - .1px) 12px, calc(100% - 1.8px) 10px, calc(100% - .3px) 8px, calc(100% - 1.4px) 6px, 100% 4px, calc(100% - 1.7px) 2px, calc(100% - .2px) 0); }
+  .receipt .slip { display: block; padding: 14px 10px 18px; color: #2a2924; font: 400 7.6px/1.5 "Noto Sans Mono", monospace;
+    background: var(--grain), linear-gradient(90deg, rgba(20, 24, 40, .06), rgba(20, 24, 40, 0) 26%, rgba(20, 24, 40, 0) 70%, rgba(20, 24, 40, .07)), linear-gradient(180deg, #fdfcf9, #f4f2ec 60%, #e8e6df);
+    background-blend-mode: soft-light, normal, normal;
     -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 5px) no-repeat, conic-gradient(from -45deg at 50% 100%, #0000, #000 1deg 89deg, #0000 90deg) bottom / 7px 5px repeat-x;
     mask: linear-gradient(#000 0 0) top / 100% calc(100% - 5px) no-repeat, conic-gradient(from -45deg at 50% 100%, #0000, #000 1deg 89deg, #0000 90deg) bottom / 7px 5px repeat-x; }
   .receipt .slip > * { display: block; }
@@ -81,39 +119,31 @@
   .receipt .tot { display: flex; justify-content: space-between; font-weight: 700; }
   .receipt .bars { height: 22px; margin: 7px 4px 4px; background: repeating-linear-gradient(90deg, #2a2924 0 1px, transparent 1px 3px, #2a2924 3px 5px, transparent 5px 6px, #2a2924 6px 7px, transparent 7px 10px, #2a2924 10px 13px, transparent 13px 14px); }
   .receipt .ty { margin-top: 2px; font-weight: 700; letter-spacing: .1em; text-align: center; }
-  .receipt .tape { position: absolute; left: 34px; top: -9px; width: 54px; height: 18px; background: linear-gradient(180deg, rgba(246, 240, 214, .78), rgba(232, 224, 192, .7)); transform: rotate(3deg); box-shadow: 0 1px 1px rgba(0, 0, 0, .12); }
-  /* a sticky note on the glass's top right corner */
-  .note { left: 750px; top: 180px; z-index: 6; width: 80px; height: 76px; padding: 12px 9px; transform: rotate(7deg); background: linear-gradient(180deg, #fff4a6, #f8e57e 85%, #ecd56a); color: #1f45b8;
-    font: 800 15px/15px "Poster Sans"; font-stretch: 75%; letter-spacing: .02em; text-transform: uppercase; box-shadow: 2px 5px 8px rgba(0, 4, 18, .35); }
+  /* a sticky note on the glass's top right corner: held flat by its glue along the top, its foot lifting off in a
+     slight curl, so its shadow is tight at the top and opens toward the foot */
+  .note { left: 750px; top: 180px; z-index: 6; width: 80px; height: 76px; padding: 12px 9px; transform: rotate(7deg); color: #1f45b8;
+    background: var(--grain), linear-gradient(180deg, #fff4a6, #f8e57e 85%, #ecd56a); background-blend-mode: soft-light, normal;
+    font: 800 15px/15px "Poster Sans"; font-stretch: 75%; letter-spacing: .02em; text-transform: uppercase; box-shadow: 0 1px 1.5px rgba(0, 4, 18, .28), 3px 9px 9px -4px rgba(0, 4, 18, .42); }
   .note::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px; background: linear-gradient(180deg, rgba(0, 0, 0, .06), rgba(0, 0, 0, 0)); }
-  /* a key fob on a green strap, hung from the monitor's right side: the owner's initials on two keycaps */
-  .fob { left: 822px; top: 262px; z-index: 5; width: 80px; height: 190px; filter: drop-shadow(6px 6px 5px rgba(0, 4, 18, .4)); }
-  .fob .clip { position: absolute; left: 6px; top: 0; width: 16px; height: 28px; border-radius: 8px; border: 3px solid #c9ccd2; border-left-color: #eef0f3; border-right-color: #8d929b; }
-  .fob .strap { position: absolute; left: 8px; top: 22px; width: 12px; height: 92px; border-radius: 2px; transform: rotate(-9deg); transform-origin: 50% 0; background: linear-gradient(90deg, #5aa82a, #a8e266 45%, #86d13f 70%, #4d9423); box-shadow: inset 0 0 0 1px rgba(11, 34, 6, .25); }
-  .fob .strap::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; bottom: 6px; border-left: 1px dashed rgba(11, 34, 6, .35); border-right: 1px dashed rgba(11, 34, 6, .35); }
-  .fob .ring { position: absolute; left: 22px; top: 106px; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #c9ccd2; border-top-color: #f2f3f6; border-bottom-color: #8d929b; }
-  .fob .cap { position: absolute; width: 34px; height: 34px; border-radius: 6px; display: grid; place-items: center; font: 800 15px/1 "Poster Sans"; font-stretch: 87.5%;
-    background: linear-gradient(180deg, #ffffff, #e9e5d6); color: #3a3428; box-shadow: inset 0 -5px 0 #cfc9b4, inset 0 0 0 1px rgba(20, 16, 8, .18), 0 1px 1px rgba(20, 16, 8, .3); padding-bottom: 4px; }
-  .fob .cap.i { left: 10px; top: 124px; transform: rotate(-10deg); background: linear-gradient(180deg, #c6ef8c, #86d13f); color: var(--glow-ink); box-shadow: inset 0 -5px 0 #5aa82a, inset 0 0 0 1px rgba(11, 34, 6, .25), 0 1px 1px rgba(11, 34, 6, .35); }
-  .fob .cap.s { left: 38px; top: 136px; transform: rotate(12deg); }
-  /* a mug of coffee on the desk's left */
-  .mug { left: 166px; top: 512px; z-index: 6; width: 108px; height: 100px; filter: drop-shadow(10px 6px 6px rgba(0, 4, 18, .3)); }
-  .mug .handle { position: absolute; left: 62px; top: 22px; width: 32px; height: 46px; border: 9px solid #dedad0; border-left: 0; border-radius: 0 24px 24px 0; box-shadow: inset -2px 0 2px rgba(20, 16, 8, .12); }
-  .mug .body { position: absolute; left: 0; top: 10px; width: 76px; height: 82px; border-radius: 0 0 14px 14px / 0 0 10px 10px;
-    background: linear-gradient(90deg, #cfcbbf, #fbfaf6 28%, #ffffff 40%, #ece9e0 70%, #c4c0b3); }
-  .mug .band { position: absolute; left: 0; right: 0; top: 30px; height: 8px; background: linear-gradient(90deg, #4d9423, #a8e266 32%, #86d13f 65%, #4d9423); opacity: .95; }
-  .mug .rim { position: absolute; left: 0; top: 3px; width: 76px; height: 16px; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, #3b2416 0 58%, #6a4429 74%, #f4f2ec 76%, #e3e0d6); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .25); }
-  .mug .steam { position: absolute; left: 10px; top: -58px; width: 56px; height: 64px; fill: none; stroke: rgba(255, 255, 255, .26); stroke-width: 4; stroke-linecap: round; filter: blur(2.5px); }
-  /* three books on the desk's right and the floppy standing on them */
-  .books { left: 896px; top: 520px; z-index: 6; width: 200px; height: 90px; filter: drop-shadow(10px 6px 6px rgba(0, 4, 18, .3)); }
-  .books .bk { position: absolute; display: flex; align-items: center; padding: 0 10px; border-radius: 2px; font: 800 9px/1 "Poster Sans"; font-stretch: 75%; letter-spacing: .14em; text-transform: uppercase; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .25), inset 0 -2px 0 rgba(0, 0, 0, .18); }
-  .books .bk::after { content: ""; position: absolute; top: 4px; bottom: 4px; width: 2px; right: 22px; background: rgba(255, 255, 255, .35); box-shadow: -4px 0 0 rgba(255, 255, 255, .35); }
-  .books .b1 { left: 0; top: 58px; width: 196px; height: 28px; background: linear-gradient(180deg, #2a4fa8, #1d3b85); color: #e3ebff; }
-  .books .b2 { left: 10px; top: 34px; width: 170px; height: 24px; background: linear-gradient(180deg, #efe9d6, #d9d1b8); color: #5a5140; }
-  .books .b3 { left: 4px; top: 12px; width: 184px; height: 22px; background: linear-gradient(180deg, #d84a2d, #b5321a); color: #ffe9e2; }
-  .floppy { left: 958px; top: 418px; z-index: 5; width: 104px; transform: rotate(8deg); filter: drop-shadow(10px 4px 6px rgba(0, 4, 18, .4)); }
-  /* the shadows things lay on the desk */
-  .contact { position: absolute; z-index: 3; height: 14px; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(20, 18, 12, .38), rgba(20, 18, 12, 0)); }
+  .note::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 24px; background: linear-gradient(180deg, rgba(150, 110, 0, 0), rgba(150, 110, 0, .1)); }
+  /* a mug of coffee on the desk's left (mug-art below): a ceramic cylinder seen a little from above, its rim's
+     thickness, the inner wall above the coffee, crema at its edge and the room in it, a green band and a printed play
+     mark following the curve, a loop handle, and steam fading as it rises */
+  .mug { left: 148px; top: 396px; z-index: 6; width: 140px; height: 210px; }
+  .mug svg { display: block; width: 140px; height: 210px; overflow: visible; }
+
+  /* three books on the desk's right (books-art below), the floppy standing on them. The bottom and top books lie with
+     their cloth spines to us, round and lit along the top, gilt bands at each end, the title in foil and a small
+     emblem; the middle one shows its fore-edge, the cream leaves between its two boards, and a green ribbon hangs from
+     it over the book below. The top book's cover shows a little from above, and each lower cover shows past the
+     book on it */
+  .books { left: 878px; top: 502px; z-index: 6; width: 212px; height: 100px; }
+  .books svg { display: block; width: 212px; height: 100px; overflow: visible; }
+  .books .bk-t { font: 800 9.5px "Poster Sans"; font-stretch: 75%; letter-spacing: .18em; }
+  /* the floppy stands on the top book, tipped a little: its foot sits on the book's top, and the book's front edge
+     hides the corner that dips behind it (the clip ends at that edge); its shadow on the wall far behind is faint */
+  .fl-clip { position: absolute; left: 900px; top: 380px; z-index: 7; width: 200px; height: 146px; overflow: hidden; pointer-events: none; }
+  .floppy { left: 48px; top: 39.3px; width: 104px; transform: rotate(4deg); filter: drop-shadow(10px 6px 9px rgba(0, 4, 18, .26)); }
 </style>
 </head>
 <body>
@@ -121,16 +151,23 @@
   <p class="big l">IQBAL</p>
   <p class="big r">SURYA</p>
   <div class="mid">
-    <p class="paren">(iqbalsurya.com)</p>
     <p class="what">PORTFOLIO</p>
     <svg class="play" viewBox="0 0 20 22" aria-hidden="true"><path d="M1 1.2v19.6L19 11z"/></svg>
     <p class="go">VIEW THE WORK</p>
   </div>
 
-  <div class="desk"></div>
-  <span class="contact" style="left: 470px; top: 590px; width: 270px"></span>
-  <span class="contact" style="left: 160px; top: 596px; width: 130px"></span>
-  <span class="contact" style="left: 890px; top: 598px; width: 230px"></span>
+  <div class="desk"><i class="desk-top"></i></div>
+  <!-- shadows on the desk's top: the monitor's body (far and soft, behind its stand), the stand's base, the mug and the
+       books; each with its line of contact -->
+  <span class="shade cast" style="left: 640px; top: 524px; width: 270px; height: 46px; opacity: .55; filter: blur(9px)"></span>
+  <span class="shade cast" style="left: 520px; top: 566px; width: 250px; height: 26px"></span>
+  <span class="shade" style="left: 494px; top: 575px; width: 214px; height: 16px"></span>
+  <span class="shade touch" style="left: 505px; top: 580px; width: 190px; height: 9px"></span>
+  <span class="shade cast" style="left: 180px; top: 582px; width: 120px; height: 20px"></span>
+  <span class="shade" style="left: 156px; top: 590px; width: 92px; height: 14px"></span>
+  <span class="shade touch" style="left: 161px; top: 594px; width: 80px; height: 7px"></span>
+  <span class="shade cast" style="left: 904px; top: 586px; width: 226px; height: 20px"></span>
+  <span class="shade" style="left: 874px; top: 593px; width: 216px; height: 14px"></span>
 
   <figure class="pt-crt cs-crt">
     <div class="crt-case">
@@ -139,11 +176,12 @@
           <picture><img class="pt-photo" src="../../asset/Home/photo-hero-1600.webp" width="2880" height="2000" alt="" style="object-position:50% 42%"></picture>
           <div class="tv-lower">
             <b class="tv-now">Now Showing</b>
-            <span class="tv-title">Websites and apps with character.</span>
-            <span class="tv-role">Iqbal Surya Pratama · Product Designer</span>
+            <span class="tv-title">Iqbal Surya Pratama</span>
+            <span class="tv-role">Product Designer · Indonesia</span>
             <i class="tv-bar" aria-hidden="true"><i class="hm-day" style="width:83.3%"></i></i>
             <time class="tv-clock" datetime="20:00">8:00 PM WIB</time>
           </div>
+          <i class="glare" aria-hidden="true"></i>
         </div>
       </div>
       <span class="crt-chin" aria-hidden="true"><span class="crt-grille"></span><span class="crt-badge"></span><span class="crt-keys"><i></i><i></i><i></i><i></i></span><span class="crt-lamp"></span><span class="crt-power"></span></span>
@@ -160,10 +198,10 @@
 
   <canvas class="prop stick" width="332" height="500" aria-hidden="true"></canvas>
 
+  <span class="rc-cast" aria-hidden="true"><i></i></span>
   <figure class="prop receipt" aria-hidden="true">
     <span class="slip">
       <span class="hd">RECEIPT</span>
-      <span class="ct">iqbalsurya.com</span>
       <span class="ct">PRIME TIME · 20:00</span>
       <i class="rule"></i>
       <span class="row"><b>1</b>Visual direction</span>
@@ -176,20 +214,162 @@
       <i class="bars"></i>
       <span class="ty">THANK YOU!</span>
     </span>
-    <i class="tape"></i>
   </figure>
+  <i class="rtape" aria-hidden="true"></i>
 
   <p class="prop note">Open for<br>work!</p>
 
-  <div class="prop fob" aria-hidden="true"><i class="strap"></i><i class="clip"></i><i class="ring"></i><span class="cap s">S</span><span class="cap i">I</span></div>
+  <figure class="prop mug" aria-hidden="true"><svg viewBox="0 -60 140 210">
+    <!-- lit as the room lights it: the lamp high on the left (the glaze brightest a third of the way across, with a sharp
+         streak where it mirrors the lamp, then turning into shade on the right), and the screen on its right, whose
+         cool light catches the far edge of the body and the outside of the handle -->
+    <defs>
+      <linearGradient id="mug-body" x1="0" x2="1"><stop offset="0" stop-color="#c3bfb2"/><stop offset=".05" stop-color="#dcd9cf"/><stop offset=".16" stop-color="#f3f1eb"/><stop offset=".27" stop-color="#fbfaf7"/><stop offset=".38" stop-color="#f6f4ef"/><stop offset=".56" stop-color="#e6e3da"/><stop offset=".74" stop-color="#d1cdc1"/><stop offset=".85" stop-color="#bcb7a8"/><stop offset=".925" stop-color="#c1c1bb"/><stop offset=".962" stop-color="#cfd5de"/><stop offset=".985" stop-color="#bfc2c5"/><stop offset="1" stop-color="#9d998a"/></linearGradient>
+      <linearGradient id="mug-foot" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3c3424" stop-opacity="0"/><stop offset="1" stop-color="#3c3424" stop-opacity=".24"/></linearGradient>
+      <linearGradient id="mug-band" x1="0" x2="1"><stop offset="0" stop-color="#4b8a22"/><stop offset=".05" stop-color="#62a42e"/><stop offset=".16" stop-color="#90d14d"/><stop offset=".27" stop-color="#a8e266"/><stop offset=".38" stop-color="#9cdb5a"/><stop offset=".56" stop-color="#84c742"/><stop offset=".74" stop-color="#67a733"/><stop offset=".85" stop-color="#4e8c25"/><stop offset=".925" stop-color="#55903c"/><stop offset=".962" stop-color="#719f72"/><stop offset=".985" stop-color="#578b46"/><stop offset="1" stop-color="#3a6c1a"/></linearGradient>
+      <linearGradient id="mug-spec" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".07" stop-color="#fff" stop-opacity=".9"/><stop offset=".86" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <linearGradient id="mug-lip" x1="0" x2="1"><stop offset="0" stop-color="#e6e3da"/><stop offset=".3" stop-color="#fbfaf7"/><stop offset=".72" stop-color="#f0eee7"/><stop offset="1" stop-color="#d6d2c6"/></linearGradient>
+      <linearGradient id="mug-inside" x1="0" y1="0" x2="1" y2=".4"><stop offset="0" stop-color="#8e897b"/><stop offset=".45" stop-color="#bdb8ab"/><stop offset=".8" stop-color="#dcd8cd"/><stop offset="1" stop-color="#e6e2d8"/></linearGradient>
+      <radialGradient id="mug-coffee" cx=".46" cy=".4" r=".62"><stop offset="0" stop-color="#3d2211"/><stop offset=".5" stop-color="#2b170b"/><stop offset=".78" stop-color="#4a2a14"/><stop offset=".9" stop-color="#8c5f37"/><stop offset=".97" stop-color="#b88a5a"/><stop offset="1" stop-color="#c49a6a"/></radialGradient>
+      <linearGradient id="mug-handle" x1="0" x2="1"><stop offset="0" stop-color="#d6d2c6"/><stop offset=".3" stop-color="#ebe8e0"/><stop offset=".62" stop-color="#cbc6b8"/><stop offset=".85" stop-color="#b2ad9d"/><stop offset="1" stop-color="#a5a090"/></linearGradient>
+      <radialGradient id="mug-orb" cx=".42" cy=".38" r=".75"><stop offset="0" stop-color="#a4e061"/><stop offset=".7" stop-color="#86d13f"/><stop offset="1" stop-color="#6db534"/></radialGradient>
+      <linearGradient id="mug-steam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".55" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <clipPath id="mug-shape"><path d="M10 40V132A42 10 0 0 0 94 132V40Z"/></clipPath>
+      <clipPath id="mug-mouth"><ellipse cx="52" cy="40.4" rx="38.6" ry="8.5"/></clipPath>
+      <filter id="mug-blur" x="-50%" y="-20%" width="200%" height="140%"><feGaussianBlur stdDeviation="2.4"/></filter>
+      <filter id="mug-soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>
+      <filter id="mug-fine" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation=".5"/></filter>
+    </defs>
+    <!-- the handle, behind the body at its joins: a loop lit along its top, in the body's shade below that, its inner
+         edge darker still, and the screen's light along its outer edge -->
+    <path d="M90 60C123 55 129 110 90 113" fill="none" stroke="url(#mug-handle)" stroke-width="12" stroke-linecap="round"/>
+    <path d="M93 66C117 63 121 104 93 107" fill="none" stroke="#8f8a79" stroke-opacity=".42" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M90 60C123 55 129 110 90 113" transform="translate(-1.2 -2.6)" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="40 200"/>
+    <path d="M113 62.5C121 66 124 76 122 85S119 99 115.5 103.5" fill="none" stroke="#d4dced" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round" filter="url(#mug-fine)"/>
+    <!-- the body, its foot darkened where it nears the desk, and its curved bottom edge -->
+    <path d="M10 40V132A42 10 0 0 0 94 132V40Z" fill="url(#mug-body)"/>
+    <path d="M10 110V132A42 10 0 0 0 94 132V110Z" fill="url(#mug-foot)"/>
+    <path d="M11 131.5A41 9.5 0 0 0 93 131.5" fill="none" stroke="#8e8977" stroke-opacity=".45" stroke-width="1.6"/>
+    <!-- the band and the printed play mark, following the curve -->
+    <path d="M10 74A42 10 0 0 0 94 74V83A42 10 0 0 1 10 83Z" fill="url(#mug-band)"/>
+    <path d="M10 74A42 10 0 0 0 94 74" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width=".8"/>
+    <circle cx="52" cy="108" r="9.5" fill="url(#mug-orb)"/>
+    <path d="M49 103.2v9.6l8.2-4.8z" fill="#fff"/>
+    <!-- the glaze over all of it: a broad soft sheen, and the lamp's sharp streak inside it -->
+    <g clip-path="url(#mug-shape)">
+      <rect x="22" y="50" width="14" height="88" fill="url(#mug-spec)" opacity=".34" filter="url(#mug-soft)"/>
+      <rect x="31.6" y="51" width="2.6" height="86" fill="url(#mug-spec)" opacity=".9" filter="url(#mug-fine)"/>
+    </g>
+    <!-- the rim: its lip, the inner wall above the coffee (in the rim's shade on the left), the coffee with its crema,
+         dimmer at the front where the near wall shades it, the lamp's glint and the screen's cool reflection on it; the
+         lip lit along its back and, sharply, at its front left -->
+    <ellipse cx="52" cy="40" rx="42" ry="10" fill="url(#mug-lip)"/>
+    <ellipse cx="52" cy="40.4" rx="38.6" ry="8.5" fill="url(#mug-inside)"/>
+    <g clip-path="url(#mug-mouth)">
+      <ellipse cx="52" cy="42.8" rx="36.2" ry="7" fill="url(#mug-coffee)"/>
+      <ellipse cx="46" cy="47.6" rx="38" ry="5" fill="#140a04" opacity=".4" filter="url(#mug-fine)"/>
+      <ellipse cx="41" cy="41.4" rx="11" ry="1.9" fill="#fff" fill-opacity=".16"/>
+      <ellipse cx="38.5" cy="41.2" rx="4.6" ry=".9" fill="#fff" fill-opacity=".55" filter="url(#mug-fine)"/>
+      <ellipse cx="63" cy="39.9" rx="9" ry="1.5" fill="#a9c4ff" fill-opacity=".22" filter="url(#mug-fine)"/>
+    </g>
+    <path d="M12.5 38.2A42 10 0 0 1 91.5 38.2" fill="none" stroke="#fff" stroke-width="1.3"/>
+    <path d="M10.4 41A42 10 0 0 0 93.6 41" fill="none" stroke="#a49f8e" stroke-opacity=".5" stroke-width=".8"/>
+    <path d="M17.5 45.7A42 10 0 0 0 40 49.6" fill="none" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- steam: three wisps, fading as they rise -->
+    <g fill="none" stroke="url(#mug-steam)" stroke-linecap="round" filter="url(#mug-blur)">
+      <path d="M38 30C29 17 47 9 39-4S44-24 38-36" stroke-width="6"/>
+      <path d="M57 32C49 18 66 10 58-6S62-30 57-46" stroke-width="5"/>
+      <path d="M72 30C66 20 78 12 72 0S75-16 72-24" stroke-width="4"/>
+    </g>
+  </svg></figure>
 
-  <div class="prop mug" aria-hidden="true">
-    <svg class="steam" viewBox="0 0 56 64"><path d="M16 62c-8-10 8-16 0-28s6-18 2-30"/><path d="M36 60c-7-9 9-15 1-26s5-16 1-28"/></svg>
-    <i class="handle"></i><i class="body"><i class="band"></i></i><i class="rim"></i>
-  </div>
-
-  <div class="prop books" aria-hidden="true"><i class="bk b1">Interface</i><i class="bk b2">Typography</i><i class="bk b3">Colour</i></div>
-  <figure class="prop floppy" aria-hidden="true"></figure>
+  <figure class="prop books" aria-hidden="true"><svg viewBox="0 0 212 100">
+    <defs>
+      <linearGradient id="bk-navy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f3f8f"/><stop offset=".22" stop-color="#4069c6"/><stop offset=".55" stop-color="#2a4fa8"/><stop offset="1" stop-color="#162d68"/></linearGradient>
+      <linearGradient id="bk-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8301a"/><stop offset=".22" stop-color="#ea694c"/><stop offset=".55" stop-color="#d84a2d"/><stop offset="1" stop-color="#8c2513"/></linearGradient>
+      <linearGradient id="bk-board" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1ebd9"/><stop offset="1" stop-color="#d3cab0"/></linearGradient>
+      <linearGradient id="bk-pages" x1="0" x2="1"><stop offset="0" stop-color="#d4cab1"/><stop offset=".06" stop-color="#f2ecdd"/><stop offset=".5" stop-color="#f8f4ea"/><stop offset=".94" stop-color="#eee7d4"/><stop offset="1" stop-color="#cfc4a8"/></linearGradient>
+      <pattern id="bk-leaves" width="10" height="1.3" patternUnits="userSpaceOnUse"><rect width="10" height=".45" fill="#a89c7c" fill-opacity=".45"/></pattern>
+      <linearGradient id="bk-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7e9b2"/><stop offset=".5" stop-color="#dcc06a"/><stop offset="1" stop-color="#a7883a"/></linearGradient>
+      <linearGradient id="bk-topnavy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5279cf"/><stop offset="1" stop-color="#3256a8"/></linearGradient>
+      <linearGradient id="bk-topred" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef7c60"/><stop offset="1" stop-color="#d4553a"/></linearGradient>
+      <linearGradient id="bk-ribbon" x1="0" x2="1"><stop offset="0" stop-color="#4d9423"/><stop offset=".45" stop-color="#a8e266"/><stop offset="1" stop-color="#5aa82a"/></linearGradient>
+      <!-- the lamp on the left: each book a shade brighter at its left end and dimmer at its right -->
+      <linearGradient id="bk-light" x1="0" x2="1"><stop offset="0" stop-color="#fff8e6" stop-opacity=".16"/><stop offset=".4" stop-color="#fff8e6" stop-opacity="0"/><stop offset=".6" stop-color="#0a0e24" stop-opacity="0"/><stop offset="1" stop-color="#0a0e24" stop-opacity=".2"/></linearGradient>
+      <!-- book cloth: a fine woven tooth, laid on in soft light so it only lifts and sinks the colour -->
+      <filter id="bk-cloth" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="1.1 .5" numOctaves="2" seed="4"/>
+        <feColorMatrix values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1"/>
+        <feComposite in2="SourceGraphic" operator="in"/>
+      </filter>
+      <filter id="bk-soft" x="-20%" y="-150%" width="140%" height="400%"><feGaussianBlur stdDeviation="1.4"/></filter>
+      <filter id="bk-fine" x="-20%" y="-150%" width="140%" height="400%"><feGaussianBlur stdDeviation=".6"/></filter>
+      <path id="bk-c1" d="M7 66h194l3 4H4z"/>
+      <rect id="bk-s1" x="4" y="70" width="200" height="28" rx="3"/>
+      <path id="bk-c3" d="M12 18h180l4 6H8z"/>
+      <rect id="bk-s3" x="8" y="24" width="188" height="22" rx="3"/>
+    </defs>
+    <!-- the stack's line of contact with the desk -->
+    <rect x="6" y="94.5" width="196" height="7" rx="3.5" fill="#16120c" opacity=".5" filter="url(#bk-soft)"/>
+    <!-- the bottom book: navy cloth, its cover showing past the book on it and shaded where that book sits on it; the
+         spine round and lit along its top, the joints pressed in along both edges, gilt bands and a stamped title -->
+    <use href="#bk-c1" fill="url(#bk-topnavy)"/>
+    <use href="#bk-c1" filter="url(#bk-cloth)" opacity=".5" style="mix-blend-mode: soft-light"/>
+    <use href="#bk-c1" fill="url(#bk-light)"/>
+    <rect x="11.5" y="66.2" width="3.5" height="3.8" fill="#0b1a40" opacity=".4" filter="url(#bk-fine)"/>
+    <rect x="191" y="66.2" width="3.5" height="3.8" fill="#0b1a40" opacity=".4" filter="url(#bk-fine)"/>
+    <use href="#bk-s1" fill="url(#bk-navy)"/>
+    <use href="#bk-s1" filter="url(#bk-cloth)" opacity=".55" style="mix-blend-mode: soft-light"/>
+    <use href="#bk-s1" fill="url(#bk-light)"/>
+    <rect x="6" y="70.4" width="196" height=".8" fill="#fff" fill-opacity=".22"/>
+    <path d="M6 72.2h196M6 95.8h196" stroke="#0b1a40" stroke-opacity=".3" stroke-width=".7"/>
+    <path d="M6 72.8h196" stroke="#fff" stroke-opacity=".1" stroke-width=".5"/>
+    <rect x="6" y="96.6" width="196" height="1.2" fill="#0b1a40" fill-opacity=".5"/>
+    <g fill="#0b1a40" fill-opacity=".45"><rect x="16" y="73" width="1.6" height="23"/><rect x="20" y="73" width="1.6" height="23"/><rect x="186.4" y="73" width="1.6" height="23"/><rect x="190.4" y="73" width="1.6" height="23"/></g>
+    <g fill="url(#bk-gold)"><rect x="16" y="72.5" width="1.6" height="23"/><rect x="20" y="72.5" width="1.6" height="23"/><rect x="186.4" y="72.5" width="1.6" height="23"/><rect x="190.4" y="72.5" width="1.6" height="23"/></g>
+    <text class="bk-t" x="32" y="88.1" fill="#0b1a40" fill-opacity=".5">INTERFACE</text>
+    <text class="bk-t" x="32" y="87.6" fill="url(#bk-gold)">INTERFACE</text>
+    <rect x="158" y="80" width="16" height="9" rx="1.2" fill="none" stroke="#0b1a40" stroke-opacity=".45" stroke-width="1"/>
+    <rect x="158" y="79.5" width="16" height="9" rx="1.2" fill="none" stroke="url(#bk-gold)" stroke-width="1"/>
+    <!-- the middle book, its fore-edge to us: the boards, the leaves between them, the boards' shade on the leaves -->
+    <rect x="14" y="46" width="178" height="3.4" rx="1" fill="url(#bk-board)"/>
+    <rect x="16" y="49.4" width="174" height="17.2" fill="url(#bk-pages)"/>
+    <rect x="16" y="49.4" width="174" height="17.2" fill="url(#bk-leaves)"/>
+    <path d="M16 53.3h174M16 57.9h174M16 61.6h174" stroke="#8f8466" stroke-opacity=".2" stroke-width=".35"/>
+    <rect x="16" y="49.4" width="174" height="1.6" fill="#5a4f36" fill-opacity=".2"/>
+    <rect x="16" y="65" width="174" height="1.6" fill="#5a4f36" fill-opacity=".12"/>
+    <rect x="14" y="66.6" width="178" height="3.4" rx="1" fill="url(#bk-board)"/>
+    <rect x="14" y="46" width="178" height="24" fill="url(#bk-light)"/>
+    <rect x="14" y="69.4" width="178" height="1.4" fill="#0b1a40" fill-opacity=".35"/>
+    <!-- its ribbon, out of the leaves and down over the book below, with its shadow on that book -->
+    <path d="M149.4 70.4h6v16.6l-3-2.8-3 2.8z" fill="#0b1a40" opacity=".35" filter="url(#bk-fine)"/>
+    <path d="M148 62h6v25l-3-2.8-3 2.8z" fill="url(#bk-ribbon)"/>
+    <path d="M148 62h6v1.4h-6z" fill="#2c5a12" fill-opacity=".5"/>
+    <path d="M150.6 63.6v21" stroke="#fff" stroke-opacity=".22" stroke-width=".6"/>
+    <!-- the top book: red cloth, its cover seen a little from above with the floppy standing on it (the floppy's line
+         of contact, and its shadow beside it), then its spine as the one below -->
+    <use href="#bk-c3" fill="url(#bk-topred)"/>
+    <use href="#bk-c3" filter="url(#bk-cloth)" opacity=".5" style="mix-blend-mode: soft-light"/>
+    <use href="#bk-c3" fill="url(#bk-light)"/>
+    <path d="M13 18.7h178" stroke="#fff" stroke-opacity=".4" stroke-width=".8"/>
+    <ellipse cx="103" cy="22.2" rx="34" ry="1.5" transform="rotate(4 103 22.2)" fill="#2a0c06" opacity=".55" filter="url(#bk-fine)"/>
+    <ellipse cx="187" cy="21" rx="9" ry="2.4" fill="#2a0c06" opacity=".3" filter="url(#bk-soft)"/>
+    <use href="#bk-s3" fill="url(#bk-red)"/>
+    <use href="#bk-s3" filter="url(#bk-cloth)" opacity=".55" style="mix-blend-mode: soft-light"/>
+    <use href="#bk-s3" fill="url(#bk-light)"/>
+    <rect x="10" y="24.4" width="184" height=".8" fill="#fff" fill-opacity=".25"/>
+    <path d="M10 26.1h184M10 44h184" stroke="#4a120a" stroke-opacity=".3" stroke-width=".7"/>
+    <path d="M10 26.7h184" stroke="#fff" stroke-opacity=".12" stroke-width=".5"/>
+    <rect x="10" y="44.6" width="184" height="1.2" fill="#4a120a" fill-opacity=".45"/>
+    <g fill="#4a120a" fill-opacity=".45"><rect x="20" y="27" width="1.4" height="17"/><rect x="23.6" y="27" width="1.4" height="17"/><rect x="178.6" y="27" width="1.4" height="17"/><rect x="182.2" y="27" width="1.4" height="17"/></g>
+    <g fill="url(#bk-gold)"><rect x="20" y="26.5" width="1.4" height="17"/><rect x="23.6" y="26.5" width="1.4" height="17"/><rect x="178.6" y="26.5" width="1.4" height="17"/><rect x="182.2" y="26.5" width="1.4" height="17"/></g>
+    <text class="bk-t" x="36" y="39.1" fill="#4a120a" fill-opacity=".5">COLOUR</text>
+    <text class="bk-t" x="36" y="38.6" fill="url(#bk-gold)">COLOUR</text>
+    <circle cx="164" cy="35.5" r="3.4" fill="none" stroke="#4a120a" stroke-opacity=".45" stroke-width="1"/>
+    <circle cx="164" cy="35" r="3.4" fill="none" stroke="url(#bk-gold)" stroke-width="1"/>
+    <circle cx="164" cy="35" r="1.1" fill="url(#bk-gold)"/>
+  </svg></figure>
+  <div class="fl-clip"><figure class="prop floppy" aria-hidden="true"></figure></div>
 </main>
 <script src="floppy.js"></script>
 <script>
@@ -226,8 +406,11 @@
     ctx.beginPath(); ctx.moveTo(bx, hy); ctx.lineTo(bx - 5 * f, hy + 1.8); ctx.lineTo(bx - 10 * f, hy + 3.4); ctx.stroke();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(head[0] + 2.6 * f, head[1] - 0.4, 1.1, 1.6, 0, 0, TAU); ctx.fill();
   })();
-  // render.mjs waits for this
-  Promise.all([document.fonts.ready, ...[...document.images].map((im) => im.decode().catch(() => {}))]).then(() => { document.documentElement.dataset.ready = '1'; });
+  // render.mjs waits for this; by then the receipt has its type, so its close shadow on the case can take its height
+  Promise.all([document.fonts.ready, ...[...document.images].map((im) => im.decode().catch(() => {}))]).then(() => {
+    document.querySelector('.rc-cast i').style.height = document.querySelector('.receipt .slip').offsetHeight + 'px';
+    document.documentElement.dataset.ready = '1';
+  });
 </script>
 </body>
 </html>

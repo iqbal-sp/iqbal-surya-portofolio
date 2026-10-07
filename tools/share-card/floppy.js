@@ -1,5 +1,6 @@
 // The site's 3.5" floppy, copied from option-a-desktop/app.js (floppySVG, which the About window no longer shows) so the
-// share card can lay one on the desk. window.floppySVG(label, vol) -> svg markup; its type is style.css's .floppy-art
+// share card can lay one on the desk. Lit for the card: a fine tooth on the plastic and the label's paper, and the
+// screen's cool light along its left edge. window.floppySVG(label, vol) -> svg markup; its type is style.css's .floppy-art
 (() => {
   const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const FLOPPY_GRAIN = [[3.9, 30, 58, 1], [5.1, 44, 44, 0], [6.6, 28, 40, 1], [7.4, 61, 29, 0], [9.2, 33, 51, 1], [10.7, 28, 23, 0],
@@ -20,14 +21,16 @@
         <linearGradient id="fl-metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f4f7"/><stop offset=".4" stop-color="#d4d7de"/><stop offset="1" stop-color="#b3b8c2"/></linearGradient>
         <linearGradient id="fl-sheen" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".4"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset=".68" stop-color="#282c3c" stop-opacity=".1"/><stop offset=".9" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
         <linearGradient id="fl-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf9f2"/><stop offset="1" stop-color="#f2eee2"/></linearGradient>
+        <filter id="fl-tex" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="9"/><feColorMatrix values="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 1"/><feComposite in2="SourceGraphic" operator="in"/></filter>
         <clipPath id="fl-cut"><path clip-rule="evenodd" d="${body}M109 112v5.5h5.5V112z"/></clipPath>
       </defs>
       <g clip-path="url(#fl-cut)">
         <path d="${body}" fill="url(#fl-body)"/>
         <path d="${body}" fill="url(#fl-gloss)"/>
+        <path d="${body}" filter="url(#fl-tex)" opacity=".4" style="mix-blend-mode: soft-light"/>
         <rect x="1" y="100" width="118" height="22" fill="url(#fl-foot)"/>
         <path d="M5 2.6h100.8l11.6 11.6" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width=".9"/>
-        <path d="M1.6 6v112" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width=".9"/>
+        <path d="M1.6 6v112" fill="none" stroke="#bcd0ff" stroke-opacity=".22" stroke-width=".9"/>
         <rect x="12" y="2" width="16" height="39" fill="#050a16" opacity=".16"/>
         <rect x="12" y="2" width="3" height="39" fill="url(#fl-wall)"/>
         <rect x="12" y="40.5" width="16" height=".5" fill="#fff" opacity=".1"/>
@@ -54,6 +57,7 @@
         <g fill="#b9b6ab"><rect x="19" y="84" width="82" height="1"/><rect x="19" y="97" width="82" height="1"/><rect x="19" y="110" width="82" height="1"/></g>
         <text class="fl-t1" x="19" y="82.6">${esc(label)}</text>
         <text class="fl-t2" x="19" y="95.6">${esc(vol)}</text>
+        <rect x="13" y="54" width="94" height="62" rx="2" filter="url(#fl-tex)" opacity=".3" style="mix-blend-mode: soft-light"/>
         <rect x="5.5" y="112" width="5.5" height="5.5" fill="#18213b"/>
         <rect x="5.5" y="112" width="5.5" height="1.6" fill="#050a16" opacity=".7"/>
         <rect x="5.5" y="112" width="1.1" height="5.5" fill="#050a16" opacity=".5"/>
