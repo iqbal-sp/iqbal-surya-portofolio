@@ -1214,9 +1214,9 @@ img { max-width: 100%; }
 .nero-round { margin-left: auto; display: flex; align-items: flex-end; gap: 14px; }
 .nero-key { display: grid; justify-items: center; gap: 5px; }
 .nero-key small { font: 700 11px/1 var(--read); color: #ffd9d7; text-shadow: 0 1px rgba(0, 0, 0, .45); }
-.nero-round button, .nero-round .hot { width: 40px; height: 40px; padding: 0; border-radius: 50%; border: 1px solid #3a0504; display: grid; place-items: center; cursor: pointer;
+.nero-round button, .nero-round .hot { width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 1px solid #3a0504; display: grid; place-items: center; cursor: pointer;
   background: radial-gradient(circle at 36% 30%, #ffffff, #e0e0e0 42%, #8d8d8d); box-shadow: 0 0 0 3px #6c0d0b, 0 0 0 4px rgba(255, 255, 255, .22), 0 3px 4px 2px rgba(0, 0, 0, .4); }
-.nero-round .hot { width: 48px; height: 48px; background: radial-gradient(circle at 36% 30%, #ffe2a8, #ff8a2a 45%, #b0260b); }
+.nero-round .hot { background: radial-gradient(circle at 36% 30%, #ffe2a8, #ff8a2a 45%, #b0260b); }
 .nero-round button:hover { background: radial-gradient(circle at 36% 30%, #ffffff, #e0e0e0 55%, #8d8d8d); box-shadow: 0 0 0 3px #6c0d0b, 0 0 0 4px rgba(255, 255, 255, .22), 0 3px 4px 2px rgba(0, 0, 0, .4), inset 0 0 0 2px rgba(251, 199, 97, .85); }
 .nero-round .hot:hover { background: radial-gradient(circle at 36% 30%, #ffffff, #ffe2a8 30%, #ff8a2a 60%, #b0260b); box-shadow: 0 0 0 3px #6c0d0b, 0 0 0 4px rgba(255, 255, 255, .22), 0 3px 4px 2px rgba(0, 0, 0, .4), inset 0 0 0 2px rgba(255, 240, 200, .8); }
 .nero-round button:active, .nero-round .hot:active { box-shadow: 0 0 0 3px #6c0d0b, 0 0 0 4px rgba(255, 255, 255, .22), inset 0 3px 5px rgba(0, 0, 0, .45); }
@@ -1814,7 +1814,7 @@ img { max-width: 100%; }
   .pl-select { height: 44px; }
   .nero-top { flex-basis: 56px; }
   .nero-ctrl { border-radius: 26px; }
-  .nero-ctrl button, .nero-round button { width: 44px; height: 44px; }
+  .nero-ctrl button { width: 44px; height: 44px; }
   .nero-pick { height: 44px; }
   .pl-tl { --tl-h: 44px; }
   .pl-vol { --wg-h: 44px; }
