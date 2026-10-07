@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1200">
+<title>Share card</title>
+<!--
+  The site's share card (Open Graph: asset/share/share-1200x630.jpg), drawn as a poster after the owner's reference
+  (2026-10-07): a still life of the portfolio's own CRT on a desk against a dark wall, a name in tall narrow capitals
+  either side of the top, a small centre column under them leading to the play mark, and the owner's things round the
+  monitor. It is the site itself, not a picture of it: the monitor is Home's hero CRT built from style.css and home.css
+  with the owner's photo, the floppy is the site's own drawing (floppy.js) and the stickman is the taskbar's (pet.js),
+  posed sitting on the monitor and waving.
+  ?v=a (default): Broadcast Deep wall, Focus Glow ink. ?v=b: the reference's green wall and olive ink.
+  render.mjs draws it in headless Chrome at 2x and writes the 1200 x 630 JPEG.
+-->
+<link rel="stylesheet" href="../../asset/fonts/fonts.css?v=1">
+<link rel="stylesheet" href="../../option-a-desktop/style.css">
+<link rel="stylesheet" href="../../option-a-desktop/home.css">
+<style>
+  /* Noto Sans with its width axis (Google Fonts' Latin file, OFL as asset/fonts/OFL.txt), for the poster's capitals */
+  @font-face {
+    font-family: "Poster Sans"; font-style: normal; font-weight: 100 900; font-stretch: 62.5% 100%;
+    src: url("fonts/noto-sans-wdth-latin.woff2") format("woff2");
+  }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #000; }
+
+  .poster {
+    --wall-hi: #16438c; --wall: #0b2659; --wall-lo: #03113a;
+    --ink: #b4e46b;
+    --desk-back: #bdb9ae; --desk-top: #e6e3db; --desk-lip: #faf8f2; --desk-front: #aeaa9f;
+    /* home.css keeps these on .home; the lower third reads them */
+    --bc-deep: #04163f; --bc-soft: #d6e2f8; --glow: #86d13f; --bc-scrim: rgba(3, 18, 60, .92);
+    --glow-face: linear-gradient(180deg, #a8e266, #5aa82a); --glow-edge: #d4f7ad; --glow-ink: #0b2206; --glow-halo: rgba(134, 209, 63, .55);
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.45 .45 .45 0 -.175 .45 .45 .45 0 -.175 .45 .45 .45 0 -.175 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E") 0 0 / 220px 220px;
+    position: relative; width: 1200px; height: 630px; overflow: hidden; isolation: isolate;
+    background: var(--grain), radial-gradient(58% 80% at 50% 34%, var(--wall-hi), var(--wall) 55%, var(--wall-lo));
+    background-blend-mode: soft-light, normal;
+    font-family: "Poster Sans", var(--display);
+  }
+  .poster.b { --wall-hi: #35563f; --wall: #223c2c; --wall-lo: #11201a; --ink: #d8cf62; }
+  /* the room's light falls off toward the corners */
+  .poster::after { content: ""; position: absolute; inset: 0; z-index: 9; pointer-events: none; background: radial-gradient(85% 95% at 50% 40%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, .28)); }
+
+  /* ---- the type: the name in tall narrow capitals either side, and a small column between them ---- */
+  .big { position: absolute; top: -2px; z-index: 1; margin: 0; font: 900 168px/1 "Poster Sans"; font-stretch: 62.5%; letter-spacing: -0.01em; color: var(--ink); }
+  .big.l { left: 40px; }
+  .big.r { right: 40px; }
+  .mid { position: absolute; left: 50%; top: 30px; z-index: 1; width: 320px; margin: 0 0 0 -160px; text-align: center; color: var(--ink); }
+  .mid p { margin: 0; }
+  .mid .paren { font: 500 17px/20px "Poster Sans"; font-stretch: 87.5%; letter-spacing: .01em; }
+  .mid .what { margin-top: 4px; font: 800 28px/32px "Poster Sans"; font-stretch: 75%; letter-spacing: .04em; }
+  .mid .play { display: block; width: 20px; height: 22px; margin: 16px auto 0; fill: currentColor; }
+  .mid .go { margin-top: 8px; font: 800 19px/20px "Poster Sans"; font-stretch: 75%; letter-spacing: .08em; }
+
+  /* ---- the desk: its top seen a little from above, lit toward the front, and its front edge ---- */
+  .desk { position: absolute; left: 0; right: 0; top: 584px; bottom: 0; z-index: 2;
+    background: linear-gradient(180deg, var(--desk-back), var(--desk-top) 70%, var(--desk-lip) 72%, var(--desk-front) 74%, #9d998e); }
+  .desk::before { content: ""; position: absolute; inset: 0; background: var(--grain); mix-blend-mode: soft-light; opacity: .7; }
+
+  /* ---- the monitor: Home's hero CRT at 470px, its shadow on the wall to the right ---- */
+  .poster .pt-crt { position: absolute; left: 365px; top: 166px; z-index: 4; width: 470px; filter: drop-shadow(18px 10px 16px rgba(0, 4, 18, .45)); }
+  .poster .pt-photo { cursor: default; }
+
+  /* ---- props, each with its own shadow ---- */
+  .prop { position: absolute; margin: 0; }
+  /* the stickman (pet.js) sits on the monitor's top edge and waves */
+  /* his canvas is pet.js's 64 x 96 at 2.6x; the edge he sits on (y 78) lies on the case's top (166), his hip 473 across */
+  .stick { left: 390px; top: -37px; z-index: 6; width: 166.4px; height: 249.6px; filter: drop-shadow(8px 6px 6px rgba(0, 4, 18, .35)); }
+  /* a receipt for the five services, taped over the monitor's left edge */
+  .receipt { left: 288px; top: 232px; z-index: 6; width: 116px; transform: rotate(-4deg); transform-origin: 50% 0; filter: drop-shadow(6px 8px 8px rgba(0, 4, 18, .4)); }
+  .receipt .slip { display: block; padding: 14px 10px 18px; background: linear-gradient(180deg, #fcfbf7, #f3f1ea); color: #2a2924; font: 400 7.6px/1.5 "Noto Sans Mono", monospace;
+    -webkit-mask: linear-gradient(#000 0 0) top / 100% calc(100% - 5px) no-repeat, conic-gradient(from -45deg at 50% 100%, #0000, #000 1deg 89deg, #0000 90deg) bottom / 7px 5px repeat-x;
+    mask: linear-gradient(#000 0 0) top / 100% calc(100% - 5px) no-repeat, conic-gradient(from -45deg at 50% 100%, #0000, #000 1deg 89deg, #0000 90deg) bottom / 7px 5px repeat-x; }
+  .receipt .slip > * { display: block; }
+  .receipt .hd { font-weight: 700; font-size: 10px; letter-spacing: .12em; text-align: center; }
+  .receipt .ct { text-align: center; }
+  .receipt .rule { height: 1px; margin: 5px 0; background: repeating-linear-gradient(90deg, #2a2924 0 2px, transparent 2px 4px); opacity: .6; }
+  .receipt .row { display: flex; gap: 6px; }
+  .receipt .row b { flex: none; font-weight: 400; }
+  .receipt .tot { display: flex; justify-content: space-between; font-weight: 700; }
+  .receipt .bars { height: 22px; margin: 7px 4px 4px; background: repeating-linear-gradient(90deg, #2a2924 0 1px, transparent 1px 3px, #2a2924 3px 5px, transparent 5px 6px, #2a2924 6px 7px, transparent 7px 10px, #2a2924 10px 13px, transparent 13px 14px); }
+  .receipt .ty { margin-top: 2px; font-weight: 700; letter-spacing: .1em; text-align: center; }
+  .receipt .tape { position: absolute; left: 34px; top: -9px; width: 54px; height: 18px; background: linear-gradient(180deg, rgba(246, 240, 214, .78), rgba(232, 224, 192, .7)); transform: rotate(3deg); box-shadow: 0 1px 1px rgba(0, 0, 0, .12); }
+  /* a sticky note on the glass's top right corner */
+  .note { left: 750px; top: 180px; z-index: 6; width: 80px; height: 76px; padding: 12px 9px; transform: rotate(7deg); background: linear-gradient(180deg, #fff4a6, #f8e57e 85%, #ecd56a); color: #1f45b8;
+    font: 800 15px/15px "Poster Sans"; font-stretch: 75%; letter-spacing: .02em; text-transform: uppercase; box-shadow: 2px 5px 8px rgba(0, 4, 18, .35); }
+  .note::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 12px; background: linear-gradient(180deg, rgba(0, 0, 0, .06), rgba(0, 0, 0, 0)); }
+  /* a key fob on a green strap, hung from the monitor's right side: the owner's initials on two keycaps */
+  .fob { left: 822px; top: 262px; z-index: 5; width: 80px; height: 190px; filter: drop-shadow(6px 6px 5px rgba(0, 4, 18, .4)); }
+  .fob .clip { position: absolute; left: 6px; top: 0; width: 16px; height: 28px; border-radius: 8px; border: 3px solid #c9ccd2; border-left-color: #eef0f3; border-right-color: #8d929b; }
+  .fob .strap { position: absolute; left: 8px; top: 22px; width: 12px; height: 92px; border-radius: 2px; transform: rotate(-9deg); transform-origin: 50% 0; background: linear-gradient(90deg, #5aa82a, #a8e266 45%, #86d13f 70%, #4d9423); box-shadow: inset 0 0 0 1px rgba(11, 34, 6, .25); }
+  .fob .strap::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6px; bottom: 6px; border-left: 1px dashed rgba(11, 34, 6, .35); border-right: 1px dashed rgba(11, 34, 6, .35); }
+  .fob .ring { position: absolute; left: 22px; top: 106px; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #c9ccd2; border-top-color: #f2f3f6; border-bottom-color: #8d929b; }
+  .fob .cap { position: absolute; width: 34px; height: 34px; border-radius: 6px; display: grid; place-items: center; font: 800 15px/1 "Poster Sans"; font-stretch: 87.5%;
+    background: linear-gradient(180deg, #ffffff, #e9e5d6); color: #3a3428; box-shadow: inset 0 -5px 0 #cfc9b4, inset 0 0 0 1px rgba(20, 16, 8, .18), 0 1px 1px rgba(20, 16, 8, .3); padding-bottom: 4px; }
+  .fob .cap.i { left: 10px; top: 124px; transform: rotate(-10deg); background: linear-gradient(180deg, #c6ef8c, #86d13f); color: var(--glow-ink); box-shadow: inset 0 -5px 0 #5aa82a, inset 0 0 0 1px rgba(11, 34, 6, .25), 0 1px 1px rgba(11, 34, 6, .35); }
+  .fob .cap.s { left: 38px; top: 136px; transform: rotate(12deg); }
+  /* a mug of coffee on the desk's left */
+  .mug { left: 166px; top: 512px; z-index: 6; width: 108px; height: 100px; filter: drop-shadow(10px 6px 6px rgba(0, 4, 18, .3)); }
+  .mug .handle { position: absolute; left: 62px; top: 22px; width: 32px; height: 46px; border: 9px solid #dedad0; border-left: 0; border-radius: 0 24px 24px 0; box-shadow: inset -2px 0 2px rgba(20, 16, 8, .12); }
+  .mug .body { position: absolute; left: 0; top: 10px; width: 76px; height: 82px; border-radius: 0 0 14px 14px / 0 0 10px 10px;
+    background: linear-gradient(90deg, #cfcbbf, #fbfaf6 28%, #ffffff 40%, #ece9e0 70%, #c4c0b3); }
+  .mug .band { position: absolute; left: 0; right: 0; top: 30px; height: 8px; background: linear-gradient(90deg, #4d9423, #a8e266 32%, #86d13f 65%, #4d9423); opacity: .95; }
+  .mug .rim { position: absolute; left: 0; top: 3px; width: 76px; height: 16px; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, #3b2416 0 58%, #6a4429 74%, #f4f2ec 76%, #e3e0d6); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .25); }
+  .mug .steam { position: absolute; left: 10px; top: -58px; width: 56px; height: 64px; fill: none; stroke: rgba(255, 255, 255, .26); stroke-width: 4; stroke-linecap: round; filter: blur(2.5px); }
+  /* three books on the desk's right and the floppy standing on them */
+  .books { left: 896px; top: 520px; z-index: 6; width: 200px; height: 90px; filter: drop-shadow(10px 6px 6px rgba(0, 4, 18, .3)); }
+  .books .bk { position: absolute; display: flex; align-items: center; padding: 0 10px; border-radius: 2px; font: 800 9px/1 "Poster Sans"; font-stretch: 75%; letter-spacing: .14em; text-transform: uppercase; box-shadow: inset 0 2px 0 rgba(255, 255, 255, .25), inset 0 -2px 0 rgba(0, 0, 0, .18); }
+  .books .bk::after { content: ""; position: absolute; top: 4px; bottom: 4px; width: 2px; right: 22px; background: rgba(255, 255, 255, .35); box-shadow: -4px 0 0 rgba(255, 255, 255, .35); }
+  .books .b1 { left: 0; top: 58px; width: 196px; height: 28px; background: linear-gradient(180deg, #2a4fa8, #1d3b85); color: #e3ebff; }
+  .books .b2 { left: 10px; top: 34px; width: 170px; height: 24px; background: linear-gradient(180deg, #efe9d6, #d9d1b8); color: #5a5140; }
+  .books .b3 { left: 4px; top: 12px; width: 184px; height: 22px; background: linear-gradient(180deg, #d84a2d, #b5321a); color: #ffe9e2; }
+  .floppy { left: 958px; top: 418px; z-index: 5; width: 104px; transform: rotate(8deg); filter: drop-shadow(10px 4px 6px rgba(0, 4, 18, .4)); }
+  /* the shadows things lay on the desk */
+  .contact { position: absolute; z-index: 3; height: 14px; border-radius: 50%; background: radial-gradient(50% 50% at 50% 50%, rgba(20, 18, 12, .38), rgba(20, 18, 12, 0)); }
+</style>
+</head>
+<body>
+<main class="poster" id="poster">
+  <p class="big l">IQBAL</p>
+  <p class="big r">SURYA</p>
+  <div class="mid">
+    <p class="paren">(iqbalsurya.com)</p>
+    <p class="what">PORTFOLIO</p>
+    <svg class="play" viewBox="0 0 20 22" aria-hidden="true"><path d="M1 1.2v19.6L19 11z"/></svg>
+    <p class="go">VIEW THE WORK</p>
+  </div>
+
+  <div class="desk"></div>
+  <span class="contact" style="left: 470px; top: 590px; width: 270px"></span>
+  <span class="contact" style="left: 160px; top: 596px; width: 130px"></span>
+  <span class="contact" style="left: 890px; top: 598px; width: 230px"></span>
+
+  <figure class="pt-crt cs-crt">
+    <div class="crt-case">
+      <div class="crt-bezel">
+        <div class="crt-glass">
+          <picture><img class="pt-photo" src="../../asset/Home/photo-hero-1600.webp" width="2880" height="2000" alt="" style="object-position:50% 42%"></picture>
+          <div class="tv-lower">
+            <b class="tv-now">Now Showing</b>
+            <span class="tv-title">Websites and apps with character.</span>
+            <span class="tv-role">Iqbal Surya Pratama · Product Designer</span>
+            <i class="tv-bar" aria-hidden="true"><i class="hm-day" style="width:83.3%"></i></i>
+            <time class="tv-clock" datetime="20:00">8:00 PM WIB</time>
+          </div>
+        </div>
+      </div>
+      <span class="crt-chin" aria-hidden="true"><span class="crt-grille"></span><span class="crt-badge"></span><span class="crt-keys"><i></i><i></i><i></i><i></i></span><span class="crt-lamp"></span><span class="crt-power"></span></span>
+    </div>
+    <svg class="crt-stand" viewBox="0 0 320 56" aria-hidden="true" focusable="false"><defs>
+      <linearGradient id="crt1n"><stop offset="0" stop-color="#d8d2bd"/><stop offset=".2" stop-color="#f6f4ec"/><stop offset=".55" stop-color="#ece9d8"/><stop offset=".85" stop-color="#d8d2bd"/><stop offset="1" stop-color="#aca899"/></linearGradient>
+      <linearGradient id="crt1o" x2="0" y2="1"><stop offset="0" stop-color="#141414" stop-opacity=".4"/><stop offset=".45" stop-color="#141414" stop-opacity="0"/></linearGradient>
+      <linearGradient id="crt1t" x1=".2" x2=".8" y2="1"><stop offset="0" stop-color="#f6f4ec"/><stop offset="1" stop-color="#e6e1cf"/></linearGradient>
+      <linearGradient id="crt1s" x2="0" y2="1"><stop offset="0" stop-color="#d8d2bd"/><stop offset="1" stop-color="#aca899"/></linearGradient></defs>
+      <path d="M20 34a140 12 0 0 0 280 0v8a140 12 0 0 1-280 0z" fill="url(#crt1s)"/><ellipse cx="160" cy="34" rx="140" ry="12" fill="url(#crt1t)"/><path d="M20 34a140 12 0 0 0 280 0" fill="none" stroke="#fff" stroke-opacity=".75"/>
+      <path d="M116 0h88l16 34H100z" fill="url(#crt1n)"/><path d="M116 0h88l16 34H100z" fill="url(#crt1o)"/>
+      <ellipse cx="160" cy="36" rx="67" ry="6.5" fill="#d8d2bd"/><ellipse cx="160" cy="34" rx="66" ry="6" fill="url(#crt1t)"/></svg>
+  </figure>
+
+  <canvas class="prop stick" width="332" height="500" aria-hidden="true"></canvas>
+
+  <figure class="prop receipt" aria-hidden="true">
+    <span class="slip">
+      <span class="hd">RECEIPT</span>
+      <span class="ct">iqbalsurya.com</span>
+      <span class="ct">PRIME TIME · 20:00</span>
+      <i class="rule"></i>
+      <span class="row"><b>1</b>Visual direction</span>
+      <span class="row"><b>1</b>Website structure</span>
+      <span class="row"><b>1</b>Website design</span>
+      <span class="row"><b>1</b>Product UI/UX</span>
+      <span class="row"><b>1</b>Mobile app design</span>
+      <i class="rule"></i>
+      <span class="tot"><span>TOTAL</span><span>CHARACTER</span></span>
+      <i class="bars"></i>
+      <span class="ty">THANK YOU!</span>
+    </span>
+    <i class="tape"></i>
+  </figure>
+
+  <p class="prop note">Open for<br>work!</p>
+
+  <div class="prop fob" aria-hidden="true"><i class="strap"></i><i class="clip"></i><i class="ring"></i><span class="cap s">S</span><span class="cap i">I</span></div>
+
+  <div class="prop mug" aria-hidden="true">
+    <svg class="steam" viewBox="0 0 56 64"><path d="M16 62c-8-10 8-16 0-28s6-18 2-30"/><path d="M36 60c-7-9 9-15 1-26s5-16 1-28"/></svg>
+    <i class="handle"></i><i class="body"><i class="band"></i></i><i class="rim"></i>
+  </div>
+
+  <div class="prop books" aria-hidden="true"><i class="bk b1">Interface</i><i class="bk b2">Typography</i><i class="bk b3">Colour</i></div>
+  <figure class="prop floppy" aria-hidden="true"></figure>
+</main>
+<script src="floppy.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get('v') === 'b') document.getElementById('poster').classList.add('b');
+  document.querySelector('.floppy').innerHTML = window.floppySVG('Portfolio', 'Case studies');
+
+  // the taskbar's stickman (pet.js), drawn the same way at 2.6x: sitting on an edge (the sit pose, still) and waving
+  // with his near arm, facing right. His canvas is pet.js's 64 x 96 with the edge at y 78, drawn at 2x for the render
+  (function stickman() {
+    const cv = document.querySelector('.stick'), ctx = cv.getContext('2d'), S = 2.6, DPR = 2, TAU = Math.PI * 2;
+    const LEG = [11, 11], ARM = [8, 8], f = 1, GROUND = 78, CW = 64;
+    const limb = (x, y, a1, a2, [l1, l2]) => { const kx = x + Math.sin(a1) * l1 * f, ky = y + Math.cos(a1) * l1; return [kx, ky, kx + Math.sin(a1 + a2) * l2 * f, ky + Math.cos(a1 + a2) * l2]; };
+    ctx.setTransform(S * DPR * (cv.width / (166 * DPR)), 0, 0, S * DPR * (cv.height / (250 * DPR)), 0, 0);
+    // his near arm out to the side and up, clear of his head, the far one resting on his knee
+    const legs = [[1.45, -1.35], [1.3, -1.2]], arms = [[1.9, 0.9], [0.6, 0.6]];
+    const hipY = GROUND - 1, cx = CW / 2;
+    const hip = [cx, hipY], neck = [cx, hipY - 16], head = [neck[0] + f, neck[1] - 7], sh = [neck[0], neck[1] + 2];
+    const L = legs.map((l) => limb(hip[0], hip[1], l[0], l[1], LEG));
+    const A = arms.map((l) => limb(sh[0], sh[1], l[0], l[1], ARM));
+    const parts = [[...sh, ...A[1]], [...hip, ...L[1]], [...hip, ...neck], [...hip, ...L[0]], [...sh, ...A[0]]];
+    const seg = (p) => { ctx.beginPath(); ctx.moveTo(p[0], p[1]); for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]); ctx.stroke(); };
+    const dot = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(255,255,255,.92)'; ctx.lineWidth = 6.5; parts.forEach(seg);
+    ctx.fillStyle = 'rgba(255,255,255,.92)'; dot(head[0], head[1], 8);
+    ctx.lineWidth = 3.4;
+    ctx.strokeStyle = '#4a4a4a'; seg(parts[0]); seg(parts[1]);
+    ctx.strokeStyle = '#111'; seg(parts[2]); seg(parts[3]); seg(parts[4]);
+    ctx.fillStyle = '#111'; dot(head[0], head[1], 5.6);
+    const hy = head[1] - 2.2, bx = head[0] - 5 * f;
+    ctx.strokeStyle = '#e0301e'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.moveTo(head[0] - 5.4, hy); ctx.lineTo(head[0] + 5.4, hy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx, hy); ctx.lineTo(bx - 5 * f, hy + 1.8); ctx.lineTo(bx - 10 * f, hy + 3.4); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(head[0] + 2.6 * f, head[1] - 0.4, 1.1, 1.6, 0, 0, TAU); ctx.fill();
+  })();
+  // render.mjs waits for this
+  Promise.all([document.fonts.ready, ...[...document.images].map((im) => im.decode().catch(() => {}))]).then(() => { document.documentElement.dataset.ready = '1'; });
+</script>
+</body>
+</html>
