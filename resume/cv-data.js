@@ -62,13 +62,13 @@
       en: {
         title: 'Resume', profile: 'Profile', experience: 'Experience', clients: 'Selected clients',
         skills: 'Skills', education: 'Education', languages: 'Languages', certification: 'Certification',
-        present: 'Present', ft: 'Full-time', fl: 'Freelance', updated: 'Updated',
+        present: 'Present', ft: 'Full-time', fl: 'Freelance', updated: 'Updated', earlier: 'Earlier roles',
         months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
       },
       id: {
         title: 'CV', profile: 'Profil', experience: 'Pengalaman', clients: 'Klien pilihan',
         skills: 'Keahlian', education: 'Pendidikan', languages: 'Bahasa', certification: 'Sertifikasi',
-        present: 'Sekarang', ft: 'Full-time', fl: 'Freelance', updated: 'Diperbarui',
+        present: 'Sekarang', ft: 'Full-time', fl: 'Freelance', updated: 'Diperbarui', earlier: 'Peran sebelumnya',
         months: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
       },
     },

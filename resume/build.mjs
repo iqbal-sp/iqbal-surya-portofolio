@@ -65,10 +65,12 @@ try {
     await loaded;
     // wait for Noto Sans (a fallback face would print silently otherwise) and for the portrait
     const { result } = await send('Runtime.evaluate', {
-      expression: `(async () => { await document.fonts.ready; await Promise.all([...document.images].map((i) => i.decode().catch(() => {}))); return document.fonts.check('700 12px "Noto Sans"') && document.fonts.check('400 12px "Noto Sans"'); })()`,
+      expression: `(async () => { await document.fonts.ready; await Promise.all([...document.images].map((i) => i.decode().catch(() => {}))); const page = document.getElementById('cv'); return { font: document.fonts.check('700 12px "Noto Sans"') && document.fonts.check('400 12px "Noto Sans"'), over: page.scrollHeight - page.clientHeight }; })()`,
       awaitPromise: true, returnByValue: true,
     }, sessionId);
-    if (!result.value) throw new Error(`Noto Sans did not load for ${lang}; check the network and try again`);
+    if (!result.value.font) throw new Error(`Noto Sans did not load for ${lang}; check the network and try again`);
+    // the page hides its overflow, so a CV that grew past one A4 page would lose its footer silently
+    if (result.value.over > 0) throw new Error(`the ${lang} CV runs ${result.value.over}px past one A4 page; shorten it`);
     const { data } = await send('Page.printToPDF', { preferCSSPageSize: true, printBackground: true, generateTaggedPDF: true }, sessionId);
     writeFileSync(path.join(out, name), Buffer.from(data, 'base64'));
     console.log(`${lang}: asset/cv/${name} (${Math.round(Buffer.byteLength(data, 'base64') / 1024)} KB)`);

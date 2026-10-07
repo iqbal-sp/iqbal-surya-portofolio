@@ -49,7 +49,7 @@
     photoSet: [128, 192, 256, 384].map((w) => `../asset/iqba-surya-${w}.webp ${w}w`).join(', '),
     // The CV PDF per language, printed from resume/cv.html by `node resume/build.mjs`.
     // Empty = the Resume dialog offers to send it by email instead.
-    cv: { en: '../asset/cv/Iqbal-Surya-Pratama-Resume.pdf?v=3', id: "../asset/cv/Iqbal-Surya-Pratama-CV.pdf?v=3" },
+    cv: { en: '../asset/cv/Iqbal-Surya-Pratama-Resume.pdf?v=4', id: "../asset/cv/Iqbal-Surya-Pratama-CV.pdf?v=4" },
     socials: [
       { key: 'linkedin', label: 'LinkedIn', url: 'https://www.linkedin.com/in/iqbal-surya-pratama-29b2811a3/', handle: 'Iqbal Surya Pratama' },
       { key: 'dribbble', label: 'Dribbble', url: 'https://dribbble.com/iqbalsp', handle: '@iqbalsp' },

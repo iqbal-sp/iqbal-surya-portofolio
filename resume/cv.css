@@ -21,7 +21,7 @@ body { margin: 0; background: #eceef2; color: var(--ink); font: 400 8.75pt/1.45 
 a { color: inherit; text-decoration: none; }
 p, h1, h2, h3, ul, dl, dd { margin: 0; }
 
-.page { display: flex; flex-direction: column; width: 210mm; height: 297mm; overflow: hidden; padding: 15mm 17mm 11mm; background: #fff; }
+.page { display: flex; flex-direction: column; width: 210mm; height: 297mm; overflow: hidden; padding: 14mm 17mm 10mm; background: #fff; }
 @media screen {
   body { padding: 24px 0; }
   .page { margin: 0 auto; box-shadow: 0 1px 2px rgba(20, 20, 20, .08), 0 16px 40px -12px rgba(20, 20, 20, .2); }
@@ -29,35 +29,46 @@ p, h1, h2, h3, ul, dl, dd { margin: 0; }
 @media print { body { background: #fff; } }
 
 /* head: portrait in the rail, name and ways to reach me in the content column */
-.head { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: var(--gap); align-items: start; padding-bottom: 6mm; }
-/* the portrait fills the rail, so its edges line up with every section label below it */
-.photo { display: block; width: 100%; aspect-ratio: 1; height: auto; object-fit: cover; border-radius: 1mm; }
-.name { font-size: 24pt; line-height: 1.1; font-weight: 700; letter-spacing: -0.025em; }
+.head { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: var(--gap); padding-bottom: 5mm; }
+/* the portrait fills the rail, so its edges line up with every section label below it, and it runs the
+   full height of the name block, so its top and bottom meet the name and the last contact line */
+.photo { display: block; align-self: stretch; width: 100%; height: 100%; min-height: var(--rail); object-fit: cover; object-position: 50% 30%; border-radius: 1mm; }
+/* the name's line box sits a little above its capitals; pulled up so the capitals start level with the portrait */
+.name { margin-top: -1.2mm; font-size: 24pt; line-height: 1.1; font-weight: 700; letter-spacing: -0.025em; }
 .role { margin-top: 2mm; font-size: 11pt; line-height: 1.3; }
 .avail { margin-top: 1mm; color: var(--muted); }
-.contact { display: flex; flex-wrap: wrap; gap: 0.6mm 5mm; margin-top: 3mm; padding: 0; list-style: none; }
+/* one line split by middle dots; the profile names print in the accent, so they read as links */
+.contact { display: flex; flex-wrap: wrap; gap: 0.6mm 0; margin-top: 2.6mm; padding: 0; list-style: none; }
+.contact li { white-space: nowrap; }
+.contact li + li::before { content: "·"; padding: 0 2.4mm; color: var(--muted); }
+.contact .link { color: var(--accent); font-weight: 500; }
 
 /* sections: label in the rail, content beside it, a hairline between them */
-.sec { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: var(--gap); padding: 4.6mm 0; border-top: 0.25mm solid var(--rule); }
+.sec { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); column-gap: var(--gap); padding: 4mm 0; border-top: 0.25mm solid var(--rule); }
 .sec > h2 { font-size: 8.75pt; line-height: 1.45; font-weight: 700; color: var(--accent); }
 .sec-profile p, .sec-clients p { max-width: 132mm; }
+/* a list item (a client, a skill) wraps as a whole */
+.sec-clients span, .rows dd span { white-space: nowrap; }
 
-/* experience: role and dates on one line, the organisation under it */
-.job { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 4mm; break-inside: avoid; }
-.job + .job { margin-top: 2.8mm; }
+/* experience: recent roles, then the early ones with their own label in the rail */
+.sec-experience { row-gap: 3mm; }
+.sec-experience > div { display: contents; }
+.sec-experience .sub { grid-column: 1; font-size: 8.75pt; line-height: 1.45; font-weight: 500; color: var(--muted); }
+/* role and dates on one line, sharing a baseline, the organisation under them */
+.job { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 4mm; align-items: baseline; break-inside: avoid; }
+.job + .job { margin-top: 2.4mm; }
 .job h3 { font-size: 9pt; line-height: 1.4; font-weight: 700; }
-.job .when { grid-column: 2; grid-row: 1; font-size: 8.25pt; line-height: 1.55; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.job .when { grid-column: 2; grid-row: 1; font-size: 8.25pt; line-height: 1.4; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .job .when b { font-weight: 500; color: var(--accent); }
 .job .org { grid-column: 1 / -1; color: var(--muted); }
 .job ul { grid-column: 1 / -1; margin-top: 0.6mm; padding-left: 3.4mm; }
 .job li + li { margin-top: 0.3mm; }
 /* a short early role with nothing more to say keeps to one line: role, then organisation, type and place */
-.job.brief + .job.brief { margin-top: 1.2mm; }
+.job.brief + .job.brief { margin-top: 1mm; }
 .job.brief h3 span { font-weight: 400; color: var(--muted); }
 
 /* lists of equals (skill groups and languages): a name column and a line beside it */
 .rows { display: grid; grid-template-columns: 22mm minmax(0, 1fr); gap: 1.2mm 4mm; }
-.rows dd span { white-space: nowrap; }
 .rows dt { font-weight: 700; }
 .rows dd small { color: var(--muted); font-size: inherit; }
 .sec-education p + p { margin-top: 0.8mm; }
