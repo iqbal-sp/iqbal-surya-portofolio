@@ -130,7 +130,7 @@
   <!-- the loading screen's still, fetched at once: the room shows from the first frames -->
   <link rel="preload" as="image" href="../asset/boot/room.webp?v=1" media="(min-width: 721px)" fetchpriority="high">
   <link rel="preload" as="image" href="../asset/boot/room-phone.webp?v=1" media="(max-width: 720px), (max-height: 500px) and (pointer: coarse)" fetchpriority="high">
-  <!-- three.js for the loading screen, the live wallpaper and the episode TV's desk, served from the site
+  <!-- three.js for the loading screen and live wallpaper, served from the site
        (asset/vendor/three-0.186.0/SOURCE.md) so no outside server can hold up the loading screen; here in the head
        because boot.js imports the loading screen's 3D before the rest of the page has been read -->
   <script type="importmap">
@@ -240,16 +240,16 @@
        the scripts after them wait for them -->
   <script src="boot.js?v=13" fetchpriority="high"></script>
   <link rel="stylesheet" href="style.css?v=170">
-  <link rel="stylesheet" href="home.css?v=133">
+  <link rel="stylesheet" href="home.css?v=134">
+  <link rel="stylesheet" href="../asset/Home/process/xp-window/crt.css?v=2">
   <link rel="stylesheet" href="winamp.css?v=1">
-  <script src="../shared/content.js?v=116"></script>
+  <script src="../shared/content.js?v=117"></script>
   <script src="../shared/cases.js?v=25"></script>
   <script src="icons.js?v=60"></script>
   <script src="winamp.js?v=1"></script>
-  <script src="app.js?v=197"></script>
-  <!-- live wallpaper and the episode TV's desk (three.js); the static webp on .desktop and the episode stills stay as
-       the fallbacks -->
+  <script src="app.js?v=198"></script>
+  <script src="process-crt.js?v=1"></script>
+  <!-- Live wallpaper (three.js), with the static webp on .desktop as its fallback. -->
   <script type="module" src="wallpaper3d.js?v=18"></script>
-  <script type="module" src="desk3d/episode.js?v=4"></script>
 </body>
 </html>

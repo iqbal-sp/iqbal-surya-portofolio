@@ -1,0 +1,78 @@
+/* Reusable CRT composition. The .crt ancestor enables the glass layers. */
+.crt-display {
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:#10274f url('./crt-wallpaper.svg') center / cover no-repeat;
+}
+.crt-picture { position:relative; z-index:1; }
+.crt-surface, .crt-channel {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+}
+.crt-surface { z-index:4; opacity:0; }
+.crt .crt-surface { opacity:1; }
+.crt-surface::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:2;
+  border-radius:inherit;
+  /* A fine dark line every three CSS pixels; no large checkerboard pattern. */
+  background:repeating-linear-gradient(0deg,rgba(3,12,25,.052) 0,rgba(3,12,25,.052) 1px,transparent 1px,transparent 3px);
+}
+.crt-surface::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:4;
+  border-radius:inherit;
+  background:radial-gradient(ellipse at 49% 44%,transparent 54%,rgba(2,10,24,.07) 76%,rgba(2,10,24,.4) 100%);
+  box-shadow:inset 0 0 28px rgba(0,5,18,.22),inset 0 1px 1px rgba(199,224,255,.2);
+}
+.crt-grain {
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:url('./crt-grain.svg') repeat;
+  background-size:128px 128px;
+  opacity:.065;
+  mix-blend-mode:soft-light;
+}
+.crt-reflection {
+  position:absolute;
+  inset:0;
+  z-index:3;
+  border-radius:inherit;
+  background:linear-gradient(132deg,rgba(226,241,255,.10),rgba(226,241,255,.025) 25%,transparent 42%),radial-gradient(ellipse 95% 48% at 4% -9%,rgba(220,240,255,.085),transparent 75%);
+}
+.crt-channel { z-index:5; opacity:0; }
+.pe-distort-defs { position:absolute; width:0; height:0; pointer-events:none; }
+.crt-pointer-glow {
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  opacity:var(--crt-pointer-strength,0);
+  background:radial-gradient(circle var(--crt-pointer-radius,100px) at var(--crt-pointer-x,50%) var(--crt-pointer-y,50%),rgba(164,220,255,.19),rgba(73,149,241,.035) 55%,transparent 100%);
+  mix-blend-mode:screen;
+}
+.crt .channel-change .crt-channel, .crt.channel-change .crt-channel { animation:crt-channel-change .34s ease-out; }
+.crt-channel::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(transparent 45%,rgba(168,211,255,.10) 49.5%,rgba(214,237,255,.16) 50%,rgba(168,211,255,.07) 50.5%,transparent 55%);
+}
+@keyframes crt-channel-change {
+  0% { opacity:0; transform:translateY(-40%); }
+  20% { opacity:.85; }
+  65% { opacity:.32; }
+  100% { opacity:0; transform:translateY(40%); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .crt .channel-change .crt-channel, .crt.channel-change .crt-channel { animation:none; }
+  .crt-pointer-glow { display:none; }
+}

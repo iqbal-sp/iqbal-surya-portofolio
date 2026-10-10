@@ -314,8 +314,7 @@
       ],
     },
     // Process deliverables depend on the agreed scope.
-    // Each slide's picture is a still of the 3D desk on the TV (option-a-desktop/desk3d/, rendered to asset/Home/process/
-    // by prototype/process-desk/tools/stills.mjs); where the desk can run, it plays over the still.
+    // One XP window per episode. The transparent vectors share separate blue wallpaper and CRT glass layers.
     process: {
       head: { en: 'How a project runs', id: "Alur pengerjaan proyek" },
       lead: { en: "From the first brief to final files or a website build. We agree on the scope and deliverables before starting.", id: "Dari brief awal hingga file desain final atau website. Kita menyepakati cakupan dan hasil pekerjaan sebelum mulai." },
@@ -328,7 +327,7 @@
           slot: { en: "The brief", id: "Brief awal" },
           line: { en: "Scope, budget, and timeline", id: "Cakupan, anggaran, dan jadwal" },
           genre: { en: 'News', id: 'Berita' },
-          img: { file: 'process-1', src: '../asset/Home/process/ep1', alt: { en: 'A scope document on a dark clipboard, just signed, with a slim pen above it and a green tab on its edge', id: 'Dokumen cakupan di papan klip gelap yang baru ditandatangani, dengan pena ramping di atasnya dan tab hijau di tepinya' } },
+          img: { file: 'process-1', src: '../asset/Home/process/xp-window/ep1-brief.svg', alt: { en: 'A Windows XP Notepad window with scope, budget, and timeline fields', id: 'Jendela Notepad Windows XP dengan kolom cakupan, anggaran, dan jadwal' } },
         },
         {
           when: { en: "Structure", id: "Struktur" },
@@ -338,7 +337,7 @@
           slot: { en: "The structure", id: "Struktur" },
           line: { en: "Content, wireframes, and key user flows", id: "Konten, wireframe, dan alur pengguna utama" },
           genre: { en: 'Documentary', id: 'Dokumenter' },
-          img: { file: 'process-2', src: '../asset/Home/process/ep2', alt: { en: 'A page model in layers: white layout panels settling onto a metal plate along guide lines, one panel in green', id: 'Model halaman berlapis: panel tata letak putih turun ke pelat logam mengikuti garis pemandu, satu panel berwarna hijau' } },
+          img: { file: 'process-2', src: '../asset/Home/process/xp-window/ep2-structure.svg', alt: { en: 'A Windows XP Paint window with three connected wireframe pages', id: 'Jendela Paint Windows XP dengan tiga wireframe halaman yang terhubung' } },
         },
         {
           when: { en: "Design and review", id: "Desain dan review" },
@@ -348,7 +347,7 @@
           slot: { en: "The design", id: "Desain" },
           line: { en: "Screens, prototypes, and feedback in Figma", id: "Layar, prototipe, dan masukan di Figma" },
           genre: { en: 'Series', id: 'Serial' },
-          img: { file: 'process-3', src: '../asset/Home/process/ep3', alt: { en: 'A phone on a stand showing a prototype, a pointer on its green button, a comment beside it and the next screens behind', id: 'Ponsel di stand menampilkan prototipe, kursor di tombol hijaunya, komentar di sampingnya, dan layar berikutnya di belakang' } },
+          img: { file: 'process-3', src: '../asset/Home/process/xp-window/ep3-review.svg', alt: { en: 'A Windows XP Picture Viewer window with an interface preview and a cursor on its button', id: 'Jendela Picture Viewer Windows XP dengan pratinjau antarmuka dan kursor pada tombolnya' } },
         },
         {
           when: { en: "Handoff or build", id: "Serah terima atau pembangunan" },
@@ -358,7 +357,7 @@
           slot: { en: "The handoff", id: "Serah terima" },
           line: { en: "Final design files or a Webflow / Framer website", id: "File desain final atau website Webflow / Framer" },
           genre: { en: 'Premiere', id: 'Premier' },
-          img: { file: 'process-4', src: '../asset/Home/process/ep4', alt: { en: 'A key with a green tag on a leather notebook, under a spotlight', id: 'Kunci berlabel hijau di atas buku kulit, di bawah sorot lampu' } },
+          img: { file: 'process-4', src: '../asset/Home/process/xp-window/ep4-handoff.svg', alt: { en: 'A Windows XP Explorer window with Design, Components, and Notes files', id: 'Jendela Explorer Windows XP berisi file Design, Components, dan Notes' } },
         },
       ],
     },

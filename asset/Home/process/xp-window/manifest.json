@@ -1,0 +1,66 @@
+{
+  "width": 1700,
+  "height": 1000,
+  "background": "transparent",
+  "style": "One XP window",
+  "concept": 2,
+  "windowBounds": {
+    "x": 245,
+    "y": 138,
+    "width": 1210,
+    "height": 674
+  },
+  "crt": {
+    "wallpaper": "crt-wallpaper.svg",
+    "wallpaperPng": "crt-wallpaper.png",
+    "grain": "crt-grain.svg",
+    "stylesheet": "crt.css",
+    "channelTransitionMs": 340
+  },
+  "episodes": [
+    {
+      "episode": 1,
+      "slug": "ep1-brief",
+      "title": "Agree on the work",
+      "description": "One XP Notepad window with three brief fields: scope, budget and timeline.",
+      "application": "Notepad",
+      "svg": "ep1-brief.svg",
+      "png": "ep1-brief.png",
+      "crtPng": "ep1-brief-crt.png",
+      "crtWebp": "ep1-brief-crt-850.webp"
+    },
+    {
+      "episode": 2,
+      "slug": "ep2-structure",
+      "title": "Map out the pages and flows",
+      "description": "One XP Paint window showing three connected wireframe pages.",
+      "application": "Paint",
+      "svg": "ep2-structure.svg",
+      "png": "ep2-structure.png",
+      "crtPng": "ep2-structure-crt.png",
+      "crtWebp": "ep2-structure-crt-850.webp"
+    },
+    {
+      "episode": 3,
+      "slug": "ep3-review",
+      "title": "Review the design",
+      "description": "One XP Picture Viewer window with a single interface preview and cursor.",
+      "application": "Picture Viewer",
+      "svg": "ep3-review.svg",
+      "png": "ep3-review.png",
+      "crtPng": "ep3-review-crt.png",
+      "crtWebp": "ep3-review-crt-850.webp"
+    },
+    {
+      "episode": 4,
+      "slug": "ep4-handoff",
+      "title": "Prepare the final files",
+      "description": "One XP Explorer window containing Design, Components and Notes.",
+      "application": "Explorer",
+      "svg": "ep4-handoff.svg",
+      "png": "ep4-handoff.png",
+      "crtPng": "ep4-handoff-crt.png",
+      "crtWebp": "ep4-handoff-crt-850.webp"
+    }
+  ]
+}

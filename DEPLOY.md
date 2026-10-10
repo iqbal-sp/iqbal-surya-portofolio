@@ -7,7 +7,7 @@ Portofolio ini di-deploy sebagai satu Cloudflare Worker (paket gratis):
 - `/api/scores` dijawab oleh `worker/index.js`, papan peringkat Boss Rush XP, dengan database D1 bernama `brxp-board`.
 - `/api/message` mengirim pesan dari jendela New Message di Home ke inbox lewat Resend, dan `/api/event` menghitung apa yang dilakukan pengunjung. Keduanya memakai database yang sama (lihat bagian di bawah).
 - File yang tidak ikut terunggah (catatan, `.claude/`, `.impeccable/`, kode worker) tercantum di `.assetsignore`.
-- three.js (layar loading, wallpaper hidup, desk 3D di TV Home) dilayani dari situs sendiri di `asset/vendor/three-0.186.0/`, bukan dari jsDelivr. Asal tiap file tercatat di `SOURCE.md` di folder itu. `_headers` di root membuat browser menyimpan folder itu setahun, jadi versi baru masuk ke folder baru, jangan menimpa yang lama.
+- three.js (layar loading dan wallpaper hidup) dilayani dari situs sendiri di `asset/vendor/three-0.186.0/`, bukan dari jsDelivr. TV proses di Home memakai aset SVG Windows XP dan lapisan CRT, dengan distorsi lokal mengikuti mouse; renderer desk 3D lama tidak dimuat. Asal tiap file three.js tercatat di `SOURCE.md` di folder itu. `_headers` di root membuat browser menyimpan folder itu setahun, jadi versi baru masuk ke folder baru, jangan menimpa yang lama.
 
 Semua perintah di bawah dijalankan di Terminal, dari folder proyek ini. `npx` sudah ikut terpasang bersama Node.js.
 

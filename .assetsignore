@@ -35,6 +35,11 @@ asset/**/*.json
 anti-slop
 # game prototypes: tested as private artifacts, never served from the site
 prototype
+# Process illustration explorations and review exports; the SVG windows and CRT layers ship.
+asset/Home/process/desktop-story
+asset/Home/process/xp-window/*.png
+asset/Home/process/xp-window/*.webp
+asset/Home/process/xp-window/*.zip
 # the source of Screen Saver XP's pixel letters (the site serves asset/fonts/ssxp-pixel.woff)
 tools
 

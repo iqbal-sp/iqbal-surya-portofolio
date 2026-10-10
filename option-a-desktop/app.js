@@ -1046,15 +1046,13 @@
     viewerGo(w, w.state.i);
   }
 
-  // the episode guide: each episode's still plays on a silver flat-panel TV; the remote steps through them. The
-  // stills are frames of the 3D desk (desk3d/), at its dither dot: 340 dots wide for the full TV, 170 for a
-  // phone's. Where the desk can run, desk3d/episode.js draws it over the still
+  // The remote changes a single XP window on blue wallpaper. CRT glass overlays the whole screen at its own size.
   function episodeScreenHTML(i) {
     const s = PF.home.process.steps[i], im = s.img;
     const pic = im.src
-      ? `<picture><source media="(max-width: 520px)" srcset="${esc(im.src)}-170.png"><img class="pe-img pe-still" src="${esc(im.src)}-340.png" width="340" height="200" alt="${esc(t(im.alt))}" loading="lazy" decoding="async"></picture>`
+      ? `<img class="pe-img crt-picture" src="${esc(im.src)}" width="1700" height="1000" alt="${esc(t(im.alt))}" loading="lazy" decoding="async">`
       : slotHTML(im, 'pe-img');
-    return `${pic}<span class="pe-lower"><b class="tv-now">${esc(u('epLabel', i + 1))}</b><span>${esc(t(s.when))} · ${esc(t(s.genre))}</span></span>`;
+    return `${pic}<span class="pe-lower"><b class="tv-now">${esc(u('epLabel', i + 1))}</b><span>${esc(t(s.when))} · ${esc(t(s.genre))}</span></span><div class="crt-surface" aria-hidden="true"><span class="crt-grain"></span><span class="crt-reflection"></span></div><div class="crt-channel" aria-hidden="true"></div>`;
   }
   function episodeCopyHTML(i) {
     const s = PF.home.process.steps[i];
@@ -1106,11 +1104,7 @@
     const n = PF.home.process.steps.length;
     w.state.ep = ((i % n) + n) % n;
     const screen = $('.pe-screen', w.el), copy = $('.pe-now', w.el); if (!screen || !copy) return;
-    // the desk's canvas stays through the change, so its camera can travel to the new episode
-    const desk = $(':scope > .desk3d', screen);
     screen.innerHTML = episodeScreenHTML(w.state.ep);
-    if (desk) screen.prepend(desk);
-    if (PF.desk3d) PF.desk3d.go(w.state.ep);
     // the copy goes with the picture, as one change: it dips out and back in 120 ms, swapped at the bottom of the dip
     clearTimeout(copy.swapT);
     if (reduceMotion || !copy.animate) copy.innerHTML = episodeCopyHTML(w.state.ep);
@@ -1121,12 +1115,12 @@
     }
     $$('.rm-num', w.el).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.i === w.state.ep)));
     if (!reduceMotion) {
-      screen.classList.remove('flick'); void screen.offsetWidth; screen.classList.add('flick');
+      screen.classList.remove('channel-change'); void screen.offsetWidth; screen.classList.add('channel-change');
       // the set's own on-screen display puts the channel number up for a moment (home.css, .pe-osd)
       screen.insertAdjacentHTML('beforeend', `<span class="pe-osd" aria-hidden="true">${String(w.state.ep + 1).padStart(2, '0')}</span>`);
-      // both also go on a timer, for when their animation never ends (the 3D desk draws no snow)
+      // The timer also clears the transition if an animationend event is missed.
       const osd = screen.lastElementChild;
-      clearTimeout(screen.flickT); screen.flickT = setTimeout(() => screen.classList.remove('flick'), 400);
+      clearTimeout(screen.flickT); screen.flickT = setTimeout(() => screen.classList.remove('channel-change'), 400);
       setTimeout(() => osd.remove(), 1500);
     }
     if (focusKey) { const k = $(`.rm-num[data-i="${w.state.ep}"]`, w.el); if (k) k.focus({ preventScroll: true }); }
@@ -1227,7 +1221,7 @@
         <h2 class="pt-h2" id="hm-proc-h">${esc(t(H.process.head))}</h2>
         <div class="pe-main">
           <div class="pe-set">
-            <figure class="pe-tv"><div class="tv-bezel"><div class="pe-screen" aria-live="polite">${episodeScreenHTML(st.ep)}</div><span class="tv-led" aria-hidden="true"></span></div></figure>
+            <figure class="pe-tv"><div class="tv-bezel"><div class="pe-screen crt-display crt" aria-live="polite">${episodeScreenHTML(st.ep)}</div><span class="tv-led" aria-hidden="true"></span></div></figure>
             ${remoteHTML(st.ep)}
           </div>
           <div class="pe-copy"><div class="pe-now" aria-live="polite">${episodeCopyHTML(st.ep)}</div>${H.process.steps.map((s, j) => `<div class="pe-ghost" aria-hidden="true">${episodeCopyHTML(j)}</div>`).join('')}</div>
@@ -2951,7 +2945,7 @@
   });
   document.addEventListener('animationend', (e) => {
     const c = e.target.classList; if (!c) return;
-    if (c.contains('pe-screen')) c.remove('flick');
+    if (e.animationName === 'crt-channel-change') e.target.closest('.pe-screen')?.classList.remove('channel-change');
     else if (c.contains('pe-osd')) e.target.remove();
     else c.remove('hit', 'nudge');
   });
