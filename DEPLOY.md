@@ -140,6 +140,8 @@ Menyiapkan Resend (sekali saja, paket gratis 3.000 email per bulan):
 
 Alamat tujuan dan pengirim ada di `vars` pada `wrangler.jsonc` (`MESSAGE_TO`, `MESSAGE_FROM`).
 
+Tombol **Request access / Minta akses** pada kartu Tempa 3D di About dan halaman `projects/tempa-3d/` membuka form yang sama (`shared/access-request.js`). Nama, email, dan alasan meminta akses dikirim ke `/api/message`, dengan subjek **Tempa 3D access request / Permintaan akses Tempa 3D**. Tujuannya tetap `MESSAGE_TO`, dan Reply membalas email pengunjung. Form mengikuti validasi alamat dan moderasi pesan yang sudah ada; akses ditinjau secara manual. Pesan berhasil hanya tampil setelah API mengonfirmasi penerimaan. Jika gagal, isian tetap di form dan pengunjung bisa membuka draf email untuk dikirim sendiri.
+
 Melihat pesan yang tersimpan (Console D1, seperti di bagian moderasi):
 
 ```sql

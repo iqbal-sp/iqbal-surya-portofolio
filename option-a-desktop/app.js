@@ -1658,7 +1658,7 @@
       <li class="${j.to ? '' : 'now'}"><span class="wl-date">${esc(j.from)} – ${j.to ? esc(j.to) : `<b>${esc(u('present'))}</b>`}</span>
         <div class="wl-main"><h3>${esc(j.role)}</h3><p>${esc(j.org)}${j.type ? ` · ${esc(u(j.type))}` : ''}</p>${j.place ? `<p class="wl-place">${esc(j.place)}</p>` : ''}</div></li>`).join('');
     const projects = o.sideProjects.map((p) => `
-      <li><a class="pj-card" href="${esc(t(p.url))}"${p.external === false ? '' : ' target="_blank" rel="noopener noreferrer"'} aria-label="${esc(p.name)} — ${esc(t(p.desc))}${p.external === false ? '' : ` (${esc(u('newTab'))})`}">
+      <li><a class="pj-card" href="${esc(t(p.url))}"${p.requestAccess ? ' data-act="request-access" aria-haspopup="dialog"' : ''}${p.external === false ? '' : ' target="_blank" rel="noopener noreferrer"'} aria-label="${esc(p.name)} — ${esc(t(p.desc))}${p.external === false ? '' : ` (${esc(u('newTab'))})`}">
         <span class="pj-image"><img src="${esc(p.image)}" alt="${esc(t(p.imageAlt))}" loading="lazy" decoding="async"></span>
         <div class="pj-info"><h3 class="pj-name">${esc(p.name)}</h3><span class="pj-desc">${esc(t(p.desc))}</span><span class="pj-visit">${esc(p.cta ? t(p.cta) : u('visitProject'))} ${p.external === false ? '→' : '↗'}</span></div>
       </a></li>`).join('');
@@ -2737,6 +2737,12 @@
     },
     resume: (a) => openWin('resume', { from: rectOf(a) }),
     contact: (a) => openWin('contact', { from: rectOf(a) }),
+    'request-access': async (a) => {
+      try {
+        const { openAccessRequest } = await import('../shared/access-request.js?v=3');
+        await openAccessRequest({ lang, email: PF.owner.email });
+      } catch { location.href = a.href; }
+    },
     'open-game': (a, w) => { track('door', w && w.fromHint ? 'br:balloon' : 'br:bin'); openGame(rectOf(a)); },
     'open-case': (a) => openCase(a.dataset.slug, rectOf(a), true),
     'ask-case': (a) => {

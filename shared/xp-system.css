@@ -1,0 +1,159 @@
+/* Shared XP system tokens and controls. Desktop and project dialogs use this same source. */
+
+:root {
+  /* motion (review-interaksi no. 68): the curves every transition draws from, by role. A later phase that retimes a
+     role changes it here; app.js keeps the same set for what it moves itself (PF.motion) */
+  --ease-out: cubic-bezier(.2, .8, .2, 1);   /* arrivals and settles (the Luna curve) */
+  --ease-in: cubic-bezier(.4, 0, 1, 1);      /* exits, and what is pulled away */
+  --ease-move: cubic-bezier(.65, 0, .35, 1); /* from one rest to another: glides, flights, jumps */
+  /* system */
+  --desk-deep: #04163f; /* Broadcast Deep, the wallpaper's own ground, shown while it loads */
+  --face: #ece9d8;       /* Luna 3D face: dialogs, menubars, status bars */
+  --hi: #ffffff;
+  --shade: #aca899;      /* etched lines, disabled text */
+  --dark: #444444;       /* quiet text on the face; the progress bar's border */
+  --muted: #5b5f6b;      /* secondary text on white documents */
+  --ok-ink: #11703a;     /* the work log's current role */
+  --group-ink: #0046d5;  /* group-box captions */
+  --check-line: #1c5180; /* checkbox and radio borders */
+  --tab-line: #919b9c;   /* tab and tab-page borders */
+  --orange-rule: #e8943a;/* XP's warm light line: Start menu header, band edges, the selected tab */
+  --taskpane: linear-gradient(180deg, #7ba2e7, #6375d6);
+  --task: linear-gradient(180deg, #4f95f5, #3c81f3 20%, #3374e6 80%, #2d6ad8);
+  --task-hot: linear-gradient(180deg, #6aa9ff, #53a3ff 20%, #4a92f8 80%, #3f84ec);
+  --task-on: #1e52b7;
+  --line: #7f9db9;       /* field and well borders */
+  --btn-line: #003c74;   /* push-button border */
+  --cap: linear-gradient(180deg, #0997ff 0%, #0053ee 8%, #0050ee 40%, #0066ff 88%, #0066ff 93%, #005bff 95%, #003dd7 96%, #003dd7 100%);
+  --cap-off: linear-gradient(180deg, #7697e7 0%, #7e9ee3 3%, #94afe8 6%, #97b4e9 8%, #82a5e4 14%, #7c9fe2 17%, #7996de 25%, #7b99e1 56%, #82a9e9 81%, #80a5e7 89%, #7b96e1 94%, #7a93df 97%, #abbae3 100%);
+  --frame: inset -1px -1px #00138c, inset 1px 1px #0831d9, inset -2px -2px #001ea0, inset 2px 2px #166aee, inset -3px -3px #003bda, inset 3px 3px #0855dd;
+  --frame-off: inset -1px -1px #5b76c4, inset 1px 1px #7a96df, inset -2px -2px #6f8ad4, inset 2px 2px #9bb2ec, inset -3px -3px #7d98e0, inset 3px 3px #8fa8e8;
+  --sel: #316ac5;
+  --tip: #ffffe1;
+  --link: #0b5bd3;
+  /* document surfaces (About, Home) */
+  --paper: #ffffff;
+  --paper-2: #f3f6fd;
+  --paper-line: #b9c9ea;
+  --paper-rule: #d8e1f3;
+  --heading-ink: #0c3a9e;
+  /* media skin (reference 5) */
+  --lilac: #b58fe8;
+  --lilac-2: #cdb4ff;
+  --lcd: #63f06b;
+  /* icon colours (Pixel Icon Library, two layers: fill + outline) */
+  --ic-outline: #000000;
+  --ic-yellow: #f7c948;
+  --ic-paper: #fffdf3;
+  --ic-cyan: #7fd3dc;
+  --ic-blue: #6aa8ff;
+  --ic-silver: #c9c6bd;
+  --ic-green: #6fd57f;
+  --ic-orange: #ff9f43;
+  --ic-violet: #b58fe8;
+  --ic-pink: #ff8fb8;
+  --ic-red: #ff3b30;
+  /* type */
+  --ui: "Noto Sans", sans-serif;
+  --read: "Noto Sans", sans-serif;
+  --display: "Noto Sans", sans-serif;
+  /* edges: Luna draws with 1px lines and soft gradients */
+  --well: inset 0 0 0 1px var(--line);        /* fields and white content wells */
+  --hairline: inset 0 0 0 1px #d4d0c8;        /* colour swatches, small panes */
+  --btn-face: linear-gradient(180deg, #ffffff 0%, #ecebe6 86%, #d6d0c5 100%);
+  --btn-hot: inset -1px 1px #fff0cf, inset 1px 2px #fdd889, inset -2px 2px #fbc761, inset 2px -2px #e5a01a;
+  --btn-focus: inset -1px 1px #cee7ff, inset 1px 2px #98b8ea, inset -2px 2px #bcd4f6, inset 1px -1px #89ade4, inset 2px -2px #89ade4;
+  /* the pages' ink, and the page keys' materials (Home and About), each drawn once: REC red and the remote's silver */
+  --ink: #141414;
+  --ink-2: #3d3b34;
+  --rec: #d6261c;
+  /* the gloss stays above the label: from a quarter down, the face holds white text at 4.5:1 */
+  --rec-face: linear-gradient(180deg, #f4695e 0%, #d83127 24%, #c4241b 60%, #a8170f 100%);
+  --rec-edge: #7e1410;
+  --silver-face: linear-gradient(180deg, #f3f4f7 0%, #d4d7de 45%, #b3b8c2 100%);
+  --silver-edge: #6f747e;
+  /* Luna surfaces, each drawn once and reused */
+  --caption-btn: radial-gradient(circle at 90% 90%, #0054e9 0%, #2263d5 55%, #4479e4 70%, #a3bbec 90%, #fff 100%);
+  --caption-close: radial-gradient(circle at 90% 90%, #cc4600 0%, #dc6527 55%, #cd7546 70%, #ffccb2 90%, #fff 100%);
+  /* the caption keys lit under the pointer, and pressed in: the light moves to the top-left corner and dims */
+  --caption-btn-hot: radial-gradient(circle at 90% 90%, #1c6cff 0%, #3a82f5 55%, #5f98f5 70%, #c0d4f8 90%, #fff 100%);
+  --caption-btn-down: radial-gradient(circle at 10% 10%, #0042c4 0%, #0a4ccf 55%, #2c61d0 70%, #7b98d9 90%, #d9e3f7 100%);
+  --caption-close-hot: radial-gradient(circle at 90% 90%, #e2560f 0%, #ef7a3e 55%, #e8916a 70%, #ffdac8 90%, #fff 100%);
+  --caption-close-down: radial-gradient(circle at 10% 10%, #a83800 0%, #b84a18 55%, #c0663d 70%, #e8a488 90%, #fbe0d4 100%);
+  --cap-shadow: #0f1089;          /* title text shadow */
+  --tray: linear-gradient(180deg, #0c59b9 1%, #139ee9 6%, #18b5f2 10%, #139beb 14%, #1290e8 19%, #0d8dea 63%, #0d9ff1 81%, #0f9eed 88%, #119be9 91%, #1392e2 94%, #137ed7 97%, #095bc9 100%);
+  --tray-edge: #1042af;
+  --col-head: linear-gradient(180deg, #fff, #f7f6f0 60%, #ebeadb);
+  --col-head-edge: inset 0 -3px #e2e1d3, inset -1px 0 #d6d3c0;
+  --tool-hot: linear-gradient(180deg, #fff, #f3f3ef 50%, #e7e6dd);
+  --tool-hot-edge: #cecec3;
+  --progress: linear-gradient(180deg, #acedad 0%, #7be47d 25%, #4cda50 50%, #2ed330 60%, #42d845 80%, #76e278 100%);
+  --tab-face: linear-gradient(180deg, #fff, #ecebe5 70%, #d8d7ce);
+  --menu-shadow: 2px 3px 6px rgba(0, 0, 0, .28);
+  --tb-h: 30px;
+}
+
+.btn {
+  min-width: 75px; min-height: 23px; padding: 3px 12px;
+  border: 1px solid var(--btn-line); border-radius: 3px;
+  background: var(--btn-face); color: #000;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  white-space: nowrap;
+}
+.btn.default, .btn:focus-visible { box-shadow: var(--btn-focus); }
+.btn:not(:disabled):hover { box-shadow: var(--btn-hot); }
+.btn:not(:disabled):active { background: linear-gradient(180deg, #cdcac3 0%, #e3e3db 8%, #e5e5de 94%, #f2f2f1 100%); box-shadow: none; }
+/* pressed, the label goes in with the face: a pixel down and to the right, as XP drew it */
+.btn:not(:disabled):active > *, .tbtn:not(:disabled):active > * { translate: 1px 1px; }
+.btn.lg { min-height: 32px; padding: 6px 18px; gap: 8px; }
+/* off: a pale face and XP's etched label, grey with a white line under it */
+.btn:disabled { border-color: #c9c7ba; background: #f5f4ea; color: var(--shade); text-shadow: 1px 1px var(--hi); }
+.btn:disabled svg { opacity: .45; filter: grayscale(1); }
+.tbtn:disabled { color: var(--shade); text-shadow: 1px 1px var(--hi); }
+.tbtn:disabled svg { opacity: .45; filter: grayscale(1); }
+
+.field { background: #fff; box-shadow: var(--well); }
+
+.px { flex: none; }
+.px .f { fill: var(--ic-fill, transparent); }
+.px .l { fill: var(--ic-line, var(--ic-outline)); }
+.px-folder, .px-folderOpen, .px-crown, .px-sparkles { --ic-fill: var(--ic-yellow); }
+.px-document, .px-envelope, .px-copy, .px-sound { --ic-fill: var(--ic-paper); }
+.px-computer, .px-image, .px-laptop { --ic-fill: var(--ic-cyan); }
+.px-globe, .px-translate, .px-search { --ic-fill: var(--ic-blue); }
+.px-recycle, .px-computerOff { --ic-fill: var(--ic-silver); }
+.px-play, .px-code, .px-up { --ic-fill: var(--ic-green); }
+.px-users, .px-cart, .px-clock { --ic-fill: var(--ic-orange); }
+.px-grid, .px-gradCap, .px-list { --ic-fill: var(--ic-violet); }
+.px-penNib, .px-paintBrush { --ic-fill: var(--ic-pink); }
+.px-resume { --ic-fill: var(--ic-paper); }
+/* brand tiles: body in the brand's own colour, white letterform (.g) on top */
+.px .g { fill: var(--ic-glyph, #fff); }
+.px-linkedin { --ic-fill: #0a66c2; }
+.px-dribbble { --ic-fill: #ea4c89; }
+.px-behance { --ic-fill: #1769ff; }
+.px-upwork { --ic-fill: #14a800; }
+.px-book { --ic-fill: var(--ic-violet); }
+.px-trophy { --ic-fill: var(--ic-yellow); }
+.px-warning { --ic-fill: var(--ic-yellow); }
+.px-error { --ic-fill: var(--ic-red); }
+
+.title .t-ico { display: flex; }
+.title .t-ico .px { width: 16px; height: 16px; }
+.title .t-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* 3px apart, so the 21px keys' centres sit 24px apart: the least a pointer needs to tell them apart */
+.title .t-btns { display: flex; gap: 3px; }
+.tb {
+  width: 21px; height: 21px; padding: 0; border: 1px solid #fff; border-radius: 3px; display: grid; place-items: center; color: #fff;
+  background: var(--caption-btn);
+  box-shadow: inset 0 0 0 1px rgba(0, 30, 120, .12);
+}
+.tb.close { margin-left: 2px; background: var(--caption-close); }
+.win:not(.active) .tb { opacity: .72; }
+/* under the pointer the key lights from within; pressed, it goes in and its glyph with it */
+.tb:hover { background: var(--caption-btn-hot); }
+.tb.close:hover { background: var(--caption-close-hot); }
+.tb:active { background: var(--caption-btn-down); box-shadow: inset 1px 1px 2px rgba(0, 20, 90, .45); }
+.tb.close:active { background: var(--caption-close-down); box-shadow: inset 1px 1px 2px rgba(90, 20, 0, .45); }
+.tb:active svg { translate: 1px 1px; }
+.tb svg { fill: currentColor; }

@@ -60,8 +60,8 @@
         <p class="lead id-copy">Aplikasi CAD yang saya bangun untuk merancang komponen fungsional dan menyiapkannya untuk cetak 3D.</p>
         <p class="status en-copy">In development · macOS on Apple Silicon · no public download yet</p>
         <p class="status id-copy">Dalam pengembangan · macOS dengan Apple Silicon · belum tersedia untuk diunduh</p>
-        <a class="request en-copy" href="mailto:hello@iqbalsurya.com?subject=Tempa%203D%20access%20request">Request access ↗</a>
-        <a class="request id-copy" href="mailto:hello@iqbalsurya.com?subject=Permintaan%20akses%20Tempa%203D">Minta akses ↗</a>
+        <a class="request en-copy" data-request-access aria-haspopup="dialog" href="mailto:hello@iqbalsurya.com?subject=Tempa%203D%20access%20request">Request access →</a>
+        <a class="request id-copy" data-request-access aria-haspopup="dialog" href="mailto:hello@iqbalsurya.com?subject=Permintaan%20akses%20Tempa%203D">Minta akses →</a>
       </div>
       <div class="hero-art"><img src="../../asset/about/projects/tempa-3d.svg" alt="" width="800" height="600"></div>
     </section>
@@ -70,8 +70,8 @@
       <h2 id="about-title"><span class="en-copy">About the project</span><span class="id-copy">Tentang proyek ini</span></h2>
       <p class="en-copy">Tempa brings a 3D viewport, direct modeling tools, and an operation journal into one workspace. I’m working on how people select geometry, change a part on the model, and understand what happened after each edit.</p>
       <p class="id-copy">Tempa menyatukan viewport 3D, alat pemodelan langsung, dan jurnal operasi dalam satu ruang kerja. Saya sedang mengembangkan cara pengguna memilih geometri, mengubah komponen langsung pada model, dan memahami hasil tiap pengeditan.</p>
-      <p class="en-copy">This is an internal build. I’m still testing its modeling workflows and release readiness, so there is no public app download or repository link. If you would like to see more, send me an access request by email.</p>
-      <p class="id-copy">Ini masih build internal. Saya masih menguji alur pemodelan dan kesiapan rilisnya, jadi belum ada unduhan aplikasi atau tautan repositori publik. Jika ingin melihat lebih lanjut, kirim permintaan akses lewat email.</p>
+      <p class="en-copy">This is an internal build. I’m still testing its modeling workflows and release readiness, so there is no public app download or repository link. If you would like to see more, use the access request form above.</p>
+      <p class="id-copy">Ini masih build internal. Saya masih menguji alur pemodelan dan kesiapan rilisnya, jadi belum ada unduhan aplikasi atau tautan repositori publik. Jika ingin melihat lebih lanjut, gunakan form permintaan akses di atas.</p>
       <figure>
         <img src="../../asset/about/projects/tempa-workspace.png" data-alt-en="Tempa development build showing the 3D viewport, object list, Inspector, and Inside tool" data-alt-id="Build pengembangan Tempa menampilkan viewport 3D, daftar objek, Inspector, dan alat Inside" alt="Tempa development build showing the 3D viewport, object list, Inspector, and Inside tool" width="2880" height="1750" loading="lazy">
         <figcaption><span class="en-copy">A capture from the internal development build, showing the Inside modeling workflow.</span><span class="id-copy">Cuplikan build internal saat alur pemodelan Inside sedang dikerjakan.</span></figcaption>
@@ -79,6 +79,8 @@
     </section>
     <p class="foot"><a href="../../option-a-desktop/#/about"><span class="en-copy">← Back to portfolio</span><span class="id-copy">← Kembali ke portofolio</span></a></p>
   </main>
+  <script src="../../option-a-desktop/icons.js?v=60"></script>
+  <script type="module" src="../../shared/access-request.js?v=3"></script>
   <script>
     const buttons = document.querySelectorAll('[data-language]');
     function setLanguage(language) {

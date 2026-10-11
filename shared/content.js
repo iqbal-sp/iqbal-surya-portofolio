@@ -97,8 +97,8 @@
       {
         name: 'Tempa 3D', kind: { en: '3D CAD · in development', id: 'CAD 3D · dalam pengembangan' },
         desc: {
-          en: 'A desktop CAD project for shaping functional parts. The app is still in development and the repository is not public. Want to see it? Request access by email.',
-          id: 'Proyek CAD desktop untuk membentuk komponen fungsional. Aplikasinya masih dikembangkan dan repositorinya belum publik. Ingin melihatnya? Minta akses lewat email.',
+          en: 'A desktop CAD project for shaping functional parts. The app is still in development and the repository is not public. Want to see it? Send an access request.',
+          id: 'Proyek CAD desktop untuk membentuk komponen fungsional. Aplikasinya masih dikembangkan dan repositorinya belum publik. Ingin melihatnya? Kirim permintaan akses.',
         },
         image: '../asset/about/projects/tempa-3d.webp',
         imageAlt: { en: 'The Tempa logo: a blue hexagonal cube beside the word Tempa on a dark grid', id: 'Logo Tempa: kubus segi enam biru di samping tulisan Tempa pada latar gelap berpetak' },
@@ -107,6 +107,7 @@
           id: 'mailto:hello@iqbalsurya.com?subject=Permintaan%20akses%20Tempa%203D',
         },
         cta: { en: 'Request access', id: 'Minta akses' },
+        requestAccess: true,
         external: false,
       },
     ],
