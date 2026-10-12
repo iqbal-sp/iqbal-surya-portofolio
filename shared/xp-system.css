@@ -116,6 +116,10 @@
 .px { flex: none; }
 .px .f { fill: var(--ic-fill, transparent); }
 .px .l { fill: var(--ic-line, var(--ic-outline)); }
+/* Phosphor OS's own icons (icons.js OWN): their Luna picture, and a flat copy for a control that recolours its icons
+   or asks for mono */
+.px .fl, .px.mono .lu { display: none; }
+.px.mono .fl { display: inline; }
 .px-crown, .px-sparkles { --ic-fill: var(--ic-yellow); }
 .px-document, .px-copy, .px-sound { --ic-fill: var(--ic-paper); }
 .px-image, .px-laptop { --ic-fill: var(--ic-cyan); }

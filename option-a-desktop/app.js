@@ -2748,7 +2748,7 @@
     contact: (a) => openWin('contact', { from: rectOf(a) }),
     'request-access': async (a) => {
       try {
-        const { openAccessRequest } = await import('../shared/access-request.js?v=5');
+        const { openAccessRequest } = await import('../shared/access-request.js?v=6');
         await openAccessRequest({ lang, email: PF.owner.email });
       } catch { location.href = a.href; }
     },

@@ -1,4 +1,4 @@
-@import url("../shared/xp-system.css?v=2");
+@import url("../shared/xp-system.css?v=3");
 
 /* ============================================================
    OPTION A — DESKTOP XP
@@ -82,6 +82,8 @@ img { max-width: 100%; }
   background: linear-gradient(180deg, rgba(255, 255, 255, .32) 0%, rgba(255, 255, 255, .1) 29%, rgba(255, 255, 255, 0) 30%), var(--rec-face);
   box-shadow: inset 0 1px 0 rgba(255, 214, 208, .6), inset 0 -2px 3px rgba(90, 0, 0, .35), 0 1px 1px rgba(60, 0, 0, .25), 0 8px 14px -8px rgba(126, 20, 16, .6); }
 .page-key.rec .px { --ic-line: #fff; --ic-fill: rgba(255, 255, 255, .22); }
+.page-key.rec .px .lu { display: none; }
+.page-key.rec .px .fl { display: inline; }
 .page-key.rec .rec-dot { background: radial-gradient(circle at 35% 35%, #fff, #ffd9d4 60%, #f3a79f); box-shadow: none; transition: box-shadow .15s; }
 .page-key.rec:not(:disabled):hover { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6), inset 0 -2px 3px rgba(90, 0, 0, .35), 0 0 14px rgba(214, 38, 28, .45), 0 8px 14px -8px rgba(126, 20, 16, .6); }
 /* the REC lamp (Start a project only) lights under the pointer and burns bright while the key is held */
