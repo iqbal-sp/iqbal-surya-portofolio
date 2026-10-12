@@ -12,9 +12,11 @@
   (owner's approval, 2026-10-05): at once when the server answers its file with an error, after one more try when the
   server sends the file but the browser turned it down, after the third failed load when the server can't be asked.
   A part that fails, and one passed over, is counted through /api/event, once a session.
-  When everything is in, the tube turns XP's welcome blue and the camera flies into the glass (a CSS zoom on the
-  still), then the desktop comes up in XP's order. The test is English on both languages, as a BIOS was; the screen
-  reader's status follows the page's language.
+  When everything is in, the 3D gets its moment first: a finished test waits up to WAIT_3D for a 3D still on its way,
+  and a 3D that shows holds STAGE before the flight, so a fast load still sees the room in 3D and the camera's push
+  (nothing is added when the 3D can't show: a phone, reduced motion, no WebGL). Then the tube turns XP's welcome blue
+  and the camera flies into the glass (a CSS zoom on the still), and the desktop comes up in XP's order.
+  The test is English on both languages, as a BIOS was; the screen reader's status follows the page's language.
   index.html's head adds html.booting before the first paint and holds this screen's rules, and its stylesheets come
   after this script, so the screen draws without waiting for them; app.js hands over Home (PF.boot.home) and runs its
   first-view moments through PF.bootDone.
@@ -55,6 +57,8 @@
   const TOTAL = PARTS.reduce((s, [, w]) => s + w, 0);
   const TEMPO = 0.11;         // s: the least time between two printed lines, so a cached load still reads as a boot
   const DONE_HOLD = 0.4;      // s the finished test stays before the tube turns blue
+  const WAIT_3D = 1.5;        // s a finished test waits for a 3D still on its way; past that the still flies
+  const STAGE = 1.2;          // s the 3D shows before the test may end, so its push reads (less on a return visit)
   const FLY = 1500;           // ms of the 3D's whole way into the glass; the screen goes on once the glass fills the frame
   const STILL_FLY = 1200;     // ms of the still's CSS zoom
   const RETRY = [4, 8, 16, 30];  // s before each new try after a part failed
@@ -106,7 +110,10 @@
     else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', no, { once: true }); }
   });
   const urlReady = (src, miss) => { const img = new Image(); img.src = src; return imgReady(img, miss); };
-  const cssUrls = (value) => Array.from(String(value).matchAll(/url\("?([^")]+)"?\)/g), (m) => m[1]).filter((u) => !u.startsWith('data:'));
+  // the files a computed background or mask fetches: a quoted url is read whole, so the url(%23h) inside an inline
+  // SVG's data (Home's CRT screws) is not taken for one, and neither is a reference into the page (#id)
+  const cssUrls = (value) => Array.from(String(value).matchAll(/url\(\s*(?:"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|([^)\s]*))\s*\)/g), (m) => m[1] ?? m[2] ?? m[3])
+    .filter((u) => u && !u.startsWith('data:') && !u.startsWith('#'));
   const allOk = (list) => Promise.all(list).then((oks) => oks.every(Boolean));
 
   function wall3dReady() {
@@ -338,7 +345,10 @@
     layLed();
     paintRoom();
     draw(r);
-    start3d();
+    // the 3D's state for ready(): 'loading' until it shows ('live') or is given up ('off')
+    const d3 = start3d();
+    r.d3 = d3 ? 'loading' : 'off';
+    if (d3) d3.then((c) => { if (r.d3 === 'loading') r.d3 = c ? 'live' : 'off'; });
     if (files) { try { files.observe({ type: 'resource' }); } catch (e) { /* no resource timing: the lamp stays dark */ } }
 
     const checks = {
@@ -462,6 +472,12 @@
   /* ---------- leaving ---------- */
   function ready(r) {
     if (r.holding || r.leaving || r.printed < PARTS.length || r.shown < 0.999 || got(r) < 0.999) return;
+    // the test is through, but the 3D has its moment first: one on its way is waited for up to WAIT_3D (then dropped,
+    // below), and one that shows stays STAGE before the flight
+    const now = performance.now();
+    if (!r.doneAt) { r.doneAt = now; tail.textContent = 'Starting iqbalsurya.com'; }
+    if (r.d3 === 'loading' && now - r.doneAt < WAIT_3D * 1000) return;
+    if (r.d3 === 'live' && now - r.liveAt < STAGE * 1000 * r.q) return;
     r.holding = true;
     box.classList.add('ready');
     crt.classList.add('done');
