@@ -237,7 +237,7 @@ img { max-width: 100%; }
   display: flex; align-items: center; gap: 5px; flex: none; color: #fff;
   font: italic 700 16px/1 var(--ui); text-transform: lowercase; letter-spacing: .01em; text-shadow: 1px 1px 2px rgba(0, 0, 0, .55);
 }
-.start-btn .px { width: 20px; height: 20px; filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, .4)); }
+.start-btn .start-mark { flex: none; width: 20px; height: 20px; image-rendering: pixelated; filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, .45)); }
 .start-btn:hover { background: radial-gradient(120% 90% at 30% 30%, #74cc63 0%, #4bab45 45%, #389a38 70%, #2b8a2b 100%); }
 /* pressed, and while the Start menu is open, it goes in: darker, lit from the corner, the label a pixel down */
 .start-btn:active, .start-btn[aria-expanded="true"] { background: radial-gradient(120% 90% at 30% 30%, #3d8e36 0%, #2a7a2a 50%, #1d661d 100%); box-shadow: inset 2px 2px 4px rgba(0, 30, 0, .5); }

@@ -88,6 +88,8 @@
     .bios { position: absolute; inset: 0; padding: 44px 56px; }
     .bios p { margin: 0; white-space: pre; }
     .bios-head { color: #fff; font-weight: 700; }
+    /* Phosphor OS's mark (tools/phosphor-mark) in the corner, where an old BIOS showed its Energy Star logo */
+    .bios-mark { position: absolute; right: 48px; top: 36px; width: 100px; height: 100px; image-rendering: pixelated; }
     .bios :is(.bios-mem, .bios-test, .bios-tail) { margin-top: 20px; }
     .bios-test p { display: flex; }
     .bios-test span { flex: none; width: 29ch; overflow: hidden; }
@@ -103,14 +105,27 @@
     .bios-bar i.on { background: #4cda50; }
     .bios-pct { min-width: 4ch; color: #fff; font-weight: 700; text-align: right; }
     .bios-foot { position: absolute; left: 56px; bottom: 24px; color: #aca899; }
-    /* everything is in: XP's welcome with no one logging in yet, the blue between its navy bands and their light rules */
+    /* everything is in: XP's welcome with no one logging in yet, here Phosphor OS's, the blue between its navy bands and
+       their light rules */
     .bios-blue { position: absolute; inset: 0; display: grid; grid-template-rows: 48px 1fr 48px; background: #5a7edc; visibility: hidden; }
-    .bios-blue i { position: relative; display: block; }
-    .bios-blue i:first-child, .bios-blue i:last-child { background: #00309c; }
-    .bios-blue i:first-child::after, .bios-blue i:last-child::before { content: ""; position: absolute; left: 0; right: 0; height: 2px; }
-    .bios-blue i:first-child::after { top: 100%; background: linear-gradient(90deg, transparent, #a6c4f7 25%, rgba(166, 196, 247, .5) 60%, transparent); }
-    .bios-blue i:last-child::before { bottom: 100%; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
-    .bios-blue i:nth-child(2) { background: radial-gradient(90% 90% at 0 0, rgba(166, 196, 247, .8), rgba(166, 196, 247, 0) 60%); }
+    .bios-blue > i { position: relative; display: block; }
+    .bios-blue > i:first-child, .bios-blue > i:last-child { background: #00309c; }
+    .bios-blue > i:first-child::after, .bios-blue > i:last-child::before { content: ""; position: absolute; left: 0; right: 0; height: 2px; }
+    .bios-blue > i:first-child::after { top: 100%; background: linear-gradient(90deg, transparent, #a6c4f7 25%, rgba(166, 196, 247, .5) 60%, transparent); }
+    .bios-blue > i:last-child::before { bottom: 100%; background: linear-gradient(90deg, transparent, var(--orange-rule) 30%, var(--orange-rule) 70%, transparent); }
+    /* between the bands, as XP's welcome: Phosphor OS's mark and name, a light rule, and "welcome" (English on both
+       languages, as the test above it) */
+    .bios-welcome {
+      display: flex; align-items: center; justify-content: center; gap: 36px; padding: 0 40px;
+      background: radial-gradient(90% 90% at 0 0, rgba(166, 196, 247, .8), rgba(166, 196, 247, 0) 60%);
+      color: #fff; font-family: "Noto Sans", sans-serif; text-shadow: 2px 2px 5px rgba(0, 0, 60, .35);
+    }
+    .bios-welcome p { margin: 0; white-space: nowrap; }
+    .bw-brand { display: flex; align-items: center; gap: 16px; font: 700 64px/1 "Noto Sans", sans-serif; letter-spacing: -.03em; }
+    .bw-brand img { width: 100px; height: 100px; image-rendering: pixelated; filter: drop-shadow(3px 3px 4px rgba(0, 0, 40, .4)); }
+    .bw-brand sup { margin-left: 4px; font-size: 24px; letter-spacing: 0; vertical-align: 34px; color: #b8ff9c; }
+    .bw-rule { width: 2px; height: 55%; background: linear-gradient(transparent, rgba(255, 255, 255, .75), transparent); }
+    .bw-hi { font: italic 700 76px/1 "Noto Sans", sans-serif; letter-spacing: -.02em; }
     .boot-crt.blue .bios-blue { visibility: visible; }
     .boot-crt.blue .bios { visibility: hidden; }
     /* a phone shows the whole tube in about 310px: the test half again as large, keeping only the parts and the bar */
@@ -202,15 +217,20 @@
       <i class="boot-led" aria-hidden="true"></i>
       <div class="boot-crt" aria-hidden="true">
         <div class="bios">
-          <p class="bios-head">PORTFOLIO BIOS v2.6</p>
+          <p class="bios-head">PHOSPHOR BIOS v2.6</p>
+          <img class="bios-mark" src="../asset/icon/phosphor-mark.svg?v=1" alt="">
           <p class="bios-copy">Copyright (C) 2026 Iqbal Surya Pratama</p>
           <p class="bios-mem">Memory Test :     0K</p>
           <div class="bios-test"></div>
           <div class="bios-meter"><span class="bios-bar"></span><span class="bios-pct">0%</span></div>
           <p class="bios-tail"></p>
-          <p class="bios-foot" data-id="09/29/2026-XP-PORTFOLIO-00">09/29/2026-XP-PORTFOLIO-00</p>
+          <p class="bios-foot" data-id="09/29/2026-PHOSPHOR-OS-00">09/29/2026-PHOSPHOR-OS-00</p>
         </div>
-        <div class="bios-blue"><i></i><i></i><i></i></div>
+        <div class="bios-blue"><i></i><div class="bios-welcome">
+          <p class="bw-brand"><img src="../asset/icon/phosphor-mark.svg?v=1" alt=""><span>Phosphor<sup>OS</sup></span></p>
+          <i class="bw-rule"></i>
+          <p class="bw-hi">welcome</p>
+        </div><i></i></div>
       </div>
     </div>
     <div class="sr-only" id="bootMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
@@ -238,9 +258,9 @@
 
   <!-- the loading screen first, so it can count everything after it, and draw before the stylesheets have arrived;
        the scripts after them wait for them -->
-  <script src="boot.js?v=15" fetchpriority="high"></script>
+  <script src="boot.js?v=16" fetchpriority="high"></script>
   <link rel="stylesheet" href="cursors.css?v=1">
-  <link rel="stylesheet" href="style.css?v=172">
+  <link rel="stylesheet" href="style.css?v=173">
   <link rel="stylesheet" href="home.css?v=135">
   <link rel="stylesheet" href="../asset/Home/process/xp-window/crt.css?v=2">
   <link rel="stylesheet" href="winamp.css?v=2">
@@ -249,7 +269,7 @@
   <script src="icons.js?v=60"></script>
   <script src="winamp.js?v=1"></script>
   <script src="sfx.js?v=1"></script>
-  <script src="app.js?v=202"></script>
+  <script src="app.js?v=203"></script>
   <script src="process-crt.js?v=1"></script>
   <!-- Live wallpaper (three.js), with the static webp on .desktop as its fallback. -->
   <script type="module" src="wallpaper3d.js?v=18"></script>

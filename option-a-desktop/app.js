@@ -602,7 +602,8 @@
   const startBtn = $('#startBtn');
   const startMenu = $('#startMenu');
   const socialIcon = { linkedin: 'linkedin', dribbble: 'dribbble', behance: 'behance', upwork: 'upwork' };
-  function renderStartBtn() { startBtn.innerHTML = `<span>${esc(u('start'))}</span>`; }
+  // Phosphor OS's mark (asset/icon/phosphor-mark.svg, tools/phosphor-mark) before the word, as XP's flag was
+  function renderStartBtn() { startBtn.innerHTML = `<img class="start-mark" src="../asset/icon/phosphor-mark.svg?v=1" alt="" width="20" height="20"><span>${esc(u('start'))}</span>`; }
   // the two games sit in Accessories at the foot of the programs column, as XP kept its small programs there; the
   // menu never calls them games (owner's decision, 2026-09-29)
   function renderStart() {

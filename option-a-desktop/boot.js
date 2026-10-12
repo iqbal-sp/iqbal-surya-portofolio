@@ -353,7 +353,7 @@
 
     const checks = {
       fonts: () => (document.fonts
-        ? Promise.all(['400 16px "Noto Sans"', '700 16px "Noto Sans"', '400 16px "Noto Sans Mono"'].map((f) => document.fonts.load(f))).then((sets) => sets.every((s) => s.length > 0))
+        ? Promise.all(['400 16px "Noto Sans"', '700 16px "Noto Sans"', 'italic 700 16px "Noto Sans"', '400 16px "Noto Sans Mono"'].map((f) => document.fonts.load(f))).then((sets) => sets.every((s) => s.length > 0))
         : true),
       content: () => scriptIn('content'),
       cases: () => scriptIn('cases'),
