@@ -47,7 +47,6 @@
   --ic-paper: #fffdf3;
   --ic-cyan: #7fd3dc;
   --ic-blue: #6aa8ff;
-  --ic-silver: #c9c6bd;
   --ic-green: #6fd57f;
   --ic-orange: #ff9f43;
   --ic-violet: #b58fe8;
@@ -117,11 +116,10 @@
 .px { flex: none; }
 .px .f { fill: var(--ic-fill, transparent); }
 .px .l { fill: var(--ic-line, var(--ic-outline)); }
-.px-folder, .px-folderOpen, .px-crown, .px-sparkles { --ic-fill: var(--ic-yellow); }
-.px-document, .px-envelope, .px-copy, .px-sound { --ic-fill: var(--ic-paper); }
-.px-computer, .px-image, .px-laptop { --ic-fill: var(--ic-cyan); }
-.px-globe, .px-translate, .px-search { --ic-fill: var(--ic-blue); }
-.px-recycle, .px-computerOff { --ic-fill: var(--ic-silver); }
+.px-crown, .px-sparkles { --ic-fill: var(--ic-yellow); }
+.px-document, .px-copy, .px-sound { --ic-fill: var(--ic-paper); }
+.px-image, .px-laptop { --ic-fill: var(--ic-cyan); }
+.px-translate, .px-search { --ic-fill: var(--ic-blue); }
 .px-play, .px-code, .px-up { --ic-fill: var(--ic-green); }
 .px-users, .px-cart, .px-clock { --ic-fill: var(--ic-orange); }
 .px-grid, .px-gradCap, .px-list { --ic-fill: var(--ic-violet); }

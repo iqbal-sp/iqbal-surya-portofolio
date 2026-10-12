@@ -11,7 +11,6 @@
    ============================================================ */
 
 /* icon colours for the icons Home adds */
-.px-home { --ic-fill: var(--ic-orange); }
 .px-questionCircle { --ic-fill: var(--ic-blue); }
 .px-bookOpen { --ic-fill: var(--ic-violet); }
 .px-flag { --ic-fill: var(--ic-red); }

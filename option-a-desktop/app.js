@@ -30,7 +30,7 @@
       openPortfolio: 'View selected work', downloadCV: 'Download resume', contactMe: 'Contact me',
       history: 'Career history',
       to: 'To', worklog: 'Experience', worklogLead: 'My experience across agencies, product teams, and freelance work.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Things I have made and explored outside client work.', visitProject: 'Visit project', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Outside work, I enjoy traveling, trying different food, and taking a break with coffee or a book.', myPictures: 'My Pictures', build: 'Have a project in mind?', buildLead: 'Have a website or app to design? Select what you need help with and send me a short brief.', need: 'What can I help with?', sendMsg: 'Write a project brief', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
-      footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsBy: 'The portfolio of Iqbal Surya Pratama', creditsIcons: 'Icons: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0. Recoloured here as two-tone icons.',
+      footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsBy: 'The portfolio of Iqbal Surya Pratama', creditsIcons: 'The desktop\'s own icons are drawn for Phosphor OS. The others: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0, recoloured here as two-tone icons.',
       file: 'File', view: 'View', help: 'Help', play: 'Play', up: 'Up',
       address: 'Address', myDocs: 'My Documents', thumbnails: 'Thumbnails', details: 'Details', open: 'Open',
       arrangeNo: 'Arrange by Number', arrangeName: 'Arrange by Name', aboutPortfolio: 'About this portfolio',
@@ -91,7 +91,7 @@
       openPortfolio: "Lihat karya pilihan", downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
       history: 'Riwayat karier',
       to: 'Untuk', worklog: "Pengalaman", worklogLead: "Pengalaman saya di agensi, tim produk, dan proyek freelance.", present: "Saat ini", ft: 'Full-time', fl: 'Freelance', projects: "Proyek pribadi", projectsLead: "Karya dan eksplorasi saya di luar proyek klien.", visitProject: 'Kunjungi proyek', diskLabel: "Proyek pribadi", offClock: 'Di luar jam kerja', offClockText: "Di luar pekerjaan, saya suka jalan-jalan, mencoba makanan baru, dan bersantai dengan kopi atau buku.", myPictures: "Foto Saya", build: "Punya rencana website atau aplikasi?", buildLead: "Butuh bantuan mendesain website atau aplikasi? Pilih kebutuhan Anda, lalu kirim brief singkat.", need: "Apa yang bisa saya bantu?", sendMsg: "Tulis brief proyek", reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: "Diskusi proyek", mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Tentang proyeknya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
-      footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsBy: 'Portofolio Iqbal Surya Pratama', creditsIcons: 'Ikon: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0. Di sini diwarnai ulang menjadi ikon dua warna.',
+      footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsBy: 'Portofolio Iqbal Surya Pratama', creditsIcons: 'Ikon tempat-tempat di desktop digambar khusus untuk Phosphor OS. Ikon lainnya: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0, di sini diwarnai ulang menjadi ikon dua warna.',
       file: 'Berkas', view: 'Tampilan', help: 'Bantuan', play: 'Putar', up: 'Naik',
       address: 'Alamat', myDocs: 'Dokumen Saya', thumbnails: 'Gambar mini', details: 'Rincian', open: 'Buka',
       arrangeNo: 'Urutkan menurut Nomor', arrangeName: 'Urutkan menurut Nama', aboutPortfolio: 'Tentang portofolio ini',
@@ -2748,7 +2748,7 @@
     contact: (a) => openWin('contact', { from: rectOf(a) }),
     'request-access': async (a) => {
       try {
-        const { openAccessRequest } = await import('../shared/access-request.js?v=4');
+        const { openAccessRequest } = await import('../shared/access-request.js?v=5');
         await openAccessRequest({ lang, email: PF.owner.email });
       } catch { location.href = a.href; }
     },
