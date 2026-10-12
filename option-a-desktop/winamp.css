@@ -35,7 +35,7 @@
 /* the thumb's lit edge turns orange under the pointer, as Luna's did */
 .vol-fly input[type="range"]:hover::-webkit-slider-thumb { box-shadow: inset 3px 0 #f8b636; }
 .vol-fly input[type="range"]:hover::-moz-range-thumb { box-shadow: inset 3px 0 #f8b636; }
-.vol-fly input[type="range"]:focus-visible { outline: 1px dotted #000; outline-offset: 0; }
+.vol-fly input[type="range"]:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 0; }
 .vol-fly .chk { min-height: 0; gap: 4px; font-size: 12px; }
 
 /* ============================================================ Winamp (after Winamp 5's Winamp Modern) */
@@ -120,7 +120,7 @@
 .wm-lcd-lit { z-index: 1; filter: drop-shadow(0 0 2px rgba(169, 203, 248, .85)); }
 .wm-hit { position: absolute; z-index: 3; left: 6px; top: 4px; width: 108px; height: 34px; padding: 0; border: 0; border-radius: 6px; background: none; }
 .wm-hit:hover { background: rgba(255, 255, 255, .06); }
-.wm-hit:focus-visible { outline: 1px dotted #eaf2ff; outline-offset: -1px; }
+.wm-hit:focus-visible { outline: 1px dotted #eaf2ff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #eaf2ff); outline-offset: -1px; }
 
 /* sliders: a sunken groove that fills Deck Blue up to the thumb */
 .wm input[type="range"] { -webkit-appearance: none; appearance: none; margin: 0; padding: 0; height: 16px; background: transparent; cursor: var(--cur-hand, pointer); }

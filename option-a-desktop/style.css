@@ -29,7 +29,12 @@ body {
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: var(--cur-arrow, default); }
 a { color: var(--link); }
-::selection { background: var(--sel); color: #fff; }
+/* Phosphor OS's own colour, the green of its mark (tools/phosphor-mark): selected text, and the keyboard's focus ring.
+   A ring takes the green mixed with the ink it was drawn in before, dark on light ground and light on dark, so it
+   holds better than 3:1 on both; the dotted line before each one stays for a browser without color-mix(). XP's blue
+   still marks what is selected in a list, a menu or on the desktop */
+:root { --ph: #4cda50; --ph-ink: #04220b; }
+::selection { background: var(--ph); color: var(--ph-ink); }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 /* index.html's head defines .sr-only (the loading screen uses it before this stylesheet arrives) and keeps the page
@@ -57,7 +62,7 @@ img { max-width: 100%; }
 /* focus: XP kept the dotted focus rectangle, drawn in the control's own label colour, so it reads on every face:
    black on the beige buttons, white on the blue caption keys, the taskbar and the green start button */
 :focus { outline: none; }
-:focus-visible { outline: 1px dotted currentColor; outline-offset: -4px; }
+:focus-visible { outline: 1px dotted currentColor; outline: 2px solid color-mix(in srgb, var(--ph) 55%, currentColor); outline-offset: -4px; }
 /* focus the page handed over without a key (a window opening, a click) shows no ring: app.js focusIn() marks it
    data-quiet; a window's frame and its page never draw one, the active title bar says where the keys are */
 [data-quiet]:focus-visible, .win:focus-visible, .win-body:focus-visible { outline: none; }
@@ -83,7 +88,7 @@ img { max-width: 100%; }
 .page-key.rec:not(:disabled):hover .rec-dot { box-shadow: 0 0 6px 1px rgba(255, 255, 255, .7); }
 .page-key.rec:not(:disabled):active { background: linear-gradient(180deg, #a8170f, #c4241b 40%, #d83127); box-shadow: inset 0 2px 4px rgba(60, 0, 0, .55); }
 .page-key.rec:not(:disabled):active .rec-dot { box-shadow: 0 0 8px 2px #fff; }
-.page-key.rec:focus-visible { outline: 1px dotted #fff; outline-offset: -5px; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--rec-edge), inset 0 -2px 3px rgba(90, 0, 0, .35); }
+.page-key.rec:focus-visible { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: -5px; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--rec-edge), inset 0 -2px 3px rgba(90, 0, 0, .35); }
 /* the Silver key: the remote's and the TV's silver under the same gloss and lift; its edge is a step darker than Silver
    Edge so it stands off the hero's steel as well as the white page. Under the pointer it takes XP's orange glow */
 .page-key.silver { border-color: #4a4f59; color: #1d2a3a; text-shadow: 0 1px 0 rgba(255, 255, 255, .75);
@@ -92,7 +97,7 @@ img { max-width: 100%; }
 .page-key.silver .px { --ic-line: #1d2a3a; }
 .page-key.silver:not(:disabled):hover { box-shadow: var(--btn-hot), 0 1px 1px rgba(0, 0, 0, .15), 0 8px 14px -8px rgba(0, 20, 70, .4); }
 .page-key.silver:not(:disabled):active { background: linear-gradient(180deg, #b3b8c2, #d4d7de 55%, #e4e6ea); box-shadow: inset 0 2px 4px rgba(20, 24, 40, .35); }
-.page-key.silver:focus-visible { outline: 1px dotted #1d2a3a; outline-offset: -5px; }
+.page-key.silver:focus-visible { outline: 1px dotted #1d2a3a; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #1d2a3a); outline-offset: -5px; }
 /* off: no page key is off today; drawn anyway, so the fifth state never repeats the resting one */
 .page-key:disabled { border-color: #c9c7ba; background: #f5f4ea; color: var(--shade); text-shadow: 1px 1px var(--hi); box-shadow: none; }
 .page-key:disabled svg { opacity: .45; filter: grayscale(1); }
@@ -419,7 +424,7 @@ img { max-width: 100%; }
 .pj li:last-child { padding-bottom: 0; }
 .pj li + li { background: repeating-linear-gradient(90deg, var(--paper-line) 0 4px, transparent 4px 8px) top / 100% 1px no-repeat; }
 .pj-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; color: var(--ink); text-decoration: none; }
-.pj-card:focus-visible { outline: 3px solid var(--sel); outline-offset: 6px; }
+.pj-card:focus-visible { outline: 3px solid var(--sel); outline: 3px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 6px; }
 .pj-image { display: block; align-self: start; aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid var(--paper-line); border-radius: 4px; background: #182034; box-shadow: 0 5px 14px rgba(0, 20, 70, .12); }
 .pj-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
 .pj-card:hover .pj-image img, .pj-card:focus-visible .pj-image img { transform: scale(1.04); }
@@ -457,7 +462,7 @@ img { max-width: 100%; }
 .hb-pic:focus-visible .hb-tag, .hb-pic[aria-expanded="true"] .hb-tag { opacity: 0; }
 .hb[data-hush] .hb-tip { visibility: hidden; opacity: 0; }
 .hb[data-hush] .hb-tag { opacity: 1; }
-.hb-pic:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+.hb-pic:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
 .hb-pic[aria-expanded="true"], .hb-pic:active { box-shadow: 0 0 0 2px var(--sel), 0 3px 6px -2px rgba(0, 20, 70, .3); }
 @media (forced-colors: active) { .hb-pic[aria-expanded="true"] { outline: 2px solid Highlight; } }
 
@@ -474,7 +479,7 @@ img { max-width: 100%; }
 .chk input { appearance: none; -webkit-appearance: none; flex: none; width: 13px; height: 13px; margin: 0; border: 1px solid var(--check-line); background: linear-gradient(135deg, #dcdcd7, #fff); cursor: var(--cur-hand, pointer); }
 .chk input:hover { box-shadow: inset 0 0 0 2px #fbc761; }
 .chk input:checked { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M6 0h1v3H6zM5 1h1v3H5zM4 2h1v3H4zM3 3h1v3H3zM2 2h1v3H2zM1 1h1v3H1zM0 0h1v3H0z' fill='%2321a121' transform='translate(0 1) scale(1 .85)'/%3E%3C/svg%3E") 2px 2px / 7px 7px no-repeat, linear-gradient(135deg, #dcdcd7, #fff); }
-.chk input:focus-visible + span { outline: 1px dotted #000; outline-offset: 2px; }
+.chk input:focus-visible + span { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
 .bd-send { margin-top: 24px; }
 .bd-side { min-width: 0; padding-top: 28px; border-top: 1px solid var(--paper-rule); }
 .bd-side h3 { margin: 0 0 12px; font: 700 14px/1.3 var(--display); color: #1a1a1a; }
@@ -482,7 +487,7 @@ img { max-width: 100%; }
 .bd-links a { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; align-items: center; margin: 0 -8px; padding: 8px; border-radius: 3px; color: #141414; text-decoration: none; }
 .bd-links a:hover, .bd-links a:active { background: var(--sel); color: #fff; }
 .bd-links a:hover small, .bd-links a:active small { color: #d9e2ff; }
-.bd-links a:focus-visible { outline: 1px dotted #000; outline-offset: -1px; }
+.bd-links a:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: -1px; }
 .bd-links .px { width: 24px; height: 24px; }
 .bd-links b { display: block; font: 700 14px/1.25 var(--ui); }
 .bd-links small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--muted); }
@@ -535,7 +540,7 @@ img { max-width: 100%; }
 .thumb:active .frame { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); }
 .thumb[aria-selected="true"] .frame { border-color: var(--sel); box-shadow: 0 0 0 1px var(--sel); }
 .thumb[aria-selected="true"] .name { background: var(--sel); color: #fff; text-decoration: none; }
-.files:focus-visible:not([data-quiet]) .thumb[aria-selected="true"] .name { outline: 1px dotted #fff; outline-offset: -1px; }
+.files:focus-visible:not([data-quiet]) .thumb[aria-selected="true"] .name { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: -1px; }
 .details { width: 100%; border-collapse: collapse; }
 .details th { position: sticky; top: 0; z-index: 1; padding: 0; background: var(--col-head); box-shadow: var(--col-head-edge); font-weight: 400; text-align: left; }
 .details th button { width: 100%; padding: 4px 8px; border: 0; background: none; text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 8px; white-space: nowrap; }
@@ -549,7 +554,7 @@ img { max-width: 100%; }
 .details tbody tr:not([aria-selected="true"]):hover td { color: var(--link); }
 .details tbody tr:not([aria-selected="true"]):hover td.nm span { text-decoration: underline; }
 .details tr[aria-selected="true"] td { background: var(--sel); color: #fff; }
-.files:focus-visible:not([data-quiet]) tr[aria-selected="true"] td.nm span { outline: 1px dotted #fff; outline-offset: 1px; }
+.files:focus-visible:not([data-quiet]) tr[aria-selected="true"] td.nm span { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: 1px; }
 
 /* ============================================================
    CASE STUDY PLAYER: a skinned window drawn after the Windows
@@ -588,7 +593,7 @@ img { max-width: 100%; }
 .pl-cb svg { fill: currentColor; }
 @media (hover: hover) { .pl-cb:hover, .orb:hover, .pl-key:hover { background: radial-gradient(circle at 36% 30%, #ffffff 0, #e3e4ff 42%, #9a9ccf 100%); } }
 .pl-cb:active, .orb:active, .pl-key:active { box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4); }
-.pl-caps :focus-visible, .pl-well :focus-visible { outline: 1px dotted #fff; outline-offset: 2px; }
+.pl-caps :focus-visible, .pl-well :focus-visible { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: 2px; }
 .orb { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 1px solid #62646e; display: grid; place-items: center;
   background: radial-gradient(circle at 36% 30%, #ffffff 0, #d6d7dd 42%, #9a9ca6 100%);
   box-shadow: inset 0 -2px 3px rgba(0, 0, 0, .25), 0 1px 0 rgba(255, 255, 255, .8); }
@@ -604,7 +609,7 @@ img { max-width: 100%; }
 .pl-select select { flex: 1; min-width: 0; height: 100%; padding: 0 24px 0 8px; border: 0; background: transparent; color: var(--lcd); font: 700 12px var(--ui); text-shadow: 0 0 6px rgba(99, 240, 107, .45); -webkit-appearance: none; appearance: none; outline: none; }
 .pl-select option { color: #000; background: #fff; text-shadow: none; }
 .pl-select .dd { position: absolute; right: 8px; top: 50%; margin-top: -2px; display: flex; color: var(--lcd); pointer-events: none; }
-.pl-select:has(select:focus-visible) { outline: 1px dotted #000; outline-offset: 2px; }
+.pl-select:has(select:focus-visible) { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
 .skin-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
 .skin-nav button, .skin-nav .off {
   flex: 0 0 auto; min-height: 40px; padding: 4px 8px;
@@ -900,7 +905,7 @@ img { max-width: 100%; }
 .pl-pending p { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: #3d3b34; }
 .pl-ask { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 16px; border: 1px solid #141414; border-radius: 4px; background: #fff; color: #141414; font: 700 14px/1.2 var(--read); }
 .pl-ask:hover { background: var(--face); }
-.pl-ask:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+.pl-ask:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
 /* the deck: a raised plate under the tray, one slim row so the screen gets the height: the transport, the timeline,
    the text size and the wordmark. The keys carry their names as tooltips instead of printed labels */
 .pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) auto auto; grid-template-areas: "keys tl vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
@@ -987,7 +992,7 @@ img { max-width: 100%; }
 }
 .nero::before { content: ""; position: absolute; left: 18px; right: 18px; top: 3px; height: 24px; border-radius: 22px 22px 60% 60% / 18px 18px 10px 10px; background: linear-gradient(180deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, .04)); pointer-events: none; }
 /* on the red and the dark screen XP's black dotted focus would vanish, so the skin draws it in white */
-.nero :focus-visible { outline: 1px dotted #fff; outline-offset: 2px; }
+.nero :focus-visible { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: 2px; }
 
 /* top: the slanted wordmark, the category combo in its socket, and the caption keys in a dark well like the player's */
 .nero-top { position: relative; flex: 0 0 46px; display: flex; align-items: center; gap: 10px; padding: 0 2px; touch-action: none; user-select: none; }
@@ -995,7 +1000,7 @@ img { max-width: 100%; }
 .nero-pick { position: relative; margin: 0 auto; height: 28px; min-width: 164px; display: flex; align-items: center; gap: 6px; padding: 0 3px 0 8px; border-radius: 4px; border: 1px solid #5a0b09; background: linear-gradient(#ffffff, #e2e2e2); color: #111; font: 700 12px var(--read);
   box-shadow: 0 0 0 2px #6c0d0b, 0 1px 0 2px rgba(255, 255, 255, .3), inset 0 1px rgba(255, 255, 255, .9); }
 .nero-pick:hover { box-shadow: 0 0 0 2px #6c0d0b, 0 1px 0 2px rgba(255, 255, 255, .3), inset 0 0 0 1px var(--hover-glow-amber, #fbc761), inset 0 0 4px var(--hover-glow-gold, #e5a01a); }
-.nero-pick:focus-within { outline: 1px dotted #fff; outline-offset: 4px; }
+.nero-pick:focus-within { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: 4px; }
 .nero-pick .px { width: 16px; height: 16px; }
 /* the select covers the whole field, the red arrow key under it is only drawn */
 .nero-pick select { flex: 1; height: 100%; margin-right: -24px; padding: 0 24px 0 0; border: 0; background: none; color: inherit; font: inherit; outline: none; appearance: none; -webkit-appearance: none; cursor: var(--cur-hand, pointer); position: relative; z-index: 1; }
@@ -1089,6 +1094,7 @@ img { max-width: 100%; }
 .dlg .btns { display: flex; justify-content: flex-end; gap: 6px; }
 .dlg .note { color: #5a5a5a; }
 .dlg.credits { max-width: 360px; }
+.credits-mark { flex: none; width: 40px; height: 40px; image-rendering: pixelated; }
 .credit-line { margin: 0; padding: 8px 10px; background: #fff; box-shadow: var(--well); line-height: 1.45; }
 .credit-line a { color: var(--link); }
 /* Picture Viewer: the picture on white with its name right under it, XP's toolbar on the face strip at the
@@ -1133,7 +1139,7 @@ img { max-width: 100%; }
 .gm-stage { position: absolute; inset: 1px; display: grid; place-items: center; overflow: hidden; background: #000; }
 .gm-stage > canvas, .gm-stage > .gm-layer { grid-area: 1 / 1; }
 .gm-canvas { display: block; }
-.gm-canvas:focus-visible { outline: 1px dotted #fff; outline-offset: -4px; }
+.gm-canvas:focus-visible { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: -4px; }
 .gm-layer { position: relative; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); pointer-events: none; }
 /* the title's Start menu: the whole game menu, risen from the in-game taskbar's start button (--gm-floor is the
    canvas taskbar's height, --gm-k the canvas scale; both set by the game). It is the portfolio's own Start menu
@@ -1181,7 +1187,7 @@ img { max-width: 100%; }
 /* the title's start button is painted on the canvas taskbar; this invisible button over it takes the clicks and the
    keyboard, and the canvas draws its states (up, lit, in) */
 .gm-sbtn { pointer-events: auto; position: absolute; left: 0; bottom: 0; z-index: 2; width: calc(var(--gm-k, 1) * 140px); height: var(--gm-floor, 64px); margin: 0; padding: 0; border: 0; background: none; cursor: var(--cur-arrow, default); }
-.gm-sbtn:focus-visible { outline: 1px dotted #fff; outline-offset: calc(var(--gm-k, 1) * -10px); }
+.gm-sbtn:focus-visible { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: calc(var(--gm-k, 1) * -10px); }
 /* a card is as tall as what it holds, up to --front-h (the game sets it near 60% of the stage). Beside the board the
    guide takes the board's height and scrolls its page; a lone card takes the whole height */
 .gm-fcard { pointer-events: auto; display: flex; flex-direction: column; min-width: 0; min-height: min(220px, var(--front-h, 300px)); max-height: var(--front-h, 300px); padding: 0 3px 3px; border-radius: 8px 8px 0 0; background: var(--face); color: #000; font: 12px/1.35 var(--ui); box-shadow: var(--frame), 0 16px 28px -16px rgba(0, 0, 0, .6); }
@@ -1236,15 +1242,15 @@ img { max-width: 100%; }
 .gm-join { margin: 0; padding: 4px 8px; border: 1px solid var(--shade); background: var(--tip); }
 .gm-fb-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 8px; color: var(--muted); }
 .gm-link { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; cursor: var(--cur-hand, pointer); }
-.gm-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+.gm-link:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 1px; }
 /* the guide: XP tabs (the selected one lit by Tab Highlight over Orange Rule) over one scrolling page */
 .gm-tabs { position: relative; z-index: 1; display: flex; margin: 6px 6px -1px; }
 .gm-tab { padding: 4px 10px; border: 1px solid var(--tab-line); border-bottom: 0; border-radius: 3px 3px 0 0; background: var(--tab-face); color: #000; font: 12px var(--ui); cursor: var(--cur-hand, pointer); }
 .gm-tab + .gm-tab { margin-left: -1px; }
 .gm-tab[aria-selected="true"] { position: relative; padding-bottom: 5px; background: #fcfcfe; box-shadow: inset 0 2px #ffc83c, inset 0 3px var(--orange-rule); }
-.gm-tab:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
+.gm-tab:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: -4px; }
 .gm-pane { flex: 1; min-height: 0; overflow-y: auto; margin: 0 6px 6px; padding: 8px; border: 1px solid var(--tab-line); background: #fcfcfe; }
-.gm-pane:focus-visible { outline: 1px dotted #000; outline-offset: -3px; }
+.gm-pane:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: -3px; }
 .gm-pane > .gm-podium, .gm-pane > .gm-ranks, .gm-pane > .gm-join { margin-bottom: 8px; }
 .gm-bosses, .gm-items, .gm-moves { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .gm-bosses li, .gm-items li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px; align-items: start; }
@@ -1352,7 +1358,7 @@ img { max-width: 100%; }
 .pet[hidden] { display: none; }
 .pet canvas { display: block; width: 64px; height: 96px; }
 .pet-hit { position: absolute; left: 18px; top: 20px; width: 28px; height: 58px; padding: 0; border: 0; background: none; pointer-events: auto; cursor: var(--cur-hand, pointer); }
-.pet-hit:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
+.pet-hit:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 1px; }
 /* what he says: an XP balloon over his head */
 .pet-say { position: absolute; bottom: calc(100% - 12px); left: 0; margin: 0; width: max-content; max-width: 210px; padding: 4px 8px 8px; background: var(--tip); color: #000; border: 1px solid #000; border-radius: 7px; box-shadow: var(--menu-shadow); font: 12px/1.35 var(--ui); pointer-events: none; }
 .pet-say { text-wrap: pretty; }
@@ -1408,7 +1414,7 @@ img { max-width: 100%; }
 .dev-cb svg { fill: currentColor; }
 .dev-cb:hover { background: radial-gradient(circle at 36% 30%, #fff 0, #c9c5c1 55%, #a39f9b 100%); }
 .dev-cb:active { box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4); }
-.dev-caps :focus-visible { outline: 1px dotted #fff; outline-offset: 2px; }
+.dev-caps :focus-visible { outline: 1px dotted #fff; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #fff); outline-offset: 2px; }
 .dev-keys { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
 .dev-kg { display: grid; justify-items: center; gap: 8px; }
 /* the keys' printed names in black, which holds 4.5:1 on the plastic where they sit */
@@ -1447,7 +1453,7 @@ img { max-width: 100%; }
 /* a tray balloon whose body is one button beside its close box: the Recycle Bin hint and the screensaver's offer */
 .tray-note .note-go { display: grid; gap: 4px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: var(--cur-hand, pointer); }
 .tray-note .note-go b { margin-bottom: 0; }
-.tray-note .note-go:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+.tray-note .note-go:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
 /* on a touch screen a balloon's close box keeps its drawn cross inside a 44px press, as Home's mail balloon does (Touch
    Size Rule); the stickman's install note has the same box */
 @media (max-width: 720px), (pointer: coarse) {

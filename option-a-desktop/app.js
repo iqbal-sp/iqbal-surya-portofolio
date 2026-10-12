@@ -30,7 +30,7 @@
       openPortfolio: 'View selected work', downloadCV: 'Download resume', contactMe: 'Contact me',
       history: 'Career history',
       to: 'To', worklog: 'Experience', worklogLead: 'My experience across agencies, product teams, and freelance work.', present: 'Present', ft: 'Full-time', fl: 'Freelance', projects: 'Personal projects', projectsLead: 'Things I have made and explored outside client work.', visitProject: 'Visit project', diskLabel: 'Side projects', offClock: 'Off the clock', offClockText: 'Outside work, I enjoy traveling, trying different food, and taking a break with coffee or a book.', myPictures: 'My Pictures', build: 'Have a project in mind?', buildLead: 'Have a website or app to design? Select what you need help with and send me a short brief.', need: 'What can I help with?', sendMsg: 'Write a project brief', reachDirect: 'Or reach me directly', emailLabel: 'Email', mailSubject: 'Project inquiry', mailBody: (list) => `Hi Iqbal,\n\n${list ? `I’d like help with: ${list}.\n\n` : ''}A bit about the project:\n`, factWhere: 'Based in', factExp: 'Experience', factLang: 'Languages', sinceYear: (y) => `UI design since ${y}`, also: 'Also',
-      footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsIcons: 'Icons: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0. Recoloured here as two-tone icons.',
+      footer: '© 2026 Iqbal Surya', creditsTitle: 'About this portfolio', creditsVer: 'Version 2026 · Made in Indonesia', creditsBy: 'The portfolio of Iqbal Surya Pratama', creditsIcons: 'Icons: Pixel Icon Library by HackerNoon, licensed under CC BY 4.0. Recoloured here as two-tone icons.',
       file: 'File', view: 'View', help: 'Help', play: 'Play', up: 'Up',
       address: 'Address', myDocs: 'My Documents', thumbnails: 'Thumbnails', details: 'Details', open: 'Open',
       arrangeNo: 'Arrange by Number', arrangeName: 'Arrange by Name', aboutPortfolio: 'About this portfolio',
@@ -91,7 +91,7 @@
       openPortfolio: "Lihat karya pilihan", downloadCV: 'Unduh CV', contactMe: 'Hubungi saya',
       history: 'Riwayat karier',
       to: 'Untuk', worklog: "Pengalaman", worklogLead: "Pengalaman saya di agensi, tim produk, dan proyek freelance.", present: "Saat ini", ft: 'Full-time', fl: 'Freelance', projects: "Proyek pribadi", projectsLead: "Karya dan eksplorasi saya di luar proyek klien.", visitProject: 'Kunjungi proyek', diskLabel: "Proyek pribadi", offClock: 'Di luar jam kerja', offClockText: "Di luar pekerjaan, saya suka jalan-jalan, mencoba makanan baru, dan bersantai dengan kopi atau buku.", myPictures: "Foto Saya", build: "Punya rencana website atau aplikasi?", buildLead: "Butuh bantuan mendesain website atau aplikasi? Pilih kebutuhan Anda, lalu kirim brief singkat.", need: "Apa yang bisa saya bantu?", sendMsg: "Tulis brief proyek", reachDirect: 'Atau hubungi saya langsung', emailLabel: 'Email', mailSubject: "Diskusi proyek", mailBody: (list) => `Halo Iqbal,\n\n${list ? `Saya butuh bantuan untuk: ${list}.\n\n` : ''}Tentang proyeknya:\n`, factWhere: 'Domisili', factExp: 'Pengalaman', factLang: 'Bahasa', sinceYear: (y) => `Desain UI sejak ${y}`, also: 'Lainnya',
-      footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsIcons: 'Ikon: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0. Di sini diwarnai ulang menjadi ikon dua warna.',
+      footer: '© 2026 Iqbal Surya', creditsTitle: 'Tentang portofolio ini', creditsVer: 'Versi 2026 · Dibuat di Indonesia', creditsBy: 'Portofolio Iqbal Surya Pratama', creditsIcons: 'Ikon: Pixel Icon Library oleh HackerNoon, berlisensi CC BY 4.0. Di sini diwarnai ulang menjadi ikon dua warna.',
       file: 'Berkas', view: 'Tampilan', help: 'Bantuan', play: 'Putar', up: 'Naik',
       address: 'Alamat', myDocs: 'Dokumen Saya', thumbnails: 'Gambar mini', details: 'Rincian', open: 'Buka',
       arrangeNo: 'Urutkan menurut Nomor', arrangeName: 'Urutkan menurut Nama', aboutPortfolio: 'Tentang portofolio ini',
@@ -2214,7 +2214,7 @@
   }
   function buildCredits() {
     return `<div class="win-body"><div class="dlg credits">
-      <div class="dlg-row">${I('computer', 32)}<div><p><b>${esc(PF.owner.name)} - Portfolio XP</b></p><p>${esc(u('creditsVer'))}</p></div></div>
+      <div class="dlg-row"><img class="credits-mark" src="../asset/icon/phosphor-mark.svg?v=1" alt="" width="40" height="40"><div><p><b>Phosphor OS</b></p><p>${esc(u('creditsVer'))}</p><p>${esc(u('creditsBy'))}</p></div></div>
       <p class="credit-line"><a href="https://pixeliconlibrary.com" target="_blank" rel="noopener">Pixel Icon Library</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a><br>${esc(u('creditsIcons'))}</p>
       <div class="btns"><button class="btn default" data-wact="close">${esc(u('ok'))}</button></div>
     </div></div>`;
