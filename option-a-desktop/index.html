@@ -46,10 +46,10 @@
     .boot-screen {
       position: fixed; inset: 0; z-index: 10000;
       display: none; overflow: hidden; background: #141414;
-      cursor: progress; user-select: none; -webkit-user-select: none;
+      cursor: var(--cur-busy, progress); user-select: none; -webkit-user-select: none;
     }
     html.booting .boot-screen { display: block; }
-    .boot-screen.ready { cursor: default; }
+    .boot-screen.ready { cursor: var(--cur-arrow, default); }
     /* the desktop builds and loads behind the screen but is not painted until the screen starts to leave; then it
        comes up in XP's order: the wallpaper, the taskbar and icons, and the startup window last (boot.js) */
     html.booting:not(.boot-out) :is(.desktop, .taskbar) { visibility: hidden; }
@@ -238,16 +238,18 @@
 
   <!-- the loading screen first, so it can count everything after it, and draw before the stylesheets have arrived;
        the scripts after them wait for them -->
-  <script src="boot.js?v=14" fetchpriority="high"></script>
-  <link rel="stylesheet" href="style.css?v=171">
-  <link rel="stylesheet" href="home.css?v=134">
+  <script src="boot.js?v=15" fetchpriority="high"></script>
+  <link rel="stylesheet" href="cursors.css?v=1">
+  <link rel="stylesheet" href="style.css?v=172">
+  <link rel="stylesheet" href="home.css?v=135">
   <link rel="stylesheet" href="../asset/Home/process/xp-window/crt.css?v=2">
-  <link rel="stylesheet" href="winamp.css?v=1">
+  <link rel="stylesheet" href="winamp.css?v=2">
   <script src="../shared/content.js?v=118"></script>
   <script src="../shared/cases.js?v=25"></script>
   <script src="icons.js?v=60"></script>
   <script src="winamp.js?v=1"></script>
-  <script src="app.js?v=201"></script>
+  <script src="sfx.js?v=1"></script>
+  <script src="app.js?v=202"></script>
   <script src="process-crt.js?v=1"></script>
   <!-- Live wallpaper (three.js), with the static webp on .desktop as its fallback. -->
   <script type="module" src="wallpaper3d.js?v=18"></script>

@@ -41,7 +41,7 @@ function loadStyles() {
   if (!styles) styles = (async () => {
     // The desktop already has these tokens and controls; load them once on standalone pages.
     if (!getComputedStyle(document.documentElement).getPropertyValue('--cap').trim()) await sheet('./xp-system.css?v=1');
-    await sheet('./access-request.css?v=2');
+    await sheet('./access-request.css?v=3');
   })().catch((error) => { styles = null; throw error; });
   return styles;
 }

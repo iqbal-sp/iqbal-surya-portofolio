@@ -4,7 +4,7 @@
 .access-dialog::backdrop { background: transparent; }
 .access-dialog [hidden] { display: none !important; }
 .access-dialog button, .access-dialog input, .access-dialog textarea { font: inherit; }
-.access-dialog button { cursor: default; }
+.access-dialog button { cursor: var(--cur-arrow, default); }
 .access-dialog :focus { outline: none; }
 .access-dialog :focus-visible { outline: 1px dotted currentColor; outline-offset: -4px; }
 .access-bar { display: flex; align-items: center; gap: 5px; height: 30px; margin: 0 -3px; padding: 0 5px 0 7px; border-radius: 7px 7px 0 0; background: var(--cap); color: #fff; font: 700 14px/1 var(--ui); text-shadow: 1px 1px var(--cap-shadow); user-select: none; }
@@ -27,7 +27,7 @@
 .access-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
 .access-dialog .btn { min-height: 32px; }
 .access-dialog .btn .px { width: 16px; height: 16px; }
-.access-dialog button[aria-disabled="true"] { cursor: progress; }
+.access-dialog button[aria-disabled="true"] { cursor: var(--cur-busy, progress); }
 .access-fix { margin-top: 8px; }
 .access-fallback { margin-top: 12px; }
 .access-draft { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }

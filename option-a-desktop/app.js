@@ -208,6 +208,8 @@
   let activeId = null;
 
   const rectOf = (el) => { if (!el) return null; const r = el.getBoundingClientRect(); return r.width ? { x: r.left, y: r.top, w: r.width, h: r.height } : null; };
+  // the desktop's sounds (sfx.js): quiet, through the tray's volume, and none while the loading screen covers the desktop
+  const sfx = (name) => { if (PF.sfx && !document.documentElement.classList.contains('booting')) PF.sfx.play(name); };
 
   /* focus: where the keys go in a window, as in XP the active window's page takes Page Down, Space and the arrows */
   // the last input was a key: only then does focus handed over by the page show its ring (data-quiet hides it)
@@ -421,6 +423,7 @@
       el.style.top = Math.round((H - el.offsetHeight) / 2.4) + 'px';
     }
     renderTasks();
+    sfx(def.dialog ? 'dialog' : 'open');
     const target = rectOf(el);
     el.style.visibility = 'hidden';
     if (later) requestAnimationFrame(() => requestAnimationFrame(build));
@@ -471,6 +474,7 @@
 
   function closeWin(w) {
     if (w.def.onClose) w.def.onClose(w);
+    sfx('close');
     const r = rectOf(w.el);
     w.el.remove();
     wins.delete(w.id);
@@ -488,6 +492,7 @@
     const btn = $(`[data-task="${w.id}"]`, tasksEl);
     w.min = true;
     w.el.hidden = true;
+    sfx('min');
     if (activeId === w.id) activeId = null;
     zoom(from, rectOf(btn), () => {});
     const next = topVisible();
@@ -498,6 +503,7 @@
     const btn = $(`[data-task="${w.id}"]`, tasksEl);
     w.min = false;
     w.el.hidden = false;
+    sfx('restore');
     const to = rectOf(w.el);
     w.el.style.visibility = 'hidden';
     zoom(from || rectOf(btn), to, () => { w.el.style.visibility = ''; focusWin(w, true); });
@@ -509,6 +515,7 @@
     const ns = $$('[data-keep]', w.el), ps = ns.map(placeOf), a = rectOf(w.el);
     w.max = !w.max;
     w.el.classList.toggle('max', w.max);
+    sfx(w.max ? 'restore' : 'min');
     ns.forEach((n, i) => putPlace(n, ps[i]));
     // XP drew the outline for maximise and restore as well: the window shows at its new size once it lands
     if (!reduceMotion && a) { w.el.style.visibility = 'hidden'; zoom(a, rectOf(w.el), () => { w.el.style.visibility = ''; }); }
@@ -638,6 +645,7 @@
     closeMenu();
     renderStart();
     startMenu.hidden = false;
+    sfx('menu');
     startBtn.setAttribute('aria-expanded', 'true');
     const first = $('.sm-item', startMenu);
     if (first) first.focus({ preventScroll: true });
@@ -2358,7 +2366,7 @@
     if (!saverScript) {
       saverScript = new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = 'screensaver.js?v=8';
+        s.src = 'screensaver.js?v=9';
         s.onload = () => resolve(window.ScreenSaverXP);
         s.onerror = () => { saverScript = null; s.remove(); reject(new Error('screensaver.js did not load')); };
         document.head.appendChild(s);
@@ -2739,7 +2747,7 @@
     contact: (a) => openWin('contact', { from: rectOf(a) }),
     'request-access': async (a) => {
       try {
-        const { openAccessRequest } = await import('../shared/access-request.js?v=3');
+        const { openAccessRequest } = await import('../shared/access-request.js?v=4');
         await openAccessRequest({ lang, email: PF.owner.email });
       } catch { location.href = a.href; }
     },
@@ -3127,6 +3135,7 @@
     s.addEventListener('keydown', (e) => { if (!['Shift', 'Control', 'Alt', 'Meta', 'Tab'].includes(e.key)) { e.preventDefault(); again(); } });
     document.body.appendChild(s);
     s.focus({ preventScroll: true });
+    sfx('shutdown');
   }
   // XP's Restart closes everything: each window's own close runs (a game's loop stops), and the address drops the last
   // window's hash so the fresh desktop opens on Home, not on what was left open

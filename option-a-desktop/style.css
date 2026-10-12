@@ -24,10 +24,10 @@ body {
   font: 12px/1.3 var(--ui);
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  cursor: default;
+  cursor: var(--cur-arrow, default);
 }
 button, input, select, textarea { font: inherit; color: inherit; }
-button { cursor: default; }
+button { cursor: var(--cur-arrow, default); }
 a { color: var(--link); }
 ::selection { background: var(--sel); color: #fff; }
 img { max-width: 100%; }
@@ -105,7 +105,7 @@ img { max-width: 100%; }
 .page-link:focus-visible { outline-offset: 1px; }
 /* the hand on the page, the arrow on the system: Home and About read like web pages, so everything that acts on
    them takes the hand; the Luna chrome keeps XP's arrow, except the hyperlinks XP itself drew with the hand */
-:is(.home, .doc) :is(button, select, label.chk, [role="button"]):not(:disabled), .tp-links button, .pl-ask { cursor: pointer; }
+:is(.home, .doc) :is(button, select, label.chk, [role="button"]):not(:disabled), .tp-links button, .pl-ask { cursor: var(--cur-hand, pointer); }
 
 .radio { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
 .radio input { appearance: none; width: 13px; height: 13px; margin: 0; border-radius: 50%; border: 1px solid var(--check-line); background: linear-gradient(135deg, #dcdcd7, #fff); display: grid; place-items: center; }
@@ -148,7 +148,7 @@ img { max-width: 100%; }
 .dicon {
   width: 80px; padding: 3px 2px; background: none; border: 0; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   display: flex; flex-direction: column; align-items: center; gap: 5px;
-  color: #fff; text-align: center; font: 12px/1.25 var(--ui); cursor: pointer;
+  color: #fff; text-align: center; font: 12px/1.25 var(--ui); cursor: var(--cur-hand, pointer);
 }
 .dicon .px { width: 32px; height: 32px; filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, .35)); }
 .dicon .lbl { padding: 0 3px; border-radius: 1px; text-shadow: 1px 1px 1px #000, 0 0 3px rgba(0, 0, 0, .6); }
@@ -181,7 +181,7 @@ img { max-width: 100%; }
 .win-body { flex: 1; min-height: 0; overflow: auto; container-type: inline-size; position: relative; }
 .win-body.sunk { background: #fff; box-shadow: var(--well); padding: 1px; }
 /* the XP size grip: a triangle of raised dots */
-.resize { position: absolute; right: 3px; bottom: 3px; width: 12px; height: 12px; cursor: nwse-resize; touch-action: none;
+.resize { position: absolute; right: 3px; bottom: 3px; width: 12px; height: 12px; cursor: var(--cur-nwse, nwse-resize); touch-action: none;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' shape-rendering='crispEdges'%3E%3Cg fill='%23fff'%3E%3Crect x='9' y='1' width='2' height='2'/%3E%3Crect x='5' y='5' width='2' height='2'/%3E%3Crect x='9' y='5' width='2' height='2'/%3E%3Crect x='1' y='9' width='2' height='2'/%3E%3Crect x='5' y='9' width='2' height='2'/%3E%3Crect x='9' y='9' width='2' height='2'/%3E%3C/g%3E%3Cg fill='%23aca899'%3E%3Crect x='8' y='0' width='2' height='2'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='8' y='4' width='2' height='2'/%3E%3Crect x='0' y='8' width='2' height='2'/%3E%3Crect x='4' y='8' width='2' height='2'/%3E%3Crect x='8' y='8' width='2' height='2'/%3E%3C/g%3E%3C/svg%3E") no-repeat; }
 
 /* menubar + dropdown */
@@ -470,8 +470,8 @@ img { max-width: 100%; }
 .bd-need { min-inline-size: 0; margin: 28px 0 0; padding: 12px 20px 16px; border: 1px solid #d0d0bf; border-radius: 4px; }
 .bd-need legend { padding: 0 6px; margin-left: -6px; font: 700 12px/1.2 var(--ui); color: var(--group-ink); }
 .bd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 20px; }
-.chk { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; cursor: pointer; }
-.chk input { appearance: none; -webkit-appearance: none; flex: none; width: 13px; height: 13px; margin: 0; border: 1px solid var(--check-line); background: linear-gradient(135deg, #dcdcd7, #fff); cursor: pointer; }
+.chk { display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; cursor: var(--cur-hand, pointer); }
+.chk input { appearance: none; -webkit-appearance: none; flex: none; width: 13px; height: 13px; margin: 0; border: 1px solid var(--check-line); background: linear-gradient(135deg, #dcdcd7, #fff); cursor: var(--cur-hand, pointer); }
 .chk input:hover { box-shadow: inset 0 0 0 2px #fbc761; }
 .chk input:checked { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath d='M6 0h1v3H6zM5 1h1v3H5zM4 2h1v3H4zM3 3h1v3H3zM2 2h1v3H2zM1 1h1v3H1zM0 0h1v3H0z' fill='%2321a121' transform='translate(0 1) scale(1 .85)'/%3E%3C/svg%3E") 2px 2px / 7px 7px no-repeat, linear-gradient(135deg, #dcdcd7, #fff); }
 .chk input:focus-visible + span { outline: 1px dotted #000; outline-offset: 2px; }
@@ -998,7 +998,7 @@ img { max-width: 100%; }
 .nero-pick:focus-within { outline: 1px dotted #fff; outline-offset: 4px; }
 .nero-pick .px { width: 16px; height: 16px; }
 /* the select covers the whole field, the red arrow key under it is only drawn */
-.nero-pick select { flex: 1; height: 100%; margin-right: -24px; padding: 0 24px 0 0; border: 0; background: none; color: inherit; font: inherit; outline: none; appearance: none; -webkit-appearance: none; cursor: pointer; position: relative; z-index: 1; }
+.nero-pick select { flex: 1; height: 100%; margin-right: -24px; padding: 0 24px 0 0; border: 0; background: none; color: inherit; font: inherit; outline: none; appearance: none; -webkit-appearance: none; cursor: var(--cur-hand, pointer); position: relative; z-index: 1; }
 .nero-pick select:focus-visible { outline: none; }
 .nero-pick .dd { flex: none; width: 20px; height: 20px; display: grid; place-items: center; border-radius: 3px; border: 1px solid #5a0b09; color: #fff; background: linear-gradient(#e95a53, #bf2721 55%, #a31a15); box-shadow: inset 0 1px rgba(255, 255, 255, .5); }
 .nero-pick .dd svg { width: 8px; height: 14px; transform: rotate(90deg); }
@@ -1022,7 +1022,7 @@ img { max-width: 100%; }
 }
 .nero-cats { display: flex; flex-wrap: wrap; gap: 6px 8px; padding-bottom: 12px; border-bottom: 1px solid rgba(0, 0, 0, .5); box-shadow: 0 1px rgba(255, 255, 255, .1); }
 /* one width for every tab, so the icons sit on an even rhythm whatever the label length */
-.nero-cat { width: 68px; padding: 6px 4px 4px; border: 1px solid transparent; border-radius: 10px; background: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: .8; cursor: pointer; transition: background-color .15s, opacity .15s; }
+.nero-cat { width: 68px; padding: 6px 4px 4px; border: 1px solid transparent; border-radius: 10px; background: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: .8; cursor: var(--cur-hand, pointer); transition: background-color .15s, opacity .15s; }
 .nero-cat .px { width: 40px; height: 40px; filter: drop-shadow(0 0 1px rgba(255, 255, 255, .6)) drop-shadow(0 3px 2px rgba(0, 0, 0, .5)); transition: transform .15s; }
 .nero-cat span { font-weight: 700; font-size: 12px; padding-bottom: 2px; border-bottom: 2px solid transparent; }
 .nero-cat:hover { opacity: 1; background-color: rgba(255, 255, 255, .06); }
@@ -1034,7 +1034,7 @@ img { max-width: 100%; }
 
 /* the actions: raised strips, the icon in a dark socket, a silver key on the right naming what the row does */
 .nero-actions { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
-.nero-act { width: 100%; min-height: 56px; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 5px 12px 5px 5px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 12px; color: #fff; text-decoration: none; text-align: left; font: 700 14px var(--read); cursor: pointer;
+.nero-act { width: 100%; min-height: 56px; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 5px 12px 5px 5px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 12px; color: #fff; text-decoration: none; text-align: left; font: 700 14px var(--read); cursor: var(--cur-hand, pointer);
   background: linear-gradient(180deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .02)); box-shadow: inset 0 1px rgba(255, 255, 255, .14), 0 1px 2px rgba(0, 0, 0, .25); transition: background-color .15s, box-shadow .15s; }
 .nero-act:hover { background-color: rgba(255, 255, 255, .06); box-shadow: inset 0 0 0 1px rgba(251, 199, 97, .6), inset 0 0 10px rgba(251, 199, 97, .16), 0 1px 2px rgba(0, 0, 0, .25); }
 .nero-act:active { transform: translateY(1px); background: rgba(0, 0, 0, .14); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4); }
@@ -1068,7 +1068,7 @@ img { max-width: 100%; }
 .nero-round { margin-left: auto; display: flex; align-items: flex-end; gap: 14px; }
 .nero-key { display: grid; justify-items: center; gap: 5px; }
 .nero-key small { font: 700 11px/1 var(--read); color: #ffd9d7; text-shadow: 0 1px rgba(0, 0, 0, .45); }
-.nero-round button, .nero-round .hot { width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 1px solid #3a0504; display: grid; place-items: center; cursor: pointer;
+.nero-round button, .nero-round .hot { width: 48px; height: 48px; padding: 0; border-radius: 50%; border: 1px solid #3a0504; display: grid; place-items: center; cursor: var(--cur-hand, pointer);
   background: radial-gradient(circle at 36% 30%, #ffffff, #e0e0e0 42%, #8d8d8d); box-shadow: 0 0 0 3px #6c0d0b, 0 0 0 4px rgba(255, 255, 255, .22), 0 3px 4px 2px rgba(0, 0, 0, .4); }
 .nero-round .hot { background: radial-gradient(circle at 36% 30%, #ffe2a8, #ff8a2a 45%, #b0260b); }
 .nero-round button:hover { background: radial-gradient(circle at 36% 30%, #ffffff, #e0e0e0 55%, #8d8d8d); box-shadow: 0 0 0 3px #6c0d0b, 0 0 0 4px rgba(255, 255, 255, .22), 0 3px 4px 2px rgba(0, 0, 0, .4), inset 0 0 0 2px rgba(251, 199, 97, .85); }
@@ -1180,7 +1180,7 @@ img { max-width: 100%; }
 .gm-dlg { position: relative; z-index: 2; }
 /* the title's start button is painted on the canvas taskbar; this invisible button over it takes the clicks and the
    keyboard, and the canvas draws its states (up, lit, in) */
-.gm-sbtn { pointer-events: auto; position: absolute; left: 0; bottom: 0; z-index: 2; width: calc(var(--gm-k, 1) * 140px); height: var(--gm-floor, 64px); margin: 0; padding: 0; border: 0; background: none; cursor: default; }
+.gm-sbtn { pointer-events: auto; position: absolute; left: 0; bottom: 0; z-index: 2; width: calc(var(--gm-k, 1) * 140px); height: var(--gm-floor, 64px); margin: 0; padding: 0; border: 0; background: none; cursor: var(--cur-arrow, default); }
 .gm-sbtn:focus-visible { outline: 1px dotted #fff; outline-offset: calc(var(--gm-k, 1) * -10px); }
 /* a card is as tall as what it holds, up to --front-h (the game sets it near 60% of the stage). Beside the board the
    guide takes the board's height and scrolls its page; a lone card takes the whole height */
@@ -1235,11 +1235,11 @@ img { max-width: 100%; }
 /* under the board: a cream line while the player's name isn't on it, then the count and See all */
 .gm-join { margin: 0; padding: 4px 8px; border: 1px solid var(--shade); background: var(--tip); }
 .gm-fb-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 8px; color: var(--muted); }
-.gm-link { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; cursor: pointer; }
+.gm-link { padding: 0; border: 0; background: none; color: var(--link); font: inherit; text-decoration: underline; cursor: var(--cur-hand, pointer); }
 .gm-link:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
 /* the guide: XP tabs (the selected one lit by Tab Highlight over Orange Rule) over one scrolling page */
 .gm-tabs { position: relative; z-index: 1; display: flex; margin: 6px 6px -1px; }
-.gm-tab { padding: 4px 10px; border: 1px solid var(--tab-line); border-bottom: 0; border-radius: 3px 3px 0 0; background: var(--tab-face); color: #000; font: 12px var(--ui); cursor: pointer; }
+.gm-tab { padding: 4px 10px; border: 1px solid var(--tab-line); border-bottom: 0; border-radius: 3px 3px 0 0; background: var(--tab-face); color: #000; font: 12px var(--ui); cursor: var(--cur-hand, pointer); }
 .gm-tab + .gm-tab { margin-left: -1px; }
 .gm-tab[aria-selected="true"] { position: relative; padding-bottom: 5px; background: #fcfcfe; box-shadow: inset 0 2px #ffc83c, inset 0 3px var(--orange-rule); }
 .gm-tab:focus-visible { outline: 1px dotted #000; outline-offset: -4px; }
@@ -1351,7 +1351,7 @@ img { max-width: 100%; }
 .pet { position: fixed; left: 0; bottom: calc(var(--tb-h) - 18px); z-index: 9100; width: 64px; height: 96px; pointer-events: none; will-change: transform; }
 .pet[hidden] { display: none; }
 .pet canvas { display: block; width: 64px; height: 96px; }
-.pet-hit { position: absolute; left: 18px; top: 20px; width: 28px; height: 58px; padding: 0; border: 0; background: none; pointer-events: auto; cursor: pointer; }
+.pet-hit { position: absolute; left: 18px; top: 20px; width: 28px; height: 58px; padding: 0; border: 0; background: none; pointer-events: auto; cursor: var(--cur-hand, pointer); }
 .pet-hit:focus-visible { outline: 1px dotted #000; outline-offset: 1px; }
 /* what he says: an XP balloon over his head */
 .pet-say { position: absolute; bottom: calc(100% - 12px); left: 0; margin: 0; width: max-content; max-width: 210px; padding: 4px 8px 8px; background: var(--tip); color: #000; border: 1px solid #000; border-radius: 7px; box-shadow: var(--menu-shadow); font: 12px/1.35 var(--ui); pointer-events: none; }
@@ -1368,7 +1368,7 @@ img { max-width: 100%; }
 .pet-note b { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
 .pet-note p { margin: 0; }
 /* XP's balloon close box: a drawn cross that raises a hairline box under the pointer */
-.pet-x { position: absolute; top: 5px; right: 6px; width: 16px; height: 16px; padding: 0; border: 1px solid transparent; border-radius: 2px; background: none; cursor: pointer; }
+.pet-x { position: absolute; top: 5px; right: 6px; width: 16px; height: 16px; padding: 0; border: 1px solid transparent; border-radius: 2px; background: none; cursor: var(--cur-hand, pointer); }
 .pet-x::before, .pet-x::after { content: ""; position: absolute; left: 3px; right: 3px; top: 6.5px; height: 1.5px; background: #000; }
 .pet-x::before { transform: rotate(45deg); }
 .pet-x::after { transform: rotate(-45deg); }
@@ -1414,7 +1414,7 @@ img { max-width: 100%; }
 /* the keys' printed names in black, which holds 4.5:1 on the plastic where they sit */
 .dev-kg small { font: 700 12px/16px var(--ui); color: #000; white-space: nowrap; }
 .dev-kg small span { font-weight: 400; }
-.dev-k, .dev-go { position: relative; display: grid; place-items: center; padding: 0; cursor: pointer; transition: transform .06s ease; }
+.dev-k, .dev-go { position: relative; display: grid; place-items: center; padding: 0; cursor: var(--cur-hand, pointer); transition: transform .06s ease; }
 .dev-k { width: 64px; height: 44px; border-radius: 22px; border: 1px solid #3c3734; color: #2a2622; background: linear-gradient(180deg, #cfcbc7, #b0aca8 55%, #98948f); box-shadow: inset 0 1px rgba(255, 255, 255, .6), 0 3px 0 #45403c, 0 6px 8px rgba(0, 0, 0, .35); }
 .dev-go { width: 64px; height: 64px; margin-top: 12px; border-radius: 50%; border: 1px solid #3a2419; color: #24130c; background: radial-gradient(circle at 40% 32%, #de7348, #c4552e 55%, #8c391b); box-shadow: 0 3px 0 #5c2814, 0 7px 10px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .25); }
 .dev-go::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 1px dotted rgba(40, 14, 4, .55); }
@@ -1445,7 +1445,7 @@ img { max-width: 100%; }
 }
 .px-moon { --ic-fill: var(--ic-blue); }
 /* a tray balloon whose body is one button beside its close box: the Recycle Bin hint and the screensaver's offer */
-.tray-note .note-go { display: grid; gap: 4px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.tray-note .note-go { display: grid; gap: 4px; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: var(--cur-hand, pointer); }
 .tray-note .note-go b { margin-bottom: 0; }
 .tray-note .note-go:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
 /* on a touch screen a balloon's close box keeps its drawn cross inside a 44px press, as Home's mail balloon does (Touch
@@ -1456,7 +1456,7 @@ img { max-width: 100%; }
   .pet-note .pet-x::before, .pet-note .pet-x::after { left: 16px; right: 16px; top: 21px; }
 }
 /* a menu item that would do nothing just then (the game's Pause out of a fight) is greyed, as XP greyed it */
-.menu button:disabled, .menu button:disabled:hover { background: none; color: var(--shade); text-shadow: 1px 1px #fff; cursor: default; }
+.menu button:disabled, .menu button:disabled:hover { background: none; color: var(--shade); text-shadow: 1px 1px #fff; cursor: var(--cur-arrow, default); }
 /* XP's Starfield over everything once the desktop has sat still, the pointer hidden, and the reward's trail of arrows */
 .ss-idle { position: fixed; inset: 0; z-index: 10002; width: 100vw; height: 100vh; background: #000; cursor: none; touch-action: none; }
 .trails { position: fixed; inset: 0; z-index: 9990; width: 100vw; height: 100vh; pointer-events: none; }

@@ -3,7 +3,7 @@
    silver window with a blue LCD, on the 4px grid. */
 
 /* ============================================================ the tray's speaker and its volume flyout */
-.tray .speaker { position: relative; width: 16px; height: 16px; padding: 0; border: 0; background: none; color: inherit; line-height: 0; cursor: pointer; }
+.tray .speaker { position: relative; width: 16px; height: 16px; padding: 0; border: 0; background: none; color: inherit; line-height: 0; cursor: var(--cur-hand, pointer); }
 /* the speaker is drawn 16px, but the pointer finds a 26px key round it */
 .tray .speaker::before { content: ""; position: absolute; inset: -5px; }
 .tray .speaker:focus-visible { outline-offset: 3px; }
@@ -23,7 +23,7 @@
 .vol-ticks { position: absolute; right: 0; top: 5px; bottom: 5px; width: 4px; background: repeating-linear-gradient(to bottom, #000 0 1px, transparent 1px 10.2px); }
 .vol-fly input[type="range"] {
   position: absolute; inset: 0 8px 0 4px; width: 28px; height: 112px; margin: 0; padding: 0;
-  writing-mode: vertical-lr; direction: rtl; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+  writing-mode: vertical-lr; direction: rtl; -webkit-appearance: none; appearance: none; background: transparent; cursor: var(--cur-hand, pointer);
 }
 .vol-fly input[type="range"]::-webkit-slider-runnable-track { background: transparent; border: 0; }
 .vol-fly input[type="range"]::-webkit-slider-thumb {
@@ -47,14 +47,14 @@
   box-shadow: inset 0 1px #fff, inset 0 -1px #aeb4bd, 0 10px 28px -10px rgba(0, 20, 70, .6);
   font: 12px/1.2 var(--ui); color: #22272f; user-select: none; -webkit-user-select: none;
 }
-.wm button { font: inherit; color: inherit; cursor: pointer; }
-.wm button:disabled { cursor: default; opacity: .5; }
+.wm button { font: inherit; color: inherit; cursor: var(--cur-hand, pointer); }
+.wm button:disabled { cursor: var(--cur-arrow, default); opacity: .5; }
 .wm :focus-visible { outline: 2px solid #4f7fc9; outline-offset: 1px; }
 .wm-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .wm [hidden] { display: none !important; }
 
 /* the title bar: the bolt, two etched grooves, the name embossed in the metal, minimize and close */
-.wm-title { height: 28px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; cursor: default; }
+.wm-title { height: 28px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; cursor: var(--cur-arrow, default); }
 .wm-ico { display: grid; color: #f08a1c; filter: drop-shadow(0 1px #fff); }
 .wm-groove {
   flex: 1; height: 8px;
@@ -123,7 +123,7 @@
 .wm-hit:focus-visible { outline: 1px dotted #eaf2ff; outline-offset: -1px; }
 
 /* sliders: a sunken groove that fills Deck Blue up to the thumb */
-.wm input[type="range"] { -webkit-appearance: none; appearance: none; margin: 0; padding: 0; height: 16px; background: transparent; cursor: pointer; }
+.wm input[type="range"] { -webkit-appearance: none; appearance: none; margin: 0; padding: 0; height: 16px; background: transparent; cursor: var(--cur-hand, pointer); }
 .wm input[type="range"]::-webkit-slider-runnable-track {
   height: 6px; border-radius: 3px; border: 0;
   background: linear-gradient(rgba(255, 255, 255, .35), rgba(255, 255, 255, 0) 60%), linear-gradient(to right, #4f7fc9 var(--wm-fill, 0%), #aeb4bd var(--wm-fill, 0%));
@@ -142,7 +142,7 @@
   background: linear-gradient(90deg, transparent 7px, #8a919b 7px 8px, transparent 8px 10px, #8a919b 10px 11px, transparent 11px 13px, #8a919b 13px 14px, transparent 14px) 0 50% / 100% 6px no-repeat, linear-gradient(#fff, #d6dae0);
 }
 .wm input[type="range"]:hover::-webkit-slider-thumb { background-color: #e3ebf8; }
-.wm input[type="range"]:disabled { cursor: default; }
+.wm input[type="range"]:disabled { cursor: var(--cur-arrow, default); }
 .wm input[type="range"]:disabled::-webkit-slider-thumb { visibility: hidden; }
 .wm input[type="range"]:disabled::-moz-range-thumb { visibility: hidden; }
 .wm input.wm-seek { margin: 8px 12px 0; }
@@ -188,7 +188,7 @@
 .wm-list {
   height: 148px; margin: 0; padding: 4px; list-style: none; overflow-y: auto; border-radius: 8px;
   background: #10244a; box-shadow: inset 0 0 0 1px #1d3768, inset 0 2px 6px rgba(0, 10, 40, .5);
-  color: #cfe0ff; font: 12px/20px var(--ui); scrollbar-width: thin; scrollbar-color: #a3bbe6 #10244a; cursor: default;
+  color: #cfe0ff; font: 12px/20px var(--ui); scrollbar-width: thin; scrollbar-color: #a3bbe6 #10244a; cursor: var(--cur-arrow, default);
 }
 .wm-list li { height: 20px; padding: 0 8px 0 4px; display: flex; align-items: center; gap: 8px; border-radius: 4px; white-space: nowrap; }
 .wm-list li:nth-child(even) { background: rgba(255, 255, 255, .03); }

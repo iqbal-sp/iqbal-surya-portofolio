@@ -129,17 +129,17 @@ button, input, textarea { margin: 0; font: inherit; color: inherit; }
 .scr a:focus-visible { outline: 1px solid var(--acc); outline-offset: 2px; }
 /* a screen's choices: pills in a column, the picked one ringed in orange with its ▶ */
 .menu { display: flex; flex-direction: column; align-items: center; }
-.menu button { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 16px; border: 1px solid transparent; border-radius: 999px; background: none; cursor: pointer; }
+.menu button { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 16px; border: 1px solid transparent; border-radius: 999px; background: none; cursor: var(--cur-hand, pointer); }
 .menu button:hover { color: var(--lcd-hi); }
 .menu button:focus { outline: none; }
 .menu button:focus, .menu:not(:focus-within) button.sel { border-color: var(--acc); }
 .menu button:focus::before, .menu:not(:focus-within) button.sel::before { content: "▶"; color: var(--acc); }
-.menu button:disabled { color: var(--lcd-off); cursor: default; }
+.menu button:disabled { color: var(--lcd-off); cursor: var(--cur-arrow, default); }
 /* a small action inside a screen (Save, Try again, Skip): a pill ringed in orange */
-.pill { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 16px; border: 1px solid var(--acc); border-radius: 999px; background: none; cursor: pointer; }
+.pill { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 16px; border: 1px solid var(--acc); border-radius: 999px; background: none; cursor: var(--cur-hand, pointer); }
 .pill:hover { color: var(--lcd-hi); }
 .pill:focus-visible { outline: 1px solid var(--lcd-hi); outline-offset: 2px; }
-.pill:disabled { border-color: var(--lcd-off); color: var(--lcd-off); cursor: default; }
+.pill:disabled { border-color: var(--lcd-off); color: var(--lcd-off); cursor: var(--cur-arrow, default); }
 @media (pointer: coarse) { .menu button, .pill { min-height: 44px; } }
 
 /* dot-matrix: numbers and marks drawn big, each of their pixels a round dot */

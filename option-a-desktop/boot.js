@@ -525,8 +525,10 @@
     r.leaving = true;
     try { sessionStorage.setItem('pf-a-boot', '1'); localStorage.setItem(WELCOMED, '1'); } catch (e) { /* storage unavailable */ }
     const q = r.q;
-    // the wallpaper is painted now, while the screen still covers it
+    // the wallpaper is painted now, while the screen still covers it, and the desktop's chime rings as it comes up (sfx.js;
+    // heard only when the visitor has pressed something, as browsers allow)
     root.classList.add('boot-out');
+    if (PF.sfx) PF.sfx.play('startup');
     if (reduce) root.classList.add('boot-in');
     const end = () => {
       run = null;

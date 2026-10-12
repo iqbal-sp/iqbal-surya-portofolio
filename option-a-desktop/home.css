@@ -191,7 +191,7 @@
 @keyframes tv-scan { from { clip-path: inset(-3px 100% 100% -3px); } to { clip-path: inset(-3px); } }
 /* Home's power key is a real button: the same round key, with a finger's 44px round it; pointed at, its face
    brightens, and pressed it sinks into its collar */
-.pt-crt button.crt-power { position: relative; padding: 0; border: 0; cursor: pointer; }
+.pt-crt button.crt-power { position: relative; padding: 0; border: 0; cursor: var(--cur-hand, pointer); }
 .pt-crt button.crt-power::before { content: ""; position: absolute; inset: -14px; }
 @media (hover: hover) { .pt-crt button.crt-power:hover { background: var(--glyph), radial-gradient(circle at 40% 35%, #fff, #e4dfcd 70%); } }
 .pt-crt button.crt-power:active { background: var(--glyph), radial-gradient(circle at 50% 55%, #e8e3d2, #c9c2a8 70%); box-shadow: inset 0 1px 2px rgba(20, 16, 8, .45), 0 0 0 3px #e2ddcb, 0 0 0 4px rgba(20, 16, 8, .14); }
@@ -1145,7 +1145,7 @@
 }
 .home .field.nudge { animation: field-nudge .3s linear; }
 @keyframes field-nudge { 20%, 60% { translate: -2px 0; } 40%, 80% { translate: 2px 0; } }
-.home .mail-send .btn.busy[aria-disabled="true"] { color: #000; text-shadow: none; cursor: progress; }
+.home .mail-send .btn.busy[aria-disabled="true"] { color: #000; text-shadow: none; cursor: var(--cur-busy, progress); }
 .mail-send .btn.busy[aria-disabled="true"] svg { opacity: 1; filter: none; }
 .mail-send .dots i { font-style: normal; animation: send-dot 1.2s steps(1, end) infinite; }
 .mail-send .dots i:nth-child(2) { animation-delay: .2s; }
