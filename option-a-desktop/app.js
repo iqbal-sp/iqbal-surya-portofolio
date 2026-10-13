@@ -1202,8 +1202,8 @@
         </div>
         <div class="lt-body">
           ${H.letter.map((p) => `<p>${esc(t(p))}</p>`).join('')}
-          <p class="lt-sign"><span class="lt-ava"><img src="${esc(o.photo)}" srcset="${esc(o.photoSet)}" sizes="64px" alt="${esc(u('photoAlt'))}" width="564" height="564" loading="lazy"></span><span><b>${esc(o.fullName)}</b><small>${esc(t(o.role))}, ${esc(t(o.location))}</small></span></p>
         </div>
+        <p class="lt-sign"><span class="lt-ava"><img src="${esc(o.photo)}" srcset="${esc(o.photoSet)}" sizes="64px" alt="${esc(u('photoAlt'))}" width="564" height="564" loading="lazy"></span><span><b>${esc(o.fullName)}</b><small>${esc(t(o.role))}, ${esc(t(o.location))}</small></span></p>
       </section>
 
       <section class="pt-features" id="hm-work" aria-labelledby="hm-work-h">
