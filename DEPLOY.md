@@ -114,7 +114,7 @@ npx wrangler@latest d1 execute brxp-board --remote --command "DELETE FROM scores
 
 ## Link ke satu studi kasus
 
-`iqbalsurya.com/work/krool` (juga `serenity-spa`, `findmentor`, `boxify`, `sensorstack`) membuka desktop langsung di studi kasus itu, tanpa layar welcome. Bedanya dengan `/#/work/krool`: LinkedIn, WhatsApp dan Slack menampilkan judul, teks dan gambar kasus itu sendiri, bukan kartu Home. Tombol "Copy link" di player menyalin alamat ini.
+`iqbalsurya.com/work/krool` (juga `serenity-spa`, `findmentor`, `sensorstack`) membuka desktop langsung di studi kasus itu, tanpa layar welcome. Bedanya dengan `/#/work/krool`: LinkedIn, WhatsApp dan Slack menampilkan judul, teks dan gambar kasus itu sendiri, bukan kartu Home. Tombol "Copy link" di player menyalin alamat ini.
 
 - Daftar kasusnya ada di `worker/cases.js`, dan gambar preview-nya di `asset/share/case-<slug>-1200x630.jpg`. Kalau ada kasus baru atau namanya berubah di `shared/content.js`, tambahkan juga di kedua tempat itu.
 - `iqbalsurya.com/sitemap.xml` mendaftar Home dan kelima kasus untuk mesin pencari, dan `robots.txt` menunjuk ke sana.

@@ -41,7 +41,7 @@
       writeup: 'The full project write-up is not available here yet. Email me if you’d like to discuss the work.',
       lblCase: 'Project', lblLink: 'Link', sizes: ['Small', 'Medium', 'Large'],
       fullCase: 'Project details', picSoon: (x) => `${x} (image not available yet)`, draftRatio: (s) => `Ratio differs from the slot (${s})`,
-      overview: 'Overview', nowReading: 'Now reading',
+      overview: 'Intro', nowReading: 'Now reading',
       prevCase: 'Previous case', nextCase: 'Next case', nextSection: 'Next section', stop: 'Back to selected work',
       textSize: 'Text size', readPos: 'Reading position',
       switchCase: 'Choose a project', copyLink: 'Copy link to this project', linkCopied: 'Link copied',
@@ -102,7 +102,7 @@
       writeup: "Uraian lengkap proyek ini belum tersedia di sini. Kirim email jika Anda ingin membahas pekerjaannya.",
       lblCase: "Proyek", lblLink: 'Tautan', sizes: ['Kecil', 'Sedang', 'Besar'],
       fullCase: "Detail proyek", picSoon: (x) => `${x} (gambar menyusul)`, draftRatio: (s) => `Rasio beda dengan slot (${s})`,
-      overview: 'Ringkasan', nowReading: 'Sedang dibaca',
+      overview: 'Pembuka', nowReading: 'Sedang dibaca',
       prevCase: "Proyek sebelumnya", nextCase: "Proyek berikutnya", nextSection: 'Bagian berikutnya', stop: "Kembali ke karya pilihan",
       textSize: 'Ukuran teks', readPos: 'Posisi baca',
       switchCase: 'Pilih proyek', copyLink: "Salin tautan proyek ini", linkCopied: 'Tautan tersalin',
@@ -445,6 +445,9 @@
     if (!w || w.min) return;
     if (activeId !== w.id) w.el.style.zIndex = (w.def.dialog ? DLG_Z : 0) + ++zTop;
     activeId = w.id;
+    // a tray balloon gives way to a case or About coming to the front, as hintTry waits for them: it would sit on the
+    // player's own keys
+    if (noteNow && (w.id === 'player' || w.id === 'about')) noteNow.drop();
     wins.forEach((x) => x.el.classList.toggle('active', x.id === w.id));
     renderTasks();
     if (fromOpen && !w.el.contains(document.activeElement)) {
@@ -2555,6 +2558,7 @@
     if (PF.wall3d) PF.wall3d.calm(2000);
     document.body.appendChild(n);
     const drop = () => { clearTimeout(n.timer); n.remove(); if (noteNow === n) noteNow = null; };
+    n.drop = drop;
     n.querySelector('.pet-x').addEventListener('click', drop);
     n.querySelector('.note-go').addEventListener('click', () => {
       const r = rectOf(n); drop();

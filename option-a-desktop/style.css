@@ -658,7 +658,6 @@ img { max-width: 100%; }
 /* the scrollbar runs in the bezel's own dark: a silver thumb in a rail beside the page */
 .screen-view[data-case="sensorstack"] { --tint: #f4f3ff; --ground: linear-gradient(180deg, #484fd0, #272979 56%, #1c1746); }
 .screen-view[data-case="findmentor"] { --tint: #edf6f6; --ground: linear-gradient(180deg, #0a1a19, #05332e 56%, #00463c); }
-.screen-view[data-case="boxify"] { --tint: #f2ece5; --ground: linear-gradient(180deg, #11110f, #0e3b31 56%, #0a6b5a); }
 .screen-view[data-case="serenity-spa"] { --tint: #f5f7f4; --ground: linear-gradient(180deg, #0e140f, #253828 56%, #34503a); }
 .screen-view::-webkit-scrollbar-track { background-image: none; background: #2c2e36; }
 .screen-view::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #9a9ca6, #d4d5db 50%, #9a9ca6); box-shadow: none; border-radius: 8px; border: 3px solid #2c2e36; }
