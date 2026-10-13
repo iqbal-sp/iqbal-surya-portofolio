@@ -44,8 +44,8 @@
   --glow-halo: rgba(76, 218, 80, .55);
   --glow-deep: #0f5a14;
   --glow-shade: #0a3d0e;
-  /* paper: the printed guide under the light sections, a warm sheet with a generated grain (tools/paper) multiplied
-     over it, so the grain only darkens the colour */
+  /* paper: the printed guide under the light sections, a warm sheet with a generated grain over it (tools/home-tiles):
+     black at a little opacity, so the grain only darkens the colour, as a grey multiplied over it would */
   --print: #f5f1e6;
   /* the paper's second colour: what is printed on it is ink, and an icon's face takes this deeper cream, as a two
      colour job would print it */
@@ -65,7 +65,6 @@
   min-height: 100%;
   overflow-x: clip;
   background: var(--print-sheet);
-  background-blend-mode: multiply, normal;
   color: var(--ink);
   font: 16px/1.6 var(--read);
 }
@@ -266,6 +265,9 @@
    pictures stay sharp above it, and where a browser cannot run the filter the plain gradient still shows */
 .home > .pt-features, .home > .pt-channels { isolation: isolate; }
 .home > .pt-features::before, .home > .pt-channels::before { content: ""; position: absolute; inset: 0; z-index: -1; background: inherit; filter: url(#bcDither); pointer-events: none; }
+/* the channels' band is one flat colour, so its dither is one fixed 16-dot tile: drawn as a picture (tools/home-tiles),
+   one dot a screen pixel (--bc-tile, app.js), the same dots the filter would work out on every repaint */
+.home > .pt-channels::before { filter: none; background: url("../asset/Home/band-deep-dither-16.png") 0 0 / var(--bc-tile, 16px) var(--bc-tile, 16px); image-rendering: pixelated; }
 .ft-row { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 24px; }
 .ft-air { margin-top: var(--block); }
 .ft-mark { margin: 0; display: flex; align-items: flex-start; gap: 12px; font: 700 18px/24px var(--display); color: #fff; text-wrap: balance; }

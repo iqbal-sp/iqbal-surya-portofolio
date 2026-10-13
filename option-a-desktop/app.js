@@ -966,6 +966,8 @@
     if (!tile) return;
     tile.setAttribute('width', 16 / dpr);
     tile.setAttribute('height', 16 / dpr);
+    // the channels' band draws the same dots as a picture (home.css), at the same size
+    document.documentElement.style.setProperty('--bc-tile', `${16 / dpr}px`);
     matchMedia(`(resolution: ${dpr}dppx)`).addEventListener('change', fitBandDither, { once: true });
   }
   fitBandDither();
