@@ -2500,7 +2500,8 @@
 
   /* ---- the screensaver: XP's Starfield after the desktop has sat still, twice a visit at most ---- */
   // Only on a desktop-sized screen with a mouse or trackpad (the stickman's test in pet.js), never under reduced motion:
-  // after 20 s without input, with windows open or not (the owner's call, 2026-09-29).
+  // after 20 s without input, with windows open or not (the owner's call, 2026-09-29), but never while Home, About or a
+  // case is in front: someone reading doesn't move the mouse (the owner's call, 2026-10-13).
   const roomy = matchMedia('(min-width: 721px) and (any-pointer: fine)');
   const IDLE_WAIT = 20000, IDLE_MAX = 2;
   // read every second, so it comes within a second of the wait
@@ -2521,9 +2522,11 @@
       track('hint', 'idle');
     }).catch(() => { idleArm(); });
   }
+  const READING = ['home', 'about', 'player'];
   function idleBlocked() {
     const a = document.activeElement;
-    return document.hidden || !document.hasFocus() || document.documentElement.classList.contains('booting') || !!$('.shutdown-screen')
+    const front = activeId && wins.get(activeId);
+    return (front && !front.min && READING.includes(activeId)) || document.hidden || !document.hasFocus() || document.documentElement.classList.contains('booting') || !!$('.shutdown-screen')
       || !!(a && a.closest && a.closest('input, textarea, select, [contenteditable]'))
       || !startMenu.hidden || !!menuState || !!deskMenu || !!noteNow || !!$('.pet-note')
       || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')) || (x.id === 'viewer' && x.showTimer)
