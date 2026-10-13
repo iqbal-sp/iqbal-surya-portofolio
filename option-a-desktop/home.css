@@ -1235,6 +1235,8 @@
   .home .rv figcaption b { font-size: 16px; line-height: 24px; }
   .home .rv figcaption { font-size: 14px; line-height: 20px; }
   .home .lt-body p { margin-bottom: 20px; font-size: 18px; line-height: 30px; }
+  /* the head and the letter start on one line (owner, 2026-10-13), not on the row's middle */
+  .home > .pt-letter { align-items: start; }
   .home .lt-sign b { font-size: 16px; line-height: 24px; }
 }
 @container home (min-width: 1172px) { .home .rv { width: min(600px, 80cqi); padding-right: 32px; } }
