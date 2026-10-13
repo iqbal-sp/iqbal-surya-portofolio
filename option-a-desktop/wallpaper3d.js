@@ -1,26 +1,26 @@
 /*
-  Live wallpaper for Option A: Media Center blue with ribbons of light, drawn in three.js.
-  A Broadcast blue field (Hi in the top-right corner, through Mid, to Deep) crossed by ribbons of light that
-  rise from the bottom into the right half and leave off the right edge: a wide one in Focus Glow green, a
-  lower one in blue, each on a soft halo and drawn in threads of light, and one fine pale thread. The ribbons
-  turn slowly along their length, so a fold of light travels along them.
-  Rendered at low resolution, then pushed through an ordered dither (web-safe style palette), faint
-  scanlines and the odd glitch burst, as the earlier teal wallpaper was.
-  Moving the mouse over the wallpaper drags a small water wake through it: a low-res flow field
-  (splat, self-advect, blur, decay) sweeps the dither dots along and bends the picture a little,
-  then settles. Brushing a ribbon touches it: it gives a little, flutters out from the spot you brushed,
-  and a small ripple runs through the dots.
-  Hover only, no clicks. It renders at display rate only while the water or a ribbon is still moving,
-  30 fps otherwise.
+  Live wallpaper for Option A: Phosphor OS's own, the Phosphor Signal. A CRT's power-on line, held: on the
+  Broadcast blue field (Hi in the top-right corner, through Mid, to Deep) a phosphor-green trace runs flat out of
+  the calm left, where the icons sit, and wakes into a swell on the right, over an oscilloscope's faint graticule
+  with its middle axis ticked. The trace keeps its afterglow a beat behind it, as phosphor does, and its waves
+  crawl slowly along it. Drawn as one picture in a shader (no geometry) at low resolution, then pushed through an
+  ordered dither (web-safe style palette), faint scanlines and the odd glitch burst.
+  Moving the mouse over the wallpaper drags a small water wake through it: a low-res flow field (splat,
+  self-advect, blur, decay) sweeps the dither dots along and bends the picture a little, then settles. Crossing
+  the trace plucks it like a string: a kink rises where the pointer crossed, in the way it was moving, and runs
+  out both ways along the line as it dies away, with a small ripple through the dots.
+  Hover only, no clicks. It renders at display rate only while the water or a pluck is still moving, 30 fps
+  otherwise.
 
-  A still of this scene at 10s (asset/wallpaper-media-center*.webp, one per window shape, picked by style.css)
-  stays on .desktop underneath and remains the wallpaper whenever this can't run: no WebGL, CDN blocked, phones
-  (windows cover the desktop there), or ?wall=static. With prefers-reduced-motion it renders one still frame and
-  never animates or glitches.
+  A still of this scene at 10s (asset/wallpaper-phosphor*.webp, one per window shape, picked by style.css; made by
+  tools/wallpaper-still) stays on .desktop underneath and remains the wallpaper whenever this can't run: no WebGL,
+  CDN blocked, phones (windows cover the desktop there), or ?wall=static. With prefers-reduced-motion it renders one
+  still frame and never animates or glitches.
   three.js (about 190 KB) is fetched only where the wallpaper is drawn, so a phone never downloads it; a
   screen that leaves phone mode (a window widened past 720px) fetches it then.
 
-  Tuning lives in CFG. Console helpers: PF.wall3d.glitch(ms), .pause(), .play(), .step(dt), .state(), .targets().
+  Tuning lives in CFG; the trace's shape lives in TRACE, once for the shader and once for the pointer (traceAt).
+  Console helpers: PF.wall3d.glitch(ms), .pause(), .play(), .step(dt), .state(), .targets().
 */
 let THREE = null;
 
@@ -28,12 +28,12 @@ const CFG = {
   pixel: 2,                     // CSS px per rendered pixel (the size of one dither dot)
   levels: 6,                    // colour levels per channel after dithering (6 = the 216-colour web palette)
   scanlines: 0.06,              // darkening of every other row
-  exposure: 1.15,
+  exposure: 1.0,
   fps: 30,                      // idle frame rate
-  fpsActive: 120,               // while the water wake or a touched ribbon moves (the display caps it: 60 or 120)
+  fpsActive: 120,               // while the water wake or a pluck moves (the display caps it: 60 or 120)
   glitchEvery: [3500, 9000],    // ms between glitch bursts
   glitchLength: [140, 420],     // ms per burst
-  twist: 0.16,                  // rad/s the ribbons turn along their length
+  crawl: 0.35,                  // rad/s the trace's waves travel along it
   flow: {
     grid: 4,                    // flow field resolution = rendered size / grid
     radius: 70,                 // CSS px of water the cursor drags
@@ -47,31 +47,30 @@ const CFG = {
     grain: 1.5,                 // CSS px each dot may land ahead or behind along the flow
     glow: 0.02,                 // faint lift of the wake so it reads as water, 0 to switch off
   },
-  touch: {
-    ribbon: [1.0, 0.5],         // spring [Hz, damping ratio] of the give when a ribbon is brushed
-    push: 0.7,                  // units/s a gentle brush gives (a quick swipe adds up to 0.9 more)
-    flutter: 0.55,              // flutter a brush gives the ribbon (0..1)
-    ripple: 0.45,               // strength of the ring of water around the touch
-    cooldown: 220,              // ms before the same ribbon reacts again
+  pluck: {
+    reach: 16,                  // CSS px from the trace a moving pointer plucks it
+    lift: [0.018, 0.05],        // height of the kink (share of the screen's height), a gentle cross to a quick one
+    run: 0.32,                  // screen widths a second the two halves of the kink run apart
+    width: 0.03,                // the kink's half-width, in screen widths
+    ring: 90,                   // its ripples across that width
+    life: 1.3,                  // s for a pluck to die to about a third
+    ripple: 0.45,               // strength of the ring of water around the pluck
+    cooldown: 220,              // ms before the pointer can pluck again
   },
 };
 
-// DESIGN.md colours: Broadcast Deep, Mid and Hi for the field; Focus Glow and Glow Edge for the green ribbon;
-// the icon blue and Broadcast Soft for the blue one; Glow Edge into white for the fine thread
-const INK = { deep: '#04163f', mid: '#0d3a8f', hi: '#1d56b8', glow: '#86d13f', glowEdge: '#d4f7ad', blue: '#6aa8ff', soft: '#d6e2f8', white: '#ffffff' };
+// DESIGN.md colours: Broadcast Deep, Mid and Hi for the field, Broadcast Soft for the graticule, Phosphor OS's
+// green (--ph) for the trace and its pale core
+const INK = { deep: '#04163f', mid: '#0d3a8f', hi: '#1d56b8', soft: '#d6e2f8', ph: '#4cda50', core: '#d9ffd6' };
 
-// Composition in "wallpaper units": the frame is 7.4 units tall and x = 0 is its right edge, so the ribbons
-// always rise into the right half whatever the screen's shape, and the left stays calm for icons and windows.
-// Each ribbon: its path, width, how many half-turns of twist it carries, its colours, brightness, the
-// threads of light across it, and the brightness of its halo (0 = none).
-const RIBBONS = [
-  { name: 'green', points: [[-9.2, -4.9, 0.6], [-6.2, -3.0, 0], [-3.9, -1.2, -0.5], [-1.6, 0.1, 0.2], [1.3, 0.9, 0.6]],
-    width: 1.5, turns: 0.75, colors: [INK.glow, INK.glowEdge], gain: 0.62, threads: 30, halo: 0.12, offset: 0 },
-  { name: 'blue', points: [[-8.0, -5.1, -0.4], [-5.2, -3.6, 0.3], [-2.8, -2.7, -0.2], [-0.4, -2.2, 0.3], [1.5, -2.0, -0.2]],
-    width: 1.0, turns: 0.8, colors: [INK.blue, INK.soft], gain: 0.45, threads: 26, halo: 0.1, offset: 2.1 },
-  { name: 'thread', points: [[-9.0, -4.55, 0.7], [-6.0, -2.7, 0.1], [-3.7, -0.9, -0.4], [-1.4, 0.4, 0.3], [1.4, 1.2, 0.7]],
-    width: 0.07, turns: 0, colors: [INK.glowEdge, INK.white], gain: 1.1, threads: 0, halo: 0, offset: 0 },
-];
+// The trace, in picture units: y 0..1 top down, and x as across a 16:10 screen (0..1), measured from the right edge
+// by the screen's height, so a wider screen adds flat line on the left and a narrower one crops it, and the still
+// on .desktop (anchored right, scaled by its height) always lines up. It rests at y, flat out of the left, and from
+// wake on its swell rises (an envelope eased in to full by full), a main wave bunched about peak plus a fine one
+const TRACE = { y: 0.62, wake: 0.3, full: 0.92, main: [0.085, 22, 0.8, 0.16], fine: [0.018, 57], on: [0.1, 0.24] };
+const REF = 1.6;               // the aspect the picture units are laid out at
+const toPic = (x, aspect) => 1 + ((x - 1) * aspect) / REF;   // screen x (0..1) to picture x
+const PLUCKS = 4;              // plucks running at once
 
 const PF = (window.PF = window.PF || {});
 const desktop = document.getElementById('desktop');
@@ -92,6 +91,24 @@ if (desktop && !wantStatic) {
   else mqMobile.addEventListener('change', function widened() { if (mqMobile.matches) return; mqMobile.removeEventListener('change', widened); load(); });
 }
 
+const ease = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+// the trace's height at x (screen units) for a crawl phase and the plucks running, as the shader draws it
+function traceAt(x, phase, plucks) {
+  const [a, k, peak, spread] = TRACE.main, [fa, fk] = TRACE.fine;
+  const env = Math.pow(ease(TRACE.wake, TRACE.full, x), 1.6);
+  let y = TRACE.y + env * (a * Math.sin(x * k - phase) * Math.exp(-(((x - peak) / spread) ** 2)) + fa * Math.sin(x * fk - phase * 2));
+  for (const p of plucks) y -= pluckAt(x, p);
+  return y;
+}
+// a pluck's lift at x: two halves of a kink running apart and dying away (p: x, age s, lift; 0 lift = none)
+function pluckAt(x, p) {
+  if (!p.lift) return 0;
+  const P = CFG.pluck, fade = Math.exp(-p.age / P.life);
+  let s = 0;
+  for (const dir of [-1, 1]) { const d = x - p.x - dir * P.run * p.age; s += 0.5 * Math.exp(-((d / P.width) ** 2)) * Math.cos(d * P.ring); }
+  return p.lift * fade * s;
+}
+
 function start() {
   const canvas = document.createElement('canvas');
   canvas.className = 'wall3d';
@@ -102,31 +119,86 @@ function start() {
   desktop.prepend(canvas);
 
   const floatTarget = renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float');
-  const target = new THREE.WebGLRenderTarget(4, 4, { type: floatTarget ? THREE.HalfFloatType : THREE.UnsignedByteType, depthBuffer: true });
+  const target = new THREE.WebGLRenderTarget(4, 4, { type: floatTarget ? THREE.HalfFloatType : THREE.UnsignedByteType, depthBuffer: false });
 
-  /* ---------- scene ---------- */
-  const scene = new THREE.Scene();
-  scene.background = fieldTexture();
+  /* ---------- scene: the signal, drawn whole in one pass ---------- */
+  const lin = (hex) => new THREE.Color(hex);   // three keeps colours linear, so a hex comes in already converted
+  const plucks = Array.from({ length: PLUCKS }, () => ({ x: 0, age: 0, lift: 0 }));
+  const signal = new THREE.ShaderMaterial({
+    uniforms: {
+      uRes: { value: new THREE.Vector2(4, 4) },
+      uPhase: { value: 0 },
+      uPluck: { value: plucks.map(() => new THREE.Vector3()) },
+      uDeep: { value: lin(INK.deep) }, uMid: { value: lin(INK.mid) }, uHi: { value: lin(INK.hi) },
+      uSoft: { value: lin(INK.soft) }, uPh: { value: lin(INK.ph) }, uCore: { value: lin(INK.core) },
+    },
+    defines: { PLUCKS },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: /* glsl */ `
+      uniform vec2 uRes;
+      uniform float uPhase;
+      uniform vec3 uPluck[PLUCKS];      // x, age (s), lift
+      uniform vec3 uDeep, uMid, uHi, uSoft, uPh, uCore;
+      varying vec2 vUv;
+      const float RUN = ${CFG.pluck.run.toFixed(4)}, WID = ${CFG.pluck.width.toFixed(4)}, RING = ${CFG.pluck.ring.toFixed(2)}, LIFE = ${CFG.pluck.life.toFixed(3)};
 
-  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
-  const camHome = new THREE.Vector3(0, 0, 14);
-  camera.position.copy(camHome);
+      float pluck(float x, vec3 p) {
+        if (p.z == 0.0) return 0.0;
+        float s = 0.0;
+        for (int i = 0; i < 2; i++) {
+          float d = x - p.x - (float(i) * 2.0 - 1.0) * RUN * p.y;
+          s += 0.5 * exp(-(d / WID) * (d / WID)) * cos(d * RING);
+        }
+        return p.z * exp(-p.y / LIFE) * s;
+      }
+      // the trace's height at x for the crawl phase ph (screen units, y down), as traceAt() in the script
+      float trace(float x, float ph) {
+        float env = pow(smoothstep(${TRACE.wake.toFixed(3)}, ${TRACE.full.toFixed(3)}, x), 1.6);
+        float d = x - ${TRACE.main[2].toFixed(3)};
+        float y = ${TRACE.y.toFixed(3)} + env * (${TRACE.main[0].toFixed(4)} * sin(x * ${TRACE.main[1].toFixed(2)} - ph) * exp(-d * d / ${(TRACE.main[3] ** 2).toFixed(5)})
+                  + ${TRACE.fine[0].toFixed(4)} * sin(x * ${TRACE.fine[1].toFixed(2)} - ph * 2.0));
+        for (int i = 0; i < PLUCKS; i++) y -= pluck(x, uPluck[i]);
+        return y;
+      }
+      // the light of a trace at this dot: a sharp line, a soft glow and a wide halo, by the distance across it in dots
+      // x in picture units; e is one dot of the screen in those units, so the slope comes out in dots per dot
+      float light(float x, float y, float ph) {
+        float e = (uRes.x / uRes.y) / ${REF.toFixed(2)} / uRes.x;
+        float t = trace(x, ph), slope = (trace(x + e, ph) - trace(x - e, ph)) * 0.5 * uRes.y;
+        float d = abs(y - t) * uRes.y / sqrt(1.0 + slope * slope);
+        return exp(-d * d) * 1.3 + exp(-d * d / 49.0) * 0.28 + exp(-d * d / 1156.0) * 0.08;
+      }
 
-  const group = new THREE.Group();
-  scene.add(group);
-
-  // Each ribbon is a strip of light plus, for the wide ones, a flat halo along the same path. The strip is the
-  // part a brush touches; its halo gives and flutters with it.
-  const lights = RIBBONS.map((spec) => {
-    const strip = makeRibbon(spec.points, 220, spec.width, spec.turns);
-    const mesh = new THREE.Mesh(strip.geometry, lightMaterial(spec.colors, spec.gain, spec.threads, 2.6, 0.9));
-    const halo = spec.halo ? makeRibbon(spec.points, 110, spec.width * 2.2, 0) : null;
-    const haloMesh = halo ? new THREE.Mesh(halo.geometry, lightMaterial(spec.colors, spec.halo, 0, 2.2, 0)) : null;
-    mesh.userData.touch = { off: new THREE.Vector3(), vel: new THREE.Vector3(), flutter: 0, wave: 0, at: 0.5, cool: 0 };
-    group.add(...(haloMesh ? [haloMesh, mesh] : [mesh]));
-    return { spec, strip, mesh, halo, haloMesh };
+      void main() {
+        float asp = uRes.x / uRes.y, y = 1.0 - vUv.y;
+        float x = 1.0 + (vUv.x - 1.0) * asp / ${REF.toFixed(2)};   // picture units, from the right edge by the height
+        // the field: Hi in the top-right corner, through Mid, to Deep
+        float r = length(vec2((vUv.x - 1.0) * asp, y));
+        vec3 col = mix(uMid, uDeep, smoothstep(0.2, 1.6, r));
+        col = mix(col, uHi, exp(-r * 2.2) * 0.55);
+        // the graticule: square divisions an eighth of the height, one dot wide, its middle axis ticked in fortieths,
+        // fading out to the left and at the foot
+        vec2 g = vec2((vUv.x - 1.0) * asp * 8.0, y * 8.0), dg = (0.5 - abs(fract(g) - 0.5)) * (uRes.y / 8.0);
+        float grid = step(dg.x, 0.5) + step(dg.y, 0.5);
+        float tick = step(abs(y - ${TRACE.y.toFixed(3)}) * uRes.y, 1.5) * step(fract((vUv.x - 1.0) * asp * 40.0), 0.18);
+        col += uSoft * (0.035 * min(grid, 1.0) + 0.06 * tick) * smoothstep(0.35, 0.7, x) * (1.0 - smoothstep(0.85, 1.0, y));
+        // the trace with its afterglow a beat behind, drawn in only once clear of the icons
+        float on = smoothstep(${TRACE.on[0]}, ${TRACE.on[1]}, x);
+        float now = light(x, y, uPhase), was = light(x, y, uPhase - 0.9);
+        col += uPh * (now + 0.22 * was) * on;
+        float t = trace(x, uPhase), dc = abs(y - t) * uRes.y;
+        col += uCore * exp(-dc * dc / 0.36) * 0.5 * smoothstep(0.35, 0.85, x) * on;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+    depthTest: false,
+    depthWrite: false,
   });
-  const touchables = lights.map((L) => L.mesh);
+  const scene = new THREE.Scene();
+  const sigQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), signal);
+  sigQuad.frustumCulled = false;
+  scene.add(sigQuad);
 
   /* ---------- post: glitch, dither, scanlines ---------- */
   const post = new THREE.ShaderMaterial({
@@ -285,7 +357,8 @@ function start() {
     const cssW = Math.max(1, desktop.clientWidth), cssH = Math.max(1, desktop.clientHeight);
     const w = Math.max(1, Math.round(cssW / CFG.pixel)), h = Math.max(1, Math.round(cssH / CFG.pixel));
     renderer.setSize(w * CFG.pixel, h * CFG.pixel, false);   // output at CSS resolution (one whole number of dots)
-    target.setSize(w, h);                                   // the 3D scene itself stays at dot resolution
+    target.setSize(w, h);                                   // the picture itself stays at dot resolution
+    signal.uniforms.uRes.value.set(w, h);
     post.uniforms.uRes.value.set(w, h);
     post.uniforms.uOut.value.set(w * CFG.pixel, h * CFG.pixel);
     if (flowOn) {
@@ -296,31 +369,21 @@ function start() {
       flowMat.uniforms.uRadius.value = CFG.flow.radius / cssH;
       clearFlow();
     }
-    camera.aspect = cssW / cssH;
-    camera.updateProjectionMatrix();
-    const visH = 2 * camHome.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const visW = visH * camera.aspect;
-    const s = visH / 7.4;
-    group.scale.setScalar(s);
-    group.position.set(visW / 2, 0, 0);
   }
 
   /* ---------- motion ---------- */
-  const pointer = new THREE.Vector2();
   // Wake input, in desktop UV (0..1, y up). Only the bare wallpaper reacts: not windows, menus or the taskbar.
   const cursorAim = new THREE.Vector2(), cursor = new THREE.Vector2(), cursorWas = new THREE.Vector2(), cursorVel = new THREE.Vector2();
   // wake: 1 while the cursor stirs the water, easing to 0; below WAKE_MIN the shift is under a fifth of a pixel, so the field is cleared
   const WAKE_MIN = 0.03;
   let overWall = false, wake = 0, flowIdle = true;
-  const ptrVel = new THREE.Vector2(), ptrStep = new THREE.Vector2();   // raw cursor velocity (uv/s), for touches
+  const ptrVel = new THREE.Vector2(), ptrStep = new THREE.Vector2();   // raw cursor velocity (uv/s), for plucks
   let ptrAt = 0, pointerMoved = false;
   window.addEventListener('pointermove', (e) => {
     const r = desktop.getBoundingClientRect();
     const u = (e.clientX - r.left) / r.width, v = 1 - (e.clientY - r.top) / r.height;
     const inside = u >= 0 && u <= 1 && v >= 0 && v <= 1 && !(e.target.closest && e.target.closest('.win, .taskbar, .start-menu, .menu'));
     if (!inside) { overWall = false; return; }
-    // the camera leans with the pointer only over the bare wallpaper: windows, menus and the taskbar don't stir it
-    pointer.set((e.clientX / window.innerWidth - 0.5) * 2, -(e.clientY / window.innerHeight - 0.5) * 2);
     const now = performance.now();
     if (!overWall) { cursor.set(u, v); cursorWas.set(u, v); ptrVel.set(0, 0); }   // entering: no streak from the old spot
     else {
@@ -328,6 +391,7 @@ function start() {
       ptrVel.lerp(ptrStep.set((u - cursorAim.x) / dt, (v - cursorAim.y) / dt), 0.5);
     }
     ptrAt = now;
+    if (overWall) side.was = side.now;
     overWall = true;
     cursorAim.set(u, v);
     pointerMoved = true;
@@ -368,93 +432,51 @@ function start() {
     wake = moving ? 1 : wake * Math.exp(-dt / CFG.flow.settle);
   }
 
-  /* ---------- touch ---------- */
-  const raycaster = new THREE.Raycaster();
-  const ndc = new THREE.Vector2();
+  /* ---------- plucks ---------- */
   const ripple = { u: 0, v: 0, amount: 0, age: 1 };
-  const vA = new THREE.Vector3(), vB = new THREE.Vector3();
-  let lastHit = null, touchLive = false;
+  // which side of the trace the pointer is on (1 above, -1 below, 0 out of reach), now and at the last move
+  const side = { now: 0, was: 0 };
+  let phase = 0, coolUntil = 0, plucking = false;
 
-  // Only a moving cursor touches: a ribbon drifting under a resting cursor is left alone.
-  function touchTest(now) {
-    if (!overWall) { lastHit = null; pointerMoved = false; return; }
+  // A moving pointer plucks the trace where it crosses it, or brushes within reach of it: the kink rises the way the
+  // pointer was going, higher for a quicker cross. A pointer resting on the line leaves it alone.
+  function pluckTest(now) {
+    if (!overWall) { side.now = side.was = 0; pointerMoved = false; return; }
     if (!pointerMoved) return;
     pointerMoved = false;
-    ndc.set(cursorAim.x * 2 - 1, cursorAim.y * 2 - 1);
-    camera.updateMatrixWorld();
-    group.updateMatrixWorld(true);
-    raycaster.setFromCamera(ndc, camera);
-    const hit = raycaster.intersectObjects(touchables, false)[0];
-    const mesh = hit ? hit.object : null;
-    if (mesh && mesh !== lastHit && now > mesh.userData.touch.cool) touch(mesh, hit, now);
-    lastHit = mesh;
+    const h = desktop.clientHeight || 1, x = toPic(cursorAim.x, (desktop.clientWidth || 1) / h), y = 1 - cursorAim.y;
+    const t = traceAt(x, phase, plucks), off = (y - t) * h;
+    const on = ease(TRACE.on[0], TRACE.on[1], x) > 0.5;
+    side.now = !on ? 0 : off < 0 ? 1 : -1;
+    const crossed = side.was && side.now && side.was !== side.now;
+    if (!on || now < coolUntil || !(crossed || Math.abs(off) < CFG.pluck.reach)) return;
+    const P = CFG.pluck, speed = Math.min(1, ptrVel.length() / 1.2);
+    const up = ptrVel.y !== 0 ? Math.sign(ptrVel.y) : side.now;          // the way the pointer went, up the screen = up
+    const slot = plucks.reduce((a, b) => (b.lift === 0 || b.age > a.age ? b : a));
+    Object.assign(slot, { x, age: 0, lift: up * (P.lift[0] + (P.lift[1] - P.lift[0]) * speed) });
+    coolUntil = now + P.cooldown;
+    plucking = true;
+    if (flowOn) { Object.assign(ripple, { u: cursorAim.x, v: 1 - t, amount: P.ripple * (0.8 + 0.5 * speed), age: 0 }); wake = 1; }
   }
-
-  function touch(mesh, hit, now) {
-    const T = CFG.touch, st = mesh.userData.touch;
-    st.cool = now + T.cooldown;
-    const speed = Math.min(1, ptrVel.length() / 1.2);                  // 0 = a gentle brush, 1 = a quick swipe
-    const push = vB.set(ptrVel.x * camera.aspect, ptrVel.y, 0);         // the ribbon gives along the swipe...
-    if (push.lengthSq() < 1e-8) push.set(0, 0, -1); else push.normalize();
-    push.z -= 0.35;                                                     // ...and a little into the screen, like a press
-    push.normalize();
-    st.vel.addScaledVector(push, (T.push + 0.9 * speed) * 0.35);
-    if (st.flutter < 0.1 && hit.uv) st.at = hit.uv.x;                  // the flutter spreads out from the spot brushed
-    st.flutter = Math.min(1, st.flutter + T.flutter + 0.45 * speed);
-    if (flowOn) {
-      vA.copy(hit.point).project(camera);
-      Object.assign(ripple, { u: (vA.x + 1) / 2, v: (vA.y + 1) / 2, amount: T.ripple * (0.8 + 0.5 * speed), age: 0 });
-      wake = 1;
-    }
-    touchLive = true;
-  }
-
-  // damped spring toward zero, sub-stepped so it behaves the same at 30 and 120 fps
-  function spring(x, v, [hz, zeta], dt) {
-    const w = 2 * Math.PI * hz, k = w * w, c = 2 * zeta * w;
-    const n = Math.max(1, Math.ceil(dt * 240)), h = dt / n;
-    for (let i = 0; i < n; i++) {
-      v.x += (-k * x.x - c * v.x) * h; v.y += (-k * x.y - c * v.y) * h; v.z += (-k * x.z - c * v.z) * h;
-      x.addScaledVector(v, h);
-    }
-  }
-  function touchStep(dt) {
-    if (!touchLive) return;
+  function pluckStep(dt) {
+    if (!plucking) return;
     let live = false;
-    for (const m of touchables) {
-      const st = m.userData.touch;
-      spring(st.off, st.vel, CFG.touch.ribbon, dt);
-      if (st.flutter > 0) {
-        st.wave += dt * 7;
-        st.flutter *= Math.exp(-dt / 0.7);
-        if (st.flutter < 0.01) { st.flutter = 0; st.wave = 0; }
-      }
-      if (st.off.lengthSq() < 1e-6 && st.vel.lengthSq() < 1e-5) { st.off.set(0, 0, 0); st.vel.set(0, 0, 0); }   // under 0.1 px: at rest
+    for (const p of plucks) {
+      if (!p.lift) continue;
+      p.age += dt;
+      if (Math.abs(p.lift) * Math.exp(-p.age / CFG.pluck.life) < 0.0008) p.lift = 0;   // under half a pixel: gone
       else live = true;
-      if (st.flutter > 0) live = true;
     }
-    touchLive = live;
+    plucking = live;
   }
 
   // the clock starts at the moment the still on .desktop was rendered, so the first frame fades in over the same picture
   const STILL_T = 10;
   let time = STILL_T;
-  function animate(t, dt = 1 / 60) {
-    lights.forEach((L, i) => {
-      const st = L.mesh.userData.touch;
-      L.strip.update(t * CFG.twist + L.spec.offset, st);
-      L.mesh.position.copy(st.off);
-      L.mesh.position.y += Math.sin(t * 0.23 + i * 1.9) * 0.06;         // each ribbon breathes a little on its own
-      L.mesh.material.uniforms.uTime.value = t;
-      if (L.halo) {
-        L.halo.update(0, st);
-        L.haloMesh.position.copy(L.mesh.position);
-      }
-    });
-    const ease = 1 - Math.exp(-dt / 0.33);   // same glide at 30, 60 or 120 fps
-    camera.position.x += (camHome.x + pointer.x * 0.45 - camera.position.x) * ease;
-    camera.position.y += (camHome.y + pointer.y * 0.3 - camera.position.y) * ease;
-    camera.lookAt(0, 0, 0);
+  function animate(t) {
+    phase = t * CFG.crawl;
+    signal.uniforms.uPhase.value = phase;
+    plucks.forEach((p, i) => signal.uniforms.uPluck.value[i].set(p.x, p.age, p.lift));
   }
 
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -477,7 +499,7 @@ function start() {
   function draw() {
     drawn++;
     renderer.setRenderTarget(target);
-    renderer.render(scene, camera);
+    renderer.render(scene, postCam);
     renderer.setRenderTarget(null);
     renderer.render(postScene, postCam);
     if (!canvas.classList.contains('on')) canvas.classList.add('on');
@@ -512,7 +534,7 @@ function start() {
   function frame() {
     raf = 0;
     const now = performance.now(), share = visibleShare(now);
-    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || touchLive ? CFG.fpsActive : CFG.fps);
+    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || plucking ? CFG.fpsActive : CFG.fps);
     if (now - last < frameMs - 8) { wait(last + frameMs - now - 4); return; }
     const dt = Math.min(0.1, (now - last) / 1000 || 0);
     last = now;
@@ -520,9 +542,9 @@ function start() {
     if (covered) { covered = false; reglitch(now); }
     wait(last + frameMs - performance.now() - 4);
     time += dt;
-    touchStep(dt);
-    animate(time, dt);
-    touchTest(now);
+    pluckStep(dt);
+    animate(time);
+    pluckTest(now);
     glitchTick(now);
     flowStep(dt);
     draw();
@@ -560,121 +582,14 @@ function start() {
     // a quiet spell while the interface moves (a window zooming, a balloon), so a glitch never lands on it
     calm(ms = 1500) { const t = performance.now() + ms; if (nextGlitch < t) nextGlitch = t; },
     pause() { paused = true; stop(); },
-    // where the middle of each ribbon sits on screen (CSS px), for testing touches
-    targets: () => { const r = desktop.getBoundingClientRect(); group.updateMatrixWorld(true); return lights.map((L) => { L.strip.pointAt(0.5, vA); L.mesh.localToWorld(vA).project(camera); const st = L.mesh.userData.touch; return { name: L.spec.name, x: Math.round(r.left + ((vA.x + 1) / 2) * r.width), y: Math.round(r.top + ((1 - vA.y) / 2) * r.height), push: +st.off.length().toFixed(3), flutter: +st.flutter.toFixed(3) }; }); },
-    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), touching: touchLive, drawn }),
+    // where the trace sits on screen (CSS px) at a few points along it, for testing plucks
+    targets: () => { const r = desktop.getBoundingClientRect(), a = r.width / r.height; return [0.4, 0.6, 0.8].map((x) => ({ x: Math.round(r.left + x * r.width), y: Math.round(r.top + traceAt(toPic(x, a), phase, plucks) * r.height) })); },
+    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), plucking, plucks: plucks.filter((p) => p.lift).length, drawn }),
     play() { paused = false; play(); },
     // advance one frame by hand (the browser pauses requestAnimationFrame in hidden tabs)
-    step(dt = 1 / 60) { time += dt; touchStep(dt); animate(time, dt); touchTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },
+    step(dt = 1 / 60) { time += dt; pluckStep(dt); animate(time); pluckTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },
+    // draw the picture at time t and hand it back as a PNG data URL, in the same task, so the drawing is still there to
+    // read (tools/wallpaper-still makes the stills on .desktop with it)
+    seek(t = STILL_T) { stop(); paused = true; time = t; post.uniforms.uGlitch.value = 0; animate(time); draw(); return canvas.toDataURL('image/png'); },
   };
-}
-
-/* ---------- helpers ---------- */
-
-// The flat field behind the ribbons: Broadcast Hi in the top-right corner, through Mid, to Deep at the bottom
-// left, the way Tonight's features lays its band
-function fieldTexture() {
-  const c = document.createElement('canvas');
-  c.width = 512; c.height = 320;
-  const g = c.getContext('2d');
-  const r = g.createRadialGradient(c.width * 0.9, -c.height * 0.08, 0, c.width * 0.9, -c.height * 0.08, c.width * 1.15);
-  r.addColorStop(0, INK.hi);
-  r.addColorStop(0.42, INK.mid);
-  r.addColorStop(1, INK.deep);
-  g.fillStyle = r;
-  g.fillRect(0, 0, c.width, c.height);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
-
-// Light, not a surface: added onto whatever is behind it. Along the strip the colour runs from its first to its
-// second colour and fades in and out at the ends; across it the light falls off softly to both edges and, for a
-// ribbon, is drawn in fine threads. Where the strip turns edge-on it brightens, like folded silk catching light.
-function lightMaterial([a, b], gain, threads, falloff, edge) {
-  return new THREE.ShaderMaterial({
-    uniforms: {
-      uA: { value: new THREE.Color(a) },
-      uB: { value: new THREE.Color(b) },
-      uGain: { value: gain },
-      uThreads: { value: threads },
-      uFalloff: { value: falloff },
-      uEdge: { value: edge },
-      uTime: { value: 0 },
-    },
-    vertexShader: /* glsl */ `
-      varying vec2 vUv;
-      varying float vFacing;
-      void main() {
-        vUv = uv;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        vFacing = abs(dot(normalize(normalMatrix * normal), normalize(-mv.xyz)));
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: /* glsl */ `
-      uniform vec3 uA, uB;
-      uniform float uGain, uThreads, uFalloff, uEdge, uTime;
-      varying vec2 vUv;
-      varying float vFacing;
-      void main() {
-        float along = vUv.x, across = vUv.y * 2.0 - 1.0;
-        float ends = smoothstep(0.0, 0.22, along) * smoothstep(1.0, 0.72, along);
-        float body = exp(-across * across * uFalloff);
-        float threads = uThreads > 0.0 ? 0.62 + 0.38 * sin(across * uThreads + along * 9.0 + uTime * 0.3) : 1.0;
-        float fold = mix(1.0 + uEdge, 0.8, vFacing);
-        vec3 col = mix(uA, uB, smoothstep(0.35, 0.95, along));
-        gl_FragColor = vec4(col * (uGain * ends * body * threads * fold), 1.0);
-      }`,
-    blending: THREE.AdditiveBlending,
-    transparent: true,
-    depthTest: false,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-  });
-}
-
-// A strip that twists along a curve. Its frame is taken against the screen's depth axis rather than the curve's
-// own bend, so the strip never flips where the curve changes direction. update(twist, touch) rolls the twist
-// along the strip and, while touch.flutter is above 0, sends a wave out from the brushed spot (touch.at, 0..1).
-function makeRibbon(points, segments = 220, width = 1, turns = 0.5) {
-  const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)), false, 'centripetal');
-  const centers = curve.getSpacedPoints(segments);
-  const tangents = centers.map((_, i) => curve.getTangentAt(i / segments));
-  const pos = new Float32Array((segments + 1) * 6);
-  const uv = new Float32Array((segments + 1) * 4);
-  const index = [];
-  for (let i = 0; i <= segments; i++) uv.set([i / segments, 0, i / segments, 1], i * 4);
-  for (let i = 0; i < segments; i++) {
-    const a = i * 2;
-    index.push(a, a + 2, a + 1, a + 1, a + 2, a + 3);
-  }
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-  geometry.setIndex(index);
-  const Z = new THREE.Vector3(0, 0, 1), n = new THREE.Vector3(), b = new THREE.Vector3(), dir = new THREE.Vector3(), mid = new THREE.Vector3();
-  function update(twist, touch) {
-    const flutter = touch ? touch.flutter : 0;
-    for (let i = 0; i <= segments; i++) {
-      const t = i / segments, T = tangents[i];
-      n.crossVectors(Z, T).normalize();          // across the strip, in the picture plane
-      b.crossVectors(T, n);                      // out of the picture plane
-      mid.copy(centers[i]);
-      if (flutter > 0) {
-        const d = t - touch.at;
-        mid.addScaledVector(n, flutter * 0.22 * Math.sin(Math.abs(d) * 40 - touch.wave) * Math.exp(-d * d * 18));
-      }
-      const th = twist + t * Math.PI * 2 * turns;
-      dir.copy(n).multiplyScalar(Math.cos(th)).addScaledVector(b, Math.sin(th));
-      const half = (width / 2) * (0.3 + 0.7 * Math.sqrt(Math.sin(Math.PI * t)));
-      const k = i * 6;
-      pos[k] = mid.x + dir.x * half; pos[k + 1] = mid.y + dir.y * half; pos[k + 2] = mid.z + dir.z * half;
-      pos[k + 3] = mid.x - dir.x * half; pos[k + 4] = mid.y - dir.y * half; pos[k + 5] = mid.z - dir.z * half;
-    }
-    geometry.attributes.position.needsUpdate = true;
-    geometry.computeVertexNormals();
-    geometry.computeBoundingSphere();
-  }
-  update(0);
-  return { geometry, update, pointAt: (t, v) => v.copy(curve.getPointAt(t)) };
 }

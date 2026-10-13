@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- The live wallpaper alone, on a desktop the size of one still (render.mjs sets it), for tools/wallpaper-still -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Wallpaper still</title>
+  <style>html, body { margin: 0; background: #000; } #desktop { position: relative; overflow: hidden; }</style>
+  <script type="importmap">
+  { "imports": {
+      "three": "../../asset/vendor/three-0.186.0/build/three.module.min.js",
+      "../../asset/vendor/three-0.186.0/build/three.core.js": "../../asset/vendor/three-0.186.0/build/three.core.min.js"
+  } }
+  </script>
+</head>
+<body>
+  <main id="desktop"></main>
+  <script>
+    const q = new URLSearchParams(location.search), d = document.getElementById('desktop');
+    d.style.width = q.get('w') + 'px'; d.style.height = q.get('h') + 'px';
+  </script>
+  <script type="module" src="../../option-a-desktop/wallpaper3d.js"></script>
+</body>
+</html>
