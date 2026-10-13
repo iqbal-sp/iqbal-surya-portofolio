@@ -47,6 +47,9 @@
   /* paper: the printed guide under the light sections, a warm sheet with a generated grain (tools/paper) multiplied
      over it, so the grain only darkens the colour */
   --print: #f5f1e6;
+  /* the paper's second colour: what is printed on it is ink, and an icon's face takes this deeper cream, as a two
+     colour job would print it */
+  --print-tint: #e4d9bf;
   --print-sheet: url("../asset/Home/paper-grain-256.png") 0 0 / 256px 256px, var(--print);
   /* the brushed steel of the hero and the close: a sweep a step deeper than the silver, and its grain (a generated
      1600px tile). The sheet lays the grain (drawn at 800px, so a hairline is one pixel of a 2x screen) over the sweep
@@ -425,8 +428,9 @@
 .rv blockquote p + p { margin-top: 1.6em; }
 .rv figcaption { display: grid; margin-top: auto; font: 12px/1.3 var(--ui); color: #000; }
 .rv figcaption b { font: 700 14px/1.35 var(--ui); }
-/* the icons on Home's light sections keep to one colour: Broadcast Mid line on a Broadcast Soft fill */
-.pe-items .px { --ic-line: var(--bc-mid); --ic-fill: var(--bc-soft); }
+/* the icons printed on Home's paper keep to its two colours: an ink line on a deeper cream face (blue would sit cold
+   on the warm sheet) */
+.pe-items .px { --ic-line: var(--ink); --ic-fill: var(--print-tint); }
 /* on a phone one column fills the view and the next one peeks in; a swipe settles on a column. Only one column
    shows at a time, so each keeps its byline right under its own quote */
 @container home (max-width: 759px) {
@@ -1182,7 +1186,8 @@
 @container home (min-width: 1172px) { .home .pt-faq .mw { margin-top: calc(40px / 1.88); } }
 /* a full-width window would run an answer past 90 characters a line; it keeps to a reading measure inside it */
 .home .pt-faq .faq-a p { max-width: 64ch; }
-/* the icons on paper keep to one colour (see the episode guide's): the Help topics' books too */
+/* the Help topics' books stand inside an XP window, on its white, so they keep to one colour of the window's own:
+   Broadcast Mid line on a Broadcast Soft face */
 .home .pt-faq .px { --ic-line: var(--bc-mid); --ic-fill: var(--bc-soft); }
 /* the screen's headline: the lamp and its label grow to the print headline's size (32, 40, 44), white on the blue,
    and stand over what they head at every width, as the paper's do, so the work, the wall and the grid take the
@@ -1215,11 +1220,11 @@
 }
 @container home (min-width: 1360px) { .home .mm-item { font-size: 36px; line-height: 48px; } }
 /* the reviews set as a printed guide sets its critics: each column opens under a heavy ink rule with a large
-   quotation mark in the paper's one colour, the quote a step bigger in full ink (16, 18 from 1029px), and the byline
+   quotation mark in the same ink, the quote a step bigger in full ink (16, 18 from 1029px), and the byline
    under a hairline; the columns are split by an ink hairline, not a blue one */
 .home .rv { padding-right: 24px; border-right: 1px solid rgba(20, 20, 20, .14); }
 .home .rv figure { gap: 24px; padding-top: 16px; border-top: 3px solid var(--ink); }
-.home .rv blockquote::before { content: "\201C"; display: block; height: 40px; margin-bottom: 8px; font: 700 72px/1 var(--display); color: var(--bc-mid); }
+.home .rv blockquote::before { content: "\201C"; display: block; height: 40px; margin-bottom: 8px; font: 700 72px/1 var(--display); color: var(--ink); }
 .home .rv blockquote p { font-size: 16px; line-height: 26px; color: var(--ink); }
 .home .rv figcaption { gap: 2px; padding-top: 12px; border-top: 1px solid rgba(20, 20, 20, .14); font-size: 12px; line-height: 16px; color: var(--ink-2); }
 .home .rv figcaption b { color: var(--ink); }
