@@ -6,6 +6,11 @@
    episodes. XP Luna windows still carry the programs (Help
    Topics, New Message). Type: Noto Sans throughout. Icons: Pixel Icon
    Library. Image slots are grey placeholders naming their file.
+   One page, three materials (owner, 2026-10-13), each with its own
+   kind of heading: brushed steel is the hardware that opens and
+   closes it (poster type), broadcast blue is the screen (Media
+   Center's lamp and label), and paper is the printed guide (one
+   headline size, left). One green, Phosphor OS's own.
    Loaded after style.css; everything below the icon colours is
    scoped to .home.
    ============================================================ */
@@ -26,17 +31,23 @@
   --news-ink: #1b1a17;
   /* raster (asset/Home): the owner's newsprint scan, one 1200px tile */
   --news-tex: url("../asset/Home/newsprint-1200.jpg");
-  /* Media Center broadcast blue and its green focus glow */
+  /* Media Center broadcast blue, and its focus glow in Phosphor OS's green (--ph, style.css) */
   --bc-deep: #04163f;
   --bc-mid: #0d3a8f;
   --bc-hi: #1d56b8;
   --bc-soft: #d6e2f8;
-  --glow: #86d13f;
+  --glow: var(--ph);
   /* the objects' materials, each drawn once */
-  --glow-face: linear-gradient(180deg, #a8e266, #5aa82a);
-  --glow-edge: #d4f7ad;
-  --glow-ink: #0b2206;
-  --glow-halo: rgba(134, 209, 63, .55);
+  --glow-face: linear-gradient(180deg, #9af59b, #2fb233);
+  --glow-edge: #c8fcc9;
+  --glow-ink: var(--ph-ink);
+  --glow-halo: rgba(76, 218, 80, .55);
+  --glow-deep: #0f5a14;
+  --glow-shade: #0a3d0e;
+  /* paper: the printed guide under the light sections, a warm sheet with a generated grain (tools/paper) multiplied
+     over it, so the grain only darkens the colour */
+  --print: #f5f1e6;
+  --print-sheet: url("../asset/Home/paper-grain-256.png") 0 0 / 256px 256px, var(--print);
   --silver-key: radial-gradient(circle at 35% 30%, #fff, #d5d8de 55%, #9aa0aa);
   /* the brushed steel of the hero and the close: a sweep a step deeper than the silver, and its grain (a generated
      1600px tile). The sheet lays the grain (drawn at 800px, so a hairline is one pixel of a 2x screen) over the sweep
@@ -52,7 +63,8 @@
   container: home / inline-size;
   min-height: 100%;
   overflow-x: clip;
-  background: var(--paper);
+  background: var(--print-sheet);
+  background-blend-mode: multiply, normal;
   color: var(--ink);
   font: 16px/1.6 var(--read);
 }
@@ -161,12 +173,12 @@
    the picture as clear as it was */
 .tv-lower { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "now ." "title title" "role role" "bar clock"; column-gap: 12px; justify-items: start; align-items: center; padding: 48px 20px 16px; background: linear-gradient(180deg, transparent, rgba(3, 18, 60, .8) 42%, var(--bc-scrim)); color: #fff; pointer-events: none; }
 /* the badge is lit glass: its top edge catches the light, a dark green rim holds it, and it glows */
-.tv-now { grid-area: now; margin-bottom: 12px; padding: 4px 8px; border-radius: 3px; background: var(--glow-face); color: var(--glow-ink); font: 700 12px/1 var(--ui); box-shadow: inset 0 1px rgba(255, 255, 255, .5), 0 0 0 1px rgba(11, 34, 6, .3), 0 0 12px rgba(134, 209, 63, .35); }
+.tv-now { grid-area: now; margin-bottom: 12px; padding: 4px 8px; border-radius: 3px; background: var(--glow-face); color: var(--glow-ink); font: 700 12px/1 var(--ui); box-shadow: inset 0 1px rgba(255, 255, 255, .5), 0 0 0 1px rgba(4, 34, 11, .3), 0 0 12px rgba(76, 218, 80, .35); }
 .tv-title { grid-area: title; max-width: 100%; font: 700 20px/1.15 var(--ui); }
 .tv-role { grid-area: role; margin-top: 4px; font: 14px/20px var(--read); color: var(--bc-soft); }
 .tv-bar { grid-area: bar; justify-self: stretch; position: relative; display: block; height: 3px; margin-top: 16px; border-radius: 2px; background: rgba(255, 255, 255, .22); }
 .tv-bar i { position: relative; display: block; height: 100%; border-radius: inherit; background: var(--glow); }
-.tv-bar i::after { content: ""; position: absolute; right: -4px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--glow-face); box-shadow: inset 0 1px var(--glow-edge), 0 0 0 1px rgba(11, 34, 6, .35), 0 0 8px var(--glow-halo); }
+.tv-bar i::after { content: ""; position: absolute; right: -4px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--glow-face); box-shadow: inset 0 1px var(--glow-edge), 0 0 0 1px rgba(4, 34, 11, .35), 0 0 8px var(--glow-halo); }
 .tv-clock { grid-area: clock; margin-top: 16px; font: 12px/16px var(--ui); font-variant-numeric: tabular-nums; color: var(--bc-soft); }
 /* pointing at a detection box printed on the photo selects it as Paint does: a dashed box with its eight sizing
    handles, Luna blue squares in a white rim, one at each corner and the middle of each side */
@@ -486,11 +498,11 @@
 .rm-pad { grid-auto-flow: column; align-items: center; border-radius: 22px; }
 .rm-key { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #1b1d22; border-radius: 50%; background: var(--silver-key); box-shadow: 0 2px 0 #121418, inset 0 1px 0 rgba(255, 255, 255, .8); }
 .rm-key .px { width: 16px; height: 16px; --ic-line: #1d2a3a; }
-.rm-go { border-color: #1f4a0e; background: radial-gradient(circle at 35% 30%, #dcf8b8, #7cc83c 45%, #3e8a1c); box-shadow: 0 3px 0 #173a0a, 0 0 10px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
+.rm-go { border-color: var(--glow-deep); background: radial-gradient(circle at 35% 30%, #d6fbd7, var(--ph) 45%, #1f8a24); box-shadow: 0 3px 0 var(--glow-shade), 0 0 10px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
 .rm-key:hover, .rm-num:hover { filter: brightness(1.08); }
 .rm-nums { grid-template-columns: repeat(4, 32px); }
 .rm-num { height: 32px; padding: 0; border: 1px solid #1b1d22; border-radius: 6px 6px 8px 8px; background: linear-gradient(180deg, #f5f6f8, #cdd0d6 72%, #b6bac2); box-shadow: 0 2px 0 #121418, inset 0 1px 0 var(--hi); color: #1d2a3a; font: 700 14px/1 var(--ui); }
-.rm-num[aria-pressed="true"] { border-color: #1f4a0e; background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 2px 0 #173a0a, 0 0 10px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
+.rm-num[aria-pressed="true"] { border-color: var(--glow-deep); background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 2px 0 var(--glow-shade), 0 0 10px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
 .rm-key:active, .rm-num:active { transform: translateY(2px); box-shadow: inset 0 2px 3px rgba(0, 0, 0, .35); }
 .pt-remote button:focus-visible { outline: 2px dotted #000; outline-offset: 2px; }
 .rm-well button:focus-visible { outline-color: var(--hi); }
@@ -532,7 +544,7 @@
 .home:not(.scrolling) .mm-item:not([aria-pressed="true"]):hover { border-color: rgba(212, 247, 173, .35); background: rgba(255, 255, 255, .1); color: #fff; }
 .home:not(.scrolling) .mm-item:not([aria-pressed="true"]):hover .px { opacity: .6; --ic-line: var(--glow-edge); }
 .mm-item[aria-pressed="true"] { border-color: var(--glow-edge); background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 0 20px var(--glow-halo); }
-.mm-item:not([aria-pressed="true"]):active { border-color: var(--glow-edge); background: rgba(134, 209, 63, .24); color: #fff; }
+.mm-item:not([aria-pressed="true"]):active { border-color: var(--glow-edge); background: rgba(76, 218, 80, .24); color: #fff; }
 .mm-item[aria-pressed="true"] .px { opacity: 1; }
 .mm-item:not([aria-pressed="true"]):active .px { opacity: 1; --ic-line: var(--glow-edge); }
 .mm-item:focus-visible { outline: 2px dotted #fff; outline-offset: 2px; }
@@ -746,7 +758,7 @@
   .rm-well { gap: 8px; padding: 8px; border-radius: 14px; }
   .rm-pad { border-radius: 30px; }
   .rm-key { width: 44px; height: 44px; }
-  .rm-go { box-shadow: 0 3px 0 #173a0a, 0 0 14px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
+  .rm-go { box-shadow: 0 3px 0 var(--glow-shade), 0 0 14px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
   .rm-nums { grid-template-columns: repeat(4, 44px); }
   .rm-num { height: 44px; border-radius: 8px 8px 10px 10px; }
   /* the touch remote needs a 560px TV to rest on its corner clear of the caption; below that it stays tucked */
@@ -851,8 +863,8 @@
   .home > .pt-features { padding: 120px 64px 80px; }
   .home > .pt-channels { padding: 80px 64px 120px; }
 }
-/* the promise's first sentence stands on its own line from 640px */
-@container home (min-width: 640px) { .lt-l1 { display: block; } }
+/* the promise's first sentence stands on its own line, a phone's too */
+.lt-l1 { display: block; }
 
 /* 6 · reviews */
 .home > .pt-reviews { padding: 60px 20px 37px; }
@@ -1114,6 +1126,60 @@
    it draws one pixel to a pixel; from 760px to 819px the rows pad 16px inside their 1px line, as that frame draws them */
 .mm-item .px { width: 24px; height: 24px; }
 @container home (min-width: 760px) and (max-width: 819px) { .mm-item { padding: 16px; } }
+
+/* ============================================================
+   ONE HOME (owner, 2026-10-13): one system over the Figma's sections. The paper sections share one headline, one
+   lead under it and one rhythm, every section starts on the gutter, and the space a section stands in steps with
+   the page: 56px on a phone, 80px from 640px, 120px from 1029px. Rules here override the per-section sizes above
+   ============================================================ */
+/* the print headline: 32, 40 from 640px, 44 from 1029px, set left, sentence case (app.js) */
+.home .lt-head .pt-h2, .home .rv-head, .home .pt-episodes > .pt-h2, .home .pt-faq .pt-h2 { font-size: 32px; line-height: 40px; letter-spacing: -1px; text-align: left; }
+/* the lead, from a headline to what it heads: 24, 32 from 640px, 40 from 1029px */
+.home > .pt-letter { row-gap: 24px; }
+.home .rv-row, .home .pe-main, .home .pt-faq .mw { margin-top: 24px; }
+/* the rhythm; the groove between the reviews and the episode guide stands half of it from each */
+.home > .pt-letter, .home > .pt-services, .home > .pt-faq { padding-top: 56px; padding-bottom: 56px; }
+.home > .pt-features { padding-top: 56px; }
+.home > .pt-channels { padding-bottom: 56px; }
+.home > .pt-reviews { padding-top: 56px; padding-bottom: 28px; }
+.home > .pt-divider + .pt-episodes { padding-top: 28px; padding-bottom: 56px; }
+@container home (min-width: 640px) {
+  .home .lt-head .pt-h2, .home .rv-head, .home .pt-episodes > .pt-h2, .home .pt-faq .pt-h2 { font-size: 40px; line-height: 48px; }
+  .home > .pt-letter { row-gap: 32px; }
+  .home .rv-row, .home .pe-main, .home .pt-faq .mw { margin-top: 32px; }
+  .home > .pt-letter, .home > .pt-services, .home > .pt-faq { padding-top: 80px; padding-bottom: 80px; }
+  .home > .pt-features { padding-top: 80px; }
+  .home > .pt-channels { padding-bottom: 80px; }
+  .home > .pt-reviews { padding-top: 80px; padding-bottom: 40px; }
+  .home > .pt-divider + .pt-episodes { padding-top: 40px; padding-bottom: 80px; }
+}
+@container home (min-width: 1029px) {
+  .home .lt-head .pt-h2, .home .rv-head, .home .pt-episodes > .pt-h2, .home .pt-faq .pt-h2 { font-size: 44px; line-height: 54px; }
+  .home > .pt-letter { row-gap: 40px; }
+  .home .rv-row, .home .pe-main, .home .pt-faq .mw { margin-top: 40px; }
+  .home > .pt-letter, .home > .pt-services, .home > .pt-faq { padding-top: 120px; padding-bottom: 120px; }
+  .home > .pt-features { padding-top: 120px; }
+  .home > .pt-channels { padding-bottom: 120px; }
+  .home > .pt-reviews { padding-top: 120px; padding-bottom: 60px; }
+  .home > .pt-divider + .pt-episodes { padding-top: 60px; padding-bottom: 120px; }
+}
+/* one gutter: 20px, 40px from 640px, 64px from 1100px, for every section (the close kept 64px from 760px, and the
+   reviews, the services and the FAQ kept 40px up to 1172 or 1360px) */
+@container home (min-width: 760px) and (max-width: 1099.98px) { .home > .hm-cta { padding-left: 40px; padding-right: 40px; } }
+@container home (min-width: 1100px) {
+  .home > .pt-reviews { --gutter: 64px; }
+  .home > .pt-reviews, .home > .pt-services, .home > .pt-faq { padding-left: 64px; padding-right: 64px; }
+}
+/* FAQ: the head and the Help Topics window stand on the gutter, as every other section does, and the window runs
+   the full width of the page's content. From 1100px it is zoomed: a percentage width is not scaled by the zoom, a
+   length is, so its lead is divided by the zoom */
+@container home (min-width: 820px) { .home .pt-faq .sec-copy, .home .pt-faq .mw { width: 100%; max-width: none; margin-left: 0; margin-right: 0; } }
+@container home (min-width: 1100px) { .home .pt-faq .mw { margin-top: calc(40px / 1.5); } }
+@container home (min-width: 1172px) { .home .pt-faq .mw { margin-top: calc(40px / 1.88); } }
+/* a full-width window would run an answer past 90 characters a line; it keeps to a reading measure inside it */
+.home .pt-faq .faq-a p { max-width: 64ch; }
+/* the icons on paper keep to one colour (see the episode guide's): the Help topics' books too */
+.home .pt-faq .px { --ic-line: var(--bc-mid); --ic-fill: var(--bc-soft); }
 
 /* ---------------------------------------------------------------- MOTION (owner's request, 2026-10-02)
    Small and quick, in the Luna ease, and none of it under reduced motion (app.js adds the classes only then) */

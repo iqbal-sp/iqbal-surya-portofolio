@@ -1224,7 +1224,7 @@
       </section>
 
       <section class="pt-reviews" aria-labelledby="hm-words-h">
-        <h2 class="rv-head" id="hm-words-h">${esc(titleCase(t(H.words.head)))}</h2>
+        <h2 class="rv-head" id="hm-words-h">${esc(t(H.words.head))}</h2>
         <ul class="rv-row" role="list" tabindex="0" aria-labelledby="hm-words-h">${H.words.list.map((r) => `<li class="rv"><figure lang="en"><blockquote>${r.quote.map((p) => `<p>${esc(p)}</p>`).join('')}</blockquote><figcaption>${r.name ? `<b>${esc(r.name)}</b>` : ''}<span>${esc(r.role)}</span></figcaption></figure></li>`).join('')}</ul>
       </section>
       <hr class="pt-divider">
