@@ -49,11 +49,11 @@ const CFG = {
   },
   pluck: {
     reach: 16,                  // CSS px from the trace a moving pointer plucks it
-    lift: [0.018, 0.05],        // height of the kink (share of the screen's height), a gentle cross to a quick one
+    lift: [0.03, 0.075],        // height of the kink (share of the screen's height), a gentle cross to a quick one
     run: 0.32,                  // screen widths a second the two halves of the kink run apart
-    width: 0.03,                // the kink's half-width, in screen widths
-    ring: 90,                   // its ripples across that width
-    life: 1.3,                  // s for a pluck to die to about a third
+    width: 0.045,               // the kink's half-width, in screen widths
+    ring: 70,                   // its ripples across that width
+    life: 1.7,                  // s for a pluck to die to about a third
     ripple: 0.45,               // strength of the ring of water around the pluck
     cooldown: 220,              // ms before the pointer can pluck again
   },
