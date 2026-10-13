@@ -1150,12 +1150,13 @@
     // sits far down Home, so the pictures wait until the visitor gets near it, the ones not showing last.
     // sizes follows the frame, so a 2x laptop or a 3x phone takes the 1100px copy
     const v = `?v=${PF.home.services.picVersion || 1}`;
-    return `<figure class="mm-fig">${PF.home.services.list.map((s, i) => {
+    // the pictures play on a monitor of the hero's beige plastic, in its recess and over its chin
+    return `<figure class="mm-fig crt-case"><div class="crt-bezel"><div class="mm-screen">${PF.home.services.list.map((s, i) => {
       const pic = s.img.src
         ? `<img class="mm-img" src="${esc(s.img.src)}-800.webp${v}" srcset="${[800, 1100, 1600].map((x) => `${esc(s.img.src)}-${x}.webp${v} ${x}w`).join(', ')}" sizes="(max-width: 720px) calc(100vw - 64px), (max-width: 990px) 740px, 430px" width="800" height="868" alt="" loading="lazy" decoding="async"${i === on ? '' : ' fetchpriority="low"'}>`
         : slotHTML(s.img, 'mm-img', 'png', t(s.name));
       return `<div class="mm-layer${i === on ? ' on' : ''}" data-i="${i}">${pic}</div>`;
-    }).join('')}</figure>`;
+    }).join('')}</div></div>${CRT_CHIN}</figure>`;
   }
   // the picture showing stays until the picked one has decoded, then they crossfade (home.css, .mm-layer), so the
   // column never goes blank on a slow line
@@ -1233,7 +1234,7 @@
         <h2 class="pt-h2" id="hm-proc-h">${esc(t(H.process.head))}</h2>
         <div class="pe-main">
           <div class="pe-set">
-            <figure class="pe-tv"><div class="tv-bezel"><div class="pe-screen crt-display crt" aria-live="polite">${episodeScreenHTML(st.ep)}</div><span class="tv-led" aria-hidden="true"></span></div></figure>
+            <figure class="pe-tv"><div class="tv-bezel crt-case"><div class="crt-bezel"><div class="pe-screen crt-display crt" aria-live="polite">${episodeScreenHTML(st.ep)}</div></div>${CRT_CHIN}</div></figure>
             ${remoteHTML(st.ep)}
           </div>
           <div class="pe-copy"><div class="pe-now" aria-live="polite">${episodeCopyHTML(st.ep)}</div>${H.process.steps.map((s, j) => `<div class="pe-ghost" aria-hidden="true">${episodeCopyHTML(j)}</div>`).join('')}</div>

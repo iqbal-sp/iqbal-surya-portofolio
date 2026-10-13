@@ -48,7 +48,6 @@
      over it, so the grain only darkens the colour */
   --print: #f5f1e6;
   --print-sheet: url("../asset/Home/paper-grain-256.png") 0 0 / 256px 256px, var(--print);
-  --silver-key: radial-gradient(circle at 35% 30%, #fff, #d5d8de 55%, #9aa0aa);
   /* the brushed steel of the hero and the close: a sweep a step deeper than the silver, and its grain (a generated
      1600px tile). The sheet lays the grain (drawn at 800px, so a hairline is one pixel of a 2x screen) over the sweep
      in overlay, so it only lightens and darkens the metal, with two broad bands of sheen where the light catches the
@@ -58,7 +57,6 @@
   --steel-sheet: var(--steel-tex) 0 0 / 800px auto,
     linear-gradient(90deg, rgba(255, 255, 255, 0) 8%, rgba(255, 255, 255, .4) 30%, rgba(255, 255, 255, 0) 52%, rgba(40, 44, 60, .1) 74%, rgba(255, 255, 255, .28) 90%, rgba(255, 255, 255, 0)),
     var(--steel);
-  --screen-edge: 0 0 0 2px #2a2d35, 0 0 0 3px #7c818c;
   --bc-scrim: rgba(3, 18, 60, .92);
   container: home / inline-size;
   min-height: 100%;
@@ -456,10 +454,10 @@
    tucks under the bezel's lip. The TV keeps room under it for what the remote hangs below the bezel */
 .pe-set { --rm-h: 116px; position: relative; flex: 1 1 440px; min-width: 0; max-width: 704px; container: pe-tv / inline-size; }
 .pe-tv { position: relative; margin: 0 0 calc(var(--rm-h) - 20px); }
-/* the TV: a 2004 silver flat panel, with a blue power LED at the bezel's lower right */
-.tv-bezel { position: relative; padding: 12px 12px 28px; border-radius: 12px; background: var(--silver-face); box-shadow: inset 0 1px var(--hi), inset 0 -2px 3px rgba(40, 44, 60, .25), 0 26px 44px -20px rgba(0, 20, 70, .6), 0 2px 4px rgba(0, 0, 0, .2); }
-.tv-led { position: absolute; right: 24px; bottom: 11px; width: 6px; height: 6px; border-radius: 50%; background: radial-gradient(circle, #cfeaff, #1e7be0); box-shadow: 0 0 6px #4aa8ff; }
-.pe-screen { position: relative; overflow: hidden; aspect-ratio: 17 / 10; border-radius: 3px; box-shadow: var(--screen-edge); }
+/* the TV: a flat panel in the hero monitor's beige plastic (.crt-case, style.css), the same moulded recess round its
+   screen (.crt-bezel) and the same chin under it: grille, badge, menu keys, the green power lamp and the power key */
+.tv-bezel { position: relative; }
+.pe-screen { position: relative; overflow: hidden; aspect-ratio: 17 / 10; border-radius: 6px; background: #0c0e0f; box-shadow: 0 0 0 1px rgba(20, 16, 8, .5), 0 0 12px 2px rgba(20, 16, 8, .3); }
 .pe-img { display: block; width: 100%; height: 100%; aspect-ratio: auto; object-fit: contain; }
 /* a light fade under the caption: the scrim reaches a third of its strength at the screen's foot (the owner's
    Figma). The caption keeps a navy edge of its own, so the white reads over a light picture too */
@@ -483,25 +481,25 @@
 .pe-items { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 32px; }
 .pe-items li { flex: none; display: grid; align-content: start; justify-items: start; gap: 8px; font: 16px/1.4 var(--read); color: var(--ink-2); white-space: nowrap; }
 .pe-items .px { width: 24px; height: 24px; }
-/* the remote: a silver 2004 media remote lying on its side, 220px on a mouse desktop (44px keys on touch, below).
-   A brushed shell with a glossy top edge, two dark recessed wells for the keys (round arrow keys, then rubber
+/* the remote: a 2004 media remote lying on its side, 220px on a mouse desktop (44px keys on touch, below), moulded in
+   the monitors' beige plastic with its grain. A shell with a glossy top edge, two dark recessed wells for the keys (round arrow keys, then rubber
    number keys standing on their skirts), wrapping under each other. It hangs from the TV block's foot: tucked
    under the bezel, centred, until the corner is clear */
 .pt-remote { position: absolute; z-index: 1; bottom: 0; left: 50%; translate: -50% 0; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 12px; width: 220px; max-width: 100%; padding: 10px 16px;
   border-radius: 32px 26px 26px 32px;
   background: linear-gradient(180deg, transparent 8%, rgba(255, 255, 255, .6) 16%, transparent 26%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, .06) 0 1px, rgba(40, 44, 60, .035) 1px 3px),
-    linear-gradient(180deg, #f8f9fb 0%, #e2e5ea 55%, #a2a7b1 100%);
-  box-shadow: inset 0 2px 1px var(--hi), inset 0 -3px 5px rgba(40, 44, 60, .35), 0 2px 3px rgba(0, 0, 0, .2), 0 18px 26px -12px rgba(4, 14, 32, .3); }
+    var(--crt-grain), linear-gradient(180deg, #f7f4ec 0%, var(--face) 50%, #c9c1a9 100%);
+  background-blend-mode: normal, soft-light, normal;
+  box-shadow: inset 0 0 0 1px var(--shade), inset 0 2px 1px var(--hi), inset 0 -3px 5px rgba(20, 16, 8, .3), 0 2px 3px rgba(0, 0, 0, .2), 0 18px 26px -12px rgba(4, 14, 32, .3); }
 .rm-well { display: grid; gap: 6px; padding: 6px; border-radius: 10px; background: linear-gradient(180deg, #24272e, #363a42);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, .65), inset 0 -1px 0 rgba(255, 255, 255, .08), 0 1px 0 rgba(255, 255, 255, .9); }
 .rm-pad { grid-auto-flow: column; align-items: center; border-radius: 22px; }
-.rm-key { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #1b1d22; border-radius: 50%; background: var(--silver-key); box-shadow: 0 2px 0 #121418, inset 0 1px 0 rgba(255, 255, 255, .8); }
-.rm-key .px { width: 16px; height: 16px; --ic-line: #1d2a3a; }
+.rm-key { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #1b1d22; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #e7e1cf 55%, #b9b099); box-shadow: 0 2px 0 #121418, inset 0 1px 0 rgba(255, 255, 255, .8); }
+.rm-key .px { width: 16px; height: 16px; --ic-line: #3a3220; }
 .rm-go { border-color: var(--glow-deep); background: radial-gradient(circle at 35% 30%, #d6fbd7, var(--ph) 45%, #1f8a24); box-shadow: 0 3px 0 var(--glow-shade), 0 0 10px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
 .rm-key:hover, .rm-num:hover { filter: brightness(1.08); }
 .rm-nums { grid-template-columns: repeat(4, 32px); }
-.rm-num { height: 32px; padding: 0; border: 1px solid #1b1d22; border-radius: 6px 6px 8px 8px; background: linear-gradient(180deg, #f5f6f8, #cdd0d6 72%, #b6bac2); box-shadow: 0 2px 0 #121418, inset 0 1px 0 var(--hi); color: #1d2a3a; font: 700 14px/1 var(--ui); }
+.rm-num { height: 32px; padding: 0; border: 1px solid #1b1d22; border-radius: 6px 6px 8px 8px; background: linear-gradient(180deg, #fbf9f3, #e1dbc8 72%, #cac2ab); box-shadow: 0 2px 0 #121418, inset 0 1px 0 var(--hi); color: #3a3220; font: 700 14px/1 var(--ui); }
 .rm-num[aria-pressed="true"] { border-color: var(--glow-deep); background: var(--glow-face); color: var(--glow-ink); box-shadow: 0 2px 0 var(--glow-shade), 0 0 10px var(--glow-halo), inset 0 1px 0 rgba(255, 255, 255, .6); }
 .rm-key:active, .rm-num:active { transform: translateY(2px); box-shadow: inset 0 2px 3px rgba(0, 0, 0, .35); }
 .pt-remote button:focus-visible { outline: 2px dotted #000; outline-offset: 2px; }
@@ -549,13 +547,19 @@
 .mm-item:not([aria-pressed="true"]):active .px { opacity: 1; --ic-line: var(--glow-edge); }
 .mm-item:focus-visible { outline: 2px dotted #fff; outline-offset: 2px; }
 .mm-pane { align-self: start; }
-.mm-fig { margin: 0; display: grid; }
+.mm-fig { margin: 0; display: block; }
+/* the monitor's screen: dark glass round the picture, its rim falling into the recess, the glass catching the light
+   high on the left over whatever plays */
+.mm-screen { position: relative; display: grid; overflow: hidden; border-radius: 6px; background: #0c0e0f; box-shadow: 0 0 0 1px rgba(20, 16, 8, .5), 0 0 12px 2px rgba(20, 16, 8, .3); }
+.mm-screen::after { content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 70% at 18% 4%, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 42%);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .22), inset 0 0 0 3px rgba(12, 14, 15, .85), inset 0 0 18px rgba(0, 0, 0, .35); }
 /* every service's picture lies in the pane, stacked; the picked one crossfades in once it has decoded (app.js) */
 .mm-layer { grid-area: 1 / 1; min-width: 0; opacity: 0; transition: opacity .2s; }
 .mm-layer.on { opacity: 1; }
-/* the owner's pictures keep their own shape (4444 × 4823) and sit flat on the blue, with no line or shadow; a slot
-   waiting for one takes the same shape */
-.mm-img { display: block; width: 100%; height: auto; aspect-ratio: 4444 / 4823; object-fit: cover; border-radius: 10px; }
+/* the owner's pictures keep their own shape (4444 × 4823), edge to edge on the screen; a slot waiting for one takes
+   the same shape */
+.mm-img { display: block; width: 100%; height: auto; aspect-ratio: 4444 / 4823; object-fit: cover; }
 .mm-img.ph { overflow: hidden; }
 @container home (min-width: 760px) {
   .mm-body { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 48px; }
@@ -1180,6 +1184,68 @@
 .home .pt-faq .faq-a p { max-width: 64ch; }
 /* the icons on paper keep to one colour (see the episode guide's): the Help topics' books too */
 .home .pt-faq .px { --ic-line: var(--bc-mid); --ic-fill: var(--bc-soft); }
+/* the screen's headline: the lamp and its label grow to the print headline's size (32, 40, 44), white on the blue,
+   and stand over what they head at every width, as the paper's do, so the work, the wall and the grid take the
+   content's full width. The lamp sits on the first line's middle. The wall's own head is a step down (24, 28, 32) */
+.home .ft-row { grid-template-columns: minmax(0, 1fr); column-gap: 0; row-gap: 24px; align-items: start; }
+.home .ft-mark { gap: 16px; font-size: 32px; line-height: 40px; letter-spacing: -1px; text-wrap: wrap; }
+.home .ft-mark::before { width: 20px; height: 20px; margin-top: 10px; }
+.home h3.ft-mark { gap: 12px; font-size: 24px; line-height: 32px; letter-spacing: -.5px; }
+.home h3.ft-mark::before { width: 16px; height: 16px; margin-top: 8px; }
+/* the services menu steps under its headline: 24, 28 from 640px, 32 from 1029px, 36 from 1360px */
+.home .pt-services .mm-body { margin-top: 24px; }
+.home .mm-item { font-size: 24px; line-height: 32px; letter-spacing: -.5px; }
+@container home (min-width: 640px) {
+  .home .ft-row { row-gap: 32px; }
+  .home .ft-mark { font-size: 40px; line-height: 48px; }
+  .home .ft-mark::before { width: 24px; height: 24px; margin-top: 12px; }
+  .home h3.ft-mark { font-size: 28px; line-height: 36px; }
+  .home h3.ft-mark::before { width: 18px; height: 18px; margin-top: 9px; }
+  .home .pt-services .mm-body { margin-top: 32px; }
+  .home .mm-item { font-size: 28px; line-height: 36px; letter-spacing: -1px; }
+}
+@container home (min-width: 1029px) {
+  .home .ft-row { row-gap: 40px; }
+  .home .ft-mark { font-size: 44px; line-height: 54px; }
+  .home .ft-mark::before { margin-top: 15px; }
+  .home h3.ft-mark { font-size: 32px; line-height: 40px; }
+  .home h3.ft-mark::before { width: 20px; height: 20px; margin-top: 10px; }
+  .home .pt-services .mm-body { margin-top: 40px; }
+  .home .mm-item { font-size: 32px; line-height: 44px; }
+}
+@container home (min-width: 1360px) { .home .mm-item { font-size: 36px; line-height: 48px; } }
+/* the reviews set as a printed guide sets its critics: each column opens under a heavy ink rule with a large
+   quotation mark in the paper's one colour, the quote a step bigger in full ink (16, 18 from 1029px), and the byline
+   under a hairline; the columns are split by an ink hairline, not a blue one */
+.home .rv { padding-right: 24px; border-right: 1px solid rgba(20, 20, 20, .14); }
+.home .rv figure { gap: 24px; padding-top: 16px; border-top: 3px solid var(--ink); }
+.home .rv blockquote::before { content: "\201C"; display: block; height: 40px; margin-bottom: 8px; font: 700 72px/1 var(--display); color: var(--bc-mid); }
+.home .rv blockquote p { font-size: 16px; line-height: 26px; color: var(--ink); }
+.home .rv figcaption { gap: 2px; padding-top: 12px; border-top: 1px solid rgba(20, 20, 20, .14); font-size: 12px; line-height: 16px; color: var(--ink-2); }
+.home .rv figcaption b { color: var(--ink); }
+/* the letter reads at the size of the paper's body copy beside the headline, in full ink: 16, 18 from 1029px */
+.home .lt-body p { font-size: 16px; line-height: 26px; color: var(--ink); }
+@container home (min-width: 1029px) {
+  .home .rv blockquote p { font-size: 18px; line-height: 30px; }
+  .home .rv figcaption b { font-size: 16px; line-height: 24px; }
+  .home .rv figcaption { font-size: 14px; line-height: 20px; }
+  .home .lt-body p { margin-bottom: 20px; font-size: 18px; line-height: 30px; }
+  .home .lt-sign b { font-size: 16px; line-height: 24px; }
+}
+@container home (min-width: 1172px) { .home .rv { width: min(600px, 80cqi); padding-right: 32px; } }
+/* where one material meets the next, the close's seam: a dark line, lit just under it, so every change of ground is
+   cut the same way (on the blue the light is the blue's own, a quarter white). The stage's dither layer starts under
+   the seam. Between two paper sections the owner's deeper groove stands instead */
+.home > .pt-letter, .home > .pt-reviews, .home > .pt-faq { box-shadow: inset 0 1px rgba(40, 44, 60, .35), inset 0 2px var(--hi); }
+.home > .pt-features, .home > .pt-services { box-shadow: inset 0 1px rgba(2, 8, 28, .9), inset 0 2px rgba(255, 255, 255, .22); }
+.home > .pt-features::before { top: 2px; }
+/* past 1440px the content keeps the width it has there (1312px) on the window's middle, each ground still running
+   edge to edge: the gutter grows with the window, and the reviews' row still runs out past the content's edge */
+@container home (min-width: 1440px) {
+  .home > * { --gutter: max(64px, (100cqi - 1312px) / 2); }
+  .home.home > :is(.pt-hero, .pt-letter, .pt-features, .pt-channels, .pt-reviews, .pt-episodes, .pt-services, .pt-faq, .hm-cta) { padding-left: var(--gutter); padding-right: var(--gutter); }
+  .home > .pt-reviews { --gutter: max(64px, (100cqi - 1312px) / 2); }
+}
 
 /* ---------------------------------------------------------------- MOTION (owner's request, 2026-10-02)
    Small and quick, in the Luna ease, and none of it under reduced motion (app.js adds the classes only then) */
