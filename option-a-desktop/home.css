@@ -816,6 +816,17 @@
   .pt-intro { font-size: 18px; line-height: 28px; }
 }
 @container home (min-width: 1360px) { .pt-intro { max-width: 758px; } }
+/* on a desktop 1180px wide or more, Home opens in the left two thirds (app.js, geometryFor) so the wallpaper's swell
+   shows beside it; its hero keeps the desktop size it had at full width (the 1029px step) from 720px of window, and the
+   steps above take over again from 1029px (a maximized Home) */
+@media (min-width: 1180px) {
+  @container home (min-width: 720px) and (max-width: 1028px) {
+    .home > .pt-hero { gap: 48px; }
+    .pt-copy { max-width: 880px; }
+    .pt-h1 { font-size: 64px; line-height: 74px; }
+    .pt-intro { max-width: 520px; }
+  }
+}
 
 /* 3 · a note from the host: one column, the head over the letter, until 1029px puts them side by side, the
    letter at 430px (500px from 1172px) and the head taking the rest, both on the row's middle */
