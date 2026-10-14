@@ -1,6 +1,27 @@
 {
   "tracks": [
     {
+      "file": "shane-ivers-robotertanz.mp3",
+      "artist": "Shane Ivers",
+      "title": "Robotertanz",
+      "credit": "Music: Robotertanz by Shane Ivers - https://www.silvermansound.com - Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)",
+      "duration": 223
+    },
+    {
+      "file": "kevin-macleod-raving-energy-faster.mp3",
+      "artist": "Kevin MacLeod",
+      "title": "Raving Energy (faster)",
+      "credit": "\"Raving Energy (faster)\" Kevin MacLeod (incompetech.com) Licensed under Creative Commons: By Attribution 4.0 License http://creativecommons.org/licenses/by/4.0/",
+      "duration": 244
+    },
+    {
+      "file": "alexberoza-on-my-way.mp3",
+      "artist": "Alex ft. Donnie Ozone",
+      "title": "On My Way",
+      "credit": "\"On My Way\" by Alex (AlexBeroza) ft. Donnie Ozone - http://dig.ccmixter.org/files/AlexBeroza/42806 - Licensed under CC BY 3.0 (http://creativecommons.org/licenses/by/3.0/)",
+      "duration": 238
+    },
+    {
       "youtube": "k85mRPqvMbE",
       "artist": "Crazy Frog",
       "title": "Axel F",
