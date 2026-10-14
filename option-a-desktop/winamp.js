@@ -10,7 +10,8 @@
    LCD, the position bar, round transport keys, the volume (the site's own) and Eject and PL, the playlist folding out
    under it. It plays the MP3s listed in asset/music/playlist.json, and a visitor's own files picked with Eject or
    Add (played in the page, never uploaded).
-     available() -> Promise<bool>, mount(host, { changed }), caption(), stop(), loudness() -> { low, mid, high } | null
+     available() -> Promise<bool>, mount(host, { changed }), caption(), stop(), playHeard(),
+     loudness() -> { low, mid, high } | null
 */
 (() => {
   'use strict';
@@ -1264,6 +1265,9 @@
     mount,
     caption,
     playing: () => state === 'play',
+    // the music balloon's song: the one loaded if the page can hear it, otherwise the first song it can (a file, not a
+    // YouTube video), so the wallpaper has something to follow
+    playHeard() { const i = cur >= 0 && !isYT(list[cur]) ? cur : list.findIndex((t) => !isYT(t)); play(i >= 0 ? i : undefined); },
     loudness,
     // closing the window quits Winamp: the music stops, the list stays for the next time it opens
     stop() { stop(); closeMenu(false); if (yt && yt.destroy) yt.destroy(); yt = null; view = null; },

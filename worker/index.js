@@ -543,9 +543,9 @@ ${more ? `<p style="margin:16px 0 0">${attr(more)}</p>` : ''}
 const EVENTS = {
   case: /^[a-z0-9-]{1,40}$/, window: /^(about|work|contact|resume|game|recycle|gamegate|screensaver)$/, cv: /^(open|save|request)$/,
   send: /^(api|mailto)$/, copy: /^email$/, start: /^$/, social: /^(linkedin|dribbble|behance|upwork)$/,
-  // the games: where each was opened from (ss: Screen Saver XP, br: Boss Rush XP), the nudges toward them that
-  // showed, and how far a Screen Saver XP run got
-  door: /^(ss:(display|idle|gate|link|menu)|br:(bin|balloon|konami|pet|link|menu))$/, hint: /^(bin|idle|offer)$/,
+  // the games: where each was opened from (ss: Screen Saver XP, br: Boss Rush XP, wa: Winamp from the music balloon),
+  // the nudges toward them that showed, and how far a Screen Saver XP run got
+  door: /^(ss:(display|idle|gate|link|menu)|br:(bin|balloon|konami|pet|link|menu)|wa:balloon)$/, hint: /^(bin|idle|offer|music)$/,
   run: /^ss:(start|boss[2-4]|final|win|practice|practice-done)$/,
   // the loading screen (boot.js): a part that failed to load, and one it went on without, once a session each
   boot: /^(fail|skip):(fonts|content|cases|icons|app|wall|home|wall3d)$/,

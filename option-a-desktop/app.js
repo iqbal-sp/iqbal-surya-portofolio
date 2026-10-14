@@ -78,6 +78,7 @@
       desktop: 'Desktop', properties: 'Properties', gateSaver: 'Play Screen Saver XP', gateSaverText: 'Screen Saver XP plays on a phone, with one finger.',
       binHint: 'Recycle Bin isn’t empty', binHintText: 'Click here to see what’s in it.',
       saverOffer: 'The screensaver fought back', saverOfferText: 'Click here to take it on in Screen Saver XP.',
+      musicHint: 'The wallpaper can hear', musicHintText: 'Click here to put a song on in Winamp and watch the signal move to it.',
       gateHead: 'Play Boss Rush XP on a computer.', gateText: 'This game uses a keyboard and needs more screen space. Open the portfolio on a laptop or desktop to play.',
       gateBoard: 'Leaderboard', gateCols: ['#', 'Name', 'Time'], gateLoading: 'Loading…',
       gateBoardText: (n) => `${n} ${n === 1 ? 'player has' : 'players have'} beaten it. Open this page on a computer to take them on.`, gateBoardEmpty: 'Nobody has beaten it yet. Be the first, on a computer.',
@@ -139,6 +140,7 @@
       desktop: 'Desktop', properties: 'Properti', gateSaver: 'Main Screen Saver XP', gateSaverText: 'Screen Saver XP bisa dimainkan di HP, cukup dengan satu jari.',
       binHint: 'Tempat Sampah tidak kosong', binHintText: 'Klik di sini untuk melihat isinya.',
       saverOffer: 'Screensaver-nya melawan', saverOfferText: 'Klik di sini untuk menantangnya di Screen Saver XP.',
+      musicHint: 'Wallpaper-nya bisa mendengar', musicHintText: 'Klik di sini untuk memutar lagu di Winamp dan lihat sinyalnya ikut bergerak.',
       gateHead: "Mainkan Boss Rush XP di komputer.", gateText: "Game ini menggunakan keyboard dan membutuhkan ruang layar lebih luas. Buka portofolio di laptop atau komputer untuk bermain.",
       gateBoard: 'Papan peringkat', gateCols: ['#', 'Nama', 'Waktu'], gateLoading: 'Memuat…',
       gateBoardText: (n) => `${n} pemain sudah menamatkannya. Buka halaman ini di komputer untuk menantang mereka.`, gateBoardEmpty: 'Belum ada yang menamatkannya. Jadilah yang pertama, di komputer.',
@@ -271,7 +273,9 @@
   function geometryFor(id) {
     const W = desktopEl.clientWidth, H = desktopEl.clientHeight;
     const left = W > 900 ? 100 : 12;
-    // Home is the landing page: large, centred in the space right of the icons, with desktop still showing around it
+    // Home is the landing page: large, centred in the space right of the icons, with desktop still showing around it.
+    // On a wide desktop it keeps to the left two thirds instead, so the Phosphor Signal's swell shows beside it
+    if (id === 'home' && W >= 1180) { const w = clamp(Math.round((W - left) * 0.64), 720, 1060); return { x: left + 16, y: 12, w, h: Math.min(H - 24, 960) }; }
     if (id === 'home') { const w = clamp(W - left - 48, 460, 1180); return { x: left + Math.round((W - left - w) / 2), y: 12, w, h: Math.min(H - 24, 960) }; }
     if (id === 'about') return { x: left, y: 12, w: clamp(Math.round(W * 0.56), 460, 800), h: Math.min(H - 24, 900) };
     // the Portfolio: wide enough for three covers across beside the task pane, cascaded to the right over Home
@@ -2549,13 +2553,14 @@
   document.addEventListener('visibilitychange', idleArm);
   roomy.addEventListener('change', idleArm);
 
-  /* ---- the tray's balloons: the Recycle Bin hint and the screensaver's offer, never both at once ---- */
+  /* ---- the tray's balloons: the music hint, the Recycle Bin hint and the screensaver's offer, one at a time ---- */
   // an XP balloon over the tray: its body is one button, beside its close box; it goes by itself after 12 s
   let noteNow = null;
+  const NOTES = { bin: ['binHint', 'recycle', 'bin'], offer: ['saverOffer', 'moon', 'offer'], music: ['musicHint', 'winamp', 'music'] };
   function showNote(kind) {
     // one balloon at a time, the stickman's and the trails' install notes included
     if (noteNow || $('.pet-note')) return false;
-    const [title, text, icon] = kind === 'bin' ? [u('binHint'), u('binHintText'), 'recycle'] : [u('saverOffer'), u('saverOfferText'), 'moon'];
+    const [key, icon, hint] = NOTES[kind], title = u(key), text = u(key + 'Text');
     const n = noteNow = document.createElement('div');
     n.className = 'pet-note tray-note'; n.setAttribute('role', 'status');
     n.innerHTML = `<button type="button" class="pet-x" aria-label="${esc(u('close'))}"></button><button type="button" class="note-go"><b>${I(icon, 16)}${esc(title)}</b><span>${esc(text)}</span></button>`;
@@ -2568,11 +2573,37 @@
     n.querySelector('.pet-x').addEventListener('click', drop);
     n.querySelector('.note-go').addEventListener('click', () => {
       const r = rectOf(n); drop();
-      if (kind === 'bin') openBinHint(r); else { track('door', 'ss:idle'); openSaver(r); }
+      if (kind === 'bin') openBinHint(r);
+      else if (kind === 'music') openMusicHint(r);
+      else { track('door', 'ss:idle'); openSaver(r); }
     });
     n.timer = setTimeout(drop, 12000);
-    track('hint', kind === 'bin' ? 'bin' : 'offer');
+    track('hint', hint);
     return true;
+  }
+  // a balloon waits while anything else is up, while a game is being played, and while a case or About is being read:
+  // it would land on the player's own keys
+  function noteBusy() {
+    const reading = (activeId === 'player' || activeId === 'about') && !wins.get(activeId).min;
+    return reading || noteNow || saverUp || $('.pet-note') || !startMenu.hidden || menuState || deskMenu || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')));
+  }
+  // The live wallpaper follows Winamp's music, but nobody would find that by chance: Home covers most of the desktop and
+  // Winamp waits behind its icon. So, once per browser and a few seconds after the desktop comes up, a balloon says so;
+  // clicked, Winamp opens and plays the first song the page can hear (the click lets the browser start the sound). Only
+  // where the wallpaper is live (not a phone, not reduced motion, WebGL running) and only before any music has played
+  const MUSIC_HINT_KEY = 'pf-music-hint';
+  let musicT = 0;
+  function musicTry() {
+    clearTimeout(musicT);
+    try { if (localStorage.getItem(MUSIC_HINT_KEY)) return; } catch (e) { return; }
+    if (!waOK || !PF.wall3d || !PF.winamp || isMobile() || reduceMotion || wins.has('winamp') || PF.winamp.playing()) return;
+    if (noteBusy()) { musicT = setTimeout(musicTry, 5000); return; }
+    if (showNote('music')) { try { localStorage.setItem(MUSIC_HINT_KEY, '1'); } catch (e) { /* it may show again next visit */ } }
+  }
+  function openMusicHint(from) {
+    openWin('winamp', { from });
+    track('door', 'wa:balloon');
+    if (PF.winamp) PF.winamp.playHeard();
   }
   // Boss Rush XP's way in stays the Recycle Bin, but nobody was clicking it: this balloon points there, once per browser,
   // for a visitor who hasn't opened the game, after two windows or 90 seconds on the site (GAME2_BRIEF.md). Clicked, the
@@ -2584,10 +2615,7 @@
     clearTimeout(hintT);
     if (brxpSeen() || wins.has('game') || wins.has('gamegate')) return;
     if (wins.has('recycle')) { try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* it may show next visit */ } return; }
-    // it waits while anything else is up, while a game is being played, and while a case or About is being read: the
-    // balloon would land on the player's own keys
-    const reading = (activeId === 'player' || activeId === 'about') && !wins.get(activeId).min;
-    if (reading || noteNow || saverUp || $('.pet-note') || !startMenu.hidden || menuState || deskMenu || Array.from(wins.values()).some((x) => x.def.dialog || (!x.min && (x.id === 'game' || x.id === 'screensaver')))) { hintT = setTimeout(hintTry, 5000); return; }
+    if (noteBusy()) { hintT = setTimeout(hintTry, 5000); return; }
     if (showNote('bin')) { try { localStorage.setItem(HINT_KEY, '1'); } catch (e) { /* it may show again next visit */ } }
   }
   function openBinHint(from) {
@@ -3229,10 +3257,11 @@
   openDefault();
   if (petState() === 'on') showPet(false);
   if (trailsState() === 'on') showTrails(false);
-  // once the Welcome screen has gone: the screensaver's wait starts, and the Recycle Bin's hint comes after 90 seconds, or
-  // sooner once two windows have been opened
+  // once the Welcome screen has gone: the screensaver's wait starts, the music balloon comes after 10 seconds, and the
+  // Recycle Bin's hint after 90 seconds, or sooner once two windows have been opened
   afterBoot(() => {
     idleArm();
+    musicT = setTimeout(musicTry, 10000);
     hintT = setTimeout(hintTry, 90000);
     new MutationObserver((ms) => {
       for (const m of ms) for (const n of m.addedNodes) if (n.classList && n.classList.contains('win') && !n.classList.contains('dialog') && ++hintWins === 2) setTimeout(hintTry, 1500);
