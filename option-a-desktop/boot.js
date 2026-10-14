@@ -266,6 +266,7 @@
       crt3d = m.createCrt(scene, { onFrame: (q) => {
         if (!run || run.zooming || !scene.classList.contains('live')) return;
         layGlass(q);
+        if (run.line && run.flying) aimLine(q);
         if (run.flying && covers(q)) run.filled();
       } });
       return crt3d.ready.then(() => {
@@ -333,7 +334,7 @@
     root.classList.add('booting');
     box.classList.remove('ready', 'failing');
     crt.classList.remove('blue', 'line', 'done');
-    if (lineEl) lineEl.getAnimations().forEach((a) => a.cancel());
+    if (lineEl) { lineEl.getAnimations().forEach((a) => a.cancel()); lineEl.style.top = ''; }
     scene.classList.remove('live');
     [box, scene, room].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
     lines.innerHTML = PARTS.map(([k, , label]) => `<p data-part="${k}"><span>${label}</span><b></b></p>`).join('');
@@ -512,6 +513,19 @@
       { duration: 300 * r.q, delay: 180 * r.q, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'forwards' }).finished
       .catch(() => {}).then(() => pause(320 * r.q));
   }
+  // Where the wallpaper's trace will lie on the screen (TRACE.y in wallpaper3d.js: 62% down the desktop), and where
+  // that is on the glass q, as a share of its height (between its top and bottom edges, which the flight's last frames
+  // see nearly square on)
+  const signalY = () => { const d = document.getElementById('desktop').getBoundingClientRect(); return d.top + d.height * 0.62; };
+  const onGlass = (q, y) => { const top = (q[0][1] + q[1][1]) / 2, bottom = (q[3][1] + q[2][1]) / 2; return (y - top) / (bottom - top); };
+  const lineTop = (f) => `calc(${(f * 100).toFixed(3)}% - 2px)`;
+  // As the camera nears the glass, the power-on line drifts from 62% of the tube to where the trace will lie, so the
+  // flight lands it on the trace: no drift while the glass is small (under 60% of the screen's height), all of it once
+  // the glass is as tall as the screen
+  function aimLine(q) {
+    const tall = (q[3][1] + q[2][1] - q[0][1] - q[1][1]) / 2, p = Math.min(1, Math.max(0, (tall / box.clientHeight - 0.6) / 0.4));
+    lineEl.style.top = lineTop(0.62 + (onGlass(q, signalY()) - 0.62) * p);
+  }
   // the glass's corners lie round the whole screen: from there on the flight only shows more of the same blue
   const covers = (q) => { const xs = q.map((p) => p[0]), ys = q.map((p) => p[1]); return Math.min(...xs) <= 0 && Math.min(...ys) <= 0 && Math.max(...xs) >= box.clientWidth && Math.max(...ys) >= box.clientHeight; };
   // the 3D's flight, over once the glass fills the frame (or at the end of its way); a return visit flies faster
@@ -529,10 +543,13 @@
     const gx = (Math.min(...xs) + Math.max(...xs)) / 2, gy = (Math.min(...ys) + Math.max(...ys)) / 2;
     const k = Math.max(box.clientWidth / (Math.max(...xs) - Math.min(...xs)), box.clientHeight / (Math.max(...ys) - Math.min(...ys))) * 1.2;
     const tx = box.clientWidth / 2 - gx * k, ty = box.clientHeight / 2 - gy * k, to = `translate(${tx}px, ${ty}px) scale(${k})`;
-    // where the glass ends up, for the power-on line's hand-over (the 3D's last frame tells it by itself)
-    r.glassEnd = q.map(([x, y]) => [x * k + tx, y * k + ty]);
     scene.style.transformOrigin = '0 0';
     const ms = STILL_FLY * r.q;
+    // the power-on line drifts over the zoom to where the trace will lie once the glass has grown (aimLine, for the 3D)
+    if (r.line) {
+      const f = onGlass(q.map(([x, y]) => [x * k + tx, y * k + ty]), signalY());
+      lineEl.animate([{ top: lineTop(0.62) }, { top: lineTop(f) }], { duration: ms, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' });
+    }
     room.animate([{ opacity: 1 }, { opacity: 1, offset: 0.1 }, { opacity: 0, offset: 0.32 }, { opacity: 0 }], { duration: ms, easing: 'linear', fill: 'forwards' });
     return scene.animate([{ transform: 'none' }, { transform: to }], { duration: ms, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' }).finished.catch(() => {});
   }
@@ -572,22 +589,22 @@
       .then(end);
   }
 
-  // The power-on line leaves the tube as the screen fades: laid over the page where the flight left it (62% down the
-  // glass), it glides onto the wallpaper's trace (TRACE.y in wallpaper3d.js, 62% down the desktop), which lies flat
-  // there meanwhile, thins to it, fades into it, and then the swell wakes on the right
+  // The power-on line leaves the tube as the screen fades: the flight has landed it on the wallpaper's trace, which lies
+  // flat there meanwhile, so it is laid over the page just where it is, thins to the trace, fades into it, and then the
+  // swell wakes on the right. Should it have landed a little off (a window resized in flight), it closes the gap as it
+  // thins
   function handOver(r) {
-    const g = r.glassEnd || glassNow, desk = document.getElementById('desktop');
-    if (!g || !desk || !PF.wall3d) return;
-    const q = r.q, down = (a, b) => a[1] + (b[1] - a[1]) * 0.62, tall = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
-    const y = (down(g[0], g[3]) + down(g[1], g[2])) / 2;
-    const h = Math.max(2, Math.min(10, Math.round((4 * (tall(g[0], g[3]) + tall(g[1], g[2]))) / 2 / 768)));
-    const d = desk.getBoundingClientRect(), to = d.top + d.height * 0.62;
+    if (!document.getElementById('desktop') || !PF.wall3d) return;
+    const q = r.q, b = lineEl.getBoundingClientRect(), y = b.top + b.height / 2, to = signalY();
+    const h = Math.max(2, Math.min(10, Math.round(b.height)));
     PF.wall3d.flatten();
     const el = document.createElement('i');
     el.className = 'boot-handoff';
     el.setAttribute('aria-hidden', 'true');
     document.body.appendChild(el);
-    el.animate([{ transform: `translateY(${y - h / 2}px)`, height: `${h}px` }, { transform: `translateY(${to - 1}px)`, height: '2px' }],
+    // from the tube's own width (the bezel may still show at the sides) out to the screen's, as the trace runs
+    el.animate([{ transform: `translateY(${y - h / 2}px)`, height: `${h}px`, left: `${Math.max(0, b.left)}px`, right: `${Math.max(0, innerWidth - b.right)}px` },
+      { transform: `translateY(${to - 1}px)`, height: '2px', left: '0px', right: '0px' }],
       { duration: 520 * q, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' });
     pause(520 * q)
       .then(() => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380 * q, easing: 'ease-out', fill: 'forwards' }).finished)
