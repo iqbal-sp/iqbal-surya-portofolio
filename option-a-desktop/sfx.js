@@ -7,7 +7,12 @@
    A browser lets a page sound only after the visitor has pressed something, so nothing plays before the first click,
    tap or key: the chime after a first visit's loading screen is heard only by a visitor who pressed a key or clicked
    while it ran (the self test answers a key), and on every Restart.
+   The live wallpaper's trace sounds too when the pointer plucks it: a soft string (Karplus-Strong, a burst of noise
+   ringing in a short delay line), its note picked from C major pentatonic by where along the trace it was plucked,
+   low on the calm left to high on the swell, so any run of plucks stays in tune. While Winamp plays a song (a file
+   or a YouTube video) the string keeps quiet, so it never plays over the music; the trace still moves when plucked.
      play(name)  name: open, close, min, restore, menu, dialog, startup, shutdown
+     pluck(at, speed)  at: where along the trace (0 left .. 1 right), speed: how quick the cross was (0..1)
 */
 (() => {
   'use strict';
@@ -84,16 +89,50 @@
     shutdown: (t) => chime(t, [783.99, 659.25, 523.25, 392], 0.12, 1.3, 0.075),
   };
 
+  // the plucked trace: C4 to A5 in C major pentatonic (the startup chime's key), each note's string made once
+  const STRING = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25, 783.99, 880];
+  const RING = 1.6;       // s each string rings for, about as long as the trace's kink takes to die away
+  const strings = [];
+  function string(i) {
+    if (strings[i]) return strings[i];
+    const sr = ctx.sampleRate, len = Math.round(sr * RING), n = Math.max(2, Math.round(sr / STRING[i]));
+    const buf = ctx.createBuffer(1, len, sr), d = buf.getChannelData(0), line = new Float32Array(n);
+    // the burst is smoothed first, so the attack is a soft thumb rather than a pick's click
+    let prev = 0;
+    for (let k = 0; k < n; k++) { prev = prev * 0.6 + (Math.random() * 2 - 1) * 0.4; line[k] = prev; }
+    for (let k = 0; k < len; k++) {
+      const j = k % n, nx = (j + 1) % n;
+      d[k] = line[j];
+      line[j] = 0.4985 * (line[j] + line[nx]);   // averaging dulls it a little each pass: the string's damping
+    }
+    for (let k = 0, f = Math.round(sr * 0.004); k < f; k++) d[k] *= k / f;   // no click at the start
+    for (let k = 0, f = Math.round(sr * 0.25); k < f; k++) d[len - 1 - k] *= k / f;   // nor at the end
+    return (strings[i] = buf);
+  }
+
+  const ok = () => ctx && ctx.state !== 'closed' && !document.hidden && !(PF.volume && !PF.volume.amount);
   const last = {};
   PF.sfx = {
     play(name) {
       const make = SOUNDS[name];
-      if (!make || !ctx || ctx.state === 'closed' || document.hidden || (PF.volume && !PF.volume.amount)) return;
+      if (!make || !ok()) return;
       // the same sound twice within a moment (two windows closing together) is heard once
       const now = performance.now();
       if (now - (last[name] ?? -Infinity) < 60) return;
       last[name] = now;
       try { make(ctx.currentTime + 0.01); } catch (e) { /* no sound is fine */ }
+    },
+    pluck(at, speed = 0.5) {
+      if (!ok() || (PF.winamp && PF.winamp.playing())) return;
+      try {
+        const i = Math.round(Math.min(1, Math.max(0, at)) * (STRING.length - 1)), t = ctx.currentTime + 0.01;
+        const s = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+        s.buffer = string(i);
+        lp.type = 'lowpass'; lp.frequency.value = 1800 + 1400 * speed; lp.Q.value = 0.5;
+        g.gain.value = 0.16 + 0.14 * speed;   // a gentle cross is quieter than a quick one
+        s.connect(lp); lp.connect(g); g.connect(bus);
+        s.start(t);
+      } catch (e) { /* no sound is fine */ }
     },
   };
 })();

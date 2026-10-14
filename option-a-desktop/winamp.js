@@ -10,7 +10,7 @@
    LCD, the position bar, round transport keys, the volume (the site's own) and Eject and PL, the playlist folding out
    under it. It plays the MP3s listed in asset/music/playlist.json, and a visitor's own files picked with Eject or
    Add (played in the page, never uploaded).
-     available() -> Promise<bool>, mount(host, { changed }), caption(), stop()
+     available() -> Promise<bool>, mount(host, { changed }), caption(), stop(), loudness() -> { low, mid, high } | null
 */
 (() => {
   'use strict';
@@ -1202,8 +1202,35 @@
     else scope(c, W, H, S, !still);
   }
 
+  // How loud the music is now, for the live wallpaper: { low, mid, high } each 0..1, or null while nothing plays
+  // through the analyser (stopped, paused, a YouTube song, no Web Audio). Each band is two fifths its loudness on
+  // the analyser's scale and three fifths where it sits between the song's own recent floor and peak, so a loud song
+  // still breathes on its beats instead of pinning at full; that second part fades out as the band goes quiet, so a
+  // hushed bridge stays calm instead of being stretched up to fill the range.
+  const BANDS = { low: [40, 250], mid: [250, 2000], high: [2000, 8000] };
+  const span = { low: [1, 0], mid: [1, 0], high: [1, 0], at: 0 };   // each band's recent floor and peak
+  function loudness() {
+    if (state !== 'play' || !analyser || isYT(list[cur])) return null;
+    if (!freq) freq = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(freq);
+    const now = performance.now(), dt = Math.min(0.25, (now - (span.at || now)) / 1000); span.at = now;
+    const drift = 1 - Math.exp(-dt / 3), hz = ctx.sampleRate / analyser.fftSize, out = {};
+    for (const k in BANDS) {
+      const i0 = Math.max(1, Math.round(BANDS[k][0] / hz)), i1 = Math.min(freq.length - 1, Math.round(BANDS[k][1] / hz));
+      let m = 0; for (let i = i0; i <= i1; i++) m += freq[i];
+      const v = m / (i1 - i0 + 1) / 255, s = span[k];
+      // the floor drops to a quieter moment at once and creeps back up over a few seconds; the peak the other way
+      s[0] = v < s[0] ? v : s[0] + (v - s[0]) * drift;
+      s[1] = v > s[1] ? v : s[1] + (v - s[1]) * drift;
+      // the analyser reads quiet hiss at about a quarter of full scale and loud music near three quarters
+      const level = clamp((v - 0.22) / 0.5, 0, 1);
+      out[k] = 0.4 * level + 0.6 * clamp((v - s[0]) / Math.max(0.08, s[1] - s[0]), 0, 1) * clamp(level * 2.5, 0, 1);
+    }
+    return out;
+  }
+
   let raf = 0, lastT = 0;
-  const scrolls = () => view && view.lcdLit.clientWidth && dotsW(view.marqText, 2) > 332 && !mqReduce.matches;
+  const scrolls =() => view && view.lcdLit.clientWidth && dotsW(view.marqText, 2) > 332 && !mqReduce.matches;
   function loop() {
     if (raf) return;
     const tick = (now) => {
@@ -1237,6 +1264,7 @@
     mount,
     caption,
     playing: () => state === 'play',
+    loudness,
     // closing the window quits Winamp: the music stops, the list stays for the next time it opens
     stop() { stop(); closeMenu(false); if (yt && yt.destroy) yt.destroy(); yt = null; view = null; },
   };

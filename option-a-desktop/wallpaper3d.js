@@ -8,7 +8,14 @@
   Moving the mouse over the wallpaper drags a small water wake through it: a low-res flow field (splat,
   self-advect, blur, decay) sweeps the dither dots along and bends the picture a little, then settles. Crossing
   the trace plucks it like a string: a kink rises where the pointer crossed, in the way it was moving, and runs
-  out both ways along the line as it dies away, with a small ripple through the dots.
+  out both ways along the line as it dies away, with a small ripple through the dots, and sounds a soft string note
+  (PF.sfx.pluck, higher further right).
+  While Winamp plays a song through its analyser (PF.winamp.loudness: a file, not a YouTube video) the trace listens:
+  the bass swells the main wave and brightens it, the treble lifts the fine wave, the overall level wakes the flat
+  line further left and quickens the crawl. Every one of these is eased (a quick rise, a slow fall), so the line
+  breathes with the music rather than jittering to it, and settles back the same way when the music stops. A song
+  the page can't hear (a YouTube video: its sound stays in YouTube's frame) gets a slow even breath instead, smaller
+  than a heard song's, so the line still shows that music is on without pretending to follow it.
   Hover only, no clicks. It renders at display rate only while the water or a pluck is still moving, 30 fps
   otherwise.
 
@@ -57,7 +64,22 @@ const CFG = {
     ripple: 0.45,               // strength of the ring of water around the pluck
     cooldown: 220,              // ms before the pointer can pluck again
   },
+  music: {
+    rise: 0.08,                 // s for the line to take up a louder moment
+    fall: 0.5,                  // s for it to let a quieter one go
+    swell: 0.6,                 // the main wave grows by up to this share with the bass
+    fine: 0.8,                  // the fine wave by up to this share with the treble
+    reach: 0.15,                // screen widths further left the swell wakes at full level
+    spread: 0.4,                // and how much wider its bunch grows
+    glow: 0.35,                 // the trace brightens by up to this share with the bass
+    speed: 0.8,                 // the crawl quickens by up to this share at full level
+    // a song Winamp plays but the page can't hear (YouTube): one breath every `every` s, the swell between its two
+    // levels, the rest held low (each as a share of full, like a heard song's)
+    breath: { every: 2.6, swell: [0.18, 0.38], fine: 0.12, reach: 0.4, glow: [0, 0.2] },
+  },
 };
+// the music's hold on the trace, each 0..1 and eased: bass swell, treble fine wave, overall reach, bass glow
+const MUSIC = { swell: 0, fine: 0, reach: 0, glow: 0 };
 
 // DESIGN.md colours: Broadcast Deep, Mid and Hi for the field, Broadcast Soft for the graticule, Phosphor OS's
 // green (--ph) for the trace and its pale core
@@ -94,8 +116,9 @@ if (desktop && !wantStatic) {
 const ease = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 // the trace's height at x (screen units) for a crawl phase and the plucks running, as the shader draws it
 function traceAt(x, phase, plucks) {
-  const [a, k, peak, spread] = TRACE.main, [fa, fk] = TRACE.fine;
-  const env = Math.pow(ease(TRACE.wake, TRACE.full, x), 1.6);
+  const [a0, k, peak, s0] = TRACE.main, [fa0, fk] = TRACE.fine, M = CFG.music;
+  const a = a0 * (1 + MUSIC.swell * M.swell), fa = fa0 * (1 + MUSIC.fine * M.fine), spread = s0 * (1 + MUSIC.reach * M.spread);
+  const env = Math.pow(ease(TRACE.wake - MUSIC.reach * M.reach, TRACE.full, x), 1.6);
   let y = TRACE.y + env * (a * Math.sin(x * k - phase) * Math.exp(-(((x - peak) / spread) ** 2)) + fa * Math.sin(x * fk - phase * 2));
   for (const p of plucks) y -= pluckAt(x, p);
   return y;
@@ -129,6 +152,7 @@ function start() {
       uRes: { value: new THREE.Vector2(4, 4) },
       uPhase: { value: 0 },
       uPluck: { value: plucks.map(() => new THREE.Vector3()) },
+      uMusic: { value: new THREE.Vector4() },
       uDeep: { value: lin(INK.deep) }, uMid: { value: lin(INK.mid) }, uHi: { value: lin(INK.hi) },
       uSoft: { value: lin(INK.soft) }, uPh: { value: lin(INK.ph) }, uCore: { value: lin(INK.core) },
     },
@@ -140,6 +164,7 @@ function start() {
       uniform vec2 uRes;
       uniform float uPhase;
       uniform vec3 uPluck[PLUCKS];      // x, age (s), lift
+      uniform vec4 uMusic;              // MUSIC scaled by CFG.music: main wave gain, fine wave gain, wake shift, glow
       uniform vec3 uDeep, uMid, uHi, uSoft, uPh, uCore;
       varying vec2 vUv;
       const float RUN = ${CFG.pluck.run.toFixed(4)}, WID = ${CFG.pluck.width.toFixed(4)}, RING = ${CFG.pluck.ring.toFixed(2)}, LIFE = ${CFG.pluck.life.toFixed(3)};
@@ -155,10 +180,10 @@ function start() {
       }
       // the trace's height at x for the crawl phase ph (screen units, y down), as traceAt() in the script
       float trace(float x, float ph) {
-        float env = pow(smoothstep(${TRACE.wake.toFixed(3)}, ${TRACE.full.toFixed(3)}, x), 1.6);
-        float d = x - ${TRACE.main[2].toFixed(3)};
-        float y = ${TRACE.y.toFixed(3)} + env * (${TRACE.main[0].toFixed(4)} * sin(x * ${TRACE.main[1].toFixed(2)} - ph) * exp(-d * d / ${(TRACE.main[3] ** 2).toFixed(5)})
-                  + ${TRACE.fine[0].toFixed(4)} * sin(x * ${TRACE.fine[1].toFixed(2)} - ph * 2.0));
+        float env = pow(smoothstep(${TRACE.wake.toFixed(3)} - uMusic.z, ${TRACE.full.toFixed(3)}, x), 1.6);
+        float d = x - ${TRACE.main[2].toFixed(3)}, sp = ${TRACE.main[3].toFixed(4)} * (1.0 + uMusic.z / ${CFG.music.reach.toFixed(4)} * ${CFG.music.spread.toFixed(4)});
+        float y = ${TRACE.y.toFixed(3)} + env * (${TRACE.main[0].toFixed(4)} * (1.0 + uMusic.x) * sin(x * ${TRACE.main[1].toFixed(2)} - ph) * exp(-d * d / (sp * sp))
+                  + ${TRACE.fine[0].toFixed(4)} * (1.0 + uMusic.y) * sin(x * ${TRACE.fine[1].toFixed(2)} - ph * 2.0));
         for (int i = 0; i < PLUCKS; i++) y -= pluck(x, uPluck[i]);
         return y;
       }
@@ -187,7 +212,7 @@ function start() {
         // the trace with its afterglow a beat behind, drawn in only once clear of the icons
         float on = smoothstep(${TRACE.on[0]}, ${TRACE.on[1]}, x);
         float now = light(x, y, uPhase), was = light(x, y, uPhase - 0.9);
-        col += uPh * (now + 0.22 * was) * on;
+        col += uPh * (now + 0.22 * was) * on * (1.0 + uMusic.w);
         float t = trace(x, uPhase), dc = abs(y - t) * uRes.y;
         col += uCore * exp(-dc * dc / 0.36) * 0.5 * smoothstep(0.35, 0.85, x) * on;
         gl_FragColor = vec4(col, 1.0);
@@ -456,6 +481,7 @@ function start() {
     Object.assign(slot, { x, age: 0, lift: up * (P.lift[0] + (P.lift[1] - P.lift[0]) * speed) });
     coolUntil = now + P.cooldown;
     plucking = true;
+    if (PF.sfx && PF.sfx.pluck) PF.sfx.pluck((x - TRACE.on[1]) / (1 - TRACE.on[1]), speed);
     if (flowOn) { Object.assign(ripple, { u: cursorAim.x, v: 1 - t, amount: P.ripple * (0.8 + 0.5 * speed), age: 0 }); wake = 1; }
   }
   function pluckStep(dt) {
@@ -470,13 +496,39 @@ function start() {
     plucking = live;
   }
 
+  /* ---------- music ---------- */
+  // Winamp's loudness (or the slow breath for a song it can't hear), eased toward each frame (a quick rise, a slow
+  // fall); hearing, the music runs the active frame rate, and the crawl it quickens is kept as its own phase so the
+  // trace never jumps when the music stops
+  let hearing = false, musicPhase = 0, breathT = 0;
+  const QUIET = { swell: 0, fine: 0, reach: 0, glow: 0 };
+  function musicStep(dt) {
+    const W = PF.winamp, l = W && W.loudness ? W.loudness() : null;
+    let aim = QUIET;
+    if (l) aim = { swell: l.low * 0.7 + l.mid * 0.3, fine: l.high, reach: Math.max(l.low, l.mid), glow: l.low };
+    else if (W && W.playing && W.playing()) {
+      const B = CFG.music.breath, b = 0.5 - 0.5 * Math.cos((breathT += dt) * ((2 * Math.PI) / B.every));
+      aim = { swell: B.swell[0] + (B.swell[1] - B.swell[0]) * b, fine: B.fine, reach: B.reach, glow: B.glow[0] + (B.glow[1] - B.glow[0]) * b };
+    } else breathT = 0;
+    let live = false;
+    for (const k in MUSIC) {
+      const tau = aim[k] > MUSIC[k] ? CFG.music.rise : CFG.music.fall;
+      MUSIC[k] += (aim[k] - MUSIC[k]) * (1 - Math.exp(-dt / tau));
+      if (MUSIC[k] < 0.002 && !aim[k]) MUSIC[k] = 0; else live = true;
+    }
+    hearing = live;
+    musicPhase += dt * CFG.crawl * CFG.music.speed * MUSIC.reach;
+  }
+
   // the clock starts at the moment the still on .desktop was rendered, so the first frame fades in over the same picture
   const STILL_T = 10;
   let time = STILL_T;
   function animate(t) {
-    phase = t * CFG.crawl;
+    phase = t * CFG.crawl + musicPhase;
     signal.uniforms.uPhase.value = phase;
     plucks.forEach((p, i) => signal.uniforms.uPluck.value[i].set(p.x, p.age, p.lift));
+    const M = CFG.music;
+    signal.uniforms.uMusic.value.set(MUSIC.swell * M.swell, MUSIC.fine * M.fine, MUSIC.reach * M.reach, MUSIC.glow * M.glow);
   }
 
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -534,7 +586,7 @@ function start() {
   function frame() {
     raf = 0;
     const now = performance.now(), share = visibleShare(now);
-    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || plucking ? CFG.fpsActive : CFG.fps);
+    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || plucking || hearing ? CFG.fpsActive : CFG.fps);
     if (now - last < frameMs - 8) { wait(last + frameMs - now - 4); return; }
     const dt = Math.min(0.1, (now - last) / 1000 || 0);
     last = now;
@@ -543,6 +595,7 @@ function start() {
     wait(last + frameMs - performance.now() - 4);
     time += dt;
     pluckStep(dt);
+    musicStep(dt);
     animate(time);
     pluckTest(now);
     glitchTick(now);
@@ -584,12 +637,12 @@ function start() {
     pause() { paused = true; stop(); },
     // where the trace sits on screen (CSS px) at a few points along it, for testing plucks
     targets: () => { const r = desktop.getBoundingClientRect(), a = r.width / r.height; return [0.4, 0.6, 0.8].map((x) => ({ x: Math.round(r.left + x * r.width), y: Math.round(r.top + traceAt(toPic(x, a), phase, plucks) * r.height) })); },
-    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), plucking, plucks: plucks.filter((p) => p.lift).length, drawn }),
+    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), plucking, plucks: plucks.filter((p) => p.lift).length, music: Object.fromEntries(Object.entries(MUSIC).map(([k, v]) => [k, +v.toFixed(3)])), drawn }),
     play() { paused = false; play(); },
     // advance one frame by hand (the browser pauses requestAnimationFrame in hidden tabs)
-    step(dt = 1 / 60) { time += dt; pluckStep(dt); animate(time); pluckTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },
+    step(dt = 1 / 60) { time += dt; pluckStep(dt); musicStep(dt); animate(time); pluckTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },
     // draw the picture at time t and hand it back as a PNG data URL, in the same task, so the drawing is still there to
     // read (tools/wallpaper-still makes the stills on .desktop with it)
-    seek(t = STILL_T) { stop(); paused = true; time = t; post.uniforms.uGlitch.value = 0; animate(time); draw(); return canvas.toDataURL('image/png'); },
+    seek(t = STILL_T) { stop(); paused = true; time = t; musicPhase = 0; breathT = 0; for (const k in MUSIC) MUSIC[k] = 0; post.uniforms.uGlitch.value = 0; animate(time); draw(); return canvas.toDataURL('image/png'); },
   };
 }
