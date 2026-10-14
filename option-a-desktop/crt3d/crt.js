@@ -9,7 +9,8 @@
     ready       settles once the model is in, every shader compiled and the first frame drawn (rejects on failure)
     corners()   the glass as four points in host CSS pixels: top left, top right, bottom right, bottom left
     lean(t)     the camera's slow push while the portfolio loads: t seconds since the screen appeared
-    tube(state) the light the tube throws on the room: 'test' (the self-test's grey) or 'blue' (XP's welcome)
+    tube(state) the light the tube throws on the room: 'test' (the self-test's grey), 'blue' (XP's welcome) or 'line'
+                (the dark tube's green power-on line)
     fly(ms)     the flight into the glass; resolves when the glass fills the frame
     still(name, raw) draw one pose (the stills the loader shows before the 3D is up, see tools/poster.mjs); raw: without
                 the lines and the dither, which boot.js adds to the still at the page's own dots
@@ -249,9 +250,9 @@ export function createCrt(host, opts = {}) {
     draw();
   }
   function tube(state) {
-    const blue = state === 'blue';
-    tubeLight.color.set(blue ? '#5a7edc' : '#9aa29a');
-    tubeLight.intensity = blue ? 2.6 : 0.35;
+    const blue = state === 'blue', line = state === 'line';
+    tubeLight.color.set(blue ? '#5a7edc' : line ? '#4cda50' : '#9aa29a');
+    tubeLight.intensity = blue ? 2.6 : line ? 0.5 : 0.35;
     if (poses) draw();
   }
   function fly(ms = cfg.fly) {

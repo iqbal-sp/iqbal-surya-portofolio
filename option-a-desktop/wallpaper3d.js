@@ -16,6 +16,9 @@
   breathes with the music rather than jittering to it, and settles back the same way when the music stops. A song
   the page can't hear (a YouTube video: its sound stays in YouTube's frame) gets a slow even breath instead, smaller
   than a heard song's, so the line still shows that music is on without pretending to follow it.
+  The loading screen hands the trace over as the tube's power-on line (boot.js): it calls flatten() before the
+  desktop shows, so the trace lies flat where that line lands, and rise(ms) once the line has gone, so the swell wakes
+  out of it on the right, eased in and out.
   Hover only, no clicks. It renders at display rate only while the water or a pluck is still moving, 30 fps
   otherwise.
 
@@ -80,6 +83,8 @@ const CFG = {
 };
 // the music's hold on the trace, each 0..1 and eased: bass swell, treble fine wave, overall reach, bass glow
 const MUSIC = { swell: 0, fine: 0, reach: 0, glow: 0 };
+// how far the swell has woken out of the flat power-on line, 0..1 (1 but for the moments after the loading screen)
+let RISEN = 1;
 
 // DESIGN.md colours: Broadcast Deep, Mid and Hi for the field, Broadcast Soft for the graticule, Phosphor OS's
 // green (--ph) for the trace and its pale core
@@ -118,7 +123,7 @@ const ease = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))
 function traceAt(x, phase, plucks) {
   const [a0, k, peak, s0] = TRACE.main, [fa0, fk] = TRACE.fine, M = CFG.music;
   const a = a0 * (1 + MUSIC.swell * M.swell), fa = fa0 * (1 + MUSIC.fine * M.fine), spread = s0 * (1 + MUSIC.reach * M.spread);
-  const env = Math.pow(ease(TRACE.wake - MUSIC.reach * M.reach, TRACE.full, x), 1.6);
+  const env = RISEN * Math.pow(ease(TRACE.wake - MUSIC.reach * M.reach, TRACE.full, x), 1.6);
   let y = TRACE.y + env * (a * Math.sin(x * k - phase) * Math.exp(-(((x - peak) / spread) ** 2)) + fa * Math.sin(x * fk - phase * 2));
   for (const p of plucks) y -= pluckAt(x, p);
   return y;
@@ -153,6 +158,7 @@ function start() {
       uPhase: { value: 0 },
       uPluck: { value: plucks.map(() => new THREE.Vector3()) },
       uMusic: { value: new THREE.Vector4() },
+      uRisen: { value: 1 },
       uDeep: { value: lin(INK.deep) }, uMid: { value: lin(INK.mid) }, uHi: { value: lin(INK.hi) },
       uSoft: { value: lin(INK.soft) }, uPh: { value: lin(INK.ph) }, uCore: { value: lin(INK.core) },
     },
@@ -165,6 +171,7 @@ function start() {
       uniform float uPhase;
       uniform vec3 uPluck[PLUCKS];      // x, age (s), lift
       uniform vec4 uMusic;              // MUSIC scaled by CFG.music: main wave gain, fine wave gain, wake shift, glow
+      uniform float uRisen;             // RISEN: the swell out of the power-on line
       uniform vec3 uDeep, uMid, uHi, uSoft, uPh, uCore;
       varying vec2 vUv;
       const float RUN = ${CFG.pluck.run.toFixed(4)}, WID = ${CFG.pluck.width.toFixed(4)}, RING = ${CFG.pluck.ring.toFixed(2)}, LIFE = ${CFG.pluck.life.toFixed(3)};
@@ -180,7 +187,7 @@ function start() {
       }
       // the trace's height at x for the crawl phase ph (screen units, y down), as traceAt() in the script
       float trace(float x, float ph) {
-        float env = pow(smoothstep(${TRACE.wake.toFixed(3)} - uMusic.z, ${TRACE.full.toFixed(3)}, x), 1.6);
+        float env = uRisen * pow(smoothstep(${TRACE.wake.toFixed(3)} - uMusic.z, ${TRACE.full.toFixed(3)}, x), 1.6);
         float d = x - ${TRACE.main[2].toFixed(3)}, sp = ${TRACE.main[3].toFixed(4)} * (1.0 + uMusic.z / ${CFG.music.reach.toFixed(4)} * ${CFG.music.spread.toFixed(4)});
         float y = ${TRACE.y.toFixed(3)} + env * (${TRACE.main[0].toFixed(4)} * (1.0 + uMusic.x) * sin(x * ${TRACE.main[1].toFixed(2)} - ph) * exp(-d * d / (sp * sp))
                   + ${TRACE.fine[0].toFixed(4)} * (1.0 + uMusic.y) * sin(x * ${TRACE.fine[1].toFixed(2)} - ph * 2.0));
@@ -520,6 +527,16 @@ function start() {
     musicPhase += dt * CFG.crawl * CFG.music.speed * MUSIC.reach;
   }
 
+  /* ---------- out of the power-on line ---------- */
+  // the swell wakes over `ms`, eased in and out, from the moment rise() is called; rising, it runs the active frame rate
+  let rising = null;
+  function riseStep(now) {
+    if (!rising) return;
+    const t = Math.min(1, (now - rising.at) / rising.ms);
+    RISEN = t * t * (3 - 2 * t);
+    if (t >= 1) rising = null;
+  }
+
   // the clock starts at the moment the still on .desktop was rendered, so the first frame fades in over the same picture
   const STILL_T = 10;
   let time = STILL_T;
@@ -529,6 +546,7 @@ function start() {
     plucks.forEach((p, i) => signal.uniforms.uPluck.value[i].set(p.x, p.age, p.lift));
     const M = CFG.music;
     signal.uniforms.uMusic.value.set(MUSIC.swell * M.swell, MUSIC.fine * M.fine, MUSIC.reach * M.reach, MUSIC.glow * M.glow);
+    signal.uniforms.uRisen.value = RISEN;
   }
 
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -586,7 +604,7 @@ function start() {
   function frame() {
     raf = 0;
     const now = performance.now(), share = visibleShare(now);
-    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || plucking || hearing ? CFG.fpsActive : CFG.fps);
+    const frameMs = 1000 / (share < 0.3 ? 10 : wake >= WAKE_MIN || plucking || hearing || rising ? CFG.fpsActive : CFG.fps);
     if (now - last < frameMs - 8) { wait(last + frameMs - now - 4); return; }
     const dt = Math.min(0.1, (now - last) / 1000 || 0);
     last = now;
@@ -596,6 +614,7 @@ function start() {
     time += dt;
     pluckStep(dt);
     musicStep(dt);
+    riseStep(now);
     animate(time);
     pluckTest(now);
     glitchTick(now);
@@ -634,15 +653,19 @@ function start() {
     glitch(ms = 400) { const now = performance.now(); glitchUntil = now + ms; reseedAt = 0; if (!raf && !timer) { glitchTick(now); still(); } },
     // a quiet spell while the interface moves (a window zooming, a balloon), so a glitch never lands on it
     calm(ms = 1500) { const t = performance.now() + ms; if (nextGlitch < t) nextGlitch = t; },
+    // the loading screen's hand-over (boot.js): flatten() lays the trace flat and draws it at once, even while paused;
+    // rise(ms) wakes the swell out of it. Under reduced motion the swell stays as it is, as the wallpaper never moves
+    flatten() { if (mqReduce.matches) return; rising = null; RISEN = 0; still(); },
+    rise(ms = 1600) { rising = { at: performance.now(), ms }; if (!raf && !timer) { riseStep(performance.now()); still(); } },
     pause() { paused = true; stop(); },
     // where the trace sits on screen (CSS px) at a few points along it, for testing plucks
     targets: () => { const r = desktop.getBoundingClientRect(), a = r.width / r.height; return [0.4, 0.6, 0.8].map((x) => ({ x: Math.round(r.left + x * r.width), y: Math.round(r.top + traceAt(toPic(x, a), phase, plucks) * r.height) })); },
-    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), plucking, plucks: plucks.filter((p) => p.lift).length, music: Object.fromEntries(Object.entries(MUSIC).map(([k, v]) => [k, +v.toFixed(3)])), drawn }),
+    state: () => ({ running: !!(raf || timer), covered, shown, time: +time.toFixed(2), glitch: post.uniforms.uGlitch.value, size: [canvas.width, canvas.height], flow: flowOn, wake: +wake.toFixed(3), plucking, plucks: plucks.filter((p) => p.lift).length, music: Object.fromEntries(Object.entries(MUSIC).map(([k, v]) => [k, +v.toFixed(3)])), risen: +RISEN.toFixed(3), drawn }),
     play() { paused = false; play(); },
     // advance one frame by hand (the browser pauses requestAnimationFrame in hidden tabs)
-    step(dt = 1 / 60) { time += dt; pluckStep(dt); musicStep(dt); animate(time); pluckTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },
+    step(dt = 1 / 60) { time += dt; pluckStep(dt); musicStep(dt); riseStep(performance.now()); animate(time); pluckTest(performance.now()); glitchTick(performance.now()); flowStep(dt); draw(); },
     // draw the picture at time t and hand it back as a PNG data URL, in the same task, so the drawing is still there to
     // read (tools/wallpaper-still makes the stills on .desktop with it)
-    seek(t = STILL_T) { stop(); paused = true; time = t; musicPhase = 0; breathT = 0; for (const k in MUSIC) MUSIC[k] = 0; post.uniforms.uGlitch.value = 0; animate(time); draw(); return canvas.toDataURL('image/png'); },
+    seek(t = STILL_T) { stop(); paused = true; time = t; musicPhase = 0; breathT = 0; rising = null; RISEN = 1; for (const k in MUSIC) MUSIC[k] = 0; post.uniforms.uGlitch.value = 0; animate(time); draw(); return canvas.toDataURL('image/png'); },
   };
 }

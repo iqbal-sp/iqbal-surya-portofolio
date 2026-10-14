@@ -16,6 +16,10 @@
   and a 3D that shows holds STAGE before the flight, so a fast load still sees the room in 3D and the camera's push
   (nothing is added when the 3D can't show: a phone, reduced motion, no WebGL). Then the tube turns XP's welcome blue
   and the camera flies into the glass (a CSS zoom on the still), and the desktop comes up in XP's order.
+  Where the live wallpaper runs, the tube instead goes dark and lights one phosphor line, as a CRT does when it comes on
+  (lineOn), 62% down the glass, where the wallpaper's trace lies. The camera flies into it; as the screen fades the
+  line is laid over the page where the flight left it and glides onto the wallpaper's trace, which lies flat there
+  until the line has faded into it and then wakes its swell on the right (handOver, PF.wall3d.flatten and rise).
   The test is English on both languages, as a BIOS was; the screen reader's status follows the page's language.
   index.html's head adds html.booting before the first paint and holds this screen's rules, and its stylesheets come
   after this script, so the screen draws without waiting for them; app.js hands over Home (PF.boot.home) and runs its
@@ -35,7 +39,7 @@
   const $ = (s) => box.querySelector(s);
   const scene = $('.boot-scene'), room = $('.boot-room'), led = $('.boot-led'), crt = $('.boot-crt'), lines = $('.bios-test');
   const mem = $('.bios-mem'), cells = $('.bios-bar'), pctEl = $('.bios-pct'), tail = $('.bios-tail'), foot = $('.bios-foot');
-  const meter = $('#bootMeter'), say = $('#bootSay');
+  const meter = $('#bootMeter'), say = $('#bootSay'), lineEl = $('.bios-line i');
   const themeColor = document.querySelector('meta[name="theme-color"]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // a phone gets the still and a CSS zoom, never the 3D (as the live wallpaper and desk3d)
@@ -256,7 +260,7 @@
   }
   function start3d() {
     if (small.matches || reduce || !webgl()) return null;
-    return import('./crt3d/crt.js?v=3').then((m) => {
+    return import('./crt3d/crt.js?v=4').then((m) => {
       if (!run || run.holding) return null;
       // the HTML glass follows the 3D only once the 3D shows, so it never slides off the still's bezel
       crt3d = m.createCrt(scene, { onFrame: (q) => {
@@ -328,7 +332,8 @@
     root.classList.remove('boot-out', 'boot-in');
     root.classList.add('booting');
     box.classList.remove('ready', 'failing');
-    crt.classList.remove('blue', 'done');
+    crt.classList.remove('blue', 'line', 'done');
+    if (lineEl) lineEl.getAnimations().forEach((a) => a.cancel());
     scene.classList.remove('live');
     [box, scene, room].forEach((n) => n.getAnimations().forEach((a) => a.cancel()));
     lines.innerHTML = PARTS.map(([k, , label]) => `<p data-part="${k}"><span>${label}</span><b></b></p>`).join('');
@@ -487,16 +492,26 @@
     try { sessionStorage.removeItem(TRIES); sessionStorage.removeItem(MISSES); } catch (e) { /* storage unavailable */ }
     setTimeout(() => {
       if (run !== r) return;
-      crt.classList.add('blue');
+      // where the live wallpaper runs, the tube lights the power-on line it will keep as its trace; elsewhere (a phone,
+      // reduced motion, no WebGL for the wallpaper) XP's welcome blue as before
+      r.line = !reduce && !small.matches && !!PF.wall3d && !!lineEl;
+      crt.classList.add(r.line ? 'line' : 'blue');
       // decided once, as the test ends: a 3D that shows flies into the glass; one still on its way is dropped and the
       // still flies, so the screen never stands frozen waiting for it nor changes material in mid-flight
       const live = !!crt3d && scene.classList.contains('live');
-      if (live) crt3d.tube('blue');
+      if (live) crt3d.tube(r.line ? 'line' : 'blue');
       else if (crt3d) { crt3d.destroy(); crt3d = null; }
-      (reduce ? pause(450) : live ? fly3d(r) : zoomStill(r)).then(() => leave(r));
+      const fly = () => (reduce ? pause(450) : live ? fly3d(r) : zoomStill(r));
+      (r.line ? lineOn(r).then(fly) : fly()).then(() => leave(r));
     }, DONE_HOLD * 1000 * r.q);
   }
   const pause = (ms) => new Promise((res) => setTimeout(res, ms));
+  // the tube goes dark a moment, then its line draws out from the middle, as a CRT's does when it comes on, and holds
+  function lineOn(r) {
+    return lineEl.animate([{ transform: 'scaleX(0)', opacity: 0.5 }, { transform: 'scaleX(1)', opacity: 1 }],
+      { duration: 300 * r.q, delay: 180 * r.q, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'forwards' }).finished
+      .catch(() => {}).then(() => pause(320 * r.q));
+  }
   // the glass's corners lie round the whole screen: from there on the flight only shows more of the same blue
   const covers = (q) => { const xs = q.map((p) => p[0]), ys = q.map((p) => p[1]); return Math.min(...xs) <= 0 && Math.min(...ys) <= 0 && Math.max(...xs) >= box.clientWidth && Math.max(...ys) >= box.clientHeight; };
   // the 3D's flight, over once the glass fills the frame (or at the end of its way); a return visit flies faster
@@ -513,7 +528,9 @@
     const xs = q.map((p) => p[0]), ys = q.map((p) => p[1]);
     const gx = (Math.min(...xs) + Math.max(...xs)) / 2, gy = (Math.min(...ys) + Math.max(...ys)) / 2;
     const k = Math.max(box.clientWidth / (Math.max(...xs) - Math.min(...xs)), box.clientHeight / (Math.max(...ys) - Math.min(...ys))) * 1.2;
-    const to = `translate(${box.clientWidth / 2 - gx * k}px, ${box.clientHeight / 2 - gy * k}px) scale(${k})`;
+    const tx = box.clientWidth / 2 - gx * k, ty = box.clientHeight / 2 - gy * k, to = `translate(${tx}px, ${ty}px) scale(${k})`;
+    // where the glass ends up, for the power-on line's hand-over (the 3D's last frame tells it by itself)
+    r.glassEnd = q.map(([x, y]) => [x * k + tx, y * k + ty]);
     scene.style.transformOrigin = '0 0';
     const ms = STILL_FLY * r.q;
     room.animate([{ opacity: 1 }, { opacity: 1, offset: 0.1 }, { opacity: 0, offset: 0.32 }, { opacity: 0 }], { duration: ms, easing: 'linear', fill: 'forwards' });
@@ -528,6 +545,7 @@
     // the wallpaper is painted now, while the screen still covers it, and the desktop's chime rings as it comes up (sfx.js;
     // heard only when the visitor has pressed something, as browsers allow)
     root.classList.add('boot-out');
+    if (r.line) handOver(r);
     if (PF.sfx) PF.sfx.play('startup');
     if (reduce) root.classList.add('boot-in');
     const end = () => {
@@ -552,6 +570,29 @@
     Promise.all([fade.finished, pause(300 * q).then(() => enter(q))])
       .catch(() => { root.classList.add('boot-in'); })
       .then(end);
+  }
+
+  // The power-on line leaves the tube as the screen fades: laid over the page where the flight left it (62% down the
+  // glass), it glides onto the wallpaper's trace (TRACE.y in wallpaper3d.js, 62% down the desktop), which lies flat
+  // there meanwhile, thins to it, fades into it, and then the swell wakes on the right
+  function handOver(r) {
+    const g = r.glassEnd || glassNow, desk = document.getElementById('desktop');
+    if (!g || !desk || !PF.wall3d) return;
+    const q = r.q, down = (a, b) => a[1] + (b[1] - a[1]) * 0.62, tall = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const y = (down(g[0], g[3]) + down(g[1], g[2])) / 2;
+    const h = Math.max(2, Math.min(10, Math.round((4 * (tall(g[0], g[3]) + tall(g[1], g[2]))) / 2 / 768)));
+    const d = desk.getBoundingClientRect(), to = d.top + d.height * 0.62;
+    PF.wall3d.flatten();
+    const el = document.createElement('i');
+    el.className = 'boot-handoff';
+    el.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(el);
+    el.animate([{ transform: `translateY(${y - h / 2}px)`, height: `${h}px` }, { transform: `translateY(${to - 1}px)`, height: '2px' }],
+      { duration: 520 * q, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'forwards' });
+    pause(520 * q)
+      .then(() => el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380 * q, easing: 'ease-out', fill: 'forwards' }).finished)
+      .catch(() => {})
+      .then(() => { el.remove(); if (PF.wall3d) PF.wall3d.rise(1600); });
   }
 
   // XP brought the desktop up in steps after its Welcome screen: the wallpaper first, then the taskbar and the

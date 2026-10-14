@@ -128,6 +128,17 @@
     .bw-hi { font: italic 700 76px/1 "Noto Sans", sans-serif; letter-spacing: -.02em; }
     .boot-crt.blue .bios-blue { visibility: visible; }
     .boot-crt.blue .bios { visibility: hidden; }
+    /* everything is in, where the live wallpaper runs (not a phone, not reduced motion): instead of the welcome, the tube
+       goes dark and lights one phosphor line where the wallpaper's trace lies, 62% down; the camera flies into it and
+       the desktop keeps it as its Phosphor Signal (boot.js, lineOn and handOver) */
+    .bios-line { position: absolute; inset: 0; background: #04163f; visibility: hidden; }
+    .bios-line i { position: absolute; left: 0; right: 0; top: calc(62% - 2px); height: 4px; background: #d9ffd6; transform: scaleX(0);
+      box-shadow: 0 0 4px 1px #4cda50, 0 0 18px 4px rgba(76, 218, 80, .45); }
+    .boot-crt.line .bios-line { visibility: visible; }
+    .boot-crt.line .bios { visibility: hidden; }
+    /* the same line over the screen as the loading screen fades, gliding onto the wallpaper's trace */
+    .boot-handoff { position: fixed; left: 0; right: 0; top: 0; z-index: 10001; pointer-events: none; background: #d9ffd6;
+      box-shadow: 0 0 4px 1px #4cda50, 0 0 18px 4px rgba(76, 218, 80, .45); }
     /* a phone shows the whole tube in about 310px: the test half again as large, keeping only the parts and the bar */
     @media (max-width: 720px), (max-height: 500px) and (pointer: coarse) {
       .boot-crt { font-size: 44px; line-height: 54px; }
@@ -231,6 +242,7 @@
           <i class="bw-rule"></i>
           <p class="bw-hi">welcome</p>
         </div><i></i></div>
+        <div class="bios-line"><i></i></div>
       </div>
     </div>
     <div class="sr-only" id="bootMeter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
@@ -258,7 +270,7 @@
 
   <!-- the loading screen first, so it can count everything after it, and draw before the stylesheets have arrived;
        the scripts after them wait for them -->
-  <script src="boot.js?v=16" fetchpriority="high"></script>
+  <script src="boot.js?v=17" fetchpriority="high"></script>
   <link rel="stylesheet" href="cursors.css?v=1">
   <link rel="stylesheet" href="style.css?v=179">
   <link rel="stylesheet" href="home.css?v=144">
@@ -269,9 +281,9 @@
   <script src="icons.js?v=62"></script>
   <script src="winamp.js?v=6"></script>
   <script src="sfx.js?v=3"></script>
-  <script src="app.js?v=213"></script>
+  <script src="app.js?v=214"></script>
   <script src="process-crt.js?v=1"></script>
   <!-- Live wallpaper (three.js), with the static webp on .desktop as its fallback. -->
-  <script type="module" src="wallpaper3d.js?v=23"></script>
+  <script type="module" src="wallpaper3d.js?v=24"></script>
 </body>
 </html>
