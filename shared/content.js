@@ -259,7 +259,7 @@
       ],
     },
     // the owner's app UI shots that have no case study (6 to 12, 4:3). Each opens in the Picture Viewer;
-    // title and url are optional, a missing title reads "UI shot 01"
+    // title and url are optional, a missing title reads "Exploration 01" ("Eksplorasi 01"): they are explorations
     shorts: {
       head: { en: 'Also on air', id: 'Juga tayang' },
       // the owner's UI shots, asset/Home/design-shoot/UI-nn.png, as web copies: small (640px) on the wall, src
