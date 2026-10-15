@@ -30,8 +30,8 @@
     // Figma file "Krool - CRM Dashboard" (L1c3sNmg11MZQnqMRGVPYR, page Design, 20001:2781), told as a programme page
     // (owner's choice, 2026-10-15): the case's own title and tags (content.js), a short About and the facts known so
     // far, its colours, then its screens, each a feed with its caption. A fact still null waits for the owner: a local
-    // preview marks it, the site leaves it out. The device shot that opens it (01) is the owner's from "Work area iqbal"
-    // (node 574:12567); every other screen is a frame of the Krool file, exported at 2x (2026-10-15)
+    // preview marks it, the site leaves it out. Every screen is a frame of the Krool file, exported at 2x; no device
+    // mockups (owner's call, 2026-10-15)
     krool: {
       dir: 'asset/Work/krool',
       about: {
@@ -60,13 +60,6 @@
       // one screen a row, or several side by side (an array); name gives the screen its file name over it. Big screens
       // only, nothing laid over them (owner's calls, 2026-10-15)
       screens: [
-        {
-          name: { en: 'Dashboard on a tablet', id: 'Dasbor di tablet' },
-          pic: crt('01-hero-dashboard', '574:12567', {
-            en: 'KROOL’s dashboard: conversation numbers, lead activity by region and the team’s tasks',
-            id: 'Dasbor KROOL: angka percakapan, aktivitas prospek per wilayah, dan tugas tim',
-          }),
-        },
         {
           name: { en: 'Dashboard', id: 'Dasbor' },
           pic: pic('win', 'KROOL - Dashboard', '13-dashboard', 1440, 1072, '22105:507', {
@@ -126,8 +119,8 @@
       ],
     },
     // Figma file "Sensorstock.ai" (o6kneYuABLITrPvlHJjLWP), the website the owner redesigned (design only): twelve pages on
-    // desktop (page HiFi, 2058:34) and mobile. Every screen is a page of it; the hero is the owner's shot from "Work area
-    // iqbal", so its node (577:…) points there. A programme page since 2026-10-15; the three cards (04-06) went with KROOL's
+    // desktop (page HiFi, 2058:34) and mobile. Every screen is a desktop page of it, the home page whole among them; no
+    // phones and no device mockups (owner's calls, 2026-10-15)
     sensorstack: {
       dir: 'asset/Work/sensorstack',
       about: {
@@ -140,35 +133,28 @@
         year: '2025',
         scope: { en: '12 pages, desktop and mobile, from wireframes', id: '12 halaman, desktop dan mobile, dari wireframe' },
       },
-      // its colours as colour bars, picked from its screens, and its typefaces as read off them (the owner checks)
+      // its colours and typefaces as the Sensorstock.ai file sets them (read from its Home, Facilities, Operation
+      // Efficiency and Contact pages, 2026-10-15): Inter for headings and text, Overused Grotesk for the navigation,
+      // buttons and form labels
       palette: [
-        { hex: '#4D55DB', role: { en: 'Accent', id: 'Aksen' } },
+        { hex: '#4E55DB', role: { en: 'Accent', id: 'Aksen' } },
         { hex: '#021720', role: { en: 'Navigation', id: 'Navigasi' } },
         { hex: '#000000', role: { en: 'Headings', id: 'Judul' } },
-        { hex: '#F7F6FD', role: { en: 'Highlight', id: 'Sorotan' } },
+        { hex: '#77707E', role: { en: 'Secondary text', id: 'Teks sekunder' } },
+        { hex: '#DB4310', role: { en: 'Alerts', id: 'Peringatan' } },
+        { hex: '#F4F3FF', role: { en: 'Highlight', id: 'Sorotan' } },
+        { hex: '#F5F6F8', role: { en: 'Sections', id: 'Section' } },
         { hex: '#FFFFFF', role: { en: 'Background', id: 'Latar' } },
       ],
-      type: [{ name: 'Inter', role: { en: 'Headings and text', id: 'Judul dan teks' } }],
+      type: [{ name: 'Inter', role: { en: 'Headings and text', id: 'Judul dan teks' } }, { name: 'Overused Grotesk', role: { en: 'Navigation and buttons', id: 'Navigasi dan tombol' } }],
       screens: [
         {
-          name: { en: 'Home page on a laptop', id: 'Beranda di laptop' },
-          pic: crt('01-hero-website', '577:37637', {
-            en: 'SensorStack’s home page on a laptop: Smart Monitoring Made Simple, over a preview of the monitoring dashboard',
-            id: 'Beranda SensorStack di laptop: Smart Monitoring Made Simple, di atas pratinjau dashboard pemantauan',
-          }),
-        },
-        {
-          name: { en: 'Industry list', id: 'Daftar industri' },
-          pic: pic('win', 'SensorStack - Home', '02-industry-list', 1440, 918, '20488:626', {
-            en: 'The home page’s list of industries: Industrial & Manufacturing open, with a short description and Learn More, beside a photo of a factory floor; Facilities Management, Food & Beverage, ESG & Waste Management, Energy & Sustainability and Commercial Real Estate below it',
-            id: 'Daftar industri di beranda: Industrial & Manufacturing terbuka, dengan deskripsi singkat dan tautan Learn More, di samping foto lantai pabrik; di bawahnya Facilities Management, Food & Beverage, ESG & Waste Management, Energy & Sustainability, dan Commercial Real Estate',
-          }),
-        },
-        {
-          name: { en: 'Industry pages', id: 'Halaman industri' },
-          pic: bare('03-industry-pages', '20488:1681', {
-            en: 'The four industry pages side by side, each opening on a headline beside a photo, then a row of logos and that industry’s problems',
-            id: 'Empat halaman industri berdampingan, masing-masing dibuka dengan judul di samping foto, lalu deretan logo dan masalah industri tersebut',
+          // the whole home page, scrolled through in a screen's frame (scroll), exported at 2x and kept to 2200px wide
+          name: { en: 'Home, the whole page', id: 'Beranda, satu halaman penuh' },
+          scroll: true,
+          pic: pic('win', 'SensorStack - Home', '16-home-full', 1440, 7723, '20488:403', {
+            en: 'SensorStack’s whole home page: Smart Monitoring Made Simple, the dashboard, the industries, the platform’s features, customer results and the demo request',
+            id: 'Seluruh halaman beranda SensorStack: Smart Monitoring Made Simple, dashboard, daftar industri, fitur platform, hasil pelanggan, dan permintaan demo',
           }),
         },
         {
@@ -213,33 +199,11 @@
             id: 'Get in Touch with SensorStack: formulir pesan di samping email dukungan, nomor telepon, dan alamat website',
           }),
         },
-        [
-          {
-            name: { en: 'Mobile home', id: 'Beranda mobile' },
-            pic: pic('tool', 'Home', '13-m-home', 375, 812, '20564:7921', {
-              en: 'The home page on a phone: Smart Monitoring Made Simple under a bar with the logo and a menu button, above the dashboard preview',
-              id: 'Beranda di ponsel: Smart Monitoring Made Simple di bawah bilah berisi logo dan tombol menu, di atas pratinjau dashboard',
-            }),
-          },
-          {
-            name: { en: 'Mobile industries', id: 'Industri mobile' },
-            pic: pic('tool', 'Industries', '14-m-industries', 375, 812, '20564:8132', {
-              en: 'The list of industries on a phone: Industrial & Manufacturing open, with its description, Learn More and its photo inside, above the next industries',
-              id: 'Daftar industri di ponsel: Industrial & Manufacturing terbuka, dengan deskripsi, tautan Learn More, dan fotonya di dalam, di atas industri berikutnya',
-            }),
-          },
-          {
-            name: { en: 'Mobile food and beverage', id: 'Makanan dan minuman mobile' },
-            pic: pic('tool', 'Food & Beverage', '15-m-food', 375, 812, '20574:11895', {
-              en: 'The food and beverage page on a phone: a photo of a bottling line above Cut Waste, Optimize Operations and Request a Demo',
-              id: 'Halaman makanan dan minuman di ponsel: foto lini pembotolan di atas Cut Waste, Optimize Operations, dan tombol Request a Demo',
-            }),
-          },
-        ],
       ],
     },
     // Figma "Work area iqbal", FINDMENTOR's frames (577:…). A programme page since 2026-10-15: its big screens only, so the
-    // cards and small windows (04-06, 10-12) went with KROOL's
+    // Figma file "FindMentor" (2zIhf6Kgua4RF9BFkTKb8e, page Design, 20:7): the mentee's side, then the mentor's. Every
+    // screen is a frame of it, exported at 2x; no device mockups (owner's call, 2026-10-15)
     findmentor: {
       dir: 'asset/Work/findmentor',
       about: {
@@ -250,57 +214,110 @@
         type: { en: 'Interface design', id: 'Desain antarmuka' },
         role: null,
         year: null,
-        scope: { en: 'Mentor and mentee dashboards, mentor search, booking, assignments', id: 'Dasbor mentor dan mentee, pencarian mentor, pemesanan sesi, tugas' },
+        scope: { en: 'Mentee and mentor dashboards, mentor search, booking, assignments, messages', id: 'Dasbor mentee dan mentor, pencarian mentor, pemesanan sesi, tugas, pesan' },
       },
-      // its colours as colour bars, picked from its screens, and its typefaces as read off them (the owner checks)
+      // its colours and typeface as the FindMentor file sets them (read from its Dashboard, Explore, Assignment and
+      // mentor frames, 2026-10-15)
       palette: [
-        { hex: '#1A746F', role: { en: 'Background', id: 'Latar' } },
-        { hex: '#458987', role: { en: 'Panels', id: 'Panel' } },
-        { hex: '#7277CC', role: { en: 'Selected', id: 'Terpilih' } },
-        { hex: '#E5FF62', role: { en: 'Rating', id: 'Rating' } },
-        { hex: '#FFFFFF', role: { en: 'Text', id: 'Teks' } },
+        { hex: '#004D43', role: { en: 'Primary', id: 'Utama' } },
+        { hex: '#E2FC63', role: { en: 'Highlight', id: 'Sorotan' } },
+        { hex: '#27EAA6', role: { en: 'Accent', id: 'Aksen' } },
+        { hex: '#8F93FF', role: { en: 'Chart', id: 'Grafik' } },
+        { hex: '#1A1A1A', role: { en: 'Text', id: 'Teks' } },
+        { hex: '#475467', role: { en: 'Secondary text', id: 'Teks sekunder' } },
+        { hex: '#F2F4F7', role: { en: 'Background', id: 'Latar' } },
+        { hex: '#FFFFFF', role: { en: 'Cards', id: 'Kartu' } },
       ],
       type: [{ name: 'Poppins', role: { en: 'Headings and text', id: 'Judul dan teks' } }],
       screens: [
         {
           name: { en: 'Mentee dashboard', id: 'Dasbor mentee' },
-          pic: crt('01-hero-dashboard', '574:12567', {
-            en: 'KROOL’s dashboard: conversation numbers, lead activity by region and the team’s tasks',
-            id: 'Dasbor KROOL: angka percakapan, aktivitas prospek per wilayah, dan tugas tim',
+          pic: pic('win', 'FindMentor - Dashboard', '13-dashboard', 1440, 1024, '2330:4278', {
+            en: 'The mentee’s dashboard: assignments in progress, upcoming sessions, recommended mentors and recent activity',
+            id: 'Dasbor mentee: tugas yang sedang berjalan, sesi mendatang, mentor yang disarankan, dan aktivitas terbaru',
           }),
         },
         {
           name: { en: 'Find a mentor', id: 'Cari mentor' },
-          pic: win('FindMentor - Explore', '02-explore', '577:38410', {
-            en: 'FindMentor’s Find Your Perfect Mentor screen: mentor cards by category, each with role, experience and rating',
-            id: 'Layar Find Your Perfect Mentor di FindMentor: kartu mentor per kategori, masing-masing dengan peran, pengalaman, dan rating',
+          pic: pic('win', 'FindMentor - Explore', '14-explore', 1440, 1024, '2345:9615', {
+            en: 'Find Your Perfect Mentor: mentor cards by category, each with a rating, role, experience and mentees',
+            id: 'Find Your Perfect Mentor: kartu mentor per kategori, masing-masing dengan rating, peran, pengalaman, dan jumlah mentee',
+          }),
+        },
+        {
+          name: { en: 'Mentor details', id: 'Detail mentor' },
+          pic: pic('win', 'FindMentor - Explore', '15-mentor-detail', 1440, 1024, '2349:1140', {
+            en: 'A mentor’s details over the list: expertise, description, experience and Book Mentor',
+            id: 'Detail mentor di atas daftar: keahlian, deskripsi, pengalaman, dan tombol Book Mentor',
+          }),
+        },
+        {
+          name: { en: 'My mentors', id: 'Mentor saya' },
+          pic: pic('win', 'FindMentor - My Mentors', '16-my-mentors', 1440, 1024, '2363:3573', {
+            en: 'My Mentors: the mentee’s mentors as cards above recommended mentors',
+            id: 'My Mentors: mentor milik mentee sebagai kartu di atas mentor yang disarankan',
+          }),
+        },
+        {
+          name: { en: 'Mentor profile', id: 'Profil mentor' },
+          pic: pic('win', 'FindMentor - My Mentors', '17-mentor-profile', 1440, 1616, '2363:4093', {
+            en: 'A mentor’s profile: overview, expertise, experience and reviews beside the session booking',
+            id: 'Profil mentor: ringkasan, keahlian, pengalaman, dan ulasan di samping pemesanan sesi',
+          }),
+        },
+        {
+          name: { en: 'Assignments', id: 'Tugas' },
+          pic: pic('win', 'FindMentor - Assignment', '18-assignments', 1440, 1024, '2378:9822', {
+            en: 'Assignments: the open ones with their progress above the completed ones',
+            id: 'Tugas: yang masih berjalan beserta progresnya di atas yang sudah selesai',
+          }),
+        },
+        {
+          name: { en: 'Assignment details', id: 'Detail tugas' },
+          pic: pic('win', 'FindMentor - Assignment', '19-assignment-detail', 1440, 1091, '2381:11463', {
+            en: 'An assignment opened: its brief, task list and resources, with Upload File and Mark as Done',
+            id: 'Tugas yang dibuka: ringkasan, daftar tugas, dan bahan, dengan tombol Upload File dan Mark as Done',
+          }),
+        },
+        {
+          name: { en: 'Messages', id: 'Pesan' },
+          pic: pic('win', 'FindMentor - Messages', '20-messages', 1440, 1024, '2381:12389', {
+            en: 'Messages: conversations beside a chat with a mentor, an assignment pinned at its top',
+            id: 'Pesan: daftar percakapan di samping chat dengan mentor, dengan tugas yang disematkan di atasnya',
           }),
         },
         {
           name: { en: 'Mentor dashboard', id: 'Dasbor mentor' },
-          pic: bare('03-mentor-dashboard', '577:38635', {
-            en: 'A mentor’s dashboard in FindMentor: mentoring time statistics, the week’s sessions, mentorship insights and recent bookings',
-            id: 'Dasbor mentor di FindMentor: statistik waktu mentoring, sesi minggu ini, mentorship insights, dan booking terbaru',
+          pic: pic('win', 'FindMentor - Dashboard', '21-mentor-dashboard', 1440, 1024, '2399:3565', {
+            en: 'The mentor’s dashboard: sessions, rating and hours, mentoring statistics, the week’s schedule and mentee insights',
+            id: 'Dasbor mentor: sesi, rating, jam mentoring, statistik, jadwal minggu ini, dan insight mentee',
           }),
         },
         {
-          name: { en: 'Dashboard', id: 'Dasbor' },
-          pic: crt('08-dashboard', '574:13983', {
-            en: 'KROOL’s dashboard, with conversation activity and the team’s tasks',
-            id: 'Dasbor KROOL, dengan aktivitas percakapan dan tugas tim',
+          name: { en: 'My mentees', id: 'Mentee saya' },
+          pic: pic('win', 'FindMentor - Mentee', '22-my-mentees', 1440, 1024, '2499:10015', {
+            en: 'My Mentees: recent activity, all mentees and invitation requests',
+            id: 'My Mentees: aktivitas terbaru, semua mentee, dan permintaan undangan',
           }),
         },
         {
-          name: { en: 'Goals', id: 'Target' },
-          pic: pic('win', 'FindMentor - Goals', '09-goals', 838, 660, '577:38951', {
-            en: 'A goal in FindMentor, Draft Your Unique Personal Brand Statement, with its due date, completion bar and task list',
-            id: 'Sebuah tujuan di FindMentor, Draft Your Unique Personal Brand Statement, dengan tenggat, bar penyelesaian, dan daftar tugasnya',
+          name: { en: 'Mentee details', id: 'Detail mentee' },
+          pic: pic('win', 'FindMentor - Mentee', '23-mentee-detail', 1440, 1024, '2419:7553', {
+            en: 'A mentee’s page for the mentor: overview, interests, assignments and session attendance',
+            id: 'Halaman mentee untuk mentor: ringkasan, minat, tugas, dan kehadiran sesi',
+          }),
+        },
+        {
+          name: { en: 'Mentor public profile', id: 'Profil publik mentor' },
+          pic: pic('win', 'FindMentor - Profile', '24-mentor-public-profile', 1440, 1545, '2499:17234', {
+            en: 'The mentor’s own profile: sessions, rating and hours, description, expertise, experience and reviews',
+            id: 'Profil milik mentor: sesi, rating, jam mentoring, deskripsi, keahlian, pengalaman, dan ulasan',
           }),
         },
       ],
     },
-    // Serenity SPA, read from its design (no Figma page of the owner's). A programme page since 2026-10-15; the colour
-    // palette card (05) went with KROOL's small cards
+    // Figma file "Serenity SPA Webflow" (UzwDb65Mrm4TLzciDlaRTP, page HiFi, 2058:34): every screen is a frame of it at
+    // 2x, the home page whole among them; no device mockups (owner's call, 2026-10-15)
     'serenity-spa': {
       dir: 'asset/Work/serenity-spa',
       about: {
@@ -331,17 +348,12 @@
           }),
         },
         {
-          name: { en: 'Services on the home page', id: 'Layanan di beranda' },
-          pic: pic('win', 'Serenity SPA - Home', '02-home-services', 1440, 891, '18217:31', {
-            en: 'The home page’s services section: Therapeutic Massages beside a photo of a massage table, with a short description, a smaller photo and Learn More',
-            id: 'Section layanan di beranda: Therapeutic Massages di samping foto meja pijat, dengan deskripsi singkat, foto yang lebih kecil, dan tombol Learn More',
-          }),
-        },
-        {
-          name: { en: 'About on a laptop', id: 'Tentang di laptop' },
-          pic: bare('03-about-mockup', null, {
-            en: 'An angled laptop mockup of the About page, with a large spa photograph and Book a Treatment visible in the top navigation',
-            id: 'Mockup laptop miring yang menampilkan halaman About, dengan foto spa besar dan tombol Book a Treatment terlihat di navigasi atas',
+          // the whole Home page, scrolled through in a screen's frame (scroll), exported at 2x and kept to 2200px wide
+          name: { en: 'Home, the whole page', id: 'Beranda, satu halaman penuh' },
+          scroll: true,
+          pic: pic('win', 'Serenity SPA - Home', '16-home-full', 1440, 6499, '18217:2', {
+            en: 'Serenity SPA’s whole home page: the hero, services, the about strip, treatments, testimonials and the booking call to action',
+            id: 'Seluruh halaman beranda Serenity SPA: hero, layanan, strip tentang, perawatan, testimoni, dan ajakan memesan',
           }),
         },
         {
@@ -416,12 +428,34 @@
             }),
           },
         ],
+        [
+          {
+            name: { en: 'Mobile service page', id: 'Halaman layanan mobile' },
+            pic: pic('tool', 'Therapeutic Massages', '20-m-detail-service', 393, 852, '18320:3622', {
+              en: 'A service page on a phone: Therapeutic Massages over its photo, with a short description',
+              id: 'Halaman layanan di ponsel: Therapeutic Massages di atas fotonya, dengan deskripsi singkat',
+            }),
+          },
+          {
+            name: { en: 'Mobile blog', id: 'Blog mobile' },
+            pic: pic('tool', 'Blog', '21-m-blog', 393, 852, '18333:259', {
+              en: 'The blog on a phone: Latest Wellness Insights & Self-Care Tips above the category tabs',
+              id: 'Blog di ponsel: Latest Wellness Insights & Self-Care Tips di atas tab kategori',
+            }),
+          },
+          {
+            name: { en: 'Mobile contact', id: 'Kontak mobile' },
+            pic: pic('tool', 'Contact', '22-m-contact', 393, 852, '18320:4260', {
+              en: 'Contact on a phone: Get in Touch above the Send us a message form',
+              id: 'Kontak di ponsel: Get in Touch di atas formulir Send us a message',
+            }),
+          },
+        ],
       ],
     },
   };
   // WebP copies of the owner's 2x exports, approved for the site on 2026-10-06 (at most 2x a slot's width; the exports
-  // stay out of git and the upload). FINDMENTOR's 09 was exported on a wider ground, so its slot keeps its width and
-  // takes the export's height. Serenity SPA's copies are at their third version
+  // stay out of git and the upload). Serenity SPA's copies are at their third version
   const VER = { krool: 1, sensorstack: 1, findmentor: 1, 'serenity-spa': 3 };
   Object.keys(VER).forEach((slug) => {
     const c = PF.cases[slug];

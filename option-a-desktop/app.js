@@ -2031,9 +2031,13 @@
   // with a scroll bar at its edge; without motion it stands whole
   const fileName = (n, s) => `${String(n).padStart(3, '0')}_${String(s.name.en || t(s.name)).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')}.png`;
   const isLong = (x) => x.frame === 'win' && x.h / x.w >= 0.75;
+  // A whole page (scroll: true) runs instead: its frame holds still on the screen while the page scrolls through it,
+  // its run as long as the page needs (pgPan)
   function progShot(c, s, n, count) {
-    const x = s.pic, cls = x.frame === 'bare' ? ' bare' : isPhone(x) ? ' phone' : isLong(x) ? ' long' : '';
-    return `<figure class="pg-shot${cls}"><figcaption class="pg-file"><i class="pg-tally" aria-hidden="true"></i><span class="pg-fname">${esc(fileName(n, s))}</span><span class="pg-of">${String(n).padStart(2, '0')} / ${String(count).padStart(2, '0')}</span><span class="sr-only">${esc(t(s.name))}</span></figcaption><button type="button" class="pg-pic" data-act="pg-view" data-i="${n - 1}" aria-label="${esc(u('openShot', t(s.name)))}">${picBody(c, x)}${cls === ' long' ? '<span class="pg-sb" aria-hidden="true"><i></i></span>' : ''}</button></figure>`;
+    const x = s.pic, cls = s.scroll ? ' run' : x.frame === 'bare' ? ' bare' : isPhone(x) ? ' phone' : isLong(x) ? ' long' : '';
+    const cap = `<figcaption class="pg-file"><i class="pg-tally" aria-hidden="true"></i><span class="pg-fname">${esc(fileName(n, s))}</span><span class="pg-of">${String(n).padStart(2, '0')} / ${String(count).padStart(2, '0')}</span><span class="sr-only">${esc(t(s.name))}</span></figcaption>`;
+    const pic = `<button type="button" class="pg-pic" data-act="pg-view" data-i="${n - 1}" aria-label="${esc(u('openShot', t(s.name)))}">${picBody(c, x)}${cls === ' long' || cls === ' run' ? '<span class="pg-sb" aria-hidden="true"><i></i></span>' : ''}</button>`;
+    return cls === ' run' ? `<figure class="pg-shot run"><div class="pg-run"><div class="pg-stick">${cap}${pic}</div></div></figure>` : `<figure class="pg-shot${cls}">${cap}${pic}</figure>`;
   }
   // the case's colours and typefaces (owner's pick, 2026-10-15, layout B): a thin strip of its colours, the first (its
   // signature) wide, as what is left of a test card's bars; under it the typefaces by name (the site serves only its
@@ -2140,7 +2144,6 @@
             <span class="pl-kgrp"><span class="pl-well">${key('prev-case', I('prev', 16), u('prevCase'))}${key('next-case', I('next', 16), u('nextCase'))}</span><small aria-hidden="true">${esc(u('lblCase'))}</small></span>
           </div>
           ${lcd}
-          <label class="pl-vol"><span class="pl-vrow"><b aria-hidden="true">A</b><span class="pl-wedge"><input class="range tsize" type="range" min="0" max="2" step="1" value="${w.state.size}" aria-label="${esc(u('textSize'))}" aria-valuetext="${esc(u('sizes')[w.state.size])}"><i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i></span><b class="lg" aria-hidden="true">A</b></span><small aria-hidden="true">${esc(u('textSize'))}</small></label>
           <span class="skin-logo" aria-hidden="true">iqbal·player</span>
         </div>
       </div>`;
@@ -2204,8 +2207,21 @@
   }
   // a long page in its screen's frame scrolls from its top to its foot while the frame crosses the middle of the
   // view, from a quarter of the way in to three quarters, and its scroll bar's thumb keeps pace
+  // A whole page's run: its frame sticks (CSS) while the run passes, and the page moves through the frame at
+  // RUN_RATE screen pixels of page to one of scroll, its run sized to fit (the frame's height plus the page's travel)
+  const RUN_RATE = 1.6;
   function pgPan(v) {
     const vr = v.getBoundingClientRect();
+    $$('.pg-shot.run', v).forEach((fig) => {
+      const run = $('.pg-run', fig), stick = $('.pg-stick', fig), f = $('.pg-pic', fig), img = $('.cs-img', f), thumb = $('.pg-sb i', f);
+      if (!img || !img.offsetHeight) return;
+      const travel = Math.max(0, img.offsetHeight - f.clientHeight), h = Math.round(stick.offsetHeight + travel / RUN_RATE);
+      if (run.offsetHeight !== h) run.style.height = `${h}px`;
+      const r = boxIn(run, v, vr), top = parseFloat(getComputedStyle(stick).top) || 0;
+      const p = clamp((vr.top + top - r.top) / Math.max(1, h - stick.offsetHeight), 0, 1);
+      img.style.transform = `translateY(${(-travel * p).toFixed(1)}px)`;
+      if (thumb) { const k = f.clientHeight / img.offsetHeight; thumb.style.height = `${k * 100}%`; thumb.style.top = `${(1 - k) * p * 100}%`; }
+    });
     $$('.pg-shot.long .pg-pic', v).forEach((f) => {
       const r = boxIn(f, v, vr);
       if (r.bottom < vr.top || r.top > vr.bottom) return;

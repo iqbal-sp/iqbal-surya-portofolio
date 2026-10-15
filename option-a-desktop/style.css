@@ -970,8 +970,10 @@ img { max-width: 100%; }
 /* on a local preview, a fact the owner has not given yet: a dashed slot (the site leaves its row out) */
 .pg-todo { padding: 0 8px; border: 1px dashed rgba(214, 226, 248, .6); border-radius: 3px; font-size: 12px; color: var(--bc-soft); }
 /* the cover across the column, cut to a wide frame, the channel's bug in its corner as a station marks its picture */
-.pg-poster { position: relative; overflow: hidden; border-radius: 10px; background: #000; box-shadow: 0 30px 50px -26px rgba(0, 0, 0, .8); }
-.pg-poster .cv, .pg-poster .ph { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+/* the cover and the screens stand square, as the files they are named for (owner's call, 2026-10-15): no corner
+   cuts the design's own edges, and no ground shows under them */
+.pg-poster { position: relative; overflow: hidden; box-shadow: 0 30px 50px -26px rgba(0, 0, 0, .8); }
+.pg-poster .cv, .pg-poster .ph { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: inherit; }
 .pg-bug { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px;
   background: rgba(4, 22, 63, .55); font: 700 10px/1 var(--mono); letter-spacing: .08em; color: rgba(255, 255, 255, .85); }
 .pg-bug i { width: 6px; height: 6px; border-radius: 50%; background: var(--ph); box-shadow: 0 0 6px var(--glow-halo); }
@@ -986,7 +988,7 @@ img { max-width: 100%; }
 .pg-tally { flex: none; width: 8px; height: 8px; border-radius: 2px; background: #3a3f4a; transition: background .3s, box-shadow .3s; }
 .on-air .pg-tally { background: var(--ph); box-shadow: 0 0 6px var(--glow-halo); }
 .on-air .pg-fname { color: #fff; }
-.pg-pic { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 10px; background: #000; box-shadow: 0 30px 50px -26px rgba(0, 0, 0, .8);
+.pg-pic { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; box-shadow: 0 30px 50px -26px rgba(0, 0, 0, .8);
   font: inherit; color: inherit; text-align: inherit; cursor: zoom-in; }
 .pg-pic:focus-visible { outline: 2px solid var(--ph); outline-offset: 4px; }
 /* a page taller than a screen, in a screen's frame: it scrolls through as its row passes (pgPan), its scroll bar's
@@ -995,7 +997,16 @@ img { max-width: 100%; }
 .pg-shot.long .cs-img { border-radius: 0; will-change: transform; transition: transform .35s var(--ease-out); }
 .pg-sb { position: absolute; top: 8px; right: 6px; bottom: 8px; width: 4px; border-radius: 2px; background: rgba(0, 0, 0, .1); }
 .pg-sb i { position: absolute; left: 0; right: 0; top: 0; height: 30%; border-radius: 2px; background: rgba(0, 0, 0, .42); }
+/* a whole page: the frame (a screen's 16:10) sticks below the screen's top while its run passes, the page moving
+   through it; without motion the run is just the frame, and the page scrolls inside it by hand */
+.pg-shot.run .pg-pic { aspect-ratio: 16 / 10; overflow: hidden; }
+.pg-shot.run .cs-img { border-radius: 0; will-change: transform; transition: transform .2s var(--ease-out); }
+.pg-stick { position: sticky; top: 24px; }
 @media (prefers-reduced-motion: reduce) {
+  .pg-run { height: auto !important; }
+  .pg-stick { position: static; }
+  .pg-shot.run .pg-pic { overflow-y: auto; }
+  .pg-shot.run .cs-img { transform: none !important; transition: none; }
   .pg-shot.long .pg-pic { aspect-ratio: auto; }
   .pg-shot.long .cs-img { transform: none !important; transition: none; }
   .pg-sb { display: none; }
@@ -1039,9 +1050,9 @@ img { max-width: 100%; }
   .cs-ch.pg-head { padding-top: 72px; padding-bottom: 88px; }
   .pg-title { font-size: 64px; }
 }
-/* the deck: a raised plate under the tray, one slim row so the screen gets the height: the transport, the timeline,
-   the text size and the wordmark. The keys carry their names as tooltips instead of printed labels */
-.pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) auto auto; grid-template-areas: "keys tl vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
+/* the deck: a raised plate under the tray, one slim row so the screen gets the height: the transport, the timeline
+   and the wordmark (the text size went, owner's call, 2026-10-15). The keys carry their names as tooltips instead of printed labels */
+.pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) auto; grid-template-areas: "keys tl logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
   background: linear-gradient(180deg, #dcdee3, #b2b4bd 55%, #a0a2ab);
   box-shadow: inset 0 1px #fff, inset 0 -2px 3px rgba(40, 42, 52, .3), 0 1px 0 rgba(255, 255, 255, .8), 0 3px 6px rgba(20, 22, 30, .25); }
 .range { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: none; margin: 0; }
@@ -1652,9 +1663,9 @@ img { max-width: 100%; }
   .pl-print, .pl-tools, .skin-nav, .pl-side .lcd { display: none; }
   .pl-side .pl-select { display: flex; }
   /* on a phone the deck is two compact rows, laid out like a pocket player and 8px apart everywhere (owner's request,
-     2026-09-28): play, the timeline and the text size, then the LCD beside the case pair, at the desktop deck's sizes.
+     2026-09-28): play and the timeline, then the LCD beside the case pair, at the desktop deck's sizes.
      The picker and the Start menu already reach the Portfolio, so its key and the printed labels go */
-  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play tl vol" "lcd lcd case"; gap: 8px; padding: 8px; border-radius: 16px; }
+  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "play tl tl" "lcd lcd case"; gap: 8px; padding: 8px; border-radius: 16px; }
   .pl-keys { display: contents; }
   .pl-key.big { grid-area: play; }
   .pl-kgrp:has([data-act="prev-case"]) .pl-well { grid-area: case; justify-self: end; }
@@ -1757,7 +1768,7 @@ img { max-width: 100%; }
 /* a wide phone window has room for a wider deck: the timeline across the top, then play, the LCD, the text size and
    the case pair in one row, so the LCD is not a long empty strip */
 @media (min-width: 560px) and (max-width: 720px) {
-  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "tl tl tl tl" "play lcd vol case"; }
+  .pl-deck { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "tl tl tl" "play lcd case"; }
 }
 
 /* a phone on its side: the screen keeps the whole height, and the caption, the case picker and the deck stand in a
