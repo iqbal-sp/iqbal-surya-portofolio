@@ -129,7 +129,7 @@
       },
       facts: {
         type: { en: 'Client website redesign', id: 'Desain ulang website klien' },
-        role: null,
+        role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
         year: '2025',
         scope: { en: '12 pages, desktop and mobile, from wireframes', id: '12 halaman, desktop dan mobile, dari wireframe' },
       },
@@ -212,8 +212,8 @@
       },
       facts: {
         type: { en: 'Interface design', id: 'Desain antarmuka' },
-        role: null,
-        year: null,
+        role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
+        year: '2025',
         scope: { en: 'Mentee and mentor dashboards, mentor search, booking, assignments, messages', id: 'Dasbor mentee dan mentor, pencarian mentor, pemesanan sesi, tugas, pesan' },
       },
       // its colours and typeface as the FindMentor file sets them (read from its Dashboard, Explore, Assignment and
@@ -326,8 +326,8 @@
       },
       facts: {
         type: { en: 'Website concept', id: 'Konsep website' },
-        role: null,
-        year: null,
+        role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
+        year: '2025',
         scope: { en: '7 pages, desktop and mobile, style guide', id: '7 halaman, desktop dan mobile, panduan gaya' },
       },
       // its colours as its own palette card (05) names them, and its typeface as the Figma file's pages set every
