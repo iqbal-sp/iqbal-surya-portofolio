@@ -27,34 +27,38 @@
   const bare = (file, node, alt) => pic('bare', null, file, 1029, 580, node, alt);
 
   PF.cases = {
-    // Figma node 574:12566, "Krool Detail Page", told as a programme page (owner's choice, 2026-10-15): the case's own
-    // title and tags (content.js), a short About and the facts known so far, then its screens, biggest first, each a
-    // feed with its caption. A fact still null waits for the owner: a local preview marks it, the site leaves it out.
+    // Figma file "Krool - CRM Dashboard" (L1c3sNmg11MZQnqMRGVPYR, page Design, 20001:2781), told as a programme page
+    // (owner's choice, 2026-10-15): the case's own title and tags (content.js), a short About and the facts known so
+    // far, its colours, then its screens, each a feed with its caption. A fact still null waits for the owner: a local
+    // preview marks it, the site leaves it out. The device shot that opens it (01) is the owner's from "Work area iqbal"
+    // (node 574:12567); every other screen is a frame of the Krool file, exported at 2x (2026-10-15)
     krool: {
       dir: 'asset/Work/krool',
       about: {
-        en: 'KROOL is a design study for a multi-channel CRM. It brings customer conversations, lead information, and team activity into one workspace, across a dashboard, inbox, sales pipeline, calendar, and analytics.',
-        id: 'KROOL adalah studi desain CRM multikanal. Konsep ini menyatukan percakapan pelanggan, informasi prospek, dan aktivitas tim dalam satu ruang kerja, mulai dari dashboard, kotak masuk, pipeline penjualan, kalender, hingga analitik.',
+        en: 'KROOL is a design study for a multi-channel CRM. It brings customer conversations, lead information, and team activity into one workspace, across a dashboard, inbox, sales pipeline, calendar, analytics, and automations, with an AI assistant at hand on every screen.',
+        id: 'KROOL adalah studi desain CRM multikanal. Konsep ini menyatukan percakapan pelanggan, informasi prospek, dan aktivitas tim dalam satu ruang kerja, mulai dari dashboard, kotak masuk, pipeline penjualan, kalender, analitik, hingga otomasi, dengan asisten AI yang siap dipakai di setiap layar.',
       },
       facts: {
         type: { en: 'Design study', id: 'Studi desain' },
-        role: null,
-        year: null,
-        scope: { en: 'Dashboard, inbox, pipeline, calendar, analytics', id: 'Dashboard, kotak masuk, pipeline, kalender, analitik' },
+        role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
+        year: '2025',
+        scope: { en: 'Dashboard, inbox, pipeline, calendar, analytics, automation, AI assistant', id: 'Dashboard, kotak masuk, pipeline, kalender, analitik, otomasi, asisten AI' },
       },
-      // one screen a row, or two side by side (an array); name gives the screen its file name over it. Big screens only, and
-      // no boxes laid over them (owner's call, 2026-10-15): the small cards (the charts, the teammate card) went (owner's request, 2026-10-15)
-      // its colours as colour bars, picked from its screens, and its typefaces as read off them (the owner checks)
+      // its colours and typefaces as the Krool file sets them (read from its Dashboard, Analytics, Pipeline and
+      // Automation frames, 2026-10-15): the most-used fills and text colours, and the faces of its text and its logo
       palette: [
-        { hex: '#FF6400', role: { en: 'Accent', id: 'Aksen' } },
-        { hex: '#292929', role: { en: 'Text', id: 'Teks' } },
+        { hex: '#FF6600', role: { en: 'Accent', id: 'Aksen' } },
+        { hex: '#1A1A1A', role: { en: 'Text', id: 'Teks' } },
+        { hex: '#667085', role: { en: 'Secondary text', id: 'Teks sekunder' } },
         { hex: '#F5F3EF', role: { en: 'Background', id: 'Latar' } },
         { hex: '#FFFFFF', role: { en: 'Cards', id: 'Kartu' } },
-        { hex: '#5836EB', role: { en: 'Chart', id: 'Grafik' } },
-        { hex: '#EEB136', role: { en: 'Chart', id: 'Grafik' } },
-        { hex: '#4ACC9B', role: { en: 'Chart', id: 'Grafik' } },
+        { hex: '#8070CF', role: { en: 'Chart', id: 'Grafik' } },
+        { hex: '#8FD14F', role: { en: 'Chart', id: 'Grafik' } },
+        { hex: '#58A6FB', role: { en: 'Chart', id: 'Grafik' } },
       ],
-      type: [{ name: 'Inter', role: { en: 'Interface', id: 'Antarmuka' } }],
+      type: [{ name: 'Pretendard', role: { en: 'Interface', id: 'Antarmuka' } }, { name: 'JetBrains Mono', role: { en: 'Logo', id: 'Logo' } }],
+      // one screen a row, or several side by side (an array); name gives the screen its file name over it. Big screens
+      // only, nothing laid over them (owner's calls, 2026-10-15)
       screens: [
         {
           name: { en: 'Dashboard on a tablet', id: 'Dasbor di tablet' },
@@ -65,44 +69,58 @@
         },
         {
           name: { en: 'Dashboard', id: 'Dasbor' },
-          pic: crt('08-dashboard', '574:13983', {
-            en: 'KROOL’s dashboard, with conversation activity and the team’s tasks',
-            id: 'Dasbor KROOL, dengan aktivitas percakapan dan tugas tim',
+          pic: pic('win', 'KROOL - Dashboard', '13-dashboard', 1440, 1072, '22105:507', {
+            en: 'KROOL’s dashboard: conversation numbers, lead activity by region and the team’s tasks, beside the AI assistant’s panel',
+            id: 'Dasbor KROOL: angka percakapan, aktivitas prospek per wilayah, dan tugas tim, di samping panel asisten AI',
           }),
         },
         {
           name: { en: 'Inbox', id: 'Kotak masuk' },
-          pic: win('KROOL - Inbox', '02-inbox-chat', '574:12617', {
-            en: 'KROOL’s inbox: the conversation list beside an open chat with a lead',
-            id: 'Kotak masuk KROOL: daftar percakapan di samping chat yang terbuka dengan seorang prospek',
+          pic: pic('win', 'KROOL - Inbox', '14-inbox', 1440, 900, '22132:2135', {
+            en: 'KROOL’s inbox: the conversation list beside an open chat with a lead, with Summarize and AI Draft under it',
+            id: 'Kotak masuk KROOL: daftar percakapan di samping chat yang terbuka dengan seorang prospek, dengan tombol Summarize dan AI Draft di bawahnya',
           }),
         },
         {
           name: { en: 'Contact details', id: 'Detail kontak' },
-          pic: bare('03-contact-detail', '641:60988', {
-            en: 'KROOL’s inbox with a lead’s contact details, tags and linked deal beside the chat',
-            id: 'Kotak masuk KROOL dengan detail kontak prospek, tag, dan deal terkait di samping chat',
+          pic: pic('win', 'KROOL - Inbox', '20-contact-details', 1440, 900, '22350:5404', {
+            en: 'KROOL’s inbox with a lead’s contact details, tags, linked deal, stage and task beside the chat',
+            id: 'Kotak masuk KROOL dengan detail kontak prospek, tag, deal terkait, tahapan, dan tugas di samping chat',
+          }),
+        },
+        {
+          name: { en: 'Pipeline', id: 'Pipeline' },
+          pic: pic('win', 'KROOL - Pipeline', '15-pipeline', 1440, 900, '22151:981', {
+            en: 'KROOL’s pipeline: leads as scored cards across New, Contacted, Demo Booked, Negotiation and Closed Won',
+            id: 'Pipeline KROOL: prospek sebagai kartu bernilai skor di kolom New, Contacted, Demo Booked, Negotiation, dan Closed Won',
           }),
         },
         {
           name: { en: 'Calendar', id: 'Kalender' },
-          pic: win('KROOL - Calendar', '09-calendar', '574:13554', {
-            en: 'KROOL’s calendar: a month of follow-ups and tasks',
-            id: 'Kalender KROOL: tindak lanjut dan tugas selama satu bulan',
-          }),
-        },
-        {
-          name: { en: 'Unified inbox', id: 'Kotak masuk terpadu' },
-          pic: win('KROOL - Inbox', '10-inbox', '574:13674', {
-            en: 'KROOL’s unified inbox: conversations, the open chat and the contact’s details',
-            id: 'Kotak masuk terpadu KROOL: daftar percakapan, chat yang terbuka, dan detail kontak',
+          pic: pic('win', 'KROOL - Calendar', '16-calendar', 1440, 900, '22350:4834', {
+            en: 'KROOL’s calendar: a month of follow-ups and tasks, one open on a lead',
+            id: 'Kalender KROOL: tindak lanjut dan tugas selama satu bulan, salah satunya terbuka untuk seorang prospek',
           }),
         },
         {
           name: { en: 'Analytics', id: 'Analitik' },
-          pic: win('KROOL - Analytics', '12-analytics', '574:14057', {
-            en: 'KROOL’s analytics: pipeline conversion, volume per channel, lead heatmap and revenue by lead source',
+          pic: pic('win', 'KROOL - Analytics', '17-analytics', 1440, 900, '22350:6350', {
+            en: 'KROOL’s analytics: pipeline conversion, volume per channel, a lead heatmap and revenue by lead source',
             id: 'Analitik KROOL: konversi pipeline, volume per kanal, lead heatmap, dan pendapatan per sumber prospek',
+          }),
+        },
+        {
+          name: { en: 'Automation', id: 'Otomasi' },
+          pic: pic('win', 'KROOL - Automation', '18-automation', 1440, 900, '22136:2236', {
+            en: 'KROOL’s automation builder: conditions on channel, time, tag and the AI’s confidence and sentiment, branching into actions',
+            id: 'Pembuat otomasi KROOL: kondisi berdasarkan kanal, waktu, tag, serta keyakinan dan sentimen AI, yang bercabang ke tindakan',
+          }),
+        },
+        {
+          name: { en: 'AI assistant', id: 'Asisten AI' },
+          pic: pic('win', 'KROOL - AI assistant', '19-ai-find-leads', 1440, 900, '22191:1406', {
+            en: 'KROOL’s AI assistant answering Find leads from Australia with a table of leads, their channels and stages',
+            id: 'Asisten AI KROOL menjawab Find leads from Australia dengan tabel prospek, kanal, dan tahapannya',
           }),
         },
       ],
@@ -295,15 +313,15 @@
         year: null,
         scope: { en: '7 pages, desktop and mobile, style guide', id: '7 halaman, desktop dan mobile, panduan gaya' },
       },
-      // its colours as colour bars, from its own palette card (05), and its typefaces: Playfair Display as its type
-      // scale (04) names it, the text's as read off the screens (the owner checks)
+      // its colours as its own palette card (05) names them, and its typeface as the Figma file's pages set every
+      // word in it (Playfair Display, read from the HiFi page, 2026-10-15)
       palette: [
         { hex: '#253828', role: { en: 'Primary', id: 'Utama' } },
         { hex: '#D8F089', role: { en: 'Buttons', id: 'Tombol' } },
         { hex: '#000000', role: { en: 'Headings', id: 'Judul' } },
         { hex: '#F5F7F4', role: { en: 'Sections', id: 'Section' } },
       ],
-      type: [{ name: 'Playfair Display', role: { en: 'Headings', id: 'Judul' } }, { name: 'Inter', role: { en: 'Text', id: 'Teks' } }],
+      type: [{ name: 'Playfair Display', role: { en: 'Headings and text', id: 'Judul dan teks' } }],
       screens: [
         {
           name: { en: 'Home', id: 'Beranda' },
