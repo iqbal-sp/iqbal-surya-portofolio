@@ -5,7 +5,8 @@
   here plays its overview only.
   A case with screens instead of chapters is a programme page (app.js, progSections): the owner's way from
   2026-10-15, pictures first and few words, on the broadcast stage of Home's Tonight's features. about is two or three
-  sentences, facts the known facts (type, role, year, scope; null until the owner gives it), palette its colours (hex,
+  sentences, link the full case on Behance (kind 'full') or the live site (kind 'live'), facts the known facts (type,
+  role, year, scope; null until the owner gives it), palette its colours (hex,
   and the part each plays; its signature colour first) and type its typefaces, then screens the pictures in
   order, one a row or several side by side.
 
@@ -38,6 +39,8 @@
         en: 'KROOL is a design study for a multi-channel CRM. It brings customer conversations, lead information, and team activity into one workspace, across a dashboard, inbox, sales pipeline, calendar, analytics, and automations, with an AI assistant at hand on every screen.',
         id: 'KROOL adalah studi desain CRM multikanal. Konsep ini menyatukan percakapan pelanggan, informasi prospek, dan aktivitas tim dalam satu ruang kerja, mulai dari dashboard, kotak masuk, pipeline penjualan, kalender, analitik, hingga otomasi, dengan asisten AI yang siap dipakai di setiap layar.',
       },
+      // where the whole case lives: its full write-up on Behance, or the site itself (owner's links, 2026-10-15)
+      link: { kind: 'full', url: 'https://www.behance.net/gallery/233681637/Krool-CRM-Dashboard', label: 'Behance' },
       facts: {
         type: { en: 'Design study', id: 'Studi desain' },
         role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
@@ -127,6 +130,8 @@
         en: 'SensorStack offers wireless IoT sensors and a dashboard for monitoring equipment, energy use, and conditions such as temperature and humidity. I redesigned its website between March and May 2025, from greyscale wireframes to twelve pages in desktop and mobile versions, with a page for each industry it serves. The site is live at sensorstack.ai.',
         id: 'SensorStack menawarkan sensor IoT nirkabel dan dashboard untuk memantau peralatan, pemakaian energi, serta kondisi seperti suhu dan kelembapan. Saya mendesain ulang websitenya antara Maret dan Mei 2025, dari wireframe abu-abu hingga dua belas halaman dalam versi desktop dan mobile, dengan halaman tersendiri untuk tiap industri yang dilayani. Website ini sudah bisa dikunjungi di sensorstack.ai.',
       },
+      // where the whole case lives: its full write-up on Behance, or the site itself (owner's links, 2026-10-15)
+      link: { kind: 'live', url: 'https://www.sensorstack.ai/', label: 'sensorstack.ai' },
       facts: {
         type: { en: 'Client website redesign', id: 'Desain ulang website klien' },
         role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
@@ -210,6 +215,8 @@
         en: 'FindMentor is a mentorship interface that brings mentor discovery, scheduled sessions, and learning tasks into one place. The design covers separate dashboards for mentors and mentees, with views for exploring mentors, booking sessions, reviewing assignments, and tracking progress.',
         id: 'FindMentor adalah desain antarmuka mentoring yang menyatukan pencarian mentor, jadwal sesi, dan tugas belajar dalam satu tempat. Desainnya mencakup dasbor terpisah untuk mentor dan mentee, dengan tampilan untuk mencari mentor, memesan sesi, meninjau tugas, dan memantau progres.',
       },
+      // where the whole case lives: its full write-up on Behance, or the site itself (owner's links, 2026-10-15)
+      link: { kind: 'full', url: 'https://www.behance.net/gallery/213792119/FindMentor-Expert-Guidance-to-Shape-Your-Path', label: 'Behance' },
       facts: {
         type: { en: 'Interface design', id: 'Desain antarmuka' },
         role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
@@ -453,10 +460,72 @@
         ],
       ],
     },
+    // Figma file "Meetusvr" (7W90jsvKswlDhffMbFV7Wa, page HiFi, 2058:34): HeyKiddo's website (added 2026-10-15). Its
+    // home and press pages whole, scrolled through in a screen's frame, then both layouts of its contact page; desktop
+    // only, every frame at 2x (the two whole pages kept to 2200px wide)
+    heykiddo: {
+      dir: 'asset/Work/heykiddo',
+      about: {
+        en: 'HeyKiddo is a parenting support app built by psychologists to help with children’s social, emotional, and mental well-being. I designed its website: a home page that introduces the app’s tools for parents, teachers, and homeschoolers, a Press and Media page, and two layouts for Contact.',
+        id: 'HeyKiddo adalah aplikasi pendukung pengasuhan yang dibuat oleh psikolog untuk membantu kesejahteraan sosial, emosional, dan mental anak. Saya merancang websitenya: halaman beranda yang memperkenalkan fitur aplikasi untuk orang tua, guru, dan keluarga homeschooling, halaman Press and Media, serta dua layout untuk halaman Contact.',
+      },
+      // where the whole case lives: its full write-up on Behance, or the site itself (owner's links, 2026-10-15)
+      link: { kind: 'live', url: 'https://hey-kiddo.com/', label: 'hey-kiddo.com' },
+      facts: {
+        type: { en: 'Website design', id: 'Desain website' },
+        role: { en: 'UI/UX and creative direction', id: 'UI/UX dan creative direction' },
+        year: '2025',
+        scope: { en: 'Home, press and media, contact', id: 'Beranda, press and media, kontak' },
+      },
+      // its colours and typefaces as the file sets them (read from its home, press and contact pages, 2026-10-15):
+      // Poppins for headings and the interface, Inter for text, Greycliff CF for the navigation
+      palette: [
+        { hex: '#00AC91', role: { en: 'Primary', id: 'Utama' } },
+        { hex: '#97D8CD', role: { en: 'Soft teal', id: 'Teal lembut' } },
+        { hex: '#CCEEE9', role: { en: 'Tint', id: 'Tint' } },
+        { hex: '#FF9500', role: { en: 'Accent', id: 'Aksen' } },
+        { hex: '#423377', role: { en: 'Announcement bar', id: 'Bilah pengumuman' } },
+        { hex: '#000000', role: { en: 'Text', id: 'Teks' } },
+        { hex: '#FFFFFF', role: { en: 'Background', id: 'Latar' } },
+      ],
+      type: [{ name: 'Poppins', role: { en: 'Headings and interface', id: 'Judul dan antarmuka' } }, { name: 'Inter', role: { en: 'Text', id: 'Teks' } }, { name: 'Greycliff CF', role: { en: 'Navigation', id: 'Navigasi' } }],
+      screens: [
+        {
+          name: { en: 'Home, the whole page', id: 'Beranda, satu halaman penuh' },
+          scroll: true,
+          pic: pic('win', 'HeyKiddo - Home', '01-home-full', 1440, 10487, '12001:3248', {
+            en: 'HeyKiddo’s whole home page: The All-in-One Parenting Support App, its tools for parents, teachers and homeschoolers, results, parents’ words and the app download',
+            id: 'Seluruh halaman beranda HeyKiddo: The All-in-One Parenting Support App, fitur untuk orang tua, guru, dan keluarga homeschooling, hasil, testimoni orang tua, dan unduhan aplikasi',
+          }),
+        },
+        {
+          name: { en: 'Press and media, the whole page', id: 'Press and media, satu halaman penuh' },
+          scroll: true,
+          pic: pic('win', 'HeyKiddo - Press', '02-press-full', 1440, 4714, '10139:896', {
+            en: 'HeyKiddo’s Press and Media page: awards, in the news, about HeyKiddo, media contacts and the app download',
+            id: 'Halaman Press and Media HeyKiddo: penghargaan, liputan media, tentang HeyKiddo, kontak media, dan unduhan aplikasi',
+          }),
+        },
+        {
+          name: { en: 'Contact', id: 'Kontak' },
+          pic: pic('win', 'HeyKiddo - Contact', '03-contact', 1440, 2270, '10152:1872', {
+            en: 'HeyKiddo’s contact page: Get in Touch above the message form, with the app download below',
+            id: 'Halaman kontak HeyKiddo: Get in Touch di atas formulir pesan, dengan unduhan aplikasi di bawahnya',
+          }),
+        },
+        {
+          name: { en: 'Contact, second layout', id: 'Kontak, layout kedua' },
+          pic: pic('win', 'HeyKiddo - Contact', '04-contact-alt', 1440, 2054, '10152:2648', {
+            en: 'The second contact layout: Get in Touch beside the message form',
+            id: 'Layout kontak kedua: Get in Touch di samping formulir pesan',
+          }),
+        },
+      ],
+    },
   };
   // WebP copies of the owner's 2x exports, approved for the site on 2026-10-06 (at most 2x a slot's width; the exports
   // stay out of git and the upload). Serenity SPA's copies are at their third version
-  const VER = { krool: 1, sensorstack: 1, findmentor: 1, 'serenity-spa': 3 };
+  const VER = { krool: 1, sensorstack: 1, findmentor: 1, 'serenity-spa': 3, heykiddo: 1 };
   Object.keys(VER).forEach((slug) => {
     const c = PF.cases[slug];
     const attach = (o) => {

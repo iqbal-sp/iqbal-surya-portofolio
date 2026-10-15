@@ -124,7 +124,7 @@
 .px-document, .px-copy, .px-sound { --ic-fill: var(--ic-paper); }
 .px-image, .px-laptop { --ic-fill: var(--ic-cyan); }
 .px-translate, .px-search { --ic-fill: var(--ic-blue); }
-.px-play, .px-code, .px-up { --ic-fill: var(--ic-green); }
+.px-play, .px-tv, .px-code, .px-up { --ic-fill: var(--ic-green); }
 .px-users, .px-cart, .px-clock { --ic-fill: var(--ic-orange); }
 .px-grid, .px-gradCap, .px-list { --ic-fill: var(--ic-violet); }
 .px-penNib, .px-paintBrush { --ic-fill: var(--ic-pink); }

@@ -1,4 +1,4 @@
-// The four case studies as a link to one shows them (worker/index.js, casePage()): slug, title and the English
+// The case studies as a link to one shows them (worker/index.js, casePage()): slug, title and the English
 // logline, copied from shared/content.js (PF.projects), and each case's preview image in asset/share/
 // (case-<slug>-1200x630.jpg). A case added or renamed there is added here too, with its image.
 export const CASES = [
@@ -21,5 +21,10 @@ export const CASES = [
     "slug": "sensorstack",
     "title": "SENSORSTACK",
     "text": "A client website redesign for an IoT monitoring platform, using sensor data and dashboard previews to explain the product."
+  },
+  {
+    "slug": "heykiddo",
+    "title": "HeyKiddo",
+    "text": "A website for an AI-driven parenting support app, introducing its tools to parents, teachers, and homeschoolers."
   }
 ];

@@ -134,7 +134,7 @@
     Home: a client-first landing page told as a 2004 TV-guide ad: now showing, the week's
     listing, a note from the host, tonight's features (the work), channels (logos), reviews,
     the episode guide (process), services, FAQ, and a closing call to action.
-    Tonight's features carries the owner's four case studies (PF.home.work); the Portfolio window and
+    Tonight's features carries the owner's five case studies (PF.home.work); the Portfolio window and
     the Case Study Player read the same four. PF.home.words holds the owner's clients' own words.
   */
   PF.home = {
@@ -206,7 +206,7 @@
         id: "Saya mengerjakan struktur dan detail visualnya. Mulai dari menyusun halaman atau alur pengguna, merancang antarmuka yang konsisten, hingga memastikan tindakan utama mudah ditemukan. Desainnya perlu terasa sesuai dengan produk Anda dan memberi pengguna titik awal yang jelas.",
       },
     },
-    // the owner's four case studies as the owner set them in Figma (Work area, node 542:1646): a programme
+    // the owner's case studies as the owner set them in Figma (Work area, node 542:1646; HeyKiddo added 2026-10-15): a programme
     // code and number, the title, a logline and tags. The covers are the owner's Figma exports (cover - *.jpg,
     // Dither effect and 10px corners baked in) as 640 and 1280px web copies, so the page does not dither them again
     // ui: the case study's UI card that rises over the cover on hover, 460 × 345 (4:3): the owner's
@@ -255,6 +255,16 @@
             id: "Desain ulang website klien untuk platform pemantauan IoT, dengan data sensor dan pratinjau dashboard untuk menjelaskan produknya.",
           },
           tags: ['UI/UX', 'Website', 'IoT', 'SaaS'],
+        },
+        {
+          title: 'HeyKiddo',
+          img: { file: 'cover-heykiddo', src: '../asset/Home/cover-heykiddo-1280.webp?v=3', small: '../asset/Home/cover-heykiddo-640.webp?v=3' },
+          ui: { file: 'ui-heykiddo', src: '../asset/Home/UI/ui-heykiddo-920.webp?v=2', big: '../asset/Home/UI/ui-heykiddo-1380.webp?v=2' },
+          sub: {
+            en: "A website for an AI-driven parenting support app, introducing its tools to parents, teachers, and homeschoolers.",
+            id: "Website untuk aplikasi pendukung pengasuhan berbasis AI, yang memperkenalkan fiturnya kepada orang tua, guru, dan keluarga homeschooling.",
+          },
+          tags: ['UI/UX', 'Website', { en: 'Parenting', id: 'Pengasuhan' }, 'EdTech'],
         },
       ],
     },
@@ -396,7 +406,7 @@
     timeZone: 'Asia/Jakarta',
   };
 
-  // The Portfolio window and the Case Study Player show the same four as Tonight's features. A case's page, after the
+  // The Portfolio window and the Case Study Player show the same five as Tonight's features. A case's page, after the
   // owner's Figma, goes in shared/cases.js under the case's slug.
   PF.projects = PF.home.work.list.map((f, i) => ({
     slug: f.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),

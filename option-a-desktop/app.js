@@ -43,7 +43,7 @@
       fullCase: 'Project details', picSoon: (x) => `${x} (image not available yet)`, draftRatio: (s) => `Ratio differs from the slot (${s})`,
       overview: 'Intro', nowReading: 'Now reading',
       programmes: 'Programmes', toFill: 'To fill in', palette: 'Colours', colours: (n) => `${n} colours`, typefaces: 'Typefaces',
-      factType: 'Type', factRole: 'Role', factYear: 'Year', factScope: 'Scope', factTags: 'Tags',
+      factType: 'Type', factRole: 'Role', factYear: 'Year', factScope: 'Scope', factTags: 'Tags', factFull: 'Full case study', factLive: 'Live site', newTab: 'opens in a new tab',
       prevCase: 'Previous case', nextCase: 'Next case', nextSection: 'Next section', stop: 'Back to selected work',
       textSize: 'Text size', readPos: 'Reading position',
       switchCase: 'Choose a project', copyLink: 'Copy link to this project', linkCopied: 'Link copied',
@@ -107,7 +107,7 @@
       fullCase: "Detail proyek", picSoon: (x) => `${x} (gambar menyusul)`, draftRatio: (s) => `Rasio beda dengan slot (${s})`,
       overview: 'Pembuka', nowReading: 'Sedang dibaca',
       programmes: 'Tayangan', toFill: 'Belum diisi', palette: 'Warna', colours: (n) => `${n} warna`, typefaces: 'Huruf',
-      factType: 'Jenis', factRole: 'Peran', factYear: 'Tahun', factScope: 'Cakupan', factTags: 'Tag',
+      factType: 'Jenis', factRole: 'Peran', factYear: 'Tahun', factScope: 'Cakupan', factTags: 'Tag', factFull: 'Studi kasus lengkap', factLive: 'Situs live', newTab: 'terbuka di tab baru',
       prevCase: "Proyek sebelumnya", nextCase: "Proyek berikutnya", nextSection: 'Bagian berikutnya', stop: "Kembali ke karya pilihan",
       textSize: 'Ukuran teks', readPos: 'Posisi baca',
       switchCase: 'Pilih proyek', copyLink: "Salin tautan proyek ini", linkCopied: 'Tautan tersalin',
@@ -326,7 +326,7 @@
     about: { icon: 'computer', title: () => `${u('about')} - ${PF.owner.name}`, task: () => u('about'), build: buildAbout, route: () => '#/about' },
     work: { icon: 'folder', title: () => u('work'), build: buildWork, route: () => '#/work', initial: () => ({ view: 'thumbs', sort: 'no', dir: 1, sel: PF.projects[0].slug }), onOpen: (w) => { const f = $('.files', w.el); if (f && !isMobile()) f.focus({ preventScroll: true }); } },
     player: {
-      icon: 'play',
+      icon: 'tv',
       title: (w) => `${PF.bySlug(w.state.slug).title} - ${u('player')}`,
       task: (w) => PF.bySlug(w.state.slug).title,
       build: buildPlayer, route: (w) => '#/work/' + w.state.slug, after: afterPlayer, skinned: true,
@@ -2018,7 +2018,8 @@
       const v = c.facts && c.facts[k];
       if (v == null && !DRAFTS) return '';
       return `<div><dt>${esc(u(label))}</dt><dd>${v == null ? `<span class="pg-todo">${esc(u('toFill'))}</span>` : esc(t(v))}</dd></div>`;
-    }).join('') + `<div><dt>${esc(u('factTags'))}</dt><dd>${p.tags.map((g) => esc(t(g))).join(', ')}</dd></div>`;
+    }).join('') + (c.link ? `<div><dt>${esc(u(c.link.kind === 'live' ? 'factLive' : 'factFull'))}</dt><dd><a class="pg-link" href="${esc(c.link.url)}" target="_blank" rel="noopener">${esc(c.link.label)}<span aria-hidden="true"> ↗</span><span class="sr-only"> (${esc(u('newTab'))})</span></a></dd></div>` : '')
+      + `<div><dt>${esc(u('factTags'))}</dt><dd>${p.tags.map((g) => esc(t(g))).join(', ')}</dd></div>`;
     const bug = `<span class="pg-bug" aria-hidden="true"><i></i>${esc(PF.home.work.code)} ${String(p.no).padStart(2, '0')}</span>`;
     return `<h2 class="pg-title">${esc(p.title)}</h2>
       <dl class="pg-facts">${rows}</dl>
@@ -2036,7 +2037,11 @@
   function progShot(c, s, n, count) {
     const x = s.pic, cls = s.scroll ? ' run' : x.frame === 'bare' ? ' bare' : isPhone(x) ? ' phone' : isLong(x) ? ' long' : '';
     const cap = `<figcaption class="pg-file"><i class="pg-tally" aria-hidden="true"></i><span class="pg-fname">${esc(fileName(n, s))}</span><span class="pg-of">${String(n).padStart(2, '0')} / ${String(count).padStart(2, '0')}</span><span class="sr-only">${esc(t(s.name))}</span></figcaption>`;
-    const pic = `<button type="button" class="pg-pic" data-act="pg-view" data-i="${n - 1}" aria-label="${esc(u('openShot', t(s.name)))}">${picBody(c, x)}${cls === ' long' || cls === ' run' ? '<span class="pg-sb" aria-hidden="true"><i></i></span>' : ''}</button>`;
+    // a page that scrolls in its frame sits 40px in from the frame's edges, on the design's own background (its
+    // palette's Background, else white), so its text never runs into the frame (owner's note, 2026-10-15)
+    const scrolls = cls === ' long' || cls === ' run', bg = scrolls && ((c.palette || []).find((k) => k.role.en === 'Background') || {}).hex;
+    const body = scrolls ? `<span class="pg-vp">${picBody(c, x)}</span><span class="pg-sb" aria-hidden="true"><i></i></span>` : picBody(c, x);
+    const pic = `<button type="button" class="pg-pic" data-act="pg-view" data-i="${n - 1}" aria-label="${esc(u('openShot', t(s.name)))}"${bg ? ` style="--shot-bg: ${bg}"` : ''}>${body}</button>`;
     return cls === ' run' ? `<figure class="pg-shot run"><div class="pg-run"><div class="pg-stick">${cap}${pic}</div></div></figure>` : `<figure class="pg-shot${cls}">${cap}${pic}</figure>`;
   }
   // the case's colours and typefaces (owner's pick, 2026-10-15, layout B): a thin strip of its colours, the first (its
@@ -2105,7 +2110,7 @@
     return `
       <div class="skin">
         <header class="pl-cap" data-drag>
-          <span class="pl-badge" aria-hidden="true">${I('play', 16)}</span>
+          <span class="pl-badge" aria-hidden="true">${I('tv', 16)}</span>
           <span class="pl-cap-t">${esc(u('player'))}</span>
           <span class="pl-caps"><button type="button" class="pl-cb" data-act="open-about" aria-label="${esc(u('about'))}" title="${esc(u('about'))}">?</button>${cap('min', GLYPH.min, u('minimize'))}${cap('max', w.max ? GLYPH.restore : GLYPH.max, u('maximize'))}${cap('close', GLYPH.close, u('close'))}</span>
         </header>
@@ -2165,8 +2170,9 @@
   // The deck reads the case's real layout. On the timeline a published chapter takes its share of the screen's height
   // and an unpublished one a fixed hatched slot; knots pin each chapter's marker to the scroll that shows its top.
   const TL_OFF = 0.05;
-  // a place on the timeline where the range's 12px thumb centres for that value, so a notch is where a click lands
-  const tlAt = (x) => (x <= 0 ? '0px' : x >= 1 ? '100%' : `calc(6px + (100% - 12px) * ${x.toFixed(5)})`);
+  // a place on the timeline where the range's 12px thumb centres for that value, so a notch is where a click lands;
+  // its two ends are the lane's, 3px in from the track's rim all round, so the fill and the chapters sit inside it
+  const tlAt = (x) => (x <= 0 ? '3px' : x >= 1 ? 'calc(100% - 3px)' : `calc(6px + (100% - 12px) * ${x.toFixed(5)})`);
   const tlTrack = (k, p) => { for (let i = 0; i < k.length - 1; i++) { const a = k[i], b = k[i + 1]; if (p <= b.p) return b.p > a.p ? a.t + ((p - a.p) / (b.p - a.p)) * (b.t - a.t) : a.t; } return 1; };
   const tlProg = (k, x) => { for (let i = 0; i < k.length - 1; i++) { const a = k[i], b = k[i + 1]; if (x <= b.t) return b.t > a.t ? a.p + ((x - a.t) / (b.t - a.t)) * (b.p - a.p) : a.p; } return 1; };
   function plMeasure(w) {
@@ -2213,7 +2219,7 @@
   function pgPan(v) {
     const vr = v.getBoundingClientRect();
     $$('.pg-shot.run', v).forEach((fig) => {
-      const run = $('.pg-run', fig), stick = $('.pg-stick', fig), f = $('.pg-pic', fig), img = $('.cs-img', f), thumb = $('.pg-sb i', f);
+      const run = $('.pg-run', fig), stick = $('.pg-stick', fig), f = $('.pg-vp', fig) || $('.pg-pic', fig), img = $('.cs-img', f), thumb = $('.pg-sb i', fig);
       if (!img || !img.offsetHeight) return;
       const travel = Math.max(0, img.offsetHeight - f.clientHeight), h = Math.round(stick.offsetHeight + travel / RUN_RATE);
       if (run.offsetHeight !== h) run.style.height = `${h}px`;
@@ -2222,10 +2228,10 @@
       img.style.transform = `translateY(${(-travel * p).toFixed(1)}px)`;
       if (thumb) { const k = f.clientHeight / img.offsetHeight; thumb.style.height = `${k * 100}%`; thumb.style.top = `${(1 - k) * p * 100}%`; }
     });
-    $$('.pg-shot.long .pg-pic', v).forEach((f) => {
+    $$('.pg-shot.long .pg-vp', v).forEach((f) => {
       const r = boxIn(f, v, vr);
       if (r.bottom < vr.top || r.top > vr.bottom) return;
-      const img = $('.cs-img', f), thumb = $('.pg-sb i', f);
+      const img = $('.cs-img', f), thumb = $('.pg-sb i', f.parentNode);
       const p = clamp(((vr.bottom - r.top) / (vr.height + r.height) - 0.25) / 0.5, 0, 1);
       const over = Math.max(0, img.offsetHeight - f.clientHeight);
       img.style.transform = `translateY(${(-over * p).toFixed(1)}px)`;
@@ -2251,7 +2257,7 @@
     $$('.lcd-sec', w.el).forEach((lab) => { if (meta && lab.textContent !== meta.label) lab.textContent = meta.label; });
     $$('.lcd-clock', w.el).forEach((clock) => segSet(clock, fmtTime(prog * w.total)));
     const at = w.knots ? tlTrack(w.knots, prog) : prog;
-    const fill = $('.tl-fill', w.el); if (fill) fill.style.width = tlAt(at);
+    const fill = $('.tl-fill', w.el); if (fill) fill.style.width = `calc(${tlAt(at)} - 3px)`;
     const seek = $('.seek', w.el);
     if (seek) {
       // the thumb follows the reading except while a pointer holds it; a screen reader hears the chapter and the time
