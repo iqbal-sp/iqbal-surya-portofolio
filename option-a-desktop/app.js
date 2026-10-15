@@ -36,12 +36,14 @@
       arrangeNo: 'Arrange by Number', arrangeName: 'Arrange by Name', aboutPortfolio: 'About this portfolio',
       objects: (n) => `${n} object(s)`, caseStudies: 'Projects', caseTasks: 'Project actions', otherPlaces: 'Other Places', myComputer: 'My Computer',
       colNo: 'No.', colName: 'Name', colTags: 'Keywords', typeCase: 'Project',
-      openCase: 'Open project', player: 'Project Player', chapters: 'Chapters', notYet: 'Not published',
+      openCase: 'Open project', player: 'Project Player',
       askAbout: (x) => `Ask me about ${x}`, askSubject: (x) => `About ${x}`, askBody: (x) => `Hi Iqbal,\n\nI saw ${x} in your portfolio and would like to hear more about it.\n\n`,
       writeup: 'The full project write-up is not available here yet. Email me if you’d like to discuss the work.',
       lblCase: 'Project', lblLink: 'Link', sizes: ['Small', 'Medium', 'Large'],
       fullCase: 'Project details', picSoon: (x) => `${x} (image not available yet)`, draftRatio: (s) => `Ratio differs from the slot (${s})`,
       overview: 'Intro', nowReading: 'Now reading',
+      programmes: 'Programmes', toFill: 'To fill in', palette: 'Colours', colours: (n) => `${n} colours`, typefaces: 'Typefaces',
+      factType: 'Type', factRole: 'Role', factYear: 'Year', factScope: 'Scope', factTags: 'Tags',
       prevCase: 'Previous case', nextCase: 'Next case', nextSection: 'Next section', stop: 'Back to selected work',
       textSize: 'Text size', readPos: 'Reading position',
       switchCase: 'Choose a project', copyLink: 'Copy link to this project', linkCopied: 'Link copied',
@@ -98,12 +100,14 @@
       arrangeNo: 'Urutkan menurut Nomor', arrangeName: 'Urutkan menurut Nama', aboutPortfolio: 'Tentang portofolio ini',
       objects: (n) => `${n} objek`, caseStudies: 'Proyek', caseTasks: "Aksi proyek", otherPlaces: 'Tempat Lain', myComputer: 'Komputer Saya',
       colNo: 'No.', colName: 'Nama', colTags: 'Kata kunci', typeCase: 'Proyek',
-      openCase: 'Buka proyek', player: 'Pemutar Proyek', chapters: 'Bab', notYet: "Belum diterbitkan",
+      openCase: 'Buka proyek', player: 'Pemutar Proyek',
       askAbout: (x) => `Tanya saya soal ${x}`, askSubject: (x) => `Tentang ${x}`, askBody: (x) => `Halo Iqbal,\n\nSaya melihat ${x} di portofolio Anda dan ingin tahu lebih banyak tentang proyeknya.\n\n`,
       writeup: "Uraian lengkap proyek ini belum tersedia di sini. Kirim email jika Anda ingin membahas pekerjaannya.",
       lblCase: "Proyek", lblLink: 'Tautan', sizes: ['Kecil', 'Sedang', 'Besar'],
       fullCase: "Detail proyek", picSoon: (x) => `${x} (gambar menyusul)`, draftRatio: (s) => `Rasio beda dengan slot (${s})`,
       overview: 'Pembuka', nowReading: 'Sedang dibaca',
+      programmes: 'Tayangan', toFill: 'Belum diisi', palette: 'Warna', colours: (n) => `${n} warna`, typefaces: 'Huruf',
+      factType: 'Jenis', factRole: 'Peran', factYear: 'Tahun', factScope: 'Cakupan', factTags: 'Tag',
       prevCase: "Proyek sebelumnya", nextCase: "Proyek berikutnya", nextSection: 'Bagian berikutnya', stop: "Kembali ke karya pilihan",
       textSize: 'Ukuran teks', readPos: 'Posisi baca',
       switchCase: 'Pilih proyek', copyLink: "Salin tautan proyek ini", linkCopied: 'Tautan tersalin',
@@ -270,7 +274,7 @@
     requestAnimationFrame(tick);
   }
 
-  function geometryFor(id) {
+  function geometryFor(id, state) {
     const W = desktopEl.clientWidth, H = desktopEl.clientHeight;
     const left = W > 900 ? 100 : 12;
     // Home is the landing page: large, centred in the space right of the icons, with desktop still showing around it.
@@ -293,6 +297,7 @@
     if (id === 'contact') { const w = Math.min(580, W - 40), h = Math.min(492, H - 40); return { x: Math.round((W - w) / 2) + 70, y: Math.round((H - h) / 2) - 16, w, h }; }
     if (id === 'recycle') return { x: Math.round(W / 2 - 260), y: Math.round(H / 2 - 170), w: 520, h: 300 };
     // the Picture Viewer: a 4:3 picture plus its caption and toolbar, centred a little right of the icons
+    if (id === 'viewer' && state && state.set) { const w = clamp(W - left - 24, 320, 1240), h = clamp(H - 24, 300, 920); return { x: Math.max(left, Math.round((W - w) / 2) + 40), y: Math.max(8, Math.round((H - h) / 2)), w, h }; }
     if (id === 'viewer') { const w = clamp(W - 24, 320, 760), h = clamp(Math.round((w - 40) * 0.75) + 150, 300, H - 24); return { x: Math.max(left, Math.round((W - w) / 2) + 40), y: Math.max(8, Math.round((H - h) / 2)), w, h }; }
     // the game keeps its 16:9 canvas whole: the window takes the largest canvas that fits, plus its chrome
     if (id === 'game') {
@@ -346,8 +351,8 @@
       onMin: trailsNoteNow,
     },
     viewer: {
-      icon: 'image', title: (w) => `${shotFile(PF.home.shorts.list[w.state.i])} - ${u('viewer')}`, task: () => u('viewer'),
-      build: buildViewer, initial: () => ({ i: 0 }),
+      icon: 'image', title: (w) => `${viewerList(w)[w.state.i].file} - ${u('viewer')}`, task: () => u('viewer'),
+      build: buildViewer, initial: () => ({ i: 0, set: null }),
       onClose: (w) => { clearInterval(w.showTimer); w.showTimer = null; },
     },
     // Winamp (winamp.js): a skin with its own title bars; the taskbar reads the song playing, as Winamp's did
@@ -412,7 +417,7 @@
     if (def.dialog) w.opener = document.activeElement;
     wins.set(id, w);
     if (['about', 'work', 'contact', 'resume', 'game', 'recycle', 'gamegate', 'screensaver'].includes(id)) track('window', id);
-    const g = geometryFor(id), from = opts.from || menuFrom;
+    const g = geometryFor(id, w.state), from = opts.from || menuFrom;
     placeWin(w, g);
     el.style.zIndex = (def.dialog ? DLG_Z : 0) + ++zTop;
     layer.appendChild(el);
@@ -975,6 +980,48 @@
     matchMedia(`(resolution: ${dpr}dppx)`).addEventListener('change', fitBandDither, { once: true });
   }
   fitBandDither();
+  // the programme screen's convex glass (#crtBarrel in index.html): a thin band at the foot (96px) where the picture
+  // stretches a little wider as it comes in, most at the very edge, and a level line bows out, as on a tube; the
+  // rest of the screen is the page untouched, so what is being read at the top stays sharp (owner's tuning,
+  // 2026-10-15: small, smooth, the foot only). The map says where each point draws its picture from, as a pull toward the middle (red across, green
+  // down, 0.5 for none, a unit the filter's scale); it is drawn at the screen's own size, so the pull is smooth to
+  // the pixel. The pull grows with the square of the way into the band: it starts from nothing, so the band has no
+  // edge, and keeps steepening to the screen's edge, so a picture's side runs out in one arc, as on a tube, with no
+  // S-bend (owner's note, 2026-10-15). It stops short of the scroll bar,
+  // which keeps straight. No blur: the header's dither dots must stay one a screen pixel
+  const CRT_FOOT = 96, CRT_S = 0.05;
+  let crtSize = '', crtWait = 0;
+  // a screen being resized redraws its map once it settles
+  function crtBarrelFit(v) {
+    const W = v.clientWidth, H = v.offsetHeight, full = v.offsetWidth;
+    if (!W || !H || `${W}x${H}x${full}` === crtSize) return;
+    crtSize = `${W}x${H}x${full}`;
+    clearTimeout(crtWait);
+    crtWait = setTimeout(() => crtBarrelDraw(W, H, full), 120);
+  }
+  function crtBarrelDraw(W, H, full) {
+    const map = document.getElementById('crtBarrelMap'), foot = document.getElementById('crtBarrelFoot'), cut = document.getElementById('crtBarrelCut');
+    if (!map || !foot || !cut) return;
+    const zb = Math.min(CRT_FOOT, H * 0.2), ease = (t) => t * t;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const g = cv.getContext('2d'), d = g.createImageData(W, H), p = d.data;
+    for (let j = 0; j < H; j++) {
+      const e = ease(clamp((j + 0.5 - (H - zb)) / zb, 0, 1));
+      for (let i = 0; i < W; i++) {
+        const x = (i + 0.5) / W - 0.5, o = (j * W + i) * 4;
+        const dx = -x * 0.035 * e, dy = -(0.006 + 0.006 * (1 - 4 * x * x)) * e;
+        p[o] = Math.round(255 * (0.5 + dx / CRT_S)); p[o + 1] = Math.round(255 * (0.5 + dy / CRT_S)); p[o + 2] = 0; p[o + 3] = 255;
+      }
+    }
+    g.putImageData(d, 0, 0);
+    map.setAttribute('href', cv.toDataURL());
+    const f = (W / full).toFixed(4);
+    [map, foot, cut].forEach((n) => n.setAttribute('width', f));
+    [foot, cut].forEach((n) => { n.setAttribute('y', (1 - zb / H).toFixed(4)); n.setAttribute('height', (zb / H).toFixed(4)); });
+    // the glass goes on once it has a map (without one, the filter would pull the bands sideways)
+    document.documentElement.classList.add('crt-barrel-on');
+  }
   function homeDither(w) {
     if (w.ditherRO) w.ditherRO.disconnect();
     const imgs = $$('.ft-cover img[data-dither]', w.el);
@@ -1033,12 +1080,20 @@
     $$('.ch-logo', w.el).forEach((im) => { if (im.complete && im.naturalWidth) logoInk(im); else im.addEventListener('load', () => logoInk(im), { once: true }); });
   }
 
+  // the Picture Viewer's pictures: Home's shots, or a case's screens (set, its slug) under their file names. A case's
+  // screen shows at its own shape, and a page taller than the window scrolls in it
+  function viewerList(w) {
+    const c = w.state.set && PF.cases[w.state.set];
+    if (c && c.screens) return c.screens.flat().map((s, k) => ({ src: s.pic.src, file: fileName(k + 1, s), name: t(s.name), alt: t(s.pic.alt), w: s.pic.w, h: s.pic.h, frame: s.pic.frame }));
+    return PF.home.shorts.list.map((s, k) => ({ src: s.src, file: shotFile(s), slot: s.file, name: shotName(s, k), url: s.url }));
+  }
   // the Picture Viewer: XP's own program for a picture file, with its previous/next/slide-show toolbar
   function buildViewer(w) {
-    const L = PF.home.shorts.list, i = w.state.i, s = L[i], name = shotName(s, i), on = !!w.showTimer;
+    const L = viewerList(w), i = w.state.i, s = L[i], name = s.name, on = !!w.showTimer;
+    const shape = s.w ? ` class="pv-img fit${isLong(s) ? ' long' : ''}" style="--ar: ${s.w} / ${s.h}; --w: ${s.w}px"` : ' class="pv-img"';
     const b = (act, icon, label, extra = '') => `<button class="pv-b" data-act="${act}" ${extra} aria-label="${esc(label)}" title="${esc(label)}">${I(icon, 16)}</button>`;
-    return `<div class="win-body pview">
-      <figure class="pv-stage">${s.src ? `<img class="pv-img" src="${esc(s.src)}" alt="${esc(name)}">` : slotHTML({ file: s.file, src: null }, 'pv-img', 'png', name)}
+    return `<div class="win-body pview${s.w ? ' set' : ''}">
+      <figure class="pv-stage">${s.src ? `<img${shape} src="${esc(s.src)}" alt="${esc(s.alt || name)}">` : slotHTML({ file: s.slot || s.file, src: null }, 'pv-img', 'png', name)}
         <figcaption class="pv-cap"><b>${esc(name)}</b><span>${esc(u('picOf', i + 1, L.length))}</span></figcaption></figure>
       <div class="pv-bar" role="toolbar" aria-label="${esc(u('viewer'))}">
         ${b('pv-step', 'left', u('prevPic'), 'data-d="-1"')}${b('pv-step', 'right', u('nextPic'), 'data-d="1"')}<i class="pv-sep"></i>${b('pv-show', 'play', u(on ? 'stopShow' : 'slideShow'), `aria-pressed="${on}"`)}
@@ -1047,8 +1102,14 @@
     </div>`;
   }
   // the next picture; only this window's task button learns its new title, so the taskbar keeps any focus it has
+  // a viewer already open for the other pictures takes the size and place it opens at for these
+  function openViewer(a, state) {
+    const v = wins.get('viewer');
+    if (v && v.state.set !== state.set && !v.max) placeWin(v, geometryFor('viewer', state));
+    openWin('viewer', { from: rectOf(a), state });
+  }
   function viewerGo(w, i) {
-    const n = PF.home.shorts.list.length;
+    const n = viewerList(w).length;
     w.state.i = ((i % n) + n) % n;
     renderWin(w, false);
     const tb = $(`[data-task="${w.id}"]`, tasksEl); if (tb) tb.title = w.def.title(w);
@@ -1944,10 +2005,70 @@
     trio: (b, ch, c) => `<div class="cs-trio">${b.pics.map((x, i) => `<figure class="cs-pic t${i + 1}">${casePic(c, x)}</figure>`).join('')}</div>`,
     feature: (b, ch, c) => `<div class="cs-feat"><p class="cs-flabel">${esc(t(b.label))}</p><h3 class="cs-ftitle">${esc(t(b.title))}</h3><p class="cs-body">${esc(t(b.text))}</p>${figHTML(c, b)}</div>`,
   };
+  /* ---- a programme page (a case with screens, cases.js; every case since 2026-10-15): its header on Home's broadcast
+     stage, then its screens (owner's choice: pictures first, few words, no panels of facts, nothing laid over the
+     pictures). As the owner's references set them (a Y2K picture viewer, the NASA standards manual), each screen
+     stands under its file name on a rule ---- */
+  // The header as basement.studio sets a project (owner's pick, 2026-10-15): the title, the facts as hairline rows (a
+  // dim label, a bright value), the cover across the column with the channel's bug in its corner, then the about. A
+  // fact the owner has not given yet shows as a dashed slot on a local preview, and its row is left out on the site
+  const FACTS = [['type', 'factType'], ['role', 'factRole'], ['year', 'factYear']];
+  function progHead(p, c) {
+    const rows = FACTS.map(([k, label]) => {
+      const v = c.facts && c.facts[k];
+      if (v == null && !DRAFTS) return '';
+      return `<div><dt>${esc(u(label))}</dt><dd>${v == null ? `<span class="pg-todo">${esc(u('toFill'))}</span>` : esc(t(v))}</dd></div>`;
+    }).join('') + `<div><dt>${esc(u('factTags'))}</dt><dd>${p.tags.map((g) => esc(t(g))).join(', ')}</dd></div>`;
+    const bug = `<span class="pg-bug" aria-hidden="true"><i></i>${esc(PF.home.work.code)} ${String(p.no).padStart(2, '0')}</span>`;
+    return `<h2 class="pg-title">${esc(p.title)}</h2>
+      <dl class="pg-facts">${rows}</dl>
+      <div class="pg-poster" aria-hidden="true">${coverImg(p, '(max-width: 760px) 100vw, 1100px')}${bug}</div>
+      <p class="pg-about">${esc(t(c.about))}</p>`;
+  }
+  // a screen under its file name on a rule (its number of the case's screens at the right, a tally lamp lit while
+  // its row is on the screen). A click opens it in the Picture Viewer, at its size. A page taller than a screen (a
+  // window's shot at 3:4 or taller) shows in a screen's frame and scrolls through it as its row passes (updatePlayer),
+  // with a scroll bar at its edge; without motion it stands whole
+  const fileName = (n, s) => `${String(n).padStart(3, '0')}_${String(s.name.en || t(s.name)).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')}.png`;
+  const isLong = (x) => x.frame === 'win' && x.h / x.w >= 0.75;
+  function progShot(c, s, n, count) {
+    const x = s.pic, cls = x.frame === 'bare' ? ' bare' : isPhone(x) ? ' phone' : isLong(x) ? ' long' : '';
+    return `<figure class="pg-shot${cls}"><figcaption class="pg-file"><i class="pg-tally" aria-hidden="true"></i><span class="pg-fname">${esc(fileName(n, s))}</span><span class="pg-of">${String(n).padStart(2, '0')} / ${String(count).padStart(2, '0')}</span><span class="sr-only">${esc(t(s.name))}</span></figcaption><button type="button" class="pg-pic" data-act="pg-view" data-i="${n - 1}" aria-label="${esc(u('openShot', t(s.name)))}">${picBody(c, x)}${cls === ' long' ? '<span class="pg-sb" aria-hidden="true"><i></i></span>' : ''}</button></figure>`;
+  }
+  // the case's colours and typefaces (owner's pick, 2026-10-15, layout B): a thin strip of its colours, the first (its
+  // signature) wide, as what is left of a test card's bars; under it the typefaces by name (the site serves only its
+  // own faces, owner's call), beside the colours as hairline rows, one row a part (the chart's three share theirs)
+  function progBars(c) {
+    const P = c.palette, F = c.type || [], roles = [];
+    P.forEach((x) => { const r = roles.find((o) => t(o.role) === t(x.role)); if (r) r.hex.push(x.hex); else roles.push({ role: x.role, hex: [x.hex] }); });
+    const strip = P.map((x, k) => `<i style="--c: ${x.hex}; flex: ${k ? 1 : 3}"></i>`).join('');
+    const faces = F.map((f) => `<div class="pg-face"><p class="pg-k">${esc(t(f.role))}</p><p class="pg-fn">${esc(f.name)}</p></div>`).join('');
+    const rows = roles.map((r) => `<li><span class="pg-chips" aria-hidden="true">${r.hex.map((h) => `<i style="--c: ${h}"></i>`).join('')}</span><span class="pg-role">${esc(t(r.role))}</span><span class="pg-hex">${r.hex.map((h) => esc(h.toUpperCase())).join(' · ')}</span></li>`).join('');
+    return `<figure class="pg-shot pg-card"><figcaption class="pg-file"><i class="pg-tally" aria-hidden="true"></i><span class="pg-fname">color_bars.ase</span><span class="pg-of">${esc(u('colours', P.length))}</span></figcaption>
+      <span class="pg-strip" aria-hidden="true">${strip}</span>
+      <div class="pg-spec${F.length > 1 ? ' two' : ''}">${F.length ? `<div class="pg-faces" aria-label="${esc(u('typefaces'))}">${faces}</div>` : ''}<ul class="pg-cols" aria-label="${esc(u('palette'))}">${rows}</ul></div></figure>`;
+  }
+  // the page as the player's sections: the header, each row of screens (the timeline's notches, the LCD and the play
+  // key follow them, a row at a time; at the last, play goes on to the next case)
+  function progSections(p, c) {
+    const rows = c.screens.map((r) => [].concat(r)), count = rows.reduce((a, r) => a + r.length, 0);
+    let n = 0;
+    const head = { id: 'overview', tone: 'pg pg-head', label: u('overview'), ready: true, words: words(t(c.about)) + 30, html: progHead(p, c) };
+    const shots = rows.map((r, i) => {
+      const feeds = r.map((s) => progShot(c, s, ++n, count)).join('');
+      return {
+        id: `scr${i + 1}`, tone: 'pg', label: r.map((s) => t(s.name)).join(' · '), ready: true, words: 20 * r.length,
+        html: r.length > 1 ? `<div class="pg-pair" style="--n:${r.length}">${feeds}</div>` : feeds,
+      };
+    });
+    const bars = c.palette ? [{ id: 'colours', tone: 'pg', label: u('palette'), ready: true, words: 10, html: progBars(c) }] : [];
+    return [head, ...bars, ...shots];
+  }
   // a chapter's running time on the LCD: its words, and a few seconds for each picture
   const blockWords = (b) => [b.title, b.text].flat().filter(Boolean).reduce((a, x) => a + words(t(x)), 0) + 12 * ((b.pic ? 1 : 0) + (b.pop ? 1 : 0) + (b.pics ? b.pics.length : 0));
   function sectionsFor(p) {
     const c = casePage(p);
+    if (c && c.screens) return progSections(p, c);
     const over = { id: 'overview', tone: 'hero', label: u('overview'), ready: true, words: words(t(p.sub)) + 30, html: heroHTML(p, c) };
     if (!c) {
       over.html += `<div class="pl-pending"><p>${esc(u('writeup'))}</p><button type="button" class="pl-ask" data-act="ask-case" data-slug="${p.slug}">${esc(u('askAbout', p.title))}</button></div>`;
@@ -1960,8 +2081,9 @@
     }));
     return [over, ...secs];
   }
-  // The player is a skin drawn after Windows Media Player 7: a caption plate, the chapter list and the LCD in a tray
-  // beside the screen, and a deck with the chapter timeline, the transport keys and a text-size wedge.
+  // The player is a skin drawn after Windows Media Player 7: a caption plate, the programmes as its playlist and the
+  // LCD in a tray beside the screen, and a deck with the timeline, the transport keys and a text-size wedge. The
+  // chapters it listed went with the programme pages (owner's request, 2026-10-15); the timeline still marks them.
   function buildPlayer(w) {
     const p = PF.bySlug(w.state.slug);
     const all = sectionsFor(p), secs = all.filter((s) => s.ready);
@@ -1987,15 +2109,27 @@
           <aside class="pl-side">
             <label class="pl-select"><span class="sr-only">${esc(u('switchCase'))}</span>
               <select data-change="switch-case">${PF.projects.map((q, i) => `<option value="${q.slug}" ${q === p ? 'selected' : ''}>${no(i)} · ${esc(q.title)}</option>`).join('')}</select><span class="dd" aria-hidden="true">${GLYPH.down}</span></label>
-            <p class="pl-print" aria-hidden="true">${esc(u('chapters'))}</p>
-            <nav class="skin-nav" aria-label="${esc(u('chapters'))}">${all.map((s, i) => (s.ready
-              ? `<button data-sec="${s.id}" aria-current="${s === secs[0]}"><span class="no">${no(i)}</span><span class="nm">${esc(s.label)}</span><small>${fmtTime(s.words * 0.3)}</small></button>`
-              : `<span class="off"><span class="no">${no(i)}</span><span class="nm">${esc(s.label)}</span><small>${esc(u('notYet'))}</small></span>`)).join('')}</nav>
+            <p class="pl-print" aria-hidden="true">${esc(u('programmes'))}</p>
+            <nav class="skin-nav" aria-label="${esc(u('programmes'))}">${PF.projects.map((q, i) => {
+              // as Media Player shows the album playing big and the rest of the list small: the case on the screen with its
+              // cover (the LCD's play mark on its corner) over its title and tag, the others a row with a small cover (owner's
+              // pick, 2026-10-15; no programme numbers, owner's call)
+              const on = q === p;
+              const art = q.cover.src ? `<span class="pl-art" aria-hidden="true"><img src="${esc(q.cover.small || q.cover.src)}" alt="" loading="lazy" decoding="async">${on ? '<i class="pl-live"></i>' : ''}</span>` : '';
+              const tag = t(q.tags[1] || q.tags[0]);
+              return on
+                ? `<button type="button" class="on" data-act="pick-case" data-slug="${q.slug}" aria-current="true">${art}<span class="pl-pmeta"><span class="nm">${esc(q.title)}</span><small>${esc(tag)}</small></span></button>`
+                : `<button type="button" data-act="pick-case" data-slug="${q.slug}" aria-current="false" title="${esc(q.title)} · ${esc(tag)}">${art}<span class="nm">${esc(q.title)}</span></button>`;
+            }).join('')}</nav>
             ${lcd}
             <div class="pl-tools">${tool('copy-link', 'link', u('copyLink'), u('lblLink'))}${tool('resume', 'resume', u('downloadCV'), u('resume'))}${tool('contact', 'envelope', u('contactMe'), u('contact'))}</div>
           </aside>
           <div class="screen">
-            <div class="screen-view" tabindex="0" data-keep="screen" data-case="${p.slug}" role="region" aria-label="${esc(p.title)}" style="${plStyle(w.state.size)}">${secs.map((s) => `<section class="cs-ch${s.tone ? ' ' + s.tone : ''}" data-sec="${s.id}" aria-label="${esc(s.label)}">${s.html}</section>`).join('')}</div>
+            <div class="screen-view" tabindex="0" data-keep="screen" data-case="${p.slug}" role="region" aria-label="${esc(p.title)}" style="${plStyle(w.state.size)}">${(() => {
+              const html = secs.map((s) => `<section class="cs-ch${s.tone ? ' ' + s.tone : ''}" data-sec="${s.id}" aria-label="${esc(s.label)}">${s.html}</section>`).join('');
+              // a programme page runs on one stage, whose dither runs unbroken behind all its sections
+              return secs[0].tone && secs[0].tone.startsWith('pg') ? `<div class="pg">${html}</div>` : html;
+            })()}</div>
           </div>
         </div>
         <div class="pl-deck">
@@ -2061,6 +2195,27 @@
     w.plRO.observe(v);
     $$('section[data-sec]', v).forEach((s) => w.plRO.observe(s));
   }
+  // where a block sits on the screen, from its layout rather than its painted box
+  function boxIn(el, v, vr) {
+    let y = 0;
+    for (let n = el; n && n !== v; n = n.offsetParent) y += n.offsetTop;
+    const top = vr.top + y - v.scrollTop;
+    return { top, bottom: top + el.offsetHeight };
+  }
+  // a long page in its screen's frame scrolls from its top to its foot while the frame crosses the middle of the
+  // view, from a quarter of the way in to three quarters, and its scroll bar's thumb keeps pace
+  function pgPan(v) {
+    const vr = v.getBoundingClientRect();
+    $$('.pg-shot.long .pg-pic', v).forEach((f) => {
+      const r = boxIn(f, v, vr);
+      if (r.bottom < vr.top || r.top > vr.bottom) return;
+      const img = $('.cs-img', f), thumb = $('.pg-sb i', f);
+      const p = clamp(((vr.bottom - r.top) / (vr.height + r.height) - 0.25) / 0.5, 0, 1);
+      const over = Math.max(0, img.offsetHeight - f.clientHeight);
+      img.style.transform = `translateY(${(-over * p).toFixed(1)}px)`;
+      if (thumb) { const k = img.offsetHeight ? f.clientHeight / img.offsetHeight : 1; thumb.style.height = `${k * 100}%`; thumb.style.top = `${(1 - k) * p * 100}%`; }
+    });
+  }
   function updatePlayer(w) {
     const v = $('.screen-view', w.el);
     if (!v) return;
@@ -2072,7 +2227,10 @@
     secs.forEach((s) => { if (s.offsetTop <= probe) cur = s; });
     if (prog > 0.995) cur = secs[secs.length - 1];
     const id = cur ? cur.dataset.sec : 'overview';
-    $$('.skin-nav button', w.el).forEach((b) => b.setAttribute('aria-current', String(b.dataset.sec === id)));
+    // the row on the screen is on air: its feeds' tally lamps light (a programme page)
+    secs.forEach((s) => s.classList.toggle('on-air', s === cur));
+    if (!reduceMotion) pgPan(v);
+    if ($('.pg', v)) crtBarrelFit(v);
     const meta = w.secs.find((s) => s.id === id);
     $$('.lcd-sec', w.el).forEach((lab) => { if (meta && lab.textContent !== meta.label) lab.textContent = meta.label; });
     $$('.lcd-clock', w.el).forEach((clock) => segSet(clock, fmtTime(prog * w.total)));
@@ -2085,7 +2243,6 @@
       const vt = `${meta ? meta.label : ''}, ${fmtTime(prog * w.total)} / ${fmtTime(w.total)}`;
       if (seek.getAttribute('aria-valuetext') !== vt) seek.setAttribute('aria-valuetext', vt);
     }
-    if (w.curSec !== id) { const b = $(`.skin-nav button[data-sec="${id}"]`, w.el); if (b) navShow(b); }
     w.curSec = id;
     // at the last chapter Play goes on to the next case, and is named for it
     const play = $('[data-act="next-sec"]', w.el);
@@ -2094,13 +2251,6 @@
       const name = ids.indexOf(id) >= ids.length - 1 ? `${u('nextCase')}: ${PF.projects[(k + 1) % PF.projects.length].title}` : u('nextSection');
       if (play.getAttribute('aria-label') !== name) { play.setAttribute('aria-label', name); play.title = name; }
     }
-  }
-  // the chapter being read comes into view when a short window cuts the tray's list off. Only the list scrolls, never
-  // the desktop behind a window that hangs off the screen (a phone lists no chapters)
-  function navShow(b) {
-    const n = b.parentNode, nr = n.getBoundingClientRect(), r = b.getBoundingClientRect();
-    const dy = r.top < nr.top ? r.top - nr.top : r.bottom > nr.bottom ? r.bottom - nr.bottom : 0;
-    if (dy) n.scrollBy(0, dy);
   }
   function scrollToSec(w, id) {
     const v = $('.screen-view', w.el);
@@ -2796,12 +2946,15 @@
       const p = PF.bySlug(a.dataset.slug); if (!p) return;
       location.href = `mailto:${PF.owner.email}?subject=${encodeURIComponent(u('askSubject', p.title))}&body=${encodeURIComponent(u('askBody', p.title))}`;
     },
-    'open-shot': (a) => openWin('viewer', { from: rectOf(a), state: { i: +a.dataset.i } }),
+    'open-shot': (a) => openViewer(a, { i: +a.dataset.i, set: null }),
+    'pg-view': (a, w) => openViewer(a, { i: +a.dataset.i, set: w.state.slug }),
     'pv-step': (a, w) => { if (w.showTimer) viewerTick(w); viewerGo(w, w.state.i + +a.dataset.d); },
     'pv-show': (a, w) => viewerShow(w),
     'next-sec': (a, w) => nextSection(w),
     stop: (a, w) => { const r = rectOf(w.el); closeWin(w); openWin('work', { from: r, pushHistory: true }); },
     'prev-case': (a, w) => stepCase(w, -1),
+    // a programme picked in the tray's list
+    'pick-case': (a, w) => { if (w && a.dataset.slug !== w.state.slug) switchCase(w, a.dataset.slug); },
     'next-case': (a, w) => stepCase(w, 1),
     // the site's /work/<slug> address carries the case's own link preview (worker/index.js); a local preview has no
     // worker, so there it copies the desktop's own address for the case
@@ -2950,9 +3103,6 @@
     if (sort) { const w = winOf(sort); const k = sort.dataset.sort; if (w.state.sort === k) w.state.dir = -(w.state.dir || 1); else { w.state.sort = k; w.state.dir = 1; } renderWin(w, true); return; }
     const file = e.target.closest('.files [data-slug]');
     if (file) { const w = winOf(file); selectFile(w, file.dataset.slug); openCase(file.dataset.slug, rectOf(file), true); return; }
-    const sec = e.target.closest('.skin-nav [data-sec]');
-    // a chapter picked from the keyboard hands the keys to the page, so Page Down reads on from there
-    if (sec) { const w = winOf(sec); scrollToSec(w, sec.dataset.sec); if (!e.detail) focusIn($('.screen-view', w.el)); return; }
     const cat = e.target.closest('[data-cat]');
     if (cat) { const w = winOf(cat); w.state.cat = cat.dataset.cat; renderWin(w, false); const b = $(`[data-cat="${w.state.cat}"]`, w.el); if (b) b.focus(); return; }
     if (e.target.id === 'langBtn' || e.target.closest('#langBtn')) { setLang(lang === 'en' ? 'id' : 'en'); }
@@ -3239,7 +3389,7 @@
     if (isMobile()) return;
     const W = desktopEl.clientWidth, H = desktopEl.clientHeight;
     wins.forEach((w) => {
-      placeWin(w, geometryFor(w.id));
+      placeWin(w, geometryFor(w.id, w.state));
       if (w.def.dialog) {
         w.el.style.left = Math.round((W - w.el.offsetWidth) / 2) + 'px';
         w.el.style.top = Math.round((H - w.el.offsetHeight) / 2.4) + 'px';

@@ -209,6 +209,18 @@
         <feFuncB type="discrete" tableValues="0 0.142857 0.142857 0.285714 0.285714 0.428571 0.428571 0.571429 0.571429 0.714286 0.714286 0.857143 0.857143 1"/>
       </feComponentTransfer>
     </filter>
+    <!-- A programme page's screen: an old TV's convex glass. In a thin band at its foot the picture is drawn from a
+         little nearer the middle, so what comes in stretches a little wider, and a level line bows out; the rest
+         is the page itself, untouched and sharp. app.js (crtBarrelFit()) draws the map at the screen's size,
+         sets the band, cuts the page out under it (the band stands
+         in for it, the ground behind being clear) and stops it short of the scroll bar; sizes are in the screen's own units -->
+    <filter id="crtBarrel" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+      <feImage id="crtBarrelMap" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+      <feDisplacementMap id="crtBarrelFoot" in="SourceGraphic" in2="map" scale="0.05" xChannelSelector="R" yChannelSelector="G" x="0" y="0.88" width="1" height="0.12" result="foot"/>
+      <feFlood id="crtBarrelCut" flood-color="#000" x="0" y="0.88" width="1" height="0.12" result="cut"/>
+      <feComposite in="SourceGraphic" in2="cut" operator="out" result="rest"/>
+      <feMerge><feMergeNode in="rest"/><feMergeNode in="foot"/></feMerge>
+    </filter>
   </svg>
 
   <!--
@@ -272,16 +284,16 @@
        the scripts after them wait for them -->
   <script src="boot.js?v=18" fetchpriority="high"></script>
   <link rel="stylesheet" href="cursors.css?v=1">
-  <link rel="stylesheet" href="style.css?v=179">
+  <link rel="stylesheet" href="style.css?v=204">
   <link rel="stylesheet" href="home.css?v=144">
   <link rel="stylesheet" href="../asset/Home/process/xp-window/crt.css?v=2">
   <link rel="stylesheet" href="winamp.css?v=3">
   <script src="../shared/content.js?v=118"></script>
-  <script src="../shared/cases.js?v=26"></script>
+  <script src="../shared/cases.js?v=33"></script>
   <script src="icons.js?v=62"></script>
   <script src="winamp.js?v=6"></script>
   <script src="sfx.js?v=3"></script>
-  <script src="app.js?v=214"></script>
+  <script src="app.js?v=241"></script>
   <script src="process-crt.js?v=1"></script>
   <!-- Live wallpaper (three.js), with the static webp on .desktop as its fallback. -->
   <script type="module" src="wallpaper3d.js?v=24"></script>

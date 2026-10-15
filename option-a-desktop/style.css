@@ -607,45 +607,64 @@ img { max-width: 100%; }
 .orb svg { width: 16px; height: 16px; }
 /* the screen is what the client came for, so the tray and the deck around it stay slim (owner's request, 2026-09-28) */
 .skin-body { min-height: 0; display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 8px; }
-/* the side tray: the case picker (an LCD field, like WMP's playlist picker), the chapters as the playlist, the LCD and
-   the tools */
+/* the side tray: the programmes as the playlist (the case on the screen lit, with the play mark), the LCD and the
+   tools. The case picker over them (an LCD field, like WMP's playlist picker) is the phone's, whose tray lists nothing */
 .pl-side { min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 12px;
   background: linear-gradient(180deg, rgba(40, 42, 52, .08), rgba(255, 255, 255, .2)); box-shadow: inset 0 1px 3px rgba(40, 42, 52, .35), 0 1px rgba(255, 255, 255, .8); }
 .pl-print { margin: 4px 4px 0; font-weight: 700; }
-.pl-select { position: relative; flex: none; height: 32px; display: flex; align-items: center; border-radius: 6px; background: #070707; box-shadow: inset 0 0 0 1px #3e4048, inset 0 1px 3px rgba(0, 0, 0, .8), 0 1px 0 #fff; }
+.pl-select { position: relative; flex: none; height: 32px; display: none; align-items: center; border-radius: 6px; background: #070707; box-shadow: inset 0 0 0 1px #3e4048, inset 0 1px 3px rgba(0, 0, 0, .8), 0 1px 0 #fff; }
 .pl-select select { flex: 1; min-width: 0; height: 100%; padding: 0 24px 0 8px; border: 0; background: transparent; color: var(--lcd); font: 700 12px var(--ui); text-shadow: 0 0 6px rgba(99, 240, 107, .45); -webkit-appearance: none; appearance: none; outline: none; }
 .pl-select option { color: #000; background: #fff; text-shadow: none; }
 .pl-select .dd { position: absolute; right: 8px; top: 50%; margin-top: -2px; display: flex; color: var(--lcd); pointer-events: none; }
 .pl-select:has(select:focus-visible) { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
 .skin-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 4px; overflow: auto; }
-.skin-nav button, .skin-nav .off {
-  flex: 0 0 auto; min-height: 40px; padding: 4px 8px;
-  display: grid; grid-template-columns: 24px minmax(0, 1fr); align-items: center; text-align: right;
+/* the programmes, as Media Player's playlist with the album playing shown big: each case a row with a small cover and
+   its title, the one on the screen opened up into its cover over its number (with the LCD's play mark), title and
+   tag (owner's pick, 2026-10-15) */
+.skin-nav button {
+  flex: 0 0 auto; min-height: 36px; padding: 4px; display: flex; align-items: center; gap: 8px; text-align: left;
   border: 1px solid #7f818b; border-radius: 3px 12px 12px 3px;
   background: linear-gradient(180deg, #f4f4f7, #c9cad1 62%, #b5b6be);
   box-shadow: inset 0 1px #fff, inset 0 -1px rgba(0, 0, 0, .18);
   font: 700 12px/16px var(--ui); color: #1d1e26;
 }
-.skin-nav .no { grid-row: 1 / span 2; display: flex; align-items: center; gap: 4px; text-align: left; font: 400 12px/1 var(--ui); color: #2b2c33; font-variant-numeric: tabular-nums; }
-.skin-nav .nm { min-width: 0; overflow-wrap: anywhere; }
-.skin-nav small { display: block; margin-top: 4px; font: 400 12px/1 var(--ui); color: #2b2c33; font-variant-numeric: tabular-nums; }
+.pl-art { flex: none; display: block; width: 36px; aspect-ratio: 3 / 2; overflow: hidden; border-radius: 2px; background: #1b1d22; box-shadow: 0 0 0 1px rgba(0, 0, 0, .35); }
+.pl-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.skin-nav .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (hover: hover) { .skin-nav button:hover { background: linear-gradient(180deg, #ffffff, #d9daf4 62%, #bfc1e4); } }
 .skin-nav button:not([aria-current="true"]):active { background: linear-gradient(180deg, #bfc1e4, #d9daf4 38%, #ffffff); box-shadow: inset 0 2px 3px rgba(0, 0, 0, .25); }
-.skin-nav button[aria-current="true"] { background: linear-gradient(180deg, #5153b8, #2f3190); color: #fff; border-color: #22246b; box-shadow: inset 0 1px rgba(255, 255, 255, .45); }
-.skin-nav button[aria-current="true"] small, .skin-nav button[aria-current="true"] .no { color: #d8d9ff; }
-/* the chapter on the screen carries the LCD's play mark after its number */
-.skin-nav button[aria-current="true"] .no::after { content: ""; width: 6px; height: 8px; background: var(--lcd); clip-path: polygon(0 0, 100% 50%, 0 100%); }
-.skin-nav button[aria-current="true"]:focus-visible { outline-color: #fff; }
-/* a chapter the case has not published yet keeps its place in the list, flat and dashed like the skin's notes */
-.skin-nav .off { min-height: 40px; padding-top: 4px; padding-bottom: 4px; border-style: dashed; border-color: #8e909a; background: rgba(255, 255, 255, .4); box-shadow: none; }
-.skin-nav .off, .skin-nav .off small, .skin-nav .off .no { color: #50525e; }
+/* the case on the screen: its cover across the item, then its title and tag, lit indigo; one radius all round, the
+   cover's set inside it by the padding so the two curves run parallel */
+.skin-nav button.on { flex-direction: column; align-items: stretch; gap: 6px; padding: 4px 4px 8px; border-radius: 8px;
+  background: linear-gradient(180deg, #5153b8, #2f3190); color: #fff; border-color: #22246b; box-shadow: inset 0 1px rgba(255, 255, 255, .45); }
+.skin-nav button.on .pl-art { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 4px; animation: pl-art-in .4s var(--ease-out) both; }
+@keyframes pl-art-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .skin-nav button.on .pl-art { animation: none; } }
+/* now playing: the LCD's play mark on a dark chip in the cover's corner */
+.pl-live { position: absolute; left: 6px; bottom: 6px; width: 20px; height: 20px; border-radius: 50%; background: rgba(4, 22, 63, .78);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .25); }
+.pl-live::after { content: ""; position: absolute; left: 8px; top: 6px; width: 6px; height: 8px; background: var(--lcd); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.pl-pmeta { display: block; padding: 0 4px; }
+.pl-pmeta .nm { display: block; }
+.pl-pmeta small { display: block; font: 400 12px/16px var(--ui); color: #d8d9ff; }
+.skin-nav button.on:focus-visible { outline-color: #fff; }
 .pl-tools { flex: none; display: flex; gap: 12px; padding: 8px 0 0; border-top: 1px solid rgba(40, 42, 52, .2); box-shadow: inset 0 1px rgba(255, 255, 255, .6); }
 .pl-tool { display: grid; justify-items: center; gap: 4px; }
 .pl-tool .orb { width: 32px; height: 32px; }
 .screen {
-  min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: #000;
+  position: relative; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: #000;
   border-radius: 34px 16px 16px 16px; border: 7px solid #2c2e36;
   box-shadow: 0 0 0 1px #0c0d10, 0 0 0 3px #8e909a, 0 0 0 4px #f4f5f7, 0 10px 18px rgba(20, 22, 30, .35), inset 0 0 0 1px #000;
+}
+/* a programme page plays behind convex glass, as an old TV's tube (owner's idea, 2026-10-15): what comes in at its
+   foot stretches a little wide (#crtBarrel), and its edges fall into shade, the foot more, under a faint sheen at
+   the top. Without motion the picture stays true */
+@media (prefers-reduced-motion: no-preference) { .crt-barrel-on .screen-view:has(> .pg) { filter: url(#crtBarrel); } }
+.screen:has(> .screen-view .pg)::after {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: 27px 9px 9px 9px;
+  background: radial-gradient(140% 26% at 50% 104%, rgba(0, 0, 0, .55), transparent 70%),
+    radial-gradient(140% 16% at 50% -3%, rgba(0, 0, 0, .4), transparent 70%),
+    linear-gradient(180deg, rgba(255, 255, 255, .05), transparent 8%);
 }
 /* keyboard focus on the page lights the screen's ring indigo; a dotted line would vanish into the dark hero */
 .screen:has(> .screen-view:focus-visible:not([data-quiet])) { box-shadow: 0 0 0 1px #0c0d10, 0 0 0 4px #5153b8, 0 0 0 5px #f4f5f7, 0 10px 18px rgba(20, 22, 30, .35), inset 0 0 0 1px #000; }
@@ -909,6 +928,117 @@ img { max-width: 100%; }
 .pl-ask { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 16px; border: 1px solid #141414; border-radius: 4px; background: #fff; color: #141414; font: 700 14px/1.2 var(--read); }
 .pl-ask:hover { background: var(--face); }
 .pl-ask:focus-visible { outline: 1px dotted #000; outline: 2px solid color-mix(in srgb, var(--ph) 55%, #000); outline-offset: 2px; }
+
+/* ============================================================
+   PROGRAMME PAGE: a case told pictures first (cases.js screens, app.js progSections; the owner's choice, 2026-10-15)
+   on the broadcast stage of Home's Tonight's features, with no panels of facts: the words go on the pictures, as
+   the owner's references set them (a Y2K picture viewer, the NASA standards manual). The cover carries the about as a
+   subtitle, the facts read as one line of a file's metadata, each screen stands under its file name on a rule, and a
+   few screens carry a green detection box like Home's hero TV. The stage's blues and tag pills are Home's own
+   (home.css); its deep blue carries the channel band's dither tile, unbroken behind the page
+   ============================================================ */
+.pg {
+  --bc-deep: #04163f; --bc-mid: #0d3a8f; --bc-hi: #1d56b8; --bc-soft: #d6e2f8;
+  --glow-face: linear-gradient(180deg, #9af59b, #2fb233); --glow-edge: #c8fcc9; --glow-halo: rgba(76, 218, 80, .55);
+  --mono: "Noto Sans Mono", ui-monospace, monospace;
+  --pg-g: 20px; --pg-w: 1100px;
+  position: relative; isolation: isolate; min-height: 100%; color: #fff;
+}
+/* the stage's deep blue and its dither tile sit behind the page, on the screen itself, out of reach of the glass
+   (#crtBarrel): the page runs on a clear ground, so where the glass stretches what passes, the dots behind stay
+   the same dots, one a screen pixel, and the blue reads the same at the foot as above it */
+.screen:has(> .screen-view > .pg) { background: #04163f; }
+.screen:has(> .screen-view > .pg)::before { content: ""; position: absolute; inset: 0; pointer-events: none; image-rendering: pixelated;
+  background: url("../asset/Home/band-deep-dither-16.png") 0 0 / var(--bc-tile, 16px) var(--bc-tile, 16px); }
+.screen-view:has(> .pg) { z-index: 1; background: none; }
+.pg :focus-visible { outline-color: #fff; }
+.cs-ch.pg { display: block; padding: 0 var(--pg-g) 64px; background: none; }
+/* the header: the band's lit blue from the top right over the wallpaper's faint graticule, dithered like Home's (the
+   same picture again on a layer beneath, through #bcDither), settling into the deep blue the page runs on */
+.cs-ch.pg-head { position: relative; isolation: isolate; padding-top: 40px; padding-bottom: 72px;
+  background: linear-gradient(rgba(214, 226, 248, .05) 1px, transparent 1px) 0 0 / 64px 64px, linear-gradient(90deg, rgba(214, 226, 248, .05) 1px, transparent 1px) 0 0 / 64px 64px,
+    radial-gradient(90% 60% at 88% 0%, var(--bc-hi), transparent 72%), linear-gradient(180deg, var(--bc-mid), var(--bc-deep) 92%); }
+.cs-ch.pg-head::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: inherit; filter: url(#bcDither); }
+.pg-title, .pg-facts, .pg-poster, .pg-about, .pg-shot, .pg-pair { max-width: var(--pg-w); margin-inline: auto; }
+/* the header, set as basement.studio sets a project (owner's pick, 2026-10-15): the title, the facts as hairline
+   rows with a dim label and a bright value, the cover across the column, then the about */
+.pg-title { margin-top: 0; margin-bottom: 32px; font: 700 44px/1.05 var(--display); letter-spacing: -0.025em; color: #fff; text-wrap: balance; }
+.pg-facts { margin-top: 0; margin-bottom: 40px; border-top: 1px solid rgba(214, 226, 248, .22); }
+.pg-facts > div { display: grid; grid-template-columns: minmax(96px, 30%) minmax(0, 1fr); column-gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(214, 226, 248, .22); }
+.pg-facts dt { font: 14px/1.5 var(--read); color: var(--bc-soft); }
+.pg-facts dd { margin: 0; font: 500 14px/1.5 var(--read); color: #fff; }
+/* on a local preview, a fact the owner has not given yet: a dashed slot (the site leaves its row out) */
+.pg-todo { padding: 0 8px; border: 1px dashed rgba(214, 226, 248, .6); border-radius: 3px; font-size: 12px; color: var(--bc-soft); }
+/* the cover across the column, cut to a wide frame, the channel's bug in its corner as a station marks its picture */
+.pg-poster { position: relative; overflow: hidden; border-radius: 10px; background: #000; box-shadow: 0 30px 50px -26px rgba(0, 0, 0, .8); }
+.pg-poster .cv, .pg-poster .ph { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.pg-bug { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px;
+  background: rgba(4, 22, 63, .55); font: 700 10px/1 var(--mono); letter-spacing: .08em; color: rgba(255, 255, 255, .85); }
+.pg-bug i { width: 6px; height: 6px; border-radius: 50%; background: var(--ph); box-shadow: 0 0 6px var(--glow-halo); }
+.pg-about { margin-top: 32px; margin-bottom: 0; font-size: var(--pl-lede); line-height: 1.6; color: #e3ecff; text-wrap: pretty; }
+.pg-about { max-width: min(var(--pg-w), 62ch); margin-left: max(0px, (100% - var(--pg-w)) / 2); }
+/* a screen under its file name on a hairline: the tally lamp, the name in mono, its number at the right. While its
+   row is on the screen the lamp lights and the name brightens */
+.pg-shot { margin-top: 0; margin-bottom: 0; }
+.pg-file { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; padding-top: 10px; border-top: 1px solid rgba(214, 226, 248, .22); font: 12px/1 var(--mono); color: var(--bc-soft); }
+.pg-fname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color .3s; }
+.pg-of { margin-left: auto; color: rgba(214, 226, 248, .55); }
+.pg-tally { flex: none; width: 8px; height: 8px; border-radius: 2px; background: #3a3f4a; transition: background .3s, box-shadow .3s; }
+.on-air .pg-tally { background: var(--ph); box-shadow: 0 0 6px var(--glow-halo); }
+.on-air .pg-fname { color: #fff; }
+.pg-pic { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 10px; background: #000; box-shadow: 0 30px 50px -26px rgba(0, 0, 0, .8);
+  font: inherit; color: inherit; text-align: inherit; cursor: zoom-in; }
+.pg-pic:focus-visible { outline: 2px solid var(--ph); outline-offset: 4px; }
+/* a page taller than a screen, in a screen's frame: it scrolls through as its row passes (pgPan), its scroll bar's
+   thumb at the right keeping pace; the eased step smooths a wheel's notches. Without motion it stands whole */
+.pg-shot.long .pg-pic { aspect-ratio: 16 / 10; overflow: hidden; }
+.pg-shot.long .cs-img { border-radius: 0; will-change: transform; transition: transform .35s var(--ease-out); }
+.pg-sb { position: absolute; top: 8px; right: 6px; bottom: 8px; width: 4px; border-radius: 2px; background: rgba(0, 0, 0, .1); }
+.pg-sb i { position: absolute; left: 0; right: 0; top: 0; height: 30%; border-radius: 2px; background: rgba(0, 0, 0, .42); }
+@media (prefers-reduced-motion: reduce) {
+  .pg-shot.long .pg-pic { aspect-ratio: auto; }
+  .pg-shot.long .cs-img { transform: none !important; transition: none; }
+  .pg-sb { display: none; }
+}
+.pg-pic .cs-img { display: block; width: 100%; height: auto; border-radius: inherit; }
+/* the device shot on its clear ground stands bare */
+.pg-shot.bare .pg-pic { background: none; box-shadow: none; border-radius: 0; }
+.pg-shot.phone { max-width: 320px; }
+/* the colours and typefaces (layout B): a thin strip of the colours, the signature one wide, then the typefaces by
+   name beside the colours on hairline rows (one column on a narrow page) */
+.pg-strip { display: flex; height: 28px; overflow: hidden; border-radius: 4px; }
+.pg-strip i { background: var(--c); }
+.pg-spec { display: grid; gap: 24px 40px; margin-top: 24px; }
+.pg-faces { display: flex; flex-wrap: wrap; gap: 24px 40px; }
+.pg-k { display: block; margin: 0 0 4px; font: 400 12px/16px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--bc-soft); }
+.pg-fn { margin: 0; font: 400 32px/1.2 var(--display); color: #fff; }
+.pg-faces { align-content: start; }
+.pg-cols { margin: 0; padding: 0; list-style: none; align-self: start; }
+.pg-cols li { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 8px 0; border-top: 1px solid rgba(214, 226, 248, .18); }
+.pg-cols li:last-child { border-bottom: 1px solid rgba(214, 226, 248, .18); }
+.pg-chips { flex: none; display: flex; gap: 4px; }
+.pg-chips i { width: 16px; height: 16px; border-radius: 3px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); }
+.pg-role { flex: 1; min-width: 0; font: 400 14px/20px var(--read); color: #fff; }
+.pg-hex { font: 400 12px/16px var(--mono); letter-spacing: .04em; color: rgba(214, 226, 248, .7); text-align: right; }
+/* two or three screens side by side (--n, the phones three), each at its share of the column, so their file names line up */
+.pg-pair { display: grid; gap: 24px; }
+@container (min-width: 640px) {
+  .pg { --pg-g: 40px; }
+  .cs-ch.pg-head { padding-top: 56px; }
+  .pg-pair { grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); align-items: start; }
+  .pg-spec { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pg-fn { font-size: 44px; }
+  .pg-spec.two .pg-fn { font-size: 32px; }
+  .pg-spec.two .pg-faces { flex-direction: column; }
+}
+@container (min-width: 760px) {
+  .cs-ch.pg { padding-bottom: 88px; }
+}
+@container (min-width: 1100px) {
+  .pg { --pg-g: 64px; }
+  .cs-ch.pg-head { padding-top: 72px; padding-bottom: 88px; }
+  .pg-title { font-size: 64px; }
+}
 /* the deck: a raised plate under the tray, one slim row so the screen gets the height: the transport, the timeline,
    the text size and the wordmark. The keys carry their names as tooltips instead of printed labels */
 .pl-deck { container-type: inline-size; display: grid; grid-template-columns: auto minmax(160px, 1fr) auto auto; grid-template-areas: "keys tl vol logo"; align-items: center; gap: 8px 16px; padding: 8px 16px; border-radius: 16px 16px 18px 18px;
@@ -1114,6 +1244,11 @@ img { max-width: 100%; }
 .pv-b[aria-pressed="true"], .pv-b:active { border-color: #9d9d92; background: #e3e3db; box-shadow: inset 1px 1px 2px rgba(0, 0, 0, .15); }
 .pv-b:active .px { translate: 1px 1px; }
 .pv-sep { width: 1px; height: 20px; margin: 0 5px; background: #c5c2b2; box-shadow: 1px 0 #fff; }
+/* a case's screen: at its own shape, as big as the stage lets it and no bigger than its slot; a page taller than
+   that scrolls in the stage from its top */
+.pview.set .pv-stage { overflow-y: auto; justify-content: safe center; }
+.pview.set .pv-img.fit { width: min(100%, var(--w), calc((100cqh - 30px) * (var(--ar)))); aspect-ratio: var(--ar); }
+.pview.set .pv-img.long { width: min(100%, var(--w)); }
 @media (pointer: coarse) { .pv-b { width: 44px; height: 44px; } .pv-b .px { width: 20px; height: 20px; } }
 
 .bin-list { width: 100%; border-collapse: collapse; }
@@ -1510,11 +1645,12 @@ img { max-width: 100%; }
   .pl-caps [data-wact="max"] { display: none; }
   .skin-body { display: flex; flex-direction: column; gap: 8px; }
   .skin-body .screen { flex: 1; }
-  /* a phone keeps the screen tall: the tray is only the case picker, across the width. It lists no chapters (owner's
-     request, 2026-09-28): the timeline's notches and the play key move through them, and the deck's LCD names the
-     current one */
+  /* a phone keeps the screen tall: the tray is only the case picker, across the width. It lists nothing (owner's
+     request, 2026-09-28): the timeline's notches and the play key move through the page, and the deck's LCD names
+     where it is */
   .pl-side { flex: none; padding: 0; background: none; box-shadow: none; }
   .pl-print, .pl-tools, .skin-nav, .pl-side .lcd { display: none; }
+  .pl-side .pl-select { display: flex; }
   /* on a phone the deck is two compact rows, laid out like a pocket player and 8px apart everywhere (owner's request,
      2026-09-28): play, the timeline and the text size, then the LCD beside the case pair, at the desktop deck's sizes.
      The picker and the Start menu already reach the Portfolio, so its key and the printed labels go */
